@@ -37,6 +37,13 @@
 # Visual Studio Code Config
 .vscode
 
+# 文档相关
+Document
+
+# Claude Code
+.claude
+CLAUDE.md
+
 # Gradle cache directory
 .gradle/
 
