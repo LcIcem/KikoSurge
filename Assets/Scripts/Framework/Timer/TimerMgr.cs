@@ -101,7 +101,7 @@ public class TimerMgr : Singleton<TimerMgr>
     /// <param name="timerId"></param>
     public void Clear(int timerId)
     {
-        tasks[timerId]?.Cancel();
+        tasks.Remove(timerId);
     }
 
     /// <summary>
@@ -111,4 +111,19 @@ public class TimerMgr : Singleton<TimerMgr>
     {
         tasks.Clear();
     }
+
+    /// <summary>
+    /// 获取指定计时器剩余时间
+    /// </summary>
+    public float GetRemainingTime(int timerId)
+    {
+        if (tasks.TryGetValue(timerId, out var task))
+            return task.GetRemaining();
+        return -1f;
+    }
+
+    /// <summary>
+    /// 获取当前活动计时器数量
+    /// </summary>
+    public int GetActiveTimerCount() => tasks.Count;
 }

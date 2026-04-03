@@ -61,12 +61,4 @@ public class TimerTask
                 IsRunning = false;
         }
     }
-
-    /// <summary>
-    /// 取消计时器
-    /// </summary>
-    public void Cancel()
-    {
-        IsRunning = false;
-    }
 }
