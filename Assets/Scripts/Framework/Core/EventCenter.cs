@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-
+// 使用空接口 来让其被泛型继承 达到非泛型类装载泛型类的目的
 public interface IEventCallback {}
 
 public class ParamsCallback<T> : IEventCallback
