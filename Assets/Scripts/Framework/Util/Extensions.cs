@@ -64,5 +64,4 @@ public static class Extensions
     {
         return obj?.ToString() ?? string.Empty;
     }
-
 }

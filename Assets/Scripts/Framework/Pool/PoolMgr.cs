@@ -10,17 +10,16 @@ using UnityEngine.Pool;
 /// </summary>
 public class PoolMgr : MonoSingleton<PoolMgr>
 {
+    #region 字段
     // 对象池字典  键：预设体名  值：ObjectPool对象池
     private Dictionary<string, ObjectPool<GameObject>> pools = new Dictionary<string, ObjectPool<GameObject>>();
     // 父对象字典  键：预设体名  值：父对象的Transform  目的是为了便于在Hierarchy中方便查看各对象池
     private Dictionary<string, Transform> parents = new Dictionary<string, Transform>();
     // 池根对象 过场景时不销毁 作为所有 pool 父对象的父级
     private static Transform poolRoot;
+    #endregion
 
-    private void Log(string msg) => Debug.Log($"[PoolManager] {msg}");
-    private void LogWarning(string msg) => Debug.LogWarning($"[PoolManager] {msg}");
-    private void LogError(string msg) => Debug.LogError($"[PoolManager] {msg}");
-
+    #region 对象池操作
     /// <summary>
     /// 注册一个预设体到对象池
     /// </summary>
@@ -150,4 +149,11 @@ public class PoolMgr : MonoSingleton<PoolMgr>
         }
         Log("Cleared all pools.");
     }
+    #endregion
+
+    #region 日志
+    private void Log(string msg) => Debug.Log($"[{GetType().Name}] {msg}");
+    private void LogWarning(string msg) => Debug.LogWarning($"[{GetType().Name}] {msg}");
+    private void LogError(string msg) => Debug.LogError($"[{GetType().Name}] {msg}");
+    #endregion
 }

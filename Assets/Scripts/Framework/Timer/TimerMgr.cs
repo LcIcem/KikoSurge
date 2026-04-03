@@ -12,9 +12,7 @@ public class TimerMgr : Singleton<TimerMgr>
     private Dictionary<int, TimerTask> tasks = new Dictionary<int, TimerTask>();
     private int nextId = 0; // 新增的计时器id 每次有一个新的计时器就 +1
 
-    /// <summary>
-    /// 暂停标识
-    /// </summary>
+    /// <summary> 暂停标识 </summary>
     public bool IsPaused { get; private set; }
 
 
@@ -23,9 +21,6 @@ public class TimerMgr : Singleton<TimerMgr>
         // 注册到MonoMgr，通过里面的 MonoController 驱动 Update 帧循环
         MonoMgr.Instance.AddUpdateListener(OnUpdate);
     }
-
-    private void Log(string msg) => Debug.Log($"[{GetType().Name}] {msg}");
-    private void LogError(string msg) => Debug.LogError($"[{GetType().Name}] {msg}");
 
     private void OnUpdate()
     {
@@ -126,4 +121,10 @@ public class TimerMgr : Singleton<TimerMgr>
     /// 获取当前活动计时器数量
     /// </summary>
     public int GetActiveTimerCount() => tasks.Count;
+
+    #region 日志
+    private void Log(string msg) => Debug.Log($"[{GetType().Name}] {msg}");
+    private void LogWarning(string msg) => Debug.LogWarning($"[{GetType().Name}] {msg}");
+    private void LogError(string msg) => Debug.LogError($"[{GetType().Name}] {msg}");
+    #endregion
 }
