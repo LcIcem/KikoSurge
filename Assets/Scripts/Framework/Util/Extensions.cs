@@ -45,6 +45,12 @@ public static class Extensions
         return (float)Math.Round(f, decimals);
     }
 
+    //float扩展：判断与另一个浮点数是否相等
+    public static bool IsEqualsTo(this float f, float other, float tolerance = 1e-5f)
+    {
+        return Mathf.Abs(f - other) < tolerance;
+    }
+
     // Array扩展：随机取一个元素
     public static T Random<T>(this T[] array)
     {

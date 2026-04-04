@@ -14,9 +14,10 @@ public class TestCameraFollow : MonoBehaviour
     public CameraController cameraController;
 
     [Header("效果触发")]
-    public KeyCode impactKey = KeyCode.Space;
-    public KeyCode waveKey = KeyCode.Q;
-    public KeyCode zoomKey = KeyCode.E;
+    public KeyCode impactRandomKey = KeyCode.Q;
+    public KeyCode impactDirKey = KeyCode.E;
+    public KeyCode spiralKey = KeyCode.Space;
+    public KeyCode zoomKey = KeyCode.Z;
 
     private void Update()
     {
@@ -26,8 +27,11 @@ public class TestCameraFollow : MonoBehaviour
 
         if (cameraController == null) return;
 
-        if (Input.GetKeyDown(impactKey)) cameraController.Impact(10f);
-        if (Input.GetKeyDown(waveKey))    cameraController.Spiral(20f);
-        if (Input.GetKeyDown(zoomKey))   cameraController.Zoom();
+        if (Input.GetKeyDown(impactRandomKey)) cameraController.ImpactRandom();
+        if (Input.GetKeyDown(impactDirKey)) cameraController.ImpactDir(ImpactDirection.Up);
+        if (Input.GetKeyDown(spiralKey))    cameraController.Spiral();
+        if (Input.GetKeyDown(zoomKey)) cameraController.Zoom();
+
+        this.transform.rotation = cameraController.transform.rotation;
     }
 }
