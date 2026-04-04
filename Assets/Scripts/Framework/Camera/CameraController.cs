@@ -103,4 +103,10 @@ public class CameraController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, 0.2f);
     }
     #endregion
+
+    #region 日志
+    private void Log(string msg) => Debug.Log($"[{GetType().Name}] {msg}");
+    private void LogWarning(string msg) => Debug.LogWarning($"[{GetType().Name}] {msg}");
+    private void LogError(string msg) => Debug.LogError($"[{GetType().Name}] {msg}");
+    #endregion
 }

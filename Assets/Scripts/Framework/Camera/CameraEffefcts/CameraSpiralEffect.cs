@@ -29,14 +29,13 @@ public class CameraSpiralEffect : ICameraEffect
     /// </summary>
     public void UpdateEff()
     {
-        if (isTriggered)
-        {
-            // 相位角每帧累加，幅度每帧向零衰减
-            totalTime += Time.deltaTime;
-            ampIntensity = Mathf.Lerp(ampIntensity, 0f, ampDecaySpeed * Time.deltaTime);
-            if (ampIntensity.IsEqualsTo(0f, 1e-4f))
-                isTriggered = false;
-        }
+        if (!isTriggered) return;
+        
+        // 相位角每帧累加，幅度每帧向零衰减
+        totalTime += Time.deltaTime;
+        ampIntensity = Mathf.Lerp(ampIntensity, 0f, ampDecaySpeed * Time.deltaTime);
+        if (ampIntensity.IsEqualsTo(0f, 1e-4f))
+            isTriggered = false;
     }
 
     /// <summary>

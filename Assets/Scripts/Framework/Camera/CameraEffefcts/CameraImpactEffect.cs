@@ -23,6 +23,7 @@ public class CameraImapactEffect : ICameraEffect
 
     private ImpactDirection dir = ImpactDirection.Up; // 冲击方向
     private float intensity; // 特效强度，每帧向零衰减
+    private bool isTriggered; // 特效是否触发标识
 
     // 特效应用的摄像机信息
     private Transform cam;
@@ -38,8 +39,12 @@ public class CameraImapactEffect : ICameraEffect
     /// </summary>
     public void UpdateEff()
     {
+        if (!isTriggered) return;
+
         // 每帧向零衰减
         intensity = Mathf.Lerp(intensity, 0f, impactDecaySpeed * Time.deltaTime);
+        if (intensity.IsEqualsTo(0f, 1e-4f))
+            isTriggered = false;
     }
 
     /// <summary>
@@ -47,6 +52,8 @@ public class CameraImapactEffect : ICameraEffect
     /// </summary>
     public Vector3 GetOffset()
     {
+        if (!isTriggered) return Vector3.zero;
+
         Vector3 v = dir switch
         {
             ImpactDirection.Up => cam.up,
@@ -70,6 +77,7 @@ public class CameraImapactEffect : ICameraEffect
     {
         this.intensity = Mathf.Clamp(intensity, 0f, 1f);
         dir = (ImpactDirection)Random.Range(0, System.Enum.GetValues(typeof(ImpactDirection)).Length);
+        isTriggered = true;
     }
 
     /// <summary>
@@ -81,6 +89,8 @@ public class CameraImapactEffect : ICameraEffect
     {
         this.dir = dir;
         this.intensity = Mathf.Clamp(intensity, 0f, 1f);
+        isTriggered = true;
     }
 
+    private void Log(string msg) => Debug.Log($"[{this.GetType()}] {msg}");
 }
