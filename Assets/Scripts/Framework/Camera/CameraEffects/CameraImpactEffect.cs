@@ -16,7 +16,7 @@ public enum ImpactDirection
 /// 摄像机冲击特效
 /// </summary>
 [System.Serializable]
-public class CameraImapactEffect : ICameraEffect
+public class CameraImpactEffect : ICameraEffect
 {
     public float maxImpactDis = Vector3.one.magnitude; // 最大冲击偏移距离
     public float impactDecaySpeed = 10f; // 衰减速度，越大冲击效果消失越快
@@ -29,7 +29,7 @@ public class CameraImapactEffect : ICameraEffect
     private Transform cam;
 
 
-    public CameraImapactEffect(Transform cam)
+    public CameraImpactEffect(Transform cam)
     {
         this.cam = cam;
     }

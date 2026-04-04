@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour
     public Vector3 Offset = new Vector3(0, 0, Constants.CAMERA_OFFSET_Z); // 相对目标偏移，Z=-10
 
     [Header("冲击")]
-    public CameraImapactEffect impactEff;
+    public CameraImpactEffect impactEff;
 
     [Header("螺旋")]
     public CameraSpiralEffect spiralEff;
@@ -27,7 +27,7 @@ public class CameraController : MonoBehaviour
 
     void Start()
     {
-        impactEff = new CameraImapactEffect(this.transform);
+        impactEff = new CameraImpactEffect(this.transform);
         spiralEff = new CameraSpiralEffect(this.transform);
         zoomEff = new CameraZoomEffect(this.transform);
     }

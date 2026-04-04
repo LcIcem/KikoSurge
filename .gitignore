@@ -43,6 +43,7 @@ Document
 # Claude Code
 .claude
 CLAUDE.md
+CLAUDE.md.bak
 
 # Gradle cache directory
 .gradle/
