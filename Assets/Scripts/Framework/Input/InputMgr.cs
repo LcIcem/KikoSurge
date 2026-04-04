@@ -4,16 +4,16 @@ using UnityEngine;
 
 /// <summary>
 /// 输入管理器
-/// <para>单例模式，通过 Update 轮询键位状态，缓存到公开属性供其他模块读取</para>
+/// <para>单例模式，通过 MonoMgr 托管 Update 轮询键位状态，缓存到公开属性供其他模块读取</para>
 /// </summary>
-public class InputMgr : MonoSingleton<InputMgr>
+public class InputMgr : Singleton<InputMgr>
 {
     #region 字段
     // 键位绑定字典  键：输入动作类型枚举  值：具体按键
     private Dictionary<InputActionType, KeyCode> keyBindings = new Dictionary<InputActionType, KeyCode>();
     private Vector2 moveInput; // 移动输入
     private Vector3 mouseWorldPosition; // 鼠标世界坐标
-    private bool isInputEnabled = true;  // 输入是否开启标识
+    private bool turnOn = true; // 输入是否开启标识
     private Camera mainCam; // 主摄像机
     private InputConfig_SO defaultConfig; // 默认配置（SO）
     private string keyBindingsPath; // 键位绑定文件的路径
@@ -21,38 +21,29 @@ public class InputMgr : MonoSingleton<InputMgr>
     #endregion
 
     #region 公开属性
-    /// <summary> 当前 WASD 移动向量（规格化后，Pause 时为 Vector2.zero） </summary>
+    /// <summary> 当前 WASD 移动向量（规格化后，关闭输入时为 Vector2.zero） </summary>
     public Vector2 MoveInput => moveInput;
 
-    /// <summary> 鼠标世界坐标（主摄像机平面交点，Pause 时不更新） </summary>
+    /// <summary> 鼠标世界坐标（主摄像机平面交点，关闭输入时不更新） </summary>
     public Vector3 MouseWorldPosition => mouseWorldPosition;
-
-    /// <summary> 输入开关（设置 false 暂停游戏输入，ESC 暂停本身不受影响） </summary>
-    public bool IsInputEnabled
-    {
-        get => isInputEnabled;
-        set => isInputEnabled = value;
-    }
     #endregion
 
-    #region Unity 生命周期
-    void Awake()
+    #region 初始化
+    public InputMgr()
     {
+        MonoMgr.Instance.AddUpdateListener(Update);
+        // 设置摄像机
         mainCam = Camera.main;
         // 设置 键位绑定文件 保存路径
         keyBindingsPath = $"{Application.persistentDataPath}/{Constants.KEY_BINDINGS_PATH}";
-    }
-
-    void Start()
-    {
-        // 加载键位绑定信息
+        // 加载键位配置
         LoadKeyBindings();
     }
     #endregion
 
     void Update()
     {
-        if (!isInputEnabled)
+        if (!turnOn)
         {
             moveInput = Vector2.zero;
             return;
@@ -68,7 +59,7 @@ public class InputMgr : MonoSingleton<InputMgr>
     public void UpdateMoveInput()
     {
         // 如果输入关闭 直接返回
-        if (!isInputEnabled) return;
+        if (!turnOn) return;
 
         // WASD 移动
         float h = 0f, v = 0f;
@@ -87,7 +78,7 @@ public class InputMgr : MonoSingleton<InputMgr>
         if (mainCam == null) return;
         // 得到一个从屏幕视点到鼠标的射线
         Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
-        // 得到一个地面平面（XOY平面）
+        // 得到一个地面平面（Z=0 平面）
         Plane groundPlane = new Plane(Vector3.forward, Vector3.zero);
         // 从摄像机开始对该平面进行射线检测 根据返回的值来更新鼠标世界坐标
         if (groundPlane.Raycast(ray, out float distance))
@@ -96,6 +87,16 @@ public class InputMgr : MonoSingleton<InputMgr>
     #endregion
 
     #region 键位管理
+    /// <summary>
+    /// 开启或关闭输入检测
+    /// </summary>
+    /// <param name="turnOn">true 开启，false 关闭</param>
+    public void TurnOnInput(bool turnOn)
+    {
+        this.turnOn = turnOn;
+        if (!turnOn) moveInput = Vector2.zero;
+    }
+
     /// <summary>
     /// 加载键位配置（优先级：JSON > SO 默认值 > 硬编码兜底）
     /// </summary>
@@ -126,7 +127,7 @@ public class InputMgr : MonoSingleton<InputMgr>
         {
             // 否则 使用硬编码来配置
             keyBindings = InputConfig_SO.GetHardcodedDefaults();
-            LogWarning($"未找到 {Constants.SO_DEFAULT_PATH} ，使用硬编码默认键位。");
+            LogWarning($"未找到 {Constants.SO_DEFAULT_PATH}，使用硬编码默认键位。");
         }
     }
 
@@ -188,7 +189,6 @@ public class InputMgr : MonoSingleton<InputMgr>
     public Dictionary<InputActionType, KeyCode> GetAllKeyBindings()
         => new Dictionary<InputActionType, KeyCode>(keyBindings);
     #endregion
-
 
     #region 日志
     private void Log(string msg) => Debug.Log($"[{GetType().Name}] {msg}");

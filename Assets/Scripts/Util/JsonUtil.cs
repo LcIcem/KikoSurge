@@ -9,6 +9,22 @@ using LitJson;
 public static class JsonUtil
 {
     /// <summary>
+    /// 序列化
+    /// </summary>
+    public static string ToJson(object data)
+    {
+        return JsonMapper.ToJson(data);
+    }
+
+    /// <summary>
+    /// 反序列化
+    /// </summary>
+    public static T FromJson<T>(string path)
+    {
+        return JsonMapper.ToObject<T>(path);
+    }
+
+    /// <summary>
     /// 从 JSON 文件加载并反序列化
     /// </summary>
     /// <param name="path">完整文件路径</param>

@@ -16,6 +16,6 @@ public static class GameConstants
     public const float MOUSE_SENSITIVITY = 1f; // 鼠标灵敏度
 
     // 存档
-    public const string SAVE_FILE_NAME = "save.json";
+    public const int MAX_SLOT = 3; // 最大存档槽位数
     public const string SAVE_ENCRYPTION_KEY = "kikoSurge2026"; // AES 加密密钥
 }
