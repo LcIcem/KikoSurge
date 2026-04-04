@@ -26,7 +26,7 @@ public class PoolMgr : MonoSingleton<PoolMgr>
     /// <param name="prefabName">预设体名</param>
     /// <param name="prefab">预设体</param>
     /// <param name="initialCount">预创建数量</param>
-    public void Register(string prefabName, GameObject prefab, int initialCount = 10, int maxSize = FrameworkConst.MAX_POOL_SIZE)
+    public void Register(string prefabName, GameObject prefab, int initialCount = 10, int maxSize = Constants.MAX_POOL_SIZE)
     {
         // 如果该预设体已经创建过对象池了 直接返回
         if (pools.ContainsKey(prefabName))

@@ -1,25 +1,16 @@
 /// <summary>
-/// 全局常量集中管理类
+/// 框架层常量集中管理
 /// </summary>
 public static class Constants
 {
-    // 物理
-    public const float GRAVITY = 0f; // 俯视角无重力
-    public const float PIXEL_PER_UNIT = 16f; // PPU = 16
+    // 对象池
+    public const int MAX_POOL_SIZE = 500;
 
-    // 游戏数值
-    public const int MAX_ENEMY_COUNT = 30;
-    public const int MAX_BULLET_COUNT = 800;
-    public const int BULLET_POOL_INITIAL = 200;
+    // 键位相关
+    public const string SO_DEFAULT_PATH = "Config/InputConfig_SO"; // SO键位默认配置文件 路径(相对目录为Resources)
+    public const string KEY_BINDINGS_PATH = "keybindings.json"; // 键位绑定文件 保存路径
 
     // 相机
     public const float CAMERA_SMOOTH_SPEED = 5f;
     public const float CAMERA_OFFSET_Z = -10f; // 2D 正交相机标准偏移
-
-    // 输入
-    public const float MOUSE_SENSITIVITY = 1f; // 鼠标灵敏度
-
-    // 存档
-    public const string SAVE_FILE_NAME = "save.json";
-    public const string SAVE_ENCRYPTION_KEY = "kikoSurge2026"; // AES 加密密钥
 }

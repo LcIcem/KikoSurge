@@ -8,8 +8,8 @@ public class CameraController : MonoBehaviour
 {
     [Header("跟随")]
     public Transform target; // 跟随目标
-    public float SmoothSpeed = 5f; // 平滑速度，越大跟随越紧
-    public Vector3 Offset = new Vector3(0, 0, -10); // 相对目标偏移，Z=-10
+    public float SmoothSpeed = Constants.CAMERA_SMOOTH_SPEED; // 平滑速度，越大跟随越紧
+    public Vector3 Offset = new Vector3(0, 0, Constants.CAMERA_OFFSET_Z); // 相对目标偏移，Z=-10
 
     [Header("冲击")]
     public CameraImapactEffect impactEff;

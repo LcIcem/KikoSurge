@@ -40,7 +40,7 @@ public class InputMgr : MonoSingleton<InputMgr>
     {
         mainCam = Camera.main;
         // 设置 键位绑定文件 保存路径
-        keyBindingsPath = $"{Application.persistentDataPath}/{FrameworkConst.KEY_BINDINGS_PATH}";
+        keyBindingsPath = $"{Application.persistentDataPath}/{Constants.KEY_BINDINGS_PATH}";
     }
 
     void Start()
@@ -115,7 +115,7 @@ public class InputMgr : MonoSingleton<InputMgr>
     private void LoadDefaultKeyBindings()
     {
         // 加载默认键位配置文件
-        defaultConfig = Resources.Load<InputConfig_SO>(FrameworkConst.SO_DEFAULT_PATH);
+        defaultConfig = Resources.Load<InputConfig_SO>(Constants.SO_DEFAULT_PATH);
         // 如果该文件不为空 将键位绑定设置为默认配置
         if (defaultConfig != null)
         {
@@ -126,7 +126,7 @@ public class InputMgr : MonoSingleton<InputMgr>
         {
             // 否则 使用硬编码来配置
             keyBindings = InputConfig_SO.GetHardcodedDefaults();
-            LogWarning($"未找到 {FrameworkConst.SO_DEFAULT_PATH} ，使用硬编码默认键位。");
+            LogWarning($"未找到 {Constants.SO_DEFAULT_PATH} ，使用硬编码默认键位。");
         }
     }
 
