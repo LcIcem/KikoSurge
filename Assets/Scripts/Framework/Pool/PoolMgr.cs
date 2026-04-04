@@ -31,7 +31,7 @@ public class PoolMgr : MonoSingleton<PoolMgr>
         // 如果该预设体已经创建过对象池了 直接返回
         if (pools.ContainsKey(prefabName))
         {
-            LogWarning($"Pool '{prefabName}' already registered.");
+            LogWarning($"对象池 '{prefabName}' 已存在，无需重复注册。");
             return;
         }
 
@@ -74,7 +74,21 @@ public class PoolMgr : MonoSingleton<PoolMgr>
 
         // 将该对象池 添加入 对象池字典
         pools[prefabName] = pool;
-        Log($"Registered pool '{prefabName}' with {initialCount} preloaded objects.");
+        Log($"对象池 '{prefabName}' 注册成功，预加载 {initialCount} 个对象。");
+
+        // 预实例化：按 initialCount 预先创建并归还对象，确保池中已有指定数量的备用对象
+        if (initialCount > 0)
+        {
+            var warmup = new GameObject[initialCount];
+            for (int i = 0; i < initialCount; i++)
+            {
+                warmup[i] = pool.Get();
+            }
+            for (int i = 0; i < initialCount; i++)
+            {
+                pool.Release(warmup[i]);
+            }
+        }
     }
 
     /// <summary>
@@ -85,7 +99,7 @@ public class PoolMgr : MonoSingleton<PoolMgr>
         // 如果该池没有被注册过 直接返回
         if (!pools.TryGetValue(prefabName, out var pool))
         {
-            LogError($"Pool '{prefabName}' not found. Did you forget to Register?");
+            LogError($"对象池 '{prefabName}' 未找到，是否忘记注册？");
             return null;
         }
 
@@ -116,7 +130,7 @@ public class PoolMgr : MonoSingleton<PoolMgr>
     {
         if (!pools.TryGetValue(prefabName, out var pool))
         {
-            LogWarning($"Pool '{prefabName}' not found.");
+            LogWarning($"对象池 '{prefabName}' 未找到。");
             return;
         }
 
@@ -133,7 +147,7 @@ public class PoolMgr : MonoSingleton<PoolMgr>
         parents.Remove(prefabName);
 
         pools.Remove(prefabName);
-        Log($"Unregistered pool '{prefabName}'.");
+        Log($"对象池 '{prefabName}' 已取消注册。");
     }
 
     /// <summary>
@@ -147,7 +161,7 @@ public class PoolMgr : MonoSingleton<PoolMgr>
         {
             Unregister(name, releaseAll);
         }
-        Log("Cleared all pools.");
+        Log("已清空所有对象池。");
     }
     #endregion
 

@@ -59,5 +59,4 @@ public class CameraSpiralEffect : ICameraEffect
         isTriggered = true;
     }
 
-    private void Log(string msg) => Debug.Log($"[{this.GetType()}] {msg}");
 }

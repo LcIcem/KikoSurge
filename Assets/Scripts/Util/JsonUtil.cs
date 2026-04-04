@@ -19,9 +19,9 @@ public static class JsonUtil
     /// <summary>
     /// 反序列化
     /// </summary>
-    public static T FromJson<T>(string path)
+    public static T FromJson<T>(string json)
     {
-        return JsonMapper.ToObject<T>(path);
+        return JsonMapper.ToObject<T>(json);
     }
 
     /// <summary>

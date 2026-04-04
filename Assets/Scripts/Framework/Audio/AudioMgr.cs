@@ -6,18 +6,16 @@ using UnityEngine;
 /// </summary>
 public class AudioMgr : MonoSingleton<AudioMgr>
 {
-
-    // AudioSource：背景音乐（持续播放一个）
+    // BGM 播放器
     private AudioSource bgmSource;
-
-    // AudioSource 池：同时播放多个 SFX
+    // SFX 池
     private List<AudioSource> sfxSources = new List<AudioSource>();
     private const int SFXPoolSize = Constants.SFX_Pool_Size;
-
-    // 音量配置
+    // 音量
     private float bgmVolume = 1f;
     private float sfxVolume = 1f;
 
+    #region 初始化
     private void Awake()
     {
         // 初始化 BGM 播放器
@@ -34,52 +32,130 @@ public class AudioMgr : MonoSingleton<AudioMgr>
             sfxSources.Add(src);
         }
     }
+    #endregion
 
+    #region BGM
     /// <summary>
     /// 播放背景音乐
     /// </summary>
-    /// <param name="audioId"></param>
+    /// <param name="audioId">音频 ID（由 Addressables 加载）</param>
     public void PlayBGM(string audioId)
     {
-        // TODO：实际项目中从 Addressables 加载 AudioClip
-        // AudioClip clip = await AddressablesManager.Instance.LoadAsync<AudioClip>(audioId);
+        // TODO：从 Addressables 加载 AudioClip
         bgmSource.clip = null; // 占位
         bgmSource.volume = bgmVolume;
         bgmSource.Play();
     }
 
     /// <summary>
+    /// 停止背景音乐
+    /// </summary>
+    public void StopBGM() => bgmSource.Stop();
+
+    /// <summary>
+    /// 暂停背景音乐
+    /// </summary>
+    public void PauseBGM() => bgmSource.Pause();
+
+    /// <summary>
+    /// 恢复背景音乐
+    /// </summary>
+    public void ResumeBGM() => bgmSource.UnPause();
+
+    /// <summary>
+    /// 静音背景音乐
+    /// </summary>
+    public void MuteBGM() => bgmSource.mute = true;
+
+    /// <summary>
+    /// 取消背景音乐静音
+    /// </summary>
+    public void UnmuteBGM() => bgmSource.mute = false;
+    #endregion
+
+    #region SFX
+    /// <summary>
     /// 播放音效
     /// </summary>
-    /// <param name="audioId">音效id</param>
+    /// <param name="audioId">音频 ID（由 Addressables 加载）</param>
     public void PlaySFX(string audioId)
     {
-        // 从池中找一个空闲的 AudioSource
         var src = sfxSources.Find(s => !s.isPlaying);
-        // 如果全部占用 强制复用一个
-        if (src == null) src = sfxSources[0];
+        if (src == null) src = sfxSources[0]; // 全部占用则复用第一个
         // TODO：从 Addressables 加载
         src.volume = sfxVolume;
         src.Play();
     }
 
     /// <summary>
-    /// 设置音量
+    /// 停止所有音效
     /// </summary>
-    /// <param name="type">BGM 或 SFX</param>
-    /// <param name="volume">音量大小</param>
-    public void SetVolume(string type, float volume)
+    public void StopSFX()
     {
-        volume = Mathf.Clamp01(volume);
-        switch (type)
-        {
-            case "BGM":
-                bgmVolume = volume;
-                bgmSource.volume = volume;
-                break;
-            case "SFX":
-                sfxVolume = volume;
-                break;
-        }
+        foreach (var s in sfxSources) s.Stop();
     }
+
+    /// <summary>
+    /// 暂停所有音效
+    /// </summary>
+    public void PauseSFX()
+    {
+        foreach (var s in sfxSources) s.Pause();
+    }
+
+    /// <summary>
+    /// 恢复所有音效
+    /// </summary>
+    public void ResumeSFX()
+    {
+        foreach (var s in sfxSources) s.UnPause();
+    }
+
+    /// <summary>
+    /// 静音音效
+    /// </summary>
+    public void MuteSFX()
+    {
+        foreach (var s in sfxSources) s.mute = true;
+    }
+
+    /// <summary>
+    /// 取消音效静音
+    /// </summary>
+    public void UnmuteSFX()
+    {
+        foreach (var s in sfxSources) s.mute = false;
+    }
+    #endregion
+
+    #region 音量
+    /// <summary>
+    /// 设置 BGM 音量
+    /// </summary>
+    public void SetBGMVolume(float volume)
+    {
+        bgmVolume = Mathf.Clamp01(volume);
+        bgmSource.volume = bgmVolume;
+    }
+
+    /// <summary>
+    /// 设置 SFX 音量
+    /// </summary>
+    public void SetSFXVolume(float volume)
+    {
+        sfxVolume = Mathf.Clamp01(volume);
+        foreach (var s in sfxSources)
+            s.volume = sfxVolume;
+    }
+
+    /// <summary>
+    /// 获取 BGM 音量
+    /// </summary>
+    public float GetBGMVolume() => bgmVolume;
+
+    /// <summary>
+    /// 获取 SFX 音量
+    /// </summary>
+    public float GetSFXVolume() => sfxVolume;
+    #endregion
 }

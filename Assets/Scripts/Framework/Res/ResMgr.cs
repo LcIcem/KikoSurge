@@ -23,6 +23,11 @@ public class ResMgr : Singleton<ResMgr>
     public T Load<T>(string name) where T : Object
     {
         T res = Resources.Load<T>(name);
+        if (res == null)
+        {
+            LogWarning($"资源加载失败: {name}");
+            return null;
+        }
         if (res is GameObject)
             return Object.Instantiate(res);
         else
@@ -48,9 +53,21 @@ public class ResMgr : Singleton<ResMgr>
         ResourceRequest r = Resources.LoadAsync<T>(name);
         yield return r;
 
+        if (r.asset == null)
+        {
+            LogWarning($"异步资源加载失败: {name}");
+            callback?.Invoke(null);
+            yield break;
+        }
         if (r.asset is GameObject)
             callback?.Invoke(Object.Instantiate(r.asset) as T);
         else
             callback?.Invoke(r.asset as T);
     }
+
+    #region 日志
+    private void Log(string msg) => Debug.Log($"[{GetType().Name}] {msg}");
+    private void LogWarning(string msg) => Debug.LogWarning($"[{GetType().Name}] {msg}");
+    private void LogError(string msg) => Debug.LogError($"[{GetType().Name}] {msg}");
+    #endregion
 }

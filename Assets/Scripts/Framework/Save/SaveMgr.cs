@@ -29,7 +29,7 @@ public class SaveMgr : MonoSingleton<SaveMgr>
 
     /// <summary>
     /// 保存数据到指定槽位（Json序列化 + AES加密）。
-    /// <para> 槽位索引从 1 开始算 </para>
+    /// <para> 槽位索引从 0 开始算，有效范围 0~MAX_SLOT-1 </para>
     /// </summary>
     public void Save<T>(int slot, T data) where T : class
     {
@@ -59,7 +59,7 @@ public class SaveMgr : MonoSingleton<SaveMgr>
 
     /// <summary>
     /// 从指定槽位加载数据（AES解密 + Json反序列化）。
-    /// <para> 槽位索引从 1 开始算 </para>
+    /// <para> 槽位索引从 0 开始算，有效范围 0~MAX_SLOT-1 </para>
     /// </summary>
     public T Load<T>(int slot) where T : class
     {
