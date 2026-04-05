@@ -1,5 +1,5 @@
 /// <summary>
-/// FSM状态接口
+/// FSM 状态接口
 /// </summary>
 public interface IFSMState
 {
