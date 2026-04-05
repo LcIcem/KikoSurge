@@ -7,16 +7,16 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// UI 层级枚举，对应 Canvas 下预设的四个分区。
 /// </summary>
-public enum E_UI_Layer
+public enum UILayerType
 {
     /// <summary>底层，用于底层背景等 UI。</summary>
-    BOTTOM,
+    Bottom,
     /// <summary>中间层，默认面板层级。</summary>
-    MIDDLE,
+    Middle,
     /// <summary>顶层，用于弹窗等高优先级 UI。</summary>
-    TOP,
+    Top,
     /// <summary>系统层，用于 Toast、提示框等最顶层显示。</summary>
-    SYSTEM
+    SystemLayer
 }
 
 
@@ -33,13 +33,13 @@ public enum E_UI_Layer
 public class UIMgr : Singleton<UIMgr>
 {
     /// <summary>已加载面板字典。key 为面板名称，value 为面板实例，防止同一面板被重复加载。</summary>
-    private Dictionary<string, BasePanel> panelDic = new Dictionary<string, BasePanel>();
+    private Dictionary<string, BasePanel> _panelDic = new Dictionary<string, BasePanel>();
 
     /// <summary>Canvas 各层级根节点。</summary>
-    private Transform bottom;
-    private Transform middle;
-    private Transform top;
-    private Transform system;
+    private Transform _bottom;
+    private Transform _middle;
+    private Transform _top;
+    private Transform _system;
 
     /// <summary>Canvas 的 RectTransform 引用，供外部获取 Canvas 尺寸等使用。</summary>
     public RectTransform Canvas { get; }
@@ -51,10 +51,10 @@ public class UIMgr : Singleton<UIMgr>
         Object.DontDestroyOnLoad(Canvas.gameObject);
 
         // 缓存四个层级的 Transform 引用，避免每次加载面板时重复 Find
-        bottom = Canvas.Find("Bottom");
-        middle = Canvas.Find("Middle");
-        top = Canvas.Find("Top");
-        system = Canvas.Find("System");
+        _bottom = Canvas.Find("Bottom");
+        _middle = Canvas.Find("Middle");
+        _top = Canvas.Find("Top");
+        _system = Canvas.Find("System");
 
         // EventSystem 也需持久化，否则 UI 点击事件无法响应
         Object.DontDestroyOnLoad(ResMgr.Instance.Load<GameObject>("UI/EventSystem"));
@@ -65,15 +65,15 @@ public class UIMgr : Singleton<UIMgr>
     /// </summary>
     /// <param name="layer">目标层级。</param>
     /// <returns>该层级对应的 Transform，未知层级默认返回 Middle。</returns>
-    public Transform GetLayerFather(E_UI_Layer layer)
+    public Transform GetLayerFather(UILayerType layer)
     {
         Transform trans = layer switch
         {
-            E_UI_Layer.BOTTOM => bottom,
-            E_UI_Layer.MIDDLE => middle,
-            E_UI_Layer.TOP => top,
-            E_UI_Layer.SYSTEM => system,
-            _ => middle  // 无效枚举值兜底，避免 father 未赋值
+            UILayerType.Bottom => _bottom,
+            UILayerType.Middle => _middle,
+            UILayerType.Top => _top,
+            UILayerType.SystemLayer => _system,
+            _ => _middle  // 无效枚举值兜底，避免 father 未赋值
         };
         return trans;
     }
@@ -84,16 +84,16 @@ public class UIMgr : Singleton<UIMgr>
     /// </summary>
     /// <typeparam name="T">面板类型，约束为 BasePanel 子类。</typeparam>
     /// <param name="panelName">面板资源名称（相对于 Assets/Resources/UI/）。</param>
-    /// <param name="layer">目标层级，默认为 MIDDLE。</param>
+    /// <param name="layer">目标层级，默认为 Middle。</param>
     /// <param name="callBack">加载完成回调，参数为面板实例。</param>
-    public void ShowPanel<T>(string panelName, E_UI_Layer layer = E_UI_Layer.MIDDLE, UnityAction<T> callBack = null)
+    public void ShowPanel<T>(string panelName, UILayerType layer = UILayerType.Middle, UnityAction<T> callBack = null)
         where T : BasePanel
     {
         // 已存在则直接显示，不再重复加载
-        if (panelDic.ContainsKey(panelName))
+        if (_panelDic.ContainsKey(panelName))
         {
-            panelDic[panelName].Show();
-            callBack?.Invoke(panelDic[panelName] as T);
+            _panelDic[panelName].Show();
+            callBack?.Invoke(_panelDic[panelName] as T);
             return;
         }
 
@@ -122,7 +122,7 @@ public class UIMgr : Singleton<UIMgr>
             callBack?.Invoke(panel);
 
             // 注册到字典中，防止重复加载
-            panelDic.Add(panelName, panel);
+            _panelDic.Add(panelName, panel);
         });
     }
 
@@ -133,13 +133,13 @@ public class UIMgr : Singleton<UIMgr>
     /// <param name="panelName">面板名称。</param>
     public void HidePanel(string panelName)
     {
-        if (panelDic.ContainsKey(panelName))
+        if (_panelDic.ContainsKey(panelName))
         {
             // 调用面板的 Hide 逻辑（如退场动画），然后销毁 GameObject
-            panelDic[panelName].Hide();
-            Object.Destroy(panelDic[panelName].gameObject);
+            _panelDic[panelName].Hide();
+            Object.Destroy(_panelDic[panelName].gameObject);
             // 从字典移除引用
-            panelDic.Remove(panelName);
+            _panelDic.Remove(panelName);
         }
     }
 
@@ -151,8 +151,8 @@ public class UIMgr : Singleton<UIMgr>
     /// <returns>面板实例，未加载返回 null。</returns>
     public T GetPanel<T>(string panelName) where T : BasePanel
     {
-        if (panelDic.ContainsKey(panelName))
-            return panelDic[panelName] as T;
+        if (_panelDic.ContainsKey(panelName))
+            return _panelDic[panelName] as T;
         return null;
     }
 

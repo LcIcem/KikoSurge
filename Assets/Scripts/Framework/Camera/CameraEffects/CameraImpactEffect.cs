@@ -21,17 +21,17 @@ public class CameraImpactEffect : ICameraEffect
     public float maxImpactDis = Vector3.one.magnitude; // 最大冲击偏移距离
     public float impactDecaySpeed = 10f; // 衰减速度，越大冲击效果消失越快
 
-    private ImpactDirection dir = ImpactDirection.Up; // 冲击方向
-    private float intensity; // 特效强度，每帧向零衰减
-    private bool isTriggered; // 特效是否触发标识
+    private ImpactDirection _dir = ImpactDirection.Up; // 冲击方向
+    private float _intensity; // 特效强度，每帧向零衰减
+    private bool _isTriggered; // 特效是否触发标识
 
     // 特效应用的摄像机信息
-    private Transform cam;
+    private Transform _cam;
 
 
     public CameraImpactEffect(Transform cam)
     {
-        this.cam = cam;
+        _cam = cam;
     }
 
     /// <summary>
@@ -39,12 +39,12 @@ public class CameraImpactEffect : ICameraEffect
     /// </summary>
     public void UpdateEff()
     {
-        if (!isTriggered) return;
+        if (!_isTriggered) return;
 
         // 每帧向零衰减
-        intensity = Mathf.Lerp(intensity, 0f, impactDecaySpeed * Time.deltaTime);
-        if (intensity.IsEqualsTo(0f, 1e-4f))
-            isTriggered = false;
+        _intensity = Mathf.Lerp(_intensity, 0f, impactDecaySpeed * Time.deltaTime);
+        if (_intensity.IsEqualsTo(0f, 1e-4f))
+            _isTriggered = false;
     }
 
     /// <summary>
@@ -52,21 +52,21 @@ public class CameraImpactEffect : ICameraEffect
     /// </summary>
     public Vector3 GetOffset()
     {
-        if (!isTriggered) return Vector3.zero;
+        if (!_isTriggered) return Vector3.zero;
 
-        Vector3 v = dir switch
+        Vector3 v = _dir switch
         {
-            ImpactDirection.Up => cam.up,
-            ImpactDirection.Down => -cam.up,
-            ImpactDirection.Left => -cam.right,
-            ImpactDirection.Right => cam.right,
-            ImpactDirection.UpLeft => (cam.up + -cam.right).normalized,
-            ImpactDirection.UpRight => (cam.up + cam.right).normalized,
-            ImpactDirection.DownRight => (-cam.up + cam.right).normalized,
-            ImpactDirection.DownLeft => (-cam.up + -cam.right).normalized,
+            ImpactDirection.Up => _cam.up,
+            ImpactDirection.Down => -_cam.up,
+            ImpactDirection.Left => -_cam.right,
+            ImpactDirection.Right => _cam.right,
+            ImpactDirection.UpLeft => (_cam.up + -_cam.right).normalized,
+            ImpactDirection.UpRight => (_cam.up + _cam.right).normalized,
+            ImpactDirection.DownRight => (-_cam.up + _cam.right).normalized,
+            ImpactDirection.DownLeft => (-_cam.up + -_cam.right).normalized,
             _ => Vector2.zero
         };
-        return v * (maxImpactDis * intensity);
+        return v * (maxImpactDis * _intensity);
     }
 
     /// <summary>
@@ -75,9 +75,9 @@ public class CameraImpactEffect : ICameraEffect
     /// <param name="intensity">特效强度（0~1）</param>
     public void Trigger(float intensity = 0.5f)
     {
-        this.intensity = Mathf.Clamp(intensity, 0f, 1f);
-        dir = (ImpactDirection)Random.Range(0, System.Enum.GetValues(typeof(ImpactDirection)).Length);
-        isTriggered = true;
+        _intensity = Mathf.Clamp(intensity, 0f, 1f);
+        _dir = (ImpactDirection)Random.Range(0, System.Enum.GetValues(typeof(ImpactDirection)).Length);
+        _isTriggered = true;
     }
 
     /// <summary>
@@ -87,9 +87,9 @@ public class CameraImpactEffect : ICameraEffect
     /// <param name="intensity">特效强度（0~1）</param>
     public void TriggerDir(ImpactDirection dir, float intensity = 0.5f)
     {
-        this.dir = dir;
-        this.intensity = Mathf.Clamp(intensity, 0f, 1f);
-        isTriggered = true;
+        _dir = dir;
+        _intensity = Mathf.Clamp(intensity, 0f, 1f);
+        _isTriggered = true;
     }
 
 }

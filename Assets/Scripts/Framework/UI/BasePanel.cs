@@ -22,7 +22,7 @@ public class BasePanel : MonoBehaviour
     /// 控件字典。key 为子控件 GameObject 名称，value 为该名称下所有 UIBehaviour 组件列表。
     /// 同一名称可能对应多种类型（Button + Image），按类型查询时返回第一个匹配项。
     /// </summary>
-    private Dictionary<string, List<UIBehaviour>> controlDic = new Dictionary<string, List<UIBehaviour>>();
+    private Dictionary<string, List<UIBehaviour>> _controlDic = new Dictionary<string, List<UIBehaviour>>();
 
     /// <summary>
     /// 面板初始化时自动调用，查找并缓存常见类型的子控件。
@@ -72,9 +72,9 @@ public class BasePanel : MonoBehaviour
     protected T GetControl<T>(string controlName) where T : UIBehaviour
     {
         // 先按名称找到对应的列表，再从中筛选出目标类型
-        if (controlDic.ContainsKey(controlName))
+        if (_controlDic.ContainsKey(controlName))
         {
-            foreach (var control in controlDic[controlName])
+            foreach (var control in _controlDic[controlName])
             {
                 // 同一名称可能存在多个类型不同的组件（如同名 Button 和 Image），
                 // 按类型匹配，返回第一个命中项
@@ -98,10 +98,10 @@ public class BasePanel : MonoBehaviour
         foreach (T control in controls)
         {
             // 按 GameObject 名称归并，同名不同类型的组件存入同一列表
-            if (controlDic.ContainsKey(control.gameObject.name))
-                controlDic[control.gameObject.name].Add(control);
+            if (_controlDic.ContainsKey(control.gameObject.name))
+                _controlDic[control.gameObject.name].Add(control);
             else
-                controlDic.Add(control.gameObject.name, new List<UIBehaviour>() { control });
+                _controlDic.Add(control.gameObject.name, new List<UIBehaviour>() { control });
 
             // 为交互组件自动注册事件，无需子类手动绑定
             // 将 control.name 提取为局部变量，避免 lambda 捕获循环变量导致闭包问题

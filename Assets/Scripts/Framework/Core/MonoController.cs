@@ -13,7 +13,7 @@ using UnityEngine.Events;
 /// </summary>
 public class MonoController : MonoBehaviour
 {
-    private event UnityAction updateEvent;
+    private event UnityAction _updateEvent;
 
 
     void Awake()
@@ -23,12 +23,12 @@ public class MonoController : MonoBehaviour
 
     void Update()
     {
-        updateEvent?.Invoke();
+        _updateEvent?.Invoke();
     }
 
     /// <summary>注册 Update 帧回调。</summary>
-    public void AddUpdateListener(UnityAction action) => updateEvent += action;
+    public void AddUpdateListener(UnityAction action) => _updateEvent += action;
 
     /// <summary>取消注册 Update 帧回调。</summary>
-    public void RemoveUpdateListener(UnityAction action) => updateEvent -= action;
+    public void RemoveUpdateListener(UnityAction action) => _updateEvent -= action;
 }

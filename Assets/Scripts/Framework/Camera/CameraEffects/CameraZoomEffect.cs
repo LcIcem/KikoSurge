@@ -8,13 +8,13 @@ public class CameraZoomEffect : ICameraEffect
     public float maxZoomDepth = 5f; // 最大推进深度
     public float zoomReturnSpeed = 3f; // 回位速度，越大回位越快
 
-    private float intensity; // 当前推进强度，每帧向零衰减
-    private bool isTriggered; // 特效是否触发标识
-    private Transform cam; // 相机引用
+    private float _intensity; // 当前推进强度，每帧向零衰减
+    private bool _isTriggered; // 特效是否触发标识
+    private Transform _cam; // 相机引用
 
     public CameraZoomEffect(Transform cam)
     {
-        this.cam = cam;
+        _cam = cam;
     }
 
 
@@ -23,12 +23,12 @@ public class CameraZoomEffect : ICameraEffect
     /// </summary>
     public void UpdateEff()
     {
-        if (!isTriggered) return;
+        if (!_isTriggered) return;
 
         // 进强度每帧向零线性插值衰减，实现平滑回位
-        intensity = Mathf.Lerp(intensity, 0, zoomReturnSpeed * Time.deltaTime);
-        if (intensity.IsEqualsTo(0f, 1e-4f))
-            isTriggered = false;
+        _intensity = Mathf.Lerp(_intensity, 0, zoomReturnSpeed * Time.deltaTime);
+        if (_intensity.IsEqualsTo(0f, 1e-4f))
+            _isTriggered = false;
     }
 
     /// <summary>
@@ -36,8 +36,8 @@ public class CameraZoomEffect : ICameraEffect
     /// </summary>
     public Vector3 GetOffset()
     {
-        if (!isTriggered) return Vector3.zero;
-        return cam.forward * intensity * maxZoomDepth;
+        if (!_isTriggered) return Vector3.zero;
+        return _cam.forward * _intensity * maxZoomDepth;
     }
 
     /// <summary>
@@ -46,8 +46,8 @@ public class CameraZoomEffect : ICameraEffect
     /// <param name="intensity">特效强度（0~1）</param>
     public void Trigger(float intensity = 0.5f)
     {
-        this.intensity = Mathf.Clamp(intensity, 0, 1);
-        isTriggered = true;
+        _intensity = Mathf.Clamp(intensity, 0, 1);
+        _isTriggered = true;
     }
 
 }

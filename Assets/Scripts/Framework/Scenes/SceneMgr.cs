@@ -12,7 +12,7 @@ using System.Collections;
 public class SceneMgr : MonoSingleton<SceneMgr>
 {
     // 当前场景实例 (用于卸载场景时使用)
-    private SceneInstance currentSceneInstance;
+    private SceneInstance _currentSceneInstance;
 
 
     /// <summary>
@@ -55,7 +55,7 @@ public class SceneMgr : MonoSingleton<SceneMgr>
         }
 
         // 保存场景实例，供后续 UnloadCurrentScene 使用
-        currentSceneInstance = op.Result;
+        _currentSceneInstance = op.Result;
 
         onComplete?.Invoke();
         Log($"加载场景: {sceneName}");
@@ -83,10 +83,10 @@ public class SceneMgr : MonoSingleton<SceneMgr>
     /// </summary>
     public AsyncOperationHandle UnloadCurrentScene()
     {
-        if (!currentSceneInstance.Equals(default))
+        if (!_currentSceneInstance.Equals(default))
         {
-            var op = Addressables.UnloadSceneAsync(currentSceneInstance);
-            currentSceneInstance = default;
+            var op = Addressables.UnloadSceneAsync(_currentSceneInstance);
+            _currentSceneInstance = default;
             return op;
         }
         LogWarning("没有可卸载的场景实例");

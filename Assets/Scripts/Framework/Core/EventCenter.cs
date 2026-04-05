@@ -23,7 +23,7 @@ public class EventCenter : Singleton<EventCenter>
 {
     // 键：事件ID  值：对应事件的回调列表
     // 之所以不用多播委托 是为了防止多播委托中 某个回调发生异常 导致 回调链中断的问题
-    private readonly Dictionary<EventID, IEventCallback> listeners = new Dictionary<EventID, IEventCallback>();
+    private readonly Dictionary<EventID, IEventCallback> _listeners = new Dictionary<EventID, IEventCallback>();
 
 
     /// <summary>
@@ -35,7 +35,7 @@ public class EventCenter : Singleton<EventCenter>
     public void Publish<T>(EventID eventId, T body)
     {
         // 如果能够在事件监听字典中找到该事件
-        if (listeners.TryGetValue(eventId, out IEventCallback callbacks))
+        if (_listeners.TryGetValue(eventId, out IEventCallback callbacks))
         {
             ParamsCallback<T> paramsCallback = callbacks as ParamsCallback<T>;
             // 遍历回调列表 调用每一个回调
@@ -62,11 +62,11 @@ public class EventCenter : Singleton<EventCenter>
     public void Publish(EventID eventId)
     {
         // 如果能够在事件监听字典中找到该事件
-        if (listeners.TryGetValue(eventId, out IEventCallback callbacks))
+        if (_listeners.TryGetValue(eventId, out IEventCallback callbacks))
         {
-            VoidCallback voidCallback = callbacks as VoidCallback;
+            VoidCallback cb = callbacks as VoidCallback;
             // 遍历回调列表 调用每一个回调
-            foreach (Action callback in voidCallback.callbacks)
+            foreach (Action callback in cb.callbacks)
             {
                 // 异常捕获
                 // 防止 某个回调 发生异常后 导致 整个回调链中断
@@ -91,12 +91,12 @@ public class EventCenter : Singleton<EventCenter>
     public void Subscribe<T>(EventID eventId, Action<T> callback)
     {
         // 如果事件监听字典里没有该事件 就创建该键
-        if (!listeners.ContainsKey(eventId))
+        if (!_listeners.ContainsKey(eventId))
         {
-            listeners[eventId] = new ParamsCallback<T>();
+            _listeners[eventId] = new ParamsCallback<T>();
         }
         // 添加事件监听回调
-        (listeners[eventId] as ParamsCallback<T>).callbacks.Add(callback);
+        (_listeners[eventId] as ParamsCallback<T>).callbacks.Add(callback);
     }
 
     /// <summary>
@@ -107,12 +107,12 @@ public class EventCenter : Singleton<EventCenter>
     public void Subscribe(EventID eventId, Action callback)
     {
         // 如果事件监听字典里没有该事件 就创建该键
-        if (!listeners.ContainsKey(eventId))
+        if (!_listeners.ContainsKey(eventId))
         {
-            listeners[eventId] = new VoidCallback();
+            _listeners[eventId] = new VoidCallback();
         }
         // 添加事件监听回调
-        (listeners[eventId] as VoidCallback).callbacks.Add(callback);
+        (_listeners[eventId] as VoidCallback).callbacks.Add(callback);
     }
 
     /// <summary>
@@ -124,13 +124,13 @@ public class EventCenter : Singleton<EventCenter>
     public void Unsubscribe<T>(EventID eventId, Action<T> callback)
     {
         // 如果事件监听字典里有该事件 就退订 否则 静默处理
-        if (listeners.TryGetValue(eventId, out IEventCallback callbacks))
+        if (_listeners.TryGetValue(eventId, out IEventCallback callbacks))
         {
             ParamsCallback<T> paramsCallback = callbacks as ParamsCallback<T>;
             paramsCallback.callbacks.Remove(callback);
             // 如果所有回调都退订了 就清理该字典键 防止积累无用键
             if (paramsCallback.callbacks.Count == 0)
-                listeners.Remove(eventId);
+                _listeners.Remove(eventId);
         }
     }
 
@@ -142,13 +142,13 @@ public class EventCenter : Singleton<EventCenter>
     public void Unsubscribe(EventID eventId, Action callback)
     {
         // 如果事件监听字典里有该事件 就退订 否则 静默处理
-        if (listeners.TryGetValue(eventId, out IEventCallback callbacks))
+        if (_listeners.TryGetValue(eventId, out IEventCallback callbacks))
         {
             VoidCallback paramsCallback = callbacks as VoidCallback;
             paramsCallback.callbacks.Remove(callback);
             // 如果所有回调都退订了 就清理该字典键 防止积累无用键
             if (paramsCallback.callbacks.Count == 0)
-                listeners.Remove(eventId);
+                _listeners.Remove(eventId);
         }
     }
 
@@ -158,7 +158,7 @@ public class EventCenter : Singleton<EventCenter>
     /// <param name="eventId"></param>
     public void Clear(EventID eventId)
     {
-        listeners.Remove(eventId);
+        _listeners.Remove(eventId);
     }
 
     /// <summary>
@@ -166,6 +166,6 @@ public class EventCenter : Singleton<EventCenter>
     /// </summary>
     public void ClearAll()
     {
-        listeners.Clear();
+        _listeners.Clear();
     }
 }

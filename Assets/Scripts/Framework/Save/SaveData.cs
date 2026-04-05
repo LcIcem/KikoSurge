@@ -4,13 +4,13 @@
 /// </summary>
 public class SaveData {
     // 最高分
-    public int highScore;
+    public int HighScore;
     // 最高波次
-    public int highestWave;
+    public int HighestWave;
     // 总游戏时间（秒）
-    public float totalPlayTime;
+    public float TotalPlayTime;
     // 元升级数据（局外强化）
-    public int metaUpgradePoints;
+    public int MetaUpgradePoints;
     // 上次游玩时间戳
-    public long lastPlayedTimestamp;
+    public long LastPlayedTimestamp;
 }

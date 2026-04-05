@@ -7,7 +7,7 @@ public static class Constants
     public const int MAX_POOL_SIZE = 500;
 
     // 音效池
-    public const int SFX_Pool_Size = 10;
+    public const int SFX_POOL_SIZE = 10;
 
     // 键位相关
     public const string SO_DEFAULT_PATH = "Config/InputConfig_SO"; // SO键位默认配置文件 路径(相对目录为Resources)

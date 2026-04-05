@@ -12,7 +12,7 @@ public class SaveMgr : MonoSingleton<SaveMgr>
     public const int MAX_SLOT = GameConstants.MAX_SLOT;
 
     // 存档文件夹路径
-    private string SaveDir => Path.Combine(Application.persistentDataPath, "saves");
+    private string _saveDir => Path.Combine(Application.persistentDataPath, "saves");
     // 存档文件名前缀
     private const string SAVE_PREFIX = "save_";
     // 存档文件名后缀
@@ -24,7 +24,7 @@ public class SaveMgr : MonoSingleton<SaveMgr>
     /// </summary>
     private string GetSlotPath(int slot)
     {
-        return Path.Combine(SaveDir, $"{SAVE_PREFIX}{slot}{SAVE_EXT}");
+        return Path.Combine(_saveDir, $"{SAVE_PREFIX}{slot}{SAVE_EXT}");
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ public class SaveMgr : MonoSingleton<SaveMgr>
             // 将 Json字符串 加密为 加密字符串(通过AES密钥)
             string encrypted = EncryptUtil.AESEncrypt(json, GameConstants.SAVE_ENCRYPTION_KEY);
             // 将 加密字符串 写入文件
-            Directory.CreateDirectory(SaveDir);
+            Directory.CreateDirectory(_saveDir);
             File.WriteAllText(GetSlotPath(slot), encrypted);
             Log($"存档已保存至槽位 {slot}");
         }
@@ -133,8 +133,8 @@ public class SaveMgr : MonoSingleton<SaveMgr>
     }
 
     #region 日志
-    private void Log(string msg) => Debug.Log($"[SaveManager] {msg}");
-    private void LogWarning(string msg) => Debug.LogWarning($"[SaveManager] {msg}");
-    private void LogError(string msg) => Debug.LogError($"[SaveManager] {msg}");
+    private void Log(string msg) => Debug.Log($"[{GetType().Name}] {msg}");
+    private void LogWarning(string msg) => Debug.LogWarning($"[{GetType().Name}] {msg}");
+    private void LogError(string msg) => Debug.LogError($"[{GetType().Name}] {msg}");
     #endregion
 }

@@ -10,22 +10,22 @@ public class InputMgr : Singleton<InputMgr>
 {
     #region 字段
     // 键位绑定字典  键：输入动作类型枚举  值：具体按键
-    private Dictionary<InputActionType, KeyCode> keyBindings = new Dictionary<InputActionType, KeyCode>();
-    private Vector2 moveInput; // 移动输入
-    private Vector3 mouseWorldPosition; // 鼠标世界坐标
-    private bool turnOn = true; // 输入是否开启标识
-    private Camera mainCam; // 主摄像机
-    private InputConfig_SO defaultConfig; // 默认配置（SO）
-    private string keyBindingsPath; // 键位绑定文件的路径
-    private bool isLoaded = false; // 是否已经加载键位标识
+    private Dictionary<InputActionType, KeyCode> _keyBindings = new Dictionary<InputActionType, KeyCode>();
+    private Vector2 _moveInput; // 移动输入
+    private Vector3 _mouseWorldPosition; // 鼠标世界坐标
+    private bool _turnOn = true; // 输入是否开启标识
+    private Camera _mainCam; // 主摄像机
+    private InputConfig_SO _defaultConfig; // 默认配置（SO）
+    private string _keyBindingsPath; // 键位绑定文件的路径
+    private bool _isLoaded = false; // 是否已经加载键位标识
     #endregion
 
     #region 公开属性
     /// <summary> 当前 WASD 移动向量（规格化后，关闭输入时为 Vector2.zero） </summary>
-    public Vector2 MoveInput => moveInput;
+    public Vector2 MoveInput => _moveInput;
 
     /// <summary> 鼠标世界坐标（主摄像机平面交点，关闭输入时不更新） </summary>
-    public Vector3 MouseWorldPosition => mouseWorldPosition;
+    public Vector3 MouseWorldPosition => _mouseWorldPosition;
     #endregion
 
     #region 初始化
@@ -33,9 +33,9 @@ public class InputMgr : Singleton<InputMgr>
     {
         MonoMgr.Instance.AddUpdateListener(Update);
         // 设置摄像机
-        mainCam = Camera.main;
+        _mainCam = Camera.main;
         // 设置 键位绑定文件 保存路径
-        keyBindingsPath = $"{Application.persistentDataPath}/{Constants.KEY_BINDINGS_PATH}";
+        _keyBindingsPath = $"{Application.persistentDataPath}/{Constants.KEY_BINDINGS_PATH}";
         // 加载键位配置
         LoadKeyBindings();
     }
@@ -43,9 +43,9 @@ public class InputMgr : Singleton<InputMgr>
 
     void Update()
     {
-        if (!turnOn)
+        if (!_turnOn)
         {
-            moveInput = Vector2.zero;
+            _moveInput = Vector2.zero;
             return;
         }
         UpdateMoveInput();
@@ -56,18 +56,18 @@ public class InputMgr : Singleton<InputMgr>
     /// <summary>
     /// 更新移动输入
     /// </summary>
-    public void UpdateMoveInput()
+    private void UpdateMoveInput()
     {
         // 如果输入关闭 直接返回
-        if (!turnOn) return;
+        if (!_turnOn) return;
 
         // WASD 移动
         float h = 0f, v = 0f;
-        if (Input.GetKey(keyBindings[InputActionType.MoveUp]))    v += 1f;
-        if (Input.GetKey(keyBindings[InputActionType.MoveDown]))  v -= 1f;
-        if (Input.GetKey(keyBindings[InputActionType.MoveLeft]))  h -= 1f;
-        if (Input.GetKey(keyBindings[InputActionType.MoveRight])) h += 1f;
-        moveInput = new Vector2(h, v).normalized;
+        if (Input.GetKey(_keyBindings[InputActionType.MoveUp]))    v += 1f;
+        if (Input.GetKey(_keyBindings[InputActionType.MoveDown]))  v -= 1f;
+        if (Input.GetKey(_keyBindings[InputActionType.MoveLeft]))  h -= 1f;
+        if (Input.GetKey(_keyBindings[InputActionType.MoveRight])) h += 1f;
+        _moveInput = new Vector2(h, v).normalized;
     }
 
     /// <summary>
@@ -75,14 +75,14 @@ public class InputMgr : Singleton<InputMgr>
     /// </summary>
     private void UpdateMouseWorldPosition()
     {
-        if (mainCam == null) return;
+        if (_mainCam == null) return;
         // 得到一个从屏幕视点到鼠标的射线
-        Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
+        Ray ray = _mainCam.ScreenPointToRay(Input.mousePosition);
         // 得到一个地面平面（Z=0 平面）
         Plane groundPlane = new Plane(Vector3.forward, Vector3.zero);
         // 从摄像机开始对该平面进行射线检测 根据返回的值来更新鼠标世界坐标
         if (groundPlane.Raycast(ray, out float distance))
-            mouseWorldPosition = ray.GetPoint(distance);
+            _mouseWorldPosition = ray.GetPoint(distance);
     }
     #endregion
 
@@ -90,11 +90,11 @@ public class InputMgr : Singleton<InputMgr>
     /// <summary>
     /// 开启或关闭输入检测
     /// </summary>
-    /// <param name="turnOn">true 开启，false 关闭</param>
-    public void TurnOnInput(bool turnOn)
+    /// <param name="enable">true 开启，false 关闭</param>
+    public void TurnOnInput(bool enable)
     {
-        this.turnOn = turnOn;
-        if (!turnOn) moveInput = Vector2.zero;
+        _turnOn = enable;
+        if (!enable) _moveInput = Vector2.zero;
     }
 
     /// <summary>
@@ -102,12 +102,12 @@ public class InputMgr : Singleton<InputMgr>
     /// </summary>
     public void LoadKeyBindings()
     {
-        if (isLoaded) return;
+        if (_isLoaded) return;
 
         LoadDefaultKeyBindings();
         LoadKeyBindingsFromJson();
 
-        isLoaded = true;
+        _isLoaded = true;
     }
 
     /// <summary>
@@ -116,17 +116,17 @@ public class InputMgr : Singleton<InputMgr>
     private void LoadDefaultKeyBindings()
     {
         // 加载默认键位配置文件
-        defaultConfig = Resources.Load<InputConfig_SO>(Constants.SO_DEFAULT_PATH);
+        _defaultConfig = Resources.Load<InputConfig_SO>(Constants.SO_DEFAULT_PATH);
         // 如果该文件不为空 将键位绑定设置为默认配置
-        if (defaultConfig != null)
+        if (_defaultConfig != null)
         {
-            keyBindings = defaultConfig.ToDictionary();
+            _keyBindings = _defaultConfig.ToDictionary();
             Log("从 SO 加载默认键位配置。");
         }
         else
         {
             // 否则 使用硬编码来配置
-            keyBindings = InputConfig_SO.GetHardcodedDefaults();
+            _keyBindings = InputConfig_SO.GetHardcodedDefaults();
             LogWarning($"未找到 {Constants.SO_DEFAULT_PATH}，使用硬编码默认键位。");
         }
     }
@@ -136,10 +136,10 @@ public class InputMgr : Singleton<InputMgr>
     /// </summary>
     private void LoadKeyBindingsFromJson()
     {
-        var saved = JsonUtil.LoadFromFile<Dictionary<InputActionType, KeyCode>>(keyBindingsPath);
+        var saved = JsonUtil.LoadFromFile<Dictionary<InputActionType, KeyCode>>(_keyBindingsPath);
         if (saved == null || saved.Count == 0) return;
 
-        keyBindings = saved;
+        _keyBindings = saved;
         Log("从 JSON 覆盖键位配置。");
     }
 
@@ -150,8 +150,8 @@ public class InputMgr : Singleton<InputMgr>
     {
         try
         {
-            JsonUtil.SaveToFile(keyBindingsPath, keyBindings);
-            Log($"键位已保存至 {keyBindingsPath}");
+            JsonUtil.SaveToFile(_keyBindingsPath, _keyBindings);
+            Log($"键位已保存至 {_keyBindingsPath}");
         }
         catch (Exception e)
         {
@@ -164,9 +164,9 @@ public class InputMgr : Singleton<InputMgr>
     /// </summary>
     public void SetKeyBinding(InputActionType action, KeyCode key)
     {
-        if (keyBindings.ContainsKey(action))
+        if (_keyBindings.ContainsKey(action))
         {
-            keyBindings[action] = key;
+            _keyBindings[action] = key;
             Log($"键位修改：{action} → {key}");
         }
         else LogWarning($"未知的 InputActionType：{action}");
@@ -177,17 +177,17 @@ public class InputMgr : Singleton<InputMgr>
     /// </summary>
     public void ResetToDefault()
     {
-        keyBindings = defaultConfig != null
-            ? defaultConfig.ToDictionary()
+        _keyBindings = _defaultConfig != null
+            ? _defaultConfig.ToDictionary()
             : InputConfig_SO.GetHardcodedDefaults();
-        Log(defaultConfig != null ? "键位已重置为 SO 默认值。" : "键位已重置为硬编码默认值。");
+        Log(_defaultConfig != null ? "键位已重置为 SO 默认值。" : "键位已重置为硬编码默认值。");
     }
 
     /// <summary>
     /// 获取当前键位映射（用于 UI 键位设置界面）
     /// </summary>
     public Dictionary<InputActionType, KeyCode> GetAllKeyBindings()
-        => new Dictionary<InputActionType, KeyCode>(keyBindings);
+        => new Dictionary<InputActionType, KeyCode>(_keyBindings);
     #endregion
 
     #region 日志

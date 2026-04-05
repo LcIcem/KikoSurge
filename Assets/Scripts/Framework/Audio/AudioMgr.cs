@@ -7,29 +7,29 @@ using UnityEngine;
 public class AudioMgr : MonoSingleton<AudioMgr>
 {
     // BGM 播放器
-    private AudioSource bgmSource;
+    private AudioSource _bgmSource;
     // SFX 池
-    private List<AudioSource> sfxSources = new List<AudioSource>();
-    private const int SFXPoolSize = Constants.SFX_Pool_Size;
+    private List<AudioSource> _sfxSources = new List<AudioSource>();
+    private const int SFX_POOL_SIZE = Constants.SFX_POOL_SIZE;
     // 音量
-    private float bgmVolume = 1f;
-    private float sfxVolume = 1f;
+    private float _bgmVolume = 1f;
+    private float _sfxVolume = 1f;
 
     #region 初始化
     private void Awake()
     {
         // 初始化 BGM 播放器
-        bgmSource = gameObject.AddComponent<AudioSource>();
-        bgmSource.loop = true;
-        bgmSource.playOnAwake = false;
+        _bgmSource = gameObject.AddComponent<AudioSource>();
+        _bgmSource.loop = true;
+        _bgmSource.playOnAwake = false;
 
         // 初始化 SFX 池
-        for (int i = 0; i < SFXPoolSize; i++)
+        for (int i = 0; i < SFX_POOL_SIZE; i++)
         {
             var src = gameObject.AddComponent<AudioSource>();
             src.loop = false;
             src.playOnAwake = false;
-            sfxSources.Add(src);
+            _sfxSources.Add(src);
         }
     }
     #endregion
@@ -42,35 +42,35 @@ public class AudioMgr : MonoSingleton<AudioMgr>
     public void PlayBGM(string audioId)
     {
         // TODO：从 Addressables 加载 AudioClip
-        bgmSource.clip = null; // 占位
-        bgmSource.volume = bgmVolume;
-        bgmSource.Play();
+        _bgmSource.clip = null; // 占位
+        _bgmSource.volume = _bgmVolume;
+        _bgmSource.Play();
     }
 
     /// <summary>
     /// 停止背景音乐
     /// </summary>
-    public void StopBGM() => bgmSource.Stop();
+    public void StopBGM() => _bgmSource.Stop();
 
     /// <summary>
     /// 暂停背景音乐
     /// </summary>
-    public void PauseBGM() => bgmSource.Pause();
+    public void PauseBGM() => _bgmSource.Pause();
 
     /// <summary>
     /// 恢复背景音乐
     /// </summary>
-    public void ResumeBGM() => bgmSource.UnPause();
+    public void ResumeBGM() => _bgmSource.UnPause();
 
     /// <summary>
     /// 静音背景音乐
     /// </summary>
-    public void MuteBGM() => bgmSource.mute = true;
+    public void MuteBGM() => _bgmSource.mute = true;
 
     /// <summary>
     /// 取消背景音乐静音
     /// </summary>
-    public void UnmuteBGM() => bgmSource.mute = false;
+    public void UnmuteBGM() => _bgmSource.mute = false;
     #endregion
 
     #region SFX
@@ -80,10 +80,10 @@ public class AudioMgr : MonoSingleton<AudioMgr>
     /// <param name="audioId">音频 ID（由 Addressables 加载）</param>
     public void PlaySFX(string audioId)
     {
-        var src = sfxSources.Find(s => !s.isPlaying);
-        if (src == null) src = sfxSources[0]; // 全部占用则复用第一个
+        var src = _sfxSources.Find(s => !s.isPlaying);
+        if (src == null) src = _sfxSources[0]; // 全部占用则复用第一个
         // TODO：从 Addressables 加载
-        src.volume = sfxVolume;
+        src.volume = _sfxVolume;
         src.Play();
     }
 
@@ -92,7 +92,7 @@ public class AudioMgr : MonoSingleton<AudioMgr>
     /// </summary>
     public void StopSFX()
     {
-        foreach (var s in sfxSources) s.Stop();
+        foreach (var s in _sfxSources) s.Stop();
     }
 
     /// <summary>
@@ -100,7 +100,7 @@ public class AudioMgr : MonoSingleton<AudioMgr>
     /// </summary>
     public void PauseSFX()
     {
-        foreach (var s in sfxSources) s.Pause();
+        foreach (var s in _sfxSources) s.Pause();
     }
 
     /// <summary>
@@ -108,7 +108,7 @@ public class AudioMgr : MonoSingleton<AudioMgr>
     /// </summary>
     public void ResumeSFX()
     {
-        foreach (var s in sfxSources) s.UnPause();
+        foreach (var s in _sfxSources) s.UnPause();
     }
 
     /// <summary>
@@ -116,7 +116,7 @@ public class AudioMgr : MonoSingleton<AudioMgr>
     /// </summary>
     public void MuteSFX()
     {
-        foreach (var s in sfxSources) s.mute = true;
+        foreach (var s in _sfxSources) s.mute = true;
     }
 
     /// <summary>
@@ -124,7 +124,7 @@ public class AudioMgr : MonoSingleton<AudioMgr>
     /// </summary>
     public void UnmuteSFX()
     {
-        foreach (var s in sfxSources) s.mute = false;
+        foreach (var s in _sfxSources) s.mute = false;
     }
     #endregion
 
@@ -134,8 +134,8 @@ public class AudioMgr : MonoSingleton<AudioMgr>
     /// </summary>
     public void SetBGMVolume(float volume)
     {
-        bgmVolume = Mathf.Clamp01(volume);
-        bgmSource.volume = bgmVolume;
+        _bgmVolume = Mathf.Clamp01(volume);
+        _bgmSource.volume = _bgmVolume;
     }
 
     /// <summary>
@@ -143,19 +143,19 @@ public class AudioMgr : MonoSingleton<AudioMgr>
     /// </summary>
     public void SetSFXVolume(float volume)
     {
-        sfxVolume = Mathf.Clamp01(volume);
-        foreach (var s in sfxSources)
-            s.volume = sfxVolume;
+        _sfxVolume = Mathf.Clamp01(volume);
+        foreach (var s in _sfxSources)
+            s.volume = _sfxVolume;
     }
 
     /// <summary>
     /// 获取 BGM 音量
     /// </summary>
-    public float GetBGMVolume() => bgmVolume;
+    public float GetBGMVolume() => _bgmVolume;
 
     /// <summary>
     /// 获取 SFX 音量
     /// </summary>
-    public float GetSFXVolume() => sfxVolume;
+    public float GetSFXVolume() => _sfxVolume;
     #endregion
 }

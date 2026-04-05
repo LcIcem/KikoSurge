@@ -6,8 +6,8 @@ using System;
 /// <typeparam name="T"></typeparam>
 public class Singleton<T> where T : class
 {
-    private static T instance;
-    private static readonly object lockObj = new object();
+    private static T _instance;
+    private static readonly object _lockObj = new object();
     public static T Instance
     {
         get
@@ -15,18 +15,18 @@ public class Singleton<T> where T : class
             // 双检锁
             // 外层 if：实例已创建时跳过加锁，避免每次都等锁
             // 内层 if：保证多线程下只创建一个实例
-            if (instance == null)
+            if (_instance == null)
             {
-                lock (lockObj)
+                lock (_lockObj)
                 {
                     // 第二次检测 是为了防止多线程同时进入时会生成多个实例
-                    if (instance == null)
+                    if (_instance == null)
                     {
-                        instance = Activator.CreateInstance<T>();
+                        _instance = Activator.CreateInstance<T>();
                     }
                 }
             }
-            return instance;
+            return _instance;
         }
     }
 }

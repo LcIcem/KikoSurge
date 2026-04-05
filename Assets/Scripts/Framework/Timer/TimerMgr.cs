@@ -9,8 +9,8 @@ using UnityEngine;
 public class TimerMgr : Singleton<TimerMgr>
 {
     // 计时器字典  键：计时器id  值：计时器对象
-    private Dictionary<int, TimerTask> tasks = new Dictionary<int, TimerTask>();
-    private int nextId = 0; // 新增的计时器id 每次有一个新的计时器就 +1
+    private Dictionary<int, TimerTask> _tasks = new Dictionary<int, TimerTask>();
+    private int _nextId = 0; // 新增的计时器id 每次有一个新的计时器就 +1
 
     /// <summary> 暂停标识 </summary>
     public bool IsPaused { get; private set; }
@@ -30,20 +30,20 @@ public class TimerMgr : Singleton<TimerMgr>
         // 获得当帧的时间增量 (unscaled)
         float dt = Time.unscaledDeltaTime;
         // 克隆一份key列表 避免foreach遍历字典时直接修改字典导致异常
-        var ids = new List<int>(tasks.Keys);
+        var ids = new List<int>(_tasks.Keys);
 
         // 推进所有计时器
         foreach (var id in ids)
         {
             // 如果当前遍历的的计时器正在运行 就推进该计时器
-            if (tasks[id].IsRunning)
+            if (_tasks[id].IsRunning)
             {
-                tasks[id].Tick(dt);
+                _tasks[id].Tick(dt);
             }
             else
             {
                 // 否则直接删除该计时器
-                tasks.Remove(id);
+                _tasks.Remove(id);
             }
         }
     }
@@ -57,8 +57,8 @@ public class TimerMgr : Singleton<TimerMgr>
     public int AddTimeOut(float delay, Action callback)
     {
         TimerTask task = new TimerTask(delay, callback, false);
-        tasks[++nextId] = task;
-        return nextId;
+        _tasks[++_nextId] = task;
+        return _nextId;
     }
 
     /// <summary>
@@ -70,8 +70,8 @@ public class TimerMgr : Singleton<TimerMgr>
     public int AddRepeating(float interval, Action callback)
     {
         TimerTask task = new TimerTask(interval, callback, true);
-        tasks[++nextId] = task;
-        return nextId;
+        _tasks[++_nextId] = task;
+        return _nextId;
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public class TimerMgr : Singleton<TimerMgr>
     /// <param name="timerId"></param>
     public void Clear(int timerId)
     {
-        tasks.Remove(timerId);
+        _tasks.Remove(timerId);
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ public class TimerMgr : Singleton<TimerMgr>
     /// </summary>
     public void ClearAll()
     {
-        tasks.Clear();
+        _tasks.Clear();
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ public class TimerMgr : Singleton<TimerMgr>
     /// </summary>
     public float GetRemainingTime(int timerId)
     {
-        if (tasks.TryGetValue(timerId, out var task))
+        if (_tasks.TryGetValue(timerId, out var task))
             return task.GetRemaining();
         return -1f;
     }
@@ -120,7 +120,7 @@ public class TimerMgr : Singleton<TimerMgr>
     /// <summary>
     /// 获取当前活动计时器数量
     /// </summary>
-    public int GetActiveTimerCount() => tasks.Count;
+    public int GetActiveTimerCount() => _tasks.Count;
 
     #region 日志
     private void Log(string msg) => Debug.Log($"[{GetType().Name}] {msg}");

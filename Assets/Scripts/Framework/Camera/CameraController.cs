@@ -21,8 +21,8 @@ public class CameraController : MonoBehaviour
     public CameraZoomEffect zoomEff;
 
     [Header("调试")]
-    public bool showDebug = true; // 是否绘制调试图形
-    private Vector3 desiredPosition; // desired 位置，供 Gizmos 绘制
+    public bool ShowDebug = true; // 是否绘制调试图形
+    private Vector3 _desiredPosition; // desired 位置，供 Gizmos 绘制
 
 
     void Start()
@@ -44,9 +44,9 @@ public class CameraController : MonoBehaviour
         // 合成所有偏移
         Vector3 totalOffset = Offset + impactEff.GetOffset() + spiralEff.GetOffset() + zoomEff.GetOffset();
         // 计算 desired 位置
-        desiredPosition = target.position + totalOffset;
+        _desiredPosition = target.position + totalOffset;
         // 平滑跟随
-        transform.position = Vector3.Lerp(transform.position, desiredPosition, SmoothSpeed * Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, _desiredPosition, SmoothSpeed * Time.deltaTime);
     }
 
     #region 公开 API
@@ -85,7 +85,7 @@ public class CameraController : MonoBehaviour
     #region 调试
     private void OnDrawGizmos()
     {
-        if (!showDebug) return; // 未开启调试时跳过
+        if (!ShowDebug) return; // 未开启调试时跳过
 
         // 绘制跟随目标
         if (target != null)
@@ -96,7 +96,7 @@ public class CameraController : MonoBehaviour
 
         // 绘制相机目标位置（desired）
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(desiredPosition, 0.3f);
+        Gizmos.DrawWireSphere(_desiredPosition, 0.3f);
 
         // 绘制相机实际位置
         Gizmos.color = Color.blue;

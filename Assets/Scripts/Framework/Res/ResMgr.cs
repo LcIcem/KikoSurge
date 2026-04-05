@@ -42,13 +42,13 @@ public class ResMgr : Singleton<ResMgr>
     /// <param name="callback">加载完成回调。</param>
     public void LoadAsync<T>(string name, UnityAction<T> callback) where T : Object
     {
-        MonoMgr.Instance.StartCoroutine(LoadAsync_Coroutine<T>(name, callback));
+        MonoMgr.Instance.StartCoroutine(LoadAsyncCoroutine<T>(name, callback));
     }
 
     /// <summary>
     /// 异步加载协程。使用 ResourceRequest.asset 判断是否实例化，完成后触发回调。
     /// </summary>
-    private IEnumerator LoadAsync_Coroutine<T>(string name, UnityAction<T> callback) where T : Object
+    private IEnumerator LoadAsyncCoroutine<T>(string name, UnityAction<T> callback) where T : Object
     {
         ResourceRequest r = Resources.LoadAsync<T>(name);
         yield return r;

@@ -13,22 +13,22 @@ public class TimerTask
     /// <summary> 是否为重复计时器 </summary>
     public bool IsRepeating { get; }
 
-    private readonly float duration; // 总时长（秒），定时任务的运行duration秒后结束
-    private float remaining; // 剩余时间（秒）
-    private readonly Action callback; // 定时任务结束后调用的回调
+    private readonly float _duration; // 总时长（秒），定时任务的运行_duration秒后结束
+    private float _remaining; // 剩余时间（秒）
+    private readonly Action _callback; // 定时任务结束后调用的回调
 
 
     public TimerTask(float duration, Action callback, bool repeating)
     {
-        this.duration = duration;
-        this.callback = callback;
-        remaining = duration;
+        _duration = duration;
+        _callback = callback;
+        _remaining = duration;
         IsRepeating = repeating;
         IsRunning = true;
     }
 
     /// <summary> 查询剩余时间（秒） </summary>
-    public float GetRemaining() => remaining;
+    public float GetRemaining() => _remaining;
 
     /// <summary>
     /// 推进计时器
@@ -40,14 +40,14 @@ public class TimerTask
         if (!IsRunning) return;
 
         // 按照时间增量递减剩余时间
-        remaining -= dt;
+        _remaining -= dt;
 
         // 如果计时器已经到达终点，调用回调
-        if (remaining <= 0f)
+        if (_remaining <= 0f)
         {
             try
             {
-                callback?.Invoke();
+                _callback?.Invoke();
             }
             catch (Exception e)
             {
@@ -55,7 +55,7 @@ public class TimerTask
             }
             // 如果是重复计时器则重置剩余时间
             if (IsRepeating)
-                remaining = duration;
+                _remaining = _duration;
             // 否则该计时器任务结束，将IsRunning设为false
             else
                 IsRunning = false;
