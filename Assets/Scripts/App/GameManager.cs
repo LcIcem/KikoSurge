@@ -1,13 +1,18 @@
 using UnityEngine;
 
+using LcIcemFramework.Core;
+
+namespace Game
+{
+
 /// <summary>
 /// 游戏入口管理器
 /// </summary>
-public class GameManager : MonoSingleton<GameManager>
+public class GameManager : SingletonMono<GameManager>
 {
     private void Log(string msg) => Debug.Log($"[{GetType().Name}] {msg}");
 
-    private void Awake()
+    protected override void Init()
     {
         Log("GameManager initialized");
     }
@@ -16,4 +21,5 @@ public class GameManager : MonoSingleton<GameManager>
     {
         Log("Game started");
     }
+}
 }

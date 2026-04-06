@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 7e37002d169ba0840aa8186f5c12304e
   m_currentHash:
     serializedVersion: 2
-    Hash: 00000000000000000000000000000000
+    Hash: 2ecdfb08ece7825dbfdaf071d8d74006
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 1
   m_BundleLocalCatalog: 0
@@ -44,24 +44,15 @@ MonoBehaviour:
   m_BuildAddressablesWithPlayerBuild: 0
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
-  - {fileID: 11400000, guid: 66b7afa8bff346746bff9bc30928223f, type: 2}
   - {fileID: 11400000, guid: af8266b34a00b2244b6504ed425fdee9, type: 2}
   - {fileID: 11400000, guid: ac223f356df5eee44828d4e2d112e6a0, type: 2}
   - {fileID: 11400000, guid: 23758dfde333d0f42a3a560dc69197a3, type: 2}
-  - {fileID: 11400000, guid: ee46112f9cde8c04283161827840a175, type: 2}
-  - {fileID: 11400000, guid: 38bbcac71fd02e94cbc7d1bba89c1e65, type: 2}
-  - {fileID: 11400000, guid: 06351f951f50f884c83cea0c729f64a1, type: 2}
   - {fileID: 11400000, guid: e2bb447f895f02941b57c91f1d97bd2b, type: 2}
   - {fileID: 11400000, guid: 52452c7c2d2e074478f7fa2030f42b73, type: 2}
   - {fileID: 11400000, guid: f03a0c0c02369534badfaeb3a124f1f9, type: 2}
-  - {fileID: 11400000, guid: 9a5a98eea72b8174aa97c17b64be2290, type: 2}
   - {fileID: 11400000, guid: 0da437a4c38f34c4485907bfd36f28df, type: 2}
-  - {fileID: 11400000, guid: 8686aa8ea92c8194f83cdfaa20b50795, type: 2}
-  - {fileID: 11400000, guid: ad306b3e3985a914f97833587b02269b, type: 2}
   - {fileID: 11400000, guid: 44d4c5079e15e7a4799ae47dafcb09ee, type: 2}
-  - {fileID: 11400000, guid: 01d246f20d056cf47bf7309057c2a857, type: 2}
   - {fileID: 11400000, guid: 2ef652e983f81af4290d59c443ff465d, type: 2}
-  - {fileID: 11400000, guid: 77f3abe8fb3e7e74d94d3ab08b36b33a, type: 2}
   - {fileID: 11400000, guid: c9fca26e753f6b9468634a6bc01fcf48, type: 2}
   - {fileID: 11400000, guid: 7568c9ca9688e2843abe9451eaecb42c, type: 2}
   - {fileID: 11400000, guid: e77f37d56696f244d9a85c7e5b533da7, type: 2}
@@ -137,11 +128,11 @@ MonoBehaviour:
           m_Key: HostingServiceUploadSpeed
         - m_AssemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
           m_ClassName: System.String
-          m_Data: Library/com.unity.addressables/aa/Windows/StandaloneWindows64;ServerData/StandaloneWindows64
+          m_Data: ServerData/StandaloneWindows64;Library/com.unity.addressables/aa/Windows/StandaloneWindows64
           m_Key: ContentRoot
         - m_AssemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
           m_ClassName: System.Boolean
-          m_Data: True
+          m_Data: False
           m_Key: IsEnabled
         - m_AssemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
           m_ClassName: System.String
