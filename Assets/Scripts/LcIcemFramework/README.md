@@ -30,18 +30,18 @@
 框架采用 **Manager of Managers（管理器之管理器）** 架构，通过大单例 `ManagerHub` 统一托管所有子系统，所有跨模块通信必须走 `EventCenter`。
 
 ```
-GameManager (MonoSingleton)
-    └── ManagerHub (MonoSingleton)          ← 所有 Manager 的统一入口
-          ├── MonoManager     (Singleton)    ← 协程 / Update 帧循环驱动
-          ├── EventCenter     (Singleton)    ← 全局事件总线（发布-订阅）
-          ├── ResManager      (Singleton)    ← Resources 资源加载
-          ├── TimerManager    (Singleton)    ← 全局计时器
-          ├── PoolManager     (SingletonMono)← 对象池
-          ├── SaveManager     (SingletonMono)← 多槽位存档（AES加密）
-          ├── AudioManager   (SingletonMono)← BGM ×1 + SFX池 ×10
-          ├── AddressablesManager (SingletonMono)← Addressables 封装
-          ├── UIManager      (Singleton)    ← UI 面板异步加载管理
-          └── GameSceneManager (SingletonMono)← 场景异步加载
+GameManager (SingletonMono<GameManager>)
+    └── ManagerHub (SingletonMono<ManagerHub>)  ← 所有 Manager 的统一入口
+          ├── MonoManager     (Singleton<MonoManager>)  ← 协程 / Update 帧循环驱动
+          ├── EventCenter     (Singleton<EventCenter>)  ← 全局事件总线（发布-订阅）
+          ├── ResManager      (Singleton<ResManager>)  ← Resources 资源加载
+          ├── TimerManager    (Singleton<TimerManager>) ← 全局计时器
+          ├── PoolManager     (SingletonMono<PoolManager>) ← 对象池
+          ├── SaveManager     (SingletonMono<SaveManager>) ← 多槽位存档（AES加密）
+          ├── AudioManager   (SingletonMono<AudioManager>) ← BGM ×1 + SFX池 ×10
+          ├── AddressablesManager (SingletonMono<AddressablesManager>) ← Addressables 封装
+          ├── UIManager      (Singleton<UIManager>)  ← UI 面板异步加载管理
+          └── GameSceneManager (SingletonMono<GameSceneManager>) ← 场景异步加载
 
 Camera (MonoBehaviour)
     └── ICameraEffect 接口体系（冲击 / 螺旋 / 推进）

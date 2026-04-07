@@ -1,6 +1,7 @@
 using UnityEngine;
 
 using LcIcemFramework.Core;
+using LcIcemFramework.Managers;
 
 namespace Game
 {
@@ -14,6 +15,7 @@ public class GameManager : SingletonMono<GameManager>
 
     protected override void Init()
     {
+        _ = ManagerHub.Instance;
         Log("GameManager initialized");
     }
 
