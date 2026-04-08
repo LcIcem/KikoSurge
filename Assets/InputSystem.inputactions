@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "name": "InputSystem",
+    "maps": [
+        {
+            "name": "UI",
+            "id": "857b3163-1cb2-468e-8923-25e0e28f0078",
+            "actions": [
+                {
+                    "name": "Restart",
+                    "type": "Button",
+                    "id": "90f06b96-5113-4e5d-a6e9-20c5df2b6a58",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "0d211bcd-a28e-40c7-96e3-704afae704d6",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Restart",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
