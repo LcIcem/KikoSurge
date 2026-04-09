@@ -7,6 +7,7 @@ namespace ProcGen.Core
     /// <summary>走廊数据类（纯数据，无MonoBehaviour依赖）</summary>
     public class Corridor
     {
+        public int id;          // 走廊唯一标识（生成时赋值）
         public int roomAId; // 走廊一端连接的房间ID
         public int roomBId; // 走廊另一端连接的房间ID
         public List<Vector2Int> pathTiles;  // 走廊经过的所有网格坐标（只包含空地格，不含房间格）

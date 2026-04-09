@@ -37,7 +37,7 @@ namespace ProcGen.Config
         }
 
         /// <summary>根据配置生成随机尺寸（使用种子驱动的随机数生成器）</summary>
-        public Vector2Int GetRandomSize(GameSeed seed)
+        public Vector2Int GetRandomSize(GameRandom seed)
         {
             int w = seed.Range(minSize.x, maxSize.x + 1);
             int h = seed.Range(minSize.y, maxSize.y + 1);

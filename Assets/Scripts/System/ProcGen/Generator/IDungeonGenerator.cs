@@ -9,10 +9,10 @@ namespace ProcGen.Generator
     /// </summary>
     public interface IDungeonGenerator
     {
-        /// <summary>根据配置生成地牢图结构</summary>
+        /// <summary>根据配置生成地牢图结构及瓦片数据</summary>
         /// <param name="config">地牢生成配置</param>
-        /// <param name="seed">游戏种子（为空则使用默认随机种子）</param>
-        /// <returns>包含所有房间和走廊的地牢图</returns>
-        DungeonGraph Generate(DungeonModel_SO config, GameSeed seed = null);
+        /// <param name="rng">游戏随机数生成器</param>
+        /// <returns>tuple: Item1=地牢图结构, Item2=瓦片预计算数据</returns>
+        (DungeonGraph graph, DungeonTileData tileData) Generate(DungeonModel_SO config, GameRandom rng = null);
     }
 }

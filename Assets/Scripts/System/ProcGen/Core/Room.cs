@@ -10,7 +10,8 @@ namespace ProcGen.Core
         public Vector2Int gridPos;          // 房间左下角网格坐标
         public Vector2Int size;             // 房间宽高（格）
         public RoomType roomType;           // 房间类型
-        public List<int> connectedRoomIds;  // 直接相连的房间ID列表
+        public List<int> connectedRoomIds;  // 直接相连的房间ID列表（图拓扑，用于导航）
+        public List<int> corridorIds;        // 连通本房间的走廊 ID 列表
 
         // bounds 根据 gridPos 和 size 自动计算，便于碰撞检测
         public RectInt Bounds => new RectInt(gridPos, size);
@@ -27,6 +28,7 @@ namespace ProcGen.Core
         public Room()
         {
             connectedRoomIds = new List<int>();
+            corridorIds = new List<int>();
         }
 
         /// <summary>检查是否与另一房间边界重叠</summary>

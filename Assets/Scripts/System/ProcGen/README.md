@@ -22,8 +22,8 @@ Assets/Scripts/Dungeon/
 │   ├── Corridor.cs                — 走廊数据
 │   └── DungeonGraph.cs            — 地牢图（格子查询API）
 ├── Seed/                         — 种子系统
-│   ├── GameSeed.cs                — 种子随机数封装
-│   └── ISpawnable.cs             — 可接受种子的接口
+│   ├── GameRandom.cs              — 种子随机数封装
+│   └── ISpawnable.cs             — 可接受随机数生成器的接口
 ├── Generator/                    — 生成算法
 │   ├── IDungeonGenerator.cs       — 生成器接口
 │   └── RoomFirstGenerator.cs      — Room-First + MST 算法实现
@@ -40,7 +40,7 @@ Assets/Scripts/Dungeon/
 | `DungeonModel_SO` | `ProcGen.Config` | 地牢生成总配置（地图尺寸/房间数量/走廊宽度） |
 | `RoomTemplateConfig_SO` | `ProcGen.Config` | 房间模板配置（持有所有 `RoomConfigData`） |
 | `RoomConfigData` | `ProcGen.Config` | 可序列化类，单条房间尺寸约束，含默认值 |
-| `GameSeed` | `ProcGen.Seed` | 种子随机数封装，确保生成可复现 |
+| `GameRandom` | `ProcGen.Seed` | 种子随机数封装，确保生成可复现 |
 | `IDungeonGenerator` | `ProcGen.Generator` | 生成器接口（可替换算法） |
 | `RoomFirstGenerator` | `ProcGen.Generator` | 当前实现：Room-First + MST 算法 |
 | `DungeonGraph` | `ProcGen.Core` | 地牢图结构，包含所有房间/走廊/格子查询API |
@@ -48,7 +48,7 @@ Assets/Scripts/Dungeon/
 | `Corridor` | `ProcGen.Core` | 走廊数据（路径格/包围盒） |
 | `RoomType` | `ProcGen.Core` | 房间类型枚举（9种） |
 | `DungeonBuilder` | `ProcGen.Runtime` | 将 `DungeonGraph` 实例化为 Unity Tilemap |
-| `ISpawnable` | `ProcGen.Seed` | 可接受种子的接口（用于房间内容生成） |
+| `ISpawnable` | `ProcGen.Seed` | 可接受随机数生成器的接口（用于房间内容生成） |
 | `DungeonConfigEditorWindow` | `ProcGen.Editor` | 地牢配置编辑器窗口（面板管理所有 SO） |
 
 ---
@@ -137,26 +137,29 @@ Boss     — Boss房
 
 ---
 
-## 4. 种子机制
+## 4. 随机数机制
 
-### GameSeed
+### GameRandom
 
-所有随机操作均通过 `GameSeed`，确保同一种子产生完全相同的地牢。
+所有随机操作均通过 `GameRandom`，确保同一种子产生完全相同的地牢。
 
 ```csharp
 // 从字符串创建（用户可分享）
-var seed = new GameSeed("MyMap1");
+var rng = new GameRandom("MyMap1");
 
 // 从数值创建（从存档恢复）
-var seed = new GameSeed(123456789L);
+var rng = new GameRandom(123456789L);
 
 // 生成随机数
-int value = seed.Range(0, 100);    // [0, 100)
-float ratio = seed.Value();        // [0, 1)
-bool success = seed.RollChance(30); // 30% 概率
+int value = rng.Range(0, 100);    // [0, 100)
+float ratio = rng.Value();        // [0, 1)
+bool success = rng.RollChance(30); // 30% 概率
 
 // 从列表随机选取（自动 shuffle）
-seed.Shuffle(roomConfigs);         // Fisher-Yates 洗牌
+rng.Shuffle(roomConfigs);         // Fisher-Yates 洗牌
+
+// 重置到种子初始状态（调试/确定性重放用，正常游戏不要调用）
+rng.Reset();
 ```
 
 ### ISpawnable 接口
@@ -166,9 +169,9 @@ seed.Shuffle(roomConfigs);         // Fisher-Yates 洗牌
 ```csharp
 public class EnemySpawner : MonoBehaviour, ISpawnable
 {
-    public void SetSeed(GameSeed seed)
+    public void SetRng(GameRandom rng)
     {
-        // 用种子驱动内部随机，确保同一地牢 seed 下产生相同敌人配置
+        // 用随机数驱动内部生成，确保同一种子下产生相同敌人配置
     }
 }
 ```

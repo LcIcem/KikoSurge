@@ -17,27 +17,19 @@ namespace ProcGen.Runtime
         [Header("Tilemap 引用")]
         [SerializeField] private Tilemap _floorTilemap;  // 地面层瓦片地图
         [SerializeField] private Tilemap _wallTilemap;   // 墙壁层瓦片地图
+        [SerializeField] private Tilemap _doorTilemap;   // 门层瓦片地图
+
 
         [Header("瓦片资源")]
-        [SerializeField] private TileBase _floorNormalTile;       // 地面瓦片
-        [SerializeField] private TileBase _floorStartTile;  // 开始地面瓦片
-        [SerializeField] private TileBase _floorGoalTile;   // 终点地面瓦片
-        [SerializeField] private TileBase _floorShopTile;   // 商店地面瓦片
-        [SerializeField] private TileBase _floorTreasureTile;   // 宝藏地面瓦片
-        [SerializeField] private TileBase _floorBossTile;   // Boss地面瓦片
-        [SerializeField] private TileBase _floorEliteTile;   // 精英地面瓦片
-        [SerializeField] private TileBase _floorCorridorTile;   // 走廊地面瓦片
-        [SerializeField] private TileBase _wallTile;        // 墙壁瓦片
+        [SerializeField] private TileInfo _tileInfo;
 
         [Header("生成配置")]
         [SerializeField] private DungeonModel_SO _dungeonModel; // Inspector上的地牢配置SO
 
-        [Header("调试")]
-        [SerializeField] private bool _showDebugLog = true;    // 是否打印调试日志
-
         // ==================== 私有字段 ====================
         private IDungeonGenerator _generator; // 生成器实例
         private DungeonGraph _currentGraph;   // 当前生成的地牢图（供外部访问）
+        private DungeonTileData _currentTileData; // 当前瓦片预计算数据（供外部访问）
 
         // ==================== Unity 生命周期 ====================
 
@@ -51,17 +43,10 @@ namespace ProcGen.Runtime
 
         // ==================== 公共方法 ====================
 
-        /// <summary>生成并构建地牢场景（使用随机种子，仅用于编辑器/调试）</summary>
-        /// <param name="config">地牢配置（为空则使用 Inspector 引用）</param>
-        public void Build(DungeonModel_SO config = null)
-        {
-            Build(config, new GameSeed(System.Environment.TickCount.ToString()));
-        }
-
         /// <summary>生成并构建地牢场景（使用指定游戏种子）</summary>
         /// <param name="config">地牢配置（为空则使用 Inspector 引用）</param>
-        /// <param name="seed">游戏种子（由外部 GameSeed 管理器创建）</param>
-        public void Build(DungeonModel_SO config, GameSeed seed)
+        /// <param name="rng">随机数生成器</param>
+        public void Build(DungeonModel_SO config, GameRandom rng)
         {
             // 参数优先级：传入 > Inspector
             config ??= _dungeonModel;
@@ -81,9 +66,9 @@ namespace ProcGen.Runtime
             // Step 1: 清空现有地图
             Clear();
 
-            // Step 2: 生成地牢图数据
-            Log($"开始生成地牢... (Seed: {seed.SeedString})");
-            var graph = _generator.Generate(config, seed);
+            // Step 2: 生成地牢图数据和瓦片预计算数据
+            Log($"开始生成地牢... (Seed: {rng.SeedString})");
+            var (graph, tileData) = _generator.Generate(config, rng);
 
             if (graph.allRooms.Count == 0)
             {
@@ -91,27 +76,26 @@ namespace ProcGen.Runtime
                 return;
             }
 
-            // Step 3: 缓存 graph 供外部访问
+            // Step 3: 缓存数据供外部访问
             _currentGraph = graph;
+            _currentTileData = tileData;
 
-            // Step 4: 填充地面 Tilemap
-            FillTilemap(_floorTilemap, _floorNormalTile, graph.GetRoomFloorTilesByType(RoomType.Normal));
-            FillTilemap(_floorTilemap, _floorStartTile, graph.GetRoomFloorTilesByType(RoomType.Start));
-            FillTilemap(_floorTilemap, _floorGoalTile, graph.GetRoomFloorTilesByType(RoomType.Goal));
-            FillTilemap(_floorTilemap, _floorShopTile, graph.GetRoomFloorTilesByType(RoomType.Shop));
-            FillTilemap(_floorTilemap, _floorTreasureTile, graph.GetRoomFloorTilesByType(RoomType.Treasure));
-            FillTilemap(_floorTilemap, _floorBossTile, graph.GetRoomFloorTilesByType(RoomType.Boss));
-            FillTilemap(_floorTilemap, _floorEliteTile, graph.GetRoomFloorTilesByType(RoomType.Elite));
-            FillTilemap(_floorTilemap, _floorCorridorTile, graph.GetCorridorFloorTiles());
+            // Step 4: 构建 TileType → TileBase 字典
+            var tileDict = BuildTileDict(_tileInfo);
 
-            // Step 5: 填充墙壁 Tilemap（地面周围一圈）
-            var wallTiles = graph.GetAllWallTiles();
-            FillTilemap(_wallTilemap, _wallTile, wallTiles);
+            // Step 5: 填充地面 Tilemap
+            FillRoom(_floorTilemap, tileData, tileDict);
+
+            // Step 6: 填充墙壁 Tilemap（每个房间类型单独处理）
+            FillRoomWall(_wallTilemap, tileData, tileDict);
+
+            // Step 7: 填充门 Tilemap
+            FillDoor(_doorTilemap, tileData, tileDict);
 
             Log($"地牢生成完成：{graph.allRooms.Count} 个房间，{graph.corridors.Count} 条走廊，" +
-                $"地面 {graph.GetAllFloorTiles().Count} 格，墙壁 {wallTiles.Count} 格。");
+                $"地面 {tileData.allFloorTiles.Count} 格，墙壁 {tileData.allWallTiles.Count} 格，门 {tileData.allDoorTiles.Count} 格。");
 
-            // Step 6: 打印房间类型分布
+            // Step 7: 打印房间类型分布
             LogRoomTypeSummary(graph);
         }
 
@@ -120,21 +104,145 @@ namespace ProcGen.Runtime
         {
             _floorTilemap?.ClearAllTiles();
             _wallTilemap?.ClearAllTiles();
+            _doorTilemap?.ClearAllTiles();
             _currentGraph = null;
+            _currentTileData = null;
             Log("Tilemap 已清空。");
         }
 
         /// <summary>获取当前生成的地牢图（Build 之后有效）</summary>
         public DungeonGraph GetGraph() => _currentGraph;
 
-        /// <summary>重新生成（使用随机种子重新生成，仅用于编辑器/调试）</summary>
-        [ContextMenu("重新生成地牢")]
-        public void Rebuild()
-        {
-            Build();
-        }
+        /// <summary>获取当前瓦片预计算数据（Build 之后有效，外部游戏代码使用）</summary>
+        public DungeonTileData GetTileData() => _currentTileData;
+
 
         // ==================== 私有方法 ====================
+
+        /// <summary>从 TileInfo 构建 TileType → TileBase 查找字典</summary>
+        private Dictionary<TileType, TileBase> BuildTileDict(TileInfo tileInfo)
+        {
+            var dict = new Dictionary<TileType, TileBase>();
+            if (tileInfo?.tiles == null)
+                return dict;
+            foreach (var tile in tileInfo.tiles)
+            {
+                if (tile.tile != null)
+                    dict[tile.type] = tile.tile;
+            }
+            return dict;
+        }
+
+        /// <summary>根据字典遍历所有 RoomType，填充地面 Tilemap</summary>
+        private void FillRoom(Tilemap tilemap, DungeonTileData tileData, Dictionary<TileType, TileBase> tileDict)
+        {
+            foreach (RoomType roomType in System.Enum.GetValues(typeof(RoomType)))
+            {
+                TileType floorType = RoomTypeToFloorTile(roomType);
+                // 优先用具体类型，没有则回退到通用 FloorTile
+                TileBase tile = tileDict.GetValueOrDefault(floorType, null)
+                    ?? tileDict.GetValueOrDefault(TileType.FloorTile, null);
+                if (tile == null)
+                    continue;
+
+                if (tileData.floorTilesByRoomType.TryGetValue(roomType, out var tiles) && tiles.Count > 0)
+                    FillTilemap(tilemap, tile, tiles);
+            }
+
+            // 走廊单独处理，优先 FloorCorridorTile，回退到 FloorTile
+            TileBase corridorTile = tileDict.GetValueOrDefault(TileType.FloorCorridorTile, null)
+                ?? tileDict.GetValueOrDefault(TileType.FloorTile, null);
+            if (corridorTile != null)
+            {
+                var corridorFloors = new HashSet<Vector2Int>();
+                foreach (var corridor in _currentGraph.corridors)
+                {
+                    if (tileData.TryGetCorridorFloorTiles(corridor.id, out var tiles))
+                        corridorFloors.UnionWith(tiles);
+                }
+                if (corridorFloors.Count > 0)
+                    FillTilemap(tilemap, corridorTile, corridorFloors);
+            }
+        }
+
+        /// <summary>根据字典遍历所有 RoomType，填充墙壁 Tilemap（每个房间单独处理墙壁）</summary>
+        private void FillRoomWall(Tilemap tilemap, DungeonTileData tileData, Dictionary<TileType, TileBase> tileDict)
+        {
+            foreach (RoomType roomType in System.Enum.GetValues(typeof(RoomType)))
+            {
+                TileType wallType = RoomTypeToWallTile(roomType);
+                // 优先用具体类型，没有则回退到通用 WallTile
+                TileBase tile = tileDict.GetValueOrDefault(wallType, null)
+                    ?? tileDict.GetValueOrDefault(TileType.WallTile, null);
+                if (tile == null)
+                    continue;
+
+                if (tileData.wallTilesByRoomType.TryGetValue(roomType, out var tiles) && tiles.Count > 0)
+                    FillTilemap(tilemap, tile, tiles);
+            }
+
+            // 走廊墙壁单独处理，优先 WallCorridorTile，回退到 WallTile
+            TileBase corridorWallTile = tileDict.GetValueOrDefault(TileType.WallCorridorTile, null)
+                ?? tileDict.GetValueOrDefault(TileType.WallTile, null);
+            if (corridorWallTile != null)
+            {
+                var corridorWalls = new HashSet<Vector2Int>();
+                foreach (var corridor in _currentGraph.corridors)
+                {
+                    if (tileData.TryGetCorridorWallTiles(corridor.id, out var tiles))
+                        corridorWalls.UnionWith(tiles);
+                }
+                if (corridorWalls.Count > 0)
+                    FillTilemap(tilemap, corridorWallTile, corridorWalls);
+            }
+        }
+
+        /// <summary>根据字典遍历所有房间，填充门 Tilemap（覆盖地面瓦片）</summary>
+        private void FillDoor(Tilemap tilemap, DungeonTileData tileData, Dictionary<TileType, TileBase> tileDict)
+        {
+            TileBase doorTile = tileDict.GetValueOrDefault(TileType.DoorTile, null);
+            if (doorTile == null)
+                return;
+
+            if (tileData.allDoorTiles.Count > 0)
+                FillTilemap(tilemap, doorTile, tileData.allDoorTiles);
+        }
+
+        /// <summary>将 RoomType 映射为对应的 Wall TileType</summary>
+        private TileType RoomTypeToWallTile(RoomType roomType)
+        {
+            return roomType switch
+            {
+                RoomType.Start => TileType.WallStartTile,
+                RoomType.Normal => TileType.WallNormalTile,
+                RoomType.Goal => TileType.WallGoalTile,
+                RoomType.Elite => TileType.WallEliteTile,
+                RoomType.Treasure => TileType.WallTreasureTile,
+                RoomType.Boss => TileType.WallBossTile,
+                RoomType.Shop => TileType.WallShopTile,
+                RoomType.Event => TileType.WallEventTile,
+                RoomType.Rest => TileType.WallEventTile,
+                _ => TileType.WallNormalTile,
+            };
+        }
+
+        /// <summary>将 RoomType 映射为对应的 Floor TileType</summary>
+        private TileType RoomTypeToFloorTile(RoomType roomType)
+        {
+            return roomType switch
+            {
+                RoomType.Start => TileType.FloorStartTile,
+                RoomType.Normal => TileType.FloorNormalTile,
+                RoomType.Goal => TileType.FloorGoalTile,
+                RoomType.Elite => TileType.FloorEliteTile,
+                RoomType.Treasure => TileType.FloorTreasureTile,
+                RoomType.Boss => TileType.FloorBossTile,
+                RoomType.Shop => TileType.FloorShopTile,
+                RoomType.Event => TileType.FloorEventTile,
+                RoomType.Rest => TileType.FloorEventTile,
+                _ => TileType.FloorNormalTile,
+            };
+        }
 
         /// <summary>向指定 Tilemap 填充一组格子</summary>
         private void FillTilemap(Tilemap tilemap, TileBase tile, HashSet<Vector2Int> tiles)
@@ -173,8 +281,7 @@ namespace ProcGen.Runtime
 
         private void Log(string msg)
         {
-            if (_showDebugLog)
-                Debug.Log($"[DungeonBuilder] {msg}");
+            Debug.Log($"[DungeonBuilder] {msg}");
         }
 
         private void LogError(string msg)

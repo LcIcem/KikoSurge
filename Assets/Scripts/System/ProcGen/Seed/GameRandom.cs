@@ -7,7 +7,7 @@ namespace ProcGen.Seed
     /// 封装 Random，提供确定性的伪随机数生成
     /// 所有需要与种子机制挂钩的随机操作都通过此类
     /// </summary>
-    public class GameSeed
+    public class GameRandom
     {
         private Random _rng;
 
@@ -18,7 +18,7 @@ namespace ProcGen.Seed
         public string SeedString { get; private set; }
 
         /// <summary>从数值创建种子（用于读取存档）</summary>
-        public GameSeed(long seed)
+        public GameRandom(long seed)
         {
             SeedValue = seed;
             SeedString = seed.ToString();
@@ -26,12 +26,18 @@ namespace ProcGen.Seed
         }
 
         /// <summary>从字符串创建种子（用于用户输入/分享）；随机种子时使用时间戳</summary>
-        public GameSeed(string seedStr)
+        public GameRandom(string seedStr)
         {
             SeedString = string.IsNullOrEmpty(seedStr)
                 ? Environment.TickCount.ToString()
                 : seedStr;
             SeedValue = StringToSeed(SeedString);
+            _rng = new Random((int)(SeedValue ^ (SeedValue >> 31)));
+        }
+
+        /// <summary>重置 RNG 状态回到种子初始位置，实现相同种子生成相同结果</summary>
+        public void Reset()
+        {
             _rng = new Random((int)(SeedValue ^ (SeedValue >> 31)));
         }
 

@@ -10,19 +10,20 @@ namespace ProcGen.Generator
     /// <summary>Room-First + MST 走廊地牢生成器
     /// 流程：生成起点 → 生成特殊房间 → 生成普通房间 → MST连通 → 确定终点 → 生成走廊 → 构建图结构
     /// 支持地图自动扩容：当保证数量无法生成时，根据扩容因子触发地图扩展
-    /// 所有随机操作均通过种子驱动的 GameSeed，确保同一种子产生相同地牢
+    /// 所有随机操作均通过 GameRandom，确保同一种子产生相同地牢
     /// </summary>
     public class RoomFirstGenerator : IDungeonGenerator
     {
         // ==================== 私有字段 ====================
         private int _nextRoomId;
+        private int _nextCorridorId;
         private List<Room> _rooms;
         private List<Corridor> _corridors;
         private RectInt _mapBounds;                   // 当前地图范围（可随扩容变化）
         private int _corridorWidth;
         private HashSet<Vector2Int> _roomFloorTiles;
         private DungeonModel_SO _config;
-        private GameSeed _seed;                     // 种子驱动的随机数生成器
+        private GameRandom _rng;                     // 种子驱动的随机数生成器
         private Room _startRoom;                     // 起点房间缓存（放置后不再改变，避免每次 O(n) 查找）
 
         // ==================== 扩容状态字段 ====================
@@ -37,11 +38,12 @@ namespace ProcGen.Generator
 
         // ==================== 接口实现 ====================
 
-        public DungeonGraph Generate(DungeonModel_SO config, GameSeed seed = null)
+        public (DungeonGraph graph, DungeonTileData tileData) Generate(DungeonModel_SO config, GameRandom rng = null)
         {
             _config = config;
-            _seed = seed ?? new GameSeed(System.Environment.TickCount);
+            _rng = rng ?? new GameRandom(System.Environment.TickCount);
             _nextRoomId = 0;
+            _nextCorridorId = 0;
             _rooms = new List<Room>();
             _corridors = new List<Corridor>();
             _corridorWidth = config.corridorWidth;
@@ -74,8 +76,12 @@ namespace ProcGen.Generator
             // Step 6: 生成走廊
             GenerateCorridors();
 
-            // Step 7: 构建返回结果
-            return BuildGraph();
+            // Step 7: 建立房间与走廊的关联
+            PopulateCorridorIds();
+
+            // Step 8: 构建返回结果
+            var graph = BuildGraph();
+            return (graph, new DungeonTileData(graph));
         }
 
         // ==================== Step 1: 放置起点房间 ====================
@@ -85,11 +91,11 @@ namespace ProcGen.Generator
             var startData = _config.GetRoomConfigData(RoomType.Start);
             int halfW = _mapBounds.width / 2;
             int halfH = _mapBounds.height / 2;
-            int x = _seed.Range(_mapBounds.xMin, _mapBounds.xMin + halfW);
-            int y = _seed.Range(_mapBounds.yMin, _mapBounds.yMin + halfH);
+            int x = _rng.Range(_mapBounds.xMin, _mapBounds.xMin + halfW);
+            int y = _rng.Range(_mapBounds.yMin, _mapBounds.yMin + halfH);
             var size = startData == null
                 ? new Vector2Int(8, 8)
-                : startData.GetRandomSize(_seed);
+                : startData.GetRandomSize(_rng);
 
             var room = new Room
             {
@@ -166,7 +172,7 @@ namespace ProcGen.Generator
                     break;
             }
 
-            if (extraChance > 0 && _seed.Range(0, 100) < extraChance)
+            if (extraChance > 0 && _rng.Range(0, 100) < extraChance)
                 TryPlaceSpecialRoom(type, configs);
         }
 
@@ -176,7 +182,7 @@ namespace ProcGen.Generator
         private bool TryPlaceSpecialRoom(RoomType type, List<RoomConfigData> configs)
         {
             var configList = new List<RoomConfigData>(configs);
-            _seed.Shuffle(configList);
+            _rng.Shuffle(configList);
 
             foreach (var data in configList)
             {
@@ -188,9 +194,9 @@ namespace ProcGen.Generator
                 int attempts = 0;
                 while (attempts < _currentMaxAttempts)
                 {
-                    Vector2Int size = data.GetRandomSize(_seed);
-                    int x = _seed.Range(_mapBounds.xMin, _mapBounds.xMax - size.x);
-                    int y = _seed.Range(_mapBounds.yMin, _mapBounds.yMax - size.y);
+                    Vector2Int size = data.GetRandomSize(_rng);
+                    int x = _rng.Range(_mapBounds.xMin, _mapBounds.xMax - size.x);
+                    int y = _rng.Range(_mapBounds.yMin, _mapBounds.yMax - size.y);
 
                     var candidate = new Room
                     {
@@ -310,7 +316,7 @@ namespace ProcGen.Generator
                     break;
             }
 
-            if (_config.normalExtraChance > 0 && _seed.Range(0, 100) < _config.normalExtraChance)
+            if (_config.normalExtraChance > 0 && _rng.Range(0, 100) < _config.normalExtraChance)
                 TryPlaceNormalRoom(normalConfigs);
         }
 
@@ -318,7 +324,7 @@ namespace ProcGen.Generator
         private bool TryPlaceNormalRoom(List<RoomConfigData> configs)
         {
             var configList = new List<RoomConfigData>(configs);
-            _seed.Shuffle(configList);
+            _rng.Shuffle(configList);
 
             foreach (var data in configList)
             {
@@ -330,9 +336,9 @@ namespace ProcGen.Generator
                 int attempts = 0;
                 while (attempts < _currentMaxAttempts)
                 {
-                    Vector2Int size = data.GetRandomSize(_seed);
-                    int x = _seed.Range(_mapBounds.xMin, _mapBounds.xMax - size.x);
-                    int y = _seed.Range(_mapBounds.yMin, _mapBounds.yMax - size.y);
+                    Vector2Int size = data.GetRandomSize(_rng);
+                    int x = _rng.Range(_mapBounds.xMin, _mapBounds.xMax - size.x);
+                    int y = _rng.Range(_mapBounds.yMin, _mapBounds.yMax - size.y);
 
                     var candidate = new Room
                     {
@@ -480,7 +486,7 @@ namespace ProcGen.Generator
                 foreach (var room in _rooms)
                 {
                     if (room.roomType == RoomType.Normal &&
-                        _seed.Range(0, 100) < _config.eliteExtraChance)
+                        _rng.Range(0, 100) < _config.eliteExtraChance)
                     {
                         room.roomType = RoomType.Elite;
                     }
@@ -579,7 +585,7 @@ namespace ProcGen.Generator
             }
 
             RectInt bounds = CalculateBounds(path);
-            _corridors.Add(new Corridor(a.id, b.id) { pathTiles = path, bounds = bounds });
+            _corridors.Add(new Corridor(a.id, b.id) { id = _nextCorridorId++, pathTiles = path, bounds = bounds });
         }
 
         /// <summary>获取 room 边界上距离 target 最近的一点（用于走廊起点/终点）</summary>
@@ -642,7 +648,18 @@ namespace ProcGen.Generator
             foreach (var corridor in _corridors)
                 graph.corridors.Add(corridor);
 
+            graph.BuildIndexes();
             return graph;
+        }
+
+        /// <summary>建立房间与走廊的关联（按 corridor.roomAId/roomBId 填各房间的 corridorIds）</summary>
+        private void PopulateCorridorIds()
+        {
+            foreach (var corridor in _corridors)
+            {
+                FindRoom(corridor.roomAId).corridorIds.Add(corridor.id);
+                FindRoom(corridor.roomBId).corridorIds.Add(corridor.id);
+            }
         }
 
         // ==================== 工具方法 ====================
