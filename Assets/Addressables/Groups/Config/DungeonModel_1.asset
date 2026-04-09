@@ -19,7 +19,7 @@ MonoBehaviour:
   corridorWidth: 1
   normalRoomCount: 15
   normalExtraChance: 50
-  eliteRoomCount: 0
+  eliteRoomCount: 3
   eliteExtraChance: 30
   treasureRoomCount: 3
   treasureExtraChance: 0

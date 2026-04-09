@@ -16,7 +16,7 @@ public static class Constants
     public const float CAMERA_OFFSET_Z = -10f; // 相机Z轴偏移
 
     // UI
-    public const string UI_PATH = "UI/";    // Addressables分组路径
+    public const string UI_PATH = "";    // Addressables分组路径
 
     // 存档
     public const int MAX_SLOT = 3;

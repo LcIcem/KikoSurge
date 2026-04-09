@@ -29,7 +29,7 @@ public abstract class SingletonMono<T> : MonoBehaviour where T : MonoBehaviour
             {
                 if (_instance == null)
                 {
-                    T[] existing = FindObjectsOfType<T>();
+                    T[] existing = FindObjectsByType<T>(FindObjectsSortMode.None);
                     if (existing.Length > 0)
                     {
                         _instance = existing[0];
