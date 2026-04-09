@@ -5,43 +5,36 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 5f;
-    private Animator animator;
-
     private Rigidbody2D _rb;
+    private PlayerInput _playerInput;
+
+    private float _moveSpeed = 10f;
+    private InputAction _moveAction;
     private Vector2 _moveInput;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
+        _playerInput = GetComponent<PlayerInput>();
+
+        _rb.gravityScale = 0f;
+        _rb.freezeRotation = true;
+
+        _moveAction = _playerInput.actions["Move"];
     }
 
     private void FixedUpdate()
     {
-        Vector2 targetPos = _rb.position + Vector2.right * speed * Time.fixedDeltaTime;
-        _rb.MovePosition(targetPos);
-        // transform.Translate(_moveInput * speed * Time.fixedDeltaTime);
+        _rb.MovePosition(_rb.position + _moveInput * _moveSpeed * Time.fixedDeltaTime);
     }
 
     void Update()
     {
-        if (_moveInput != Vector2.zero)
-            animator.SetBool("IsMoving", true);
-        else 
-            animator.SetBool("IsMoving", false);
+        Move();
     }
 
-    public void Move(InputAction.CallbackContext ctx)
+    public void Move()
     {
-        _moveInput = ctx.ReadValue<Vector2>();
-    }
-
-    public void Jump(InputAction.CallbackContext ctx)
-    {
-        if (ctx.started)
-        {
-            Debug.Log("Jump pressed");
-        }
+        _moveInput = _moveAction.ReadValue<Vector2>().normalized;
     }
 }

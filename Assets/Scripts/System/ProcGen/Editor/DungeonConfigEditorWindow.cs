@@ -1,570 +1,607 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using ProcGen.Config;
 using ProcGen.Core;
+using UnityEngine.Tilemaps;
 
 namespace ProcGen.Editor
 {
-    /// <summary>地牢配置编辑器窗口
-    /// 在单一面板中管理 DungeonModel_SO 和 RoomTemplateConfig_SO 的创建与配置
+    /// <summary>
+    /// 地牢配置编辑器（统一视图）
+    /// 支持拖入多个配置文件并持久化保存，下次打开无需重新拖入
+    /// 菜单入口：Window → KikoSurge → 地牢配置编辑器
     /// </summary>
     public class DungeonConfigEditorWindow : EditorWindow
     {
-        // ==================== 静态入口 ====================
+        [MenuItem("Window/KikoSurge/Dungeon Config Editor")]
+        public static void Open() => GetWindow<DungeonConfigEditorWindow>("地牢配置");
 
-        [MenuItem("KikoSurge/Dungeon/地牢配置编辑器")]
-        public static void Open()
-        {
-            var window = GetWindow<DungeonConfigEditorWindow>("地牢配置");
-            window.minSize = new Vector2(700, 500);
-        }
+        // ==================== 持久化 ====================
+        private const string PREF_KEY = "DungeonConfigEditor_AssetPaths";
 
-        // ==================== 视图模式 ====================
-
-        private enum ViewMode
-        {
-            DungeonModel,
-            RoomTemplate
-        }
-
-        private ViewMode _currentMode = ViewMode.DungeonModel;
-
-        // ==================== 数据列表 ====================
-
-        private List<DungeonModel_SO> _dungeonModels;
-        private List<RoomTemplateConfig_SO> _roomTemplates;
-        private DungeonModel_SO _selectedDungeonModel;
-        private RoomTemplateConfig_SO _selectedRoomTemplate;
-
-        // ==================== SerializedObject 缓存（避免每次访问重新创建实例）====================
-
-        private SerializedObject _dungeonModelSO;
-
-        // ==================== 滚动区域 ====================
-
+        // ==================== 状态 ====================
+        private List<ScriptableObject> _configs = new List<ScriptableObject>();
+        private int _selectedIndex = -1;
         private Vector2 _leftScroll;
         private Vector2 _rightScroll;
 
-        // ==================== Foldout 状态 ====================
-
-        private List<bool> _templateFoldouts = new List<bool>();
-
-        // ==================== 延迟操作 ====================
-
-        private int _pendingRemoveIndex = -1;  // 避免在 GUI 回调中途修改列表导致布局状态错乱
-        private System.Action _pendingAction;   // 延迟到下一帧执行的操作（避免修改列表导致布局 Begin/End 错乱）
-
-        // ==================== Unity 事件 ====================
-
-        private void OnEnable()
-        {
-            RefreshAssets();
-            _dungeonModelSO = null;
-            _pendingRemoveIndex = -1;
-            _pendingAction = null;
-        }
+        // ==================== 生命周期 ====================
+        private void OnEnable() => LoadSavedPaths();
 
         private void OnGUI()
         {
-            DrawToolbar();
-            EditorGUILayout.Space(5);
-            DrawContent();
-        }
-
-        // ==================== 工具栏 ====================
-
-        private void DrawToolbar()
-        {
-            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
-            GUILayout.FlexibleSpace();
-
-            EditorGUI.BeginChangeCheck();
-            _currentMode = (ViewMode)GUILayout.Toolbar((int)_currentMode,
-                new[] { "地牢配置 (DungeonModel)", "房间模板 (RoomTemplate)" },
-                GUILayout.Width(350));
-            bool modeChanged = EditorGUI.EndChangeCheck();
-
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
-
-            if (modeChanged)
-            {
-                _templateFoldouts.Clear();
-                _dungeonModelSO = null;
-                _pendingAction = null;
-                _pendingRemoveIndex = -1;
-            }
-        }
-
-        // ==================== 主内容区 ====================
-
-        private void DrawContent()
-        {
             EditorGUILayout.BeginHorizontal();
-
-            // 左侧：资源列表
-            EditorGUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(220), GUILayout.ExpandHeight(true));
             DrawLeftPanel();
-            EditorGUILayout.EndVertical();
-
-            // 右侧：配置详情
-            EditorGUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            DrawVerticalDivider();
             DrawRightPanel();
-            EditorGUILayout.EndVertical();
-
             EditorGUILayout.EndHorizontal();
         }
 
-        // ==================== 左侧：资源列表 ====================
-
+        // ==================== 左侧面板 ====================
         private void DrawLeftPanel()
         {
-            EditorGUILayout.LabelField("资源列表", EditorStyles.boldLabel);
-            EditorGUILayout.Space(3);
+            EditorGUILayout.BeginVertical(GUILayout.Width(230), GUILayout.ExpandHeight(true));
 
-            // 创建按钮
+            DrawHeader("配置列表");
+            GUILayout.Space(2);
+
+            DrawDropArea();
+            GUILayout.Space(4);
+
+            // 操作按钮
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("+ 新建", GUILayout.Height(22)))
-            {
-                if (_currentMode == ViewMode.DungeonModel)
-                    CreateDungeonModel();
-                else
-                    CreateRoomTemplate();
-            }
-            if (GUILayout.Button("↺", GUILayout.Width(25), GUILayout.Height(22)))
-            {
-                RefreshAssets();
-            }
+                ShowNewAssetMenu();
+            if (GUILayout.Button("↺", GUILayout.Width(26), GUILayout.Height(22)))
+            { LoadSavedPaths(); Repaint(); }
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.Space(5);
+            GUILayout.Space(6);
+            DrawHorizontalLine();
 
-            // 资源列表
+            // 配置列表
             _leftScroll = EditorGUILayout.BeginScrollView(_leftScroll);
-
-            if (_currentMode == ViewMode.DungeonModel)
-            {
-                DrawDungeonModelList();
-            }
-            else
-            {
-                DrawRoomTemplateList();
-            }
-
+            for (int i = 0; i < _configs.Count; i++)
+                DrawConfigItem(i);
             EditorGUILayout.EndScrollView();
+
+            EditorGUILayout.EndVertical();
         }
 
-        private void DrawDungeonModelList()
+        private void DrawConfigItem(int index)
         {
-            if (_dungeonModels == null || _dungeonModels.Count == 0)
+            if (index >= _configs.Count) return;
+            var cfg = _configs[index];
+
+            if (cfg == null)
             {
-                EditorGUILayout.HelpBox("尚未创建任何 DungeonModel。", MessageType.Info);
+                _configs.RemoveAt(index);
+                if (_selectedIndex >= _configs.Count) _selectedIndex = _configs.Count - 1;
+                SavePaths();
                 return;
             }
 
-            foreach (var model in _dungeonModels)
+            bool isSelected = index == _selectedIndex;
+            string typeShort = cfg.GetType().Name.Replace("_SO", "");
+            string label = $"  {cfg.name}";
+
+            Color bgOrig = GUI.backgroundColor;
+            if (isSelected) GUI.backgroundColor = new Color(0.4f, 0.6f, 1f, 0.3f);
+
+            EditorGUILayout.BeginVertical(Styles.ItemBox);
+            GUI.backgroundColor = bgOrig;
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUI.BeginChangeCheck();
+            bool selected = GUILayout.Toggle(isSelected, "", GUILayout.Width(16));
+            if (EditorGUI.EndChangeCheck()) _selectedIndex = selected ? index : -1;
+
+            EditorGUILayout.LabelField(label, Styles.ItemLabel, GUILayout.Height(18));
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.LabelField($"[{typeShort}]", Styles.TypeLabel, GUILayout.Height(18));
+            EditorGUILayout.EndHorizontal();
+
+            // 右键菜单
+            var e = Event.current;
+            if (e.type == EventType.ContextClick)
             {
-                if (model == null) continue;
-
-                bool isSelected = model == _selectedDungeonModel;
-                string label = string.IsNullOrEmpty(model.name) ? "(未命名)" : model.name;
-                label = $"  {label}";
-
-                bool selected = GUILayout.Toggle(isSelected, label,
-                    isSelected ? EditorStyles.foldoutHeader : EditorStyles.label,
-                    GUILayout.Height(20));
-
-                if (selected && !isSelected)
+                var rect = GUILayoutUtility.GetLastRect();
+                if (rect.Contains(e.mousePosition))
                 {
-                    _selectedDungeonModel = model;
-                    Selection.activeObject = model;
+                    e.Use();
+                    var menu = new GenericMenu();
+                    menu.AddItem(new GUIContent("在 Inspector 中打开"), false, () =>
+                    { Selection.activeObject = cfg; EditorGUIUtility.PingObject(cfg); });
+                    menu.AddItem(new GUIContent("定位资源"), false, () => EditorGUIUtility.PingObject(cfg));
+                    menu.AddSeparator("");
+                    menu.AddItem(new GUIContent("移除"), false, () =>
+                    {
+                        _configs.RemoveAt(index);
+                        if (_selectedIndex >= _configs.Count) _selectedIndex = _configs.Count - 1;
+                        SavePaths();
+                        Repaint();
+                    });
+                    menu.ShowAsContext();
+                }
+            }
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawDropArea()
+        {
+            var rect = GUILayoutUtility.GetRect(0, 52, GUILayout.ExpandWidth(true));
+            GUI.Box(rect, "将 SO 配置文件拖入此处\n下次打开自动恢复", Styles.DropZone);
+            Handles.DrawLine(new Vector2(rect.x + 4, rect.y + 4), new Vector2(rect.xMax - 4, rect.y + 4));
+
+            if (rect.Contains(Event.current.mousePosition))
+            {
+                if (Event.current.type == EventType.DragUpdated)
+                {
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+                    Event.current.Use();
+                }
+                else if (Event.current.type == EventType.DragPerform)
+                {
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+                    Event.current.Use();
+                    foreach (var obj in DragAndDrop.objectReferences)
+                    {
+                        if (obj is ScriptableObject so && !_configs.Contains(so))
+                        { _configs.Add(so); }
+                    }
+                    SavePaths();
+                    Repaint();
                 }
             }
         }
 
-        private void DrawRoomTemplateList()
-        {
-            if (_roomTemplates == null || _roomTemplates.Count == 0)
-            {
-                EditorGUILayout.HelpBox("尚未创建任何 RoomTemplate。", MessageType.Info);
-                return;
-            }
-
-            foreach (var template in _roomTemplates)
-            {
-                if (template == null) continue;
-
-                bool isSelected = template == _selectedRoomTemplate;
-                string label = string.IsNullOrEmpty(template.name) ? "(未命名)" : template.name;
-                label = $"  {label}";
-
-                bool selected = GUILayout.Toggle(isSelected, label,
-                    isSelected ? EditorStyles.foldoutHeader : EditorStyles.label,
-                    GUILayout.Height(20));
-
-                if (selected && !isSelected)
-                {
-                    _selectedRoomTemplate = template;
-                    Selection.activeObject = template;
-                    _templateFoldouts.Clear();
-                    if (template.templates != null)
-                        _templateFoldouts.AddRange(new bool[template.templates.Count]);
-                }
-            }
-        }
-
-        // ==================== 右侧：配置详情 ====================
-
+        // ==================== 右侧面板 ====================
         private void DrawRightPanel()
         {
+            EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+
+            if (_selectedIndex < 0 || _selectedIndex >= _configs.Count || _configs[_selectedIndex] == null)
+            {
+                DrawWelcome();
+            }
+            else
+            {
+                DrawConfigDetail(_configs[_selectedIndex]);
+            }
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawWelcome()
+        {
+            GUILayout.FlexibleSpace();
+            GUILayout.Space(40);
+
+            var rect = GUILayoutUtility.GetRect(0, 100, GUILayout.ExpandWidth(true));
+            GUI.Box(rect, "拖入配置文件到左侧列表，或点击「+ 新建」创建", Styles.Welcome);
+
+            GUILayout.Space(10);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.LabelField("支持的类型：", Styles.WelcomeSubtext);
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            GUILayout.Space(4);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.LabelField("DungeonModel_SO", Styles.WelcomeType);
+            GUILayout.Space(10);
+            EditorGUILayout.LabelField("RoomTemplateConfig_SO", Styles.WelcomeType);
+            GUILayout.Space(10);
+            EditorGUILayout.LabelField("TileInfo_SO", Styles.WelcomeType);
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            GUILayout.Space(40);
+            GUILayout.FlexibleSpace();
+        }
+
+        private void DrawConfigDetail(ScriptableObject cfg)
+        {
+            EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+
+            // 标题栏
+            EditorGUILayout.BeginHorizontal(Styles.TitleBar);
+            EditorGUILayout.LabelField(cfg.name, Styles.TitleLabel);
+            EditorGUILayout.LabelField(cfg.GetType().Name, Styles.TitleType);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("定位", GUILayout.Width(60), GUILayout.Height(20)))
+                EditorGUIUtility.PingObject(cfg);
+            EditorGUILayout.EndHorizontal();
+
+            GUILayout.Space(6);
+
             _rightScroll = EditorGUILayout.BeginScrollView(_rightScroll);
 
-            if (_currentMode == ViewMode.DungeonModel)
-                DrawDungeonModelDetail();
-            else
-                DrawRoomTemplateDetail();
+            if (cfg is DungeonModel_SO dm)
+                DrawDungeonModel(dm);
+            else if (cfg is RoomTemplateConfig_SO rt)
+                DrawRoomTemplate(rt);
+            else if (cfg is TileInfo_SO ti)
+                DrawTileInfo(ti);
 
             EditorGUILayout.EndScrollView();
+            EditorGUILayout.EndVertical();
         }
 
-        // ==================== DungeonModel 详情 ====================
+        // ==================== DungeonModel 编辑 ====================
+        private SerializedObject _dmSO;
 
-        private void DrawDungeonModelDetail()
+        private void DrawDungeonModel(DungeonModel_SO dm)
         {
-            if (_selectedDungeonModel == null)
+            Undo.RecordObject(dm, "Edit DungeonModel");
+            _dmSO ??= new SerializedObject(dm);
+
+            DrawGroup("地图尺寸", () =>
             {
-                EditorGUILayout.HelpBox("从左侧选择一个 DungeonModel 进行编辑，或点击 \"+ 新建\" 创建。", MessageType.Info);
-                return;
-            }
-
-            EditorGUILayout.LabelField($"编辑：{_selectedDungeonModel.name}", EditorStyles.boldLabel);
-            EditorGUILayout.Space(5);
-
-            Undo.RecordObject(_selectedDungeonModel, "Edit DungeonModel");
-            _dungeonModelSO = new SerializedObject(_selectedDungeonModel);
-
-            // 地图尺寸
-            DrawSectionHeader("地图尺寸", () =>
-            {
-                _selectedDungeonModel.mapWidth = EditorGUILayout.IntField("地图宽度（格）", _selectedDungeonModel.mapWidth);
-                _selectedDungeonModel.mapHeight = EditorGUILayout.IntField("地图高度（格）", _selectedDungeonModel.mapHeight);
-                _selectedDungeonModel.borderSize = EditorGUILayout.IntField("边界留空（格）", _selectedDungeonModel.borderSize);
+                EditorGUILayout.PropertyField(_dmSO.FindProperty("mapWidth"));
+                EditorGUILayout.PropertyField(_dmSO.FindProperty("mapHeight"));
+                EditorGUILayout.PropertyField(_dmSO.FindProperty("borderSize"));
             });
 
-            // 房间模板引用
-            DrawSectionHeader("房间模板配置", () =>
+            DrawGroup("房间模板配置", () =>
             {
-                EditorGUILayout.PropertyField(_dungeonModelSO.FindProperty("roomTemplateConfig"), true);
+                EditorGUILayout.PropertyField(_dmSO.FindProperty("roomTemplateConfig"));
             });
 
-            // 走廊
-            DrawSectionHeader("走廊", () =>
+            DrawGroup("走廊", () =>
             {
-                _selectedDungeonModel.corridorWidth = EditorGUILayout.IntField("走廊宽度（格）", _selectedDungeonModel.corridorWidth);
+                EditorGUILayout.PropertyField(_dmSO.FindProperty("corridorWidth"));
+                EditorGUILayout.IntSlider(_dmSO.FindProperty("extraCorridorChance"), 0, 100, new GUIContent("额外走廊概率（%）"));
+                EditorGUILayout.PropertyField(_dmSO.FindProperty("extraCorridorMaxDistance"), new GUIContent("最大走廊距离（格）"));
             });
 
-            // 普通房间
-            DrawSectionHeader("普通房间", () =>
+            DrawGroup("普通房间", () =>
             {
-                _selectedDungeonModel.normalRoomCount = EditorGUILayout.IntField("保证数量", _selectedDungeonModel.normalRoomCount);
-                DrawExtraChanceField(_dungeonModelSO.FindProperty("normalExtraChance"));
+                EditorGUILayout.PropertyField(_dmSO.FindProperty("normalRoomCount"));
+                EditorGUILayout.IntSlider(_dmSO.FindProperty("normalExtraChance"), 0, 100, new GUIContent("额外生成概率（%）"));
             });
 
-            // 特殊房间（批量）
-            DrawSectionHeader("特殊房间", () =>
+            DrawGroup("特殊房间", () =>
             {
-                DrawSpecialRoomField("精英房（Elite）", _dungeonModelSO.FindProperty("eliteRoomCount"), _dungeonModelSO.FindProperty("eliteExtraChance"));
-                DrawSpecialRoomField("宝藏间（Treasure）", _dungeonModelSO.FindProperty("treasureRoomCount"), _dungeonModelSO.FindProperty("treasureExtraChance"));
-                DrawSpecialRoomField("商店（Shop）", _dungeonModelSO.FindProperty("shopRoomCount"), _dungeonModelSO.FindProperty("shopExtraChance"));
-                DrawSpecialRoomField("休息室（Rest）", _dungeonModelSO.FindProperty("restRoomCount"), _dungeonModelSO.FindProperty("restExtraChance"));
-                DrawSpecialRoomField("事件房（Event）", _dungeonModelSO.FindProperty("eventRoomCount"), _dungeonModelSO.FindProperty("eventExtraChance"));
-                DrawSpecialRoomField("Boss房（Boss）", _dungeonModelSO.FindProperty("bossRoomCount"), _dungeonModelSO.FindProperty("bossExtraChance"));
+                DrawSpecialRoom("精英房", _dmSO.FindProperty("eliteRoomCount"), _dmSO.FindProperty("eliteExtraChance"));
+                DrawSpecialRoom("宝藏间", _dmSO.FindProperty("treasureRoomCount"), _dmSO.FindProperty("treasureExtraChance"));
+                DrawSpecialRoom("商店", _dmSO.FindProperty("shopRoomCount"), _dmSO.FindProperty("shopExtraChance"));
+                DrawSpecialRoom("休息室", _dmSO.FindProperty("restRoomCount"), _dmSO.FindProperty("restExtraChance"));
+                DrawSpecialRoom("事件房", _dmSO.FindProperty("eventRoomCount"), _dmSO.FindProperty("eventExtraChance"));
+                DrawSpecialRoom("Boss房", _dmSO.FindProperty("bossRoomCount"), _dmSO.FindProperty("bossExtraChance"));
             });
 
-            _dungeonModelSO.ApplyModifiedProperties();
-
-            EditorGUILayout.Space(10);
-            DrawAssetButtons(_selectedDungeonModel);
+            _dmSO.ApplyModifiedProperties();
         }
 
-        private void DrawSpecialRoomField(string label, SerializedProperty countProp, SerializedProperty chanceProp)
+        private void DrawSpecialRoom(string label, SerializedProperty countProp, SerializedProperty chanceProp)
         {
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(label, GUILayout.Width(130));
-
-            EditorGUILayout.PropertyField(countProp, GUIContent.none, GUILayout.Width(60));
-            EditorGUILayout.LabelField("个", GUILayout.Width(15));
-            EditorGUILayout.PropertyField(chanceProp, GUIContent.none, GUILayout.Width(50));
-            EditorGUILayout.LabelField("%", GUILayout.Width(15));
-            EditorGUILayout.LabelField($"额外概率", GUILayout.Width(55));
-
-            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(countProp, new GUIContent("保证数量"));
+            EditorGUILayout.IntSlider(chanceProp, 0, 100, new GUIContent("额外概率（%）"));
+            EditorGUI.indentLevel--;
         }
 
-        private void DrawExtraChanceField(SerializedProperty prop)
+        // ==================== RoomTemplate 编辑 ====================
+        private List<bool> _foldouts = new List<bool>();
+
+        private void DrawRoomTemplate(RoomTemplateConfig_SO rt)
         {
-            EditorGUILayout.PropertyField(prop, true);
-        }
+            Undo.RecordObject(rt, "Edit RoomTemplate");
+            if (rt.templates == null) rt.templates = new List<RoomConfigData>();
 
-        // ==================== RoomTemplate 详情 ====================
-
-        private void DrawRoomTemplateDetail()
-        {
-            if (_selectedRoomTemplate == null)
+            DrawGroup("", () =>
             {
-                EditorGUILayout.HelpBox("从左侧选择一个 RoomTemplate 进行编辑，或点击 \"+ 新建\" 创建。", MessageType.Info);
-                return;
-            }
-
-            EditorGUILayout.LabelField($"编辑：{_selectedRoomTemplate.name}", EditorStyles.boldLabel);
-            EditorGUILayout.Space(5);
-
-            Undo.RecordObject(_selectedRoomTemplate, "Edit RoomTemplate");
-
-            // 模板列表
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("房间模板列表", EditorStyles.boldLabel, GUILayout.Width(120));
-            GUILayout.FlexibleSpace();
-
-            if (GUILayout.Button("+ 添加模板", GUILayout.Height(20), GUILayout.Width(100)))
-            {
-                AddTemplate();
-            }
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.Space(3);
-
-            if (_selectedRoomTemplate.templates == null)
-                _selectedRoomTemplate.templates = new List<RoomConfigData>();
-
-            // 确保 foldout 状态数量一致
-            while (_templateFoldouts.Count < _selectedRoomTemplate.templates.Count)
-                _templateFoldouts.Add(false);
-            while (_templateFoldouts.Count > _selectedRoomTemplate.templates.Count)
-                _templateFoldouts.RemoveAt(_templateFoldouts.Count - 1);
-
-            for (int i = 0; i < _selectedRoomTemplate.templates.Count; i++)
-            {
-                DrawTemplateItem(i);
-            }
-
-            // 延迟删除：使用 delayCall 推迟到下一帧执行，避免修改列表导致当前帧布局 Begin/End 错乱
-            if (_pendingRemoveIndex >= 0)
-            {
-                int toRemove = _pendingRemoveIndex;
-                _pendingRemoveIndex = -1;
-                _pendingAction = () =>
-                {
-                    if (toRemove < _selectedRoomTemplate.templates.Count)
-                    {
-                        Undo.RecordObject(_selectedRoomTemplate, "Remove Template");
-                        _selectedRoomTemplate.templates.RemoveAt(toRemove);
-                        _templateFoldouts.RemoveAt(toRemove);
-                    }
-                    _pendingAction = null;
-                };
-                EditorApplication.delayCall += () =>
-                {
-                    _pendingAction?.Invoke();
-                };
-            }
-
-            // 批量工具
-            if (_selectedRoomTemplate.templates.Count > 0)
-            {
-                EditorGUILayout.Space(5);
                 EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField($"共 {rt.templates.Count} 个模板", GUILayout.Width(120));
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("全部折叠", GUILayout.Width(90)))
+                if (GUILayout.Button("+ 添加", GUILayout.Width(70), GUILayout.Height(18)))
                 {
-                    for (int i = 0; i < _templateFoldouts.Count; i++)
-                        _templateFoldouts[i] = false;
+                    Undo.RecordObject(rt, "Add Template");
+                    rt.templates.Add(new RoomConfigData
+                    {
+                        displayName = $"模板_{rt.templates.Count + 1}",
+                        roomType = RoomType.Normal,
+                        minSize = new Vector2Int(5, 5),
+                        maxSize = new Vector2Int(10, 10)
+                    });
+                    _foldouts.Add(true);
                 }
-                if (GUILayout.Button("全部展开", GUILayout.Width(90)))
+                if (rt.templates.Count > 0)
                 {
-                    for (int i = 0; i < _templateFoldouts.Count; i++)
-                        _templateFoldouts[i] = true;
+                    if (GUILayout.Button("全部折叠", GUILayout.Width(70), GUILayout.Height(18)))
+                        for (int i = 0; i < _foldouts.Count; i++) _foldouts[i] = false;
+                    if (GUILayout.Button("全部展开", GUILayout.Width(70), GUILayout.Height(18)))
+                        for (int i = 0; i < _foldouts.Count; i++) _foldouts[i] = true;
                 }
                 EditorGUILayout.EndHorizontal();
-            }
+            });
 
-            EditorGUILayout.Space(10);
-            DrawAssetButtons(_selectedRoomTemplate);
+            while (_foldouts.Count < rt.templates.Count) _foldouts.Add(false);
+            while (_foldouts.Count > rt.templates.Count) _foldouts.RemoveAt(_foldouts.Count - 1);
+
+            for (int i = 0; i < rt.templates.Count; i++)
+                DrawTemplateItem(rt, i);
         }
 
-        private void DrawTemplateItem(int index)
+        private void DrawTemplateItem(RoomTemplateConfig_SO rt, int i)
         {
-            if (index >= _selectedRoomTemplate.templates.Count) return;
+            if (i >= rt.templates.Count) return;
+            var data = rt.templates[i];
 
-            EditorGUILayout.BeginVertical(GUI.skin.box);
-
-            var data = _selectedRoomTemplate.templates[index];
-
-            // Foldout 标题栏
+            EditorGUILayout.BeginVertical(Styles.ItemBox);
             EditorGUILayout.BeginHorizontal();
-            _templateFoldouts[index] = EditorGUILayout.Foldout(_templateFoldouts[index],
-                $"[{index}] {data.displayName} — {data.roomType}", true);
+
+            _foldouts[i] = EditorGUILayout.Foldout(_foldouts[i],
+                $"[{i}] {data.displayName}  —  {data.roomType}", true);
 
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("×", GUILayout.Width(20), GUILayout.Height(16)))
             {
-                // 标记延迟删除（下一帧执行，避免当前帧修改列表导致布局 Begin/End 错乱）
-                _pendingRemoveIndex = index;
+                Undo.RecordObject(rt, "Remove Template");
+                rt.templates.RemoveAt(i);
+                _foldouts.RemoveAt(i);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+                return;
             }
             EditorGUILayout.EndHorizontal();
 
-            // 展开内容
-            if (_templateFoldouts[index])
+            if (_foldouts[i])
             {
                 EditorGUI.indentLevel++;
-
                 data.displayName = EditorGUILayout.TextField("显示名称", data.displayName);
                 data.roomType = (RoomType)EditorGUILayout.EnumPopup("房间类型", data.roomType);
-
-                EditorGUILayout.BeginHorizontal();
                 data.minSize = EditorGUILayout.Vector2IntField("最小尺寸", data.minSize);
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.BeginHorizontal();
                 data.maxSize = EditorGUILayout.Vector2IntField("最大尺寸", data.maxSize);
-                EditorGUILayout.EndHorizontal();
-
                 EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField("距起点最小距离", GUILayout.Width(130));
-                data.minDistFromStart = EditorGUILayout.IntField(data.minDistFromStart, GUILayout.Width(60));
-                EditorGUILayout.LabelField("（0=不限制）", GUILayout.Width(80));
+                EditorGUILayout.LabelField("距起点", GUILayout.Width(80));
+                data.minDistFromStart = EditorGUILayout.IntField(GUIContent.none, data.minDistFromStart, GUILayout.Width(70));
+                EditorGUILayout.LabelField("~", GUILayout.Width(10));
+                data.maxDistFromStart = EditorGUILayout.IntField(GUIContent.none, data.maxDistFromStart, GUILayout.Width(70));
                 EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField("距起点最大距离", GUILayout.Width(130));
-                data.maxDistFromStart = EditorGUILayout.IntField(data.maxDistFromStart, GUILayout.Width(60));
-                EditorGUILayout.LabelField("（-1=不限制）", GUILayout.Width(80));
-                EditorGUILayout.EndHorizontal();
-
                 EditorGUI.indentLevel--;
             }
 
-            // 写回
-            Undo.RecordObject(_selectedRoomTemplate, "Edit Template");
-            _selectedRoomTemplate.templates[index] = data;
-
+            rt.templates[i] = data;
             EditorGUILayout.EndVertical();
+            GUILayout.Space(2);
+        }
+
+        // ==================== TileInfo 编辑 ====================
+        private void DrawTileInfo(TileInfo_SO ti)
+        {
+            Undo.RecordObject(ti, "Edit TileInfo");
+            if (ti.tiles == null) ti.tiles = new List<Tile>();
+
+            DrawGroup("", () =>
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField($"共 {ti.tiles.Count} 个瓦片", GUILayout.Width(120));
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("+ 添加", GUILayout.Width(70), GUILayout.Height(18)))
+                {
+                    Undo.RecordObject(ti, "Add Tile");
+                    ti.tiles.Add(new Tile());
+                }
+                EditorGUILayout.EndHorizontal();
+            });
+
+            for (int i = 0; i < ti.tiles.Count; i++)
+                DrawTileItem(ti, i);
+        }
+
+        private void DrawTileItem(TileInfo_SO ti, int i)
+        {
+            if (i >= ti.tiles.Count) return;
+            var tile = ti.tiles[i];
+
+            EditorGUILayout.BeginVertical(Styles.ItemBox);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField($"[{i}]  {tile.type}", Styles.ItemLabel, GUILayout.Height(18));
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("×", GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                Undo.RecordObject(ti, "Remove Tile");
+                ti.tiles.RemoveAt(i);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+                return;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUI.indentLevel++;
+            tile.type = (TileType)EditorGUILayout.EnumPopup("类型", tile.type);
+            tile.tile = (TileBase)EditorGUILayout.ObjectField("瓦片资源", tile.tile, typeof(TileBase), false);
+            EditorGUI.indentLevel--;
+
+            ti.tiles[i] = tile;
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(2);
+        }
+
+        // ==================== 新建菜单 ====================
+        private void ShowNewAssetMenu()
+        {
+            var menu = new GenericMenu();
+            menu.AddItem(new GUIContent("DungeonModel_SO（地牢总配置）"), false, CreateDungeonModel);
+            menu.AddItem(new GUIContent("RoomTemplateConfig_SO（房间模板）"), false, CreateRoomTemplate);
+            menu.AddItem(new GUIContent("TileInfo_SO（瓦片配置）"), false, CreateTileInfo);
+            menu.ShowAsContext();
+        }
+
+        private void CreateDungeonModel() => CreateAsset<DungeonModel_SO>("DungeonModel_New", "");
+        private void CreateRoomTemplate() => CreateAsset<RoomTemplateConfig_SO>("RoomTemplate_New", "", obj => { ((RoomTemplateConfig_SO)obj).templates = new List<RoomConfigData>(); });
+        private void CreateTileInfo() => CreateAsset<TileInfo_SO>("TileInfo_New", "", obj => { ((TileInfo_SO)obj).tiles = new List<Tile>(); });
+
+        private void CreateAsset<T>(string defaultName, string subFolder, Action<ScriptableObject> init = null) where T : ScriptableObject
+        {
+            string folder = string.IsNullOrEmpty(subFolder) ? "Assets" : $"Assets/{subFolder}";
+            string path = EditorUtility.SaveFilePanelInProject(
+                $"创建 {typeof(T).Name}", $"{folder}/{defaultName}", "asset", "选择保存位置");
+            if (string.IsNullOrEmpty(path)) return;
+
+            var obj = CreateInstance<T>();
+            AssetDatabase.CreateAsset(obj, path);
+            init?.Invoke(obj);
+            EditorUtility.SetDirty(obj);
+            AssetDatabase.SaveAssets();
+
+            if (!_configs.Contains(obj)) _configs.Add(obj);
+            _selectedIndex = _configs.Count - 1;
+            SavePaths();
+            Repaint();
+        }
+
+        // ==================== 持久化 ====================
+        private void SavePaths()
+        {
+            var paths = new List<string>();
+            foreach (var cfg in _configs)
+                if (cfg != null) paths.Add(AssetDatabase.GetAssetPath(cfg));
+            EditorPrefs.SetString(PREF_KEY, string.Join("\n", paths));
+        }
+
+        private void LoadSavedPaths()
+        {
+            _configs.Clear();
+            _selectedIndex = -1;
+            string json = EditorPrefs.GetString(PREF_KEY, "");
+            if (string.IsNullOrEmpty(json)) return;
+            var paths = json.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var path in paths)
+            {
+                var obj = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path.Trim());
+                if (obj != null && !_configs.Contains(obj)) _configs.Add(obj);
+            }
+            if (_configs.RemoveAll(c => c == null) > 0) SavePaths();
+        }
+
+        // ==================== 布局工具 ====================
+        private void DrawHeader(string title)
+        {
+            GUILayout.Space(4);
+            EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
             EditorGUILayout.Space(2);
         }
 
-        private void AddTemplate()
+        private void DrawVerticalDivider()
         {
-            Undo.RecordObject(_selectedRoomTemplate, "Add Template");
-            var newData = new RoomConfigData
-            {
-                displayName = $"模板_{_selectedRoomTemplate.templates.Count + 1}",
-                roomType = RoomType.Normal,
-                minSize = new Vector2Int(5, 5),
-                maxSize = new Vector2Int(10, 10)
-            };
-            _selectedRoomTemplate.templates.Add(newData);
-            _templateFoldouts.Add(true);
+            var c = GUI.color;
+            GUI.color = new Color(0.35f, 0.35f, 0.35f);
+            GUILayout.Box(GUIContent.none, GUILayout.Width(3), GUILayout.ExpandHeight(true));
+            GUI.color = c;
         }
 
-        // ==================== 通用 UI 组件 ====================
-
-        private void DrawSectionHeader(string title, System.Action content)
+        private void DrawHorizontalLine()
         {
-            EditorGUILayout.BeginVertical(GUI.skin.box);
-            EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
+            GUILayout.Space(2);
+            var c = GUI.color;
+            GUI.color = new Color(0.35f, 0.35f, 0.35f);
+            GUILayout.Box(GUIContent.none, GUILayout.Height(1), GUILayout.ExpandWidth(true));
+            GUI.color = c;
+            GUILayout.Space(2);
+        }
+
+        private void DrawGroup(string title, Action content)
+        {
+            bool hasTitle = !string.IsNullOrEmpty(title);
+            if (hasTitle)
+            {
+                EditorGUILayout.BeginVertical(Styles.GroupBox);
+                EditorGUILayout.LabelField(title, Styles.GroupLabel);
+                EditorGUI.indentLevel++;
+            }
+            else
+            {
+                EditorGUILayout.BeginVertical();
+            }
+
             content();
-            EditorGUI.indentLevel--;
-            EditorGUILayout.EndVertical();
-            EditorGUILayout.Space(3);
-        }
 
-        private void DrawAssetButtons(Object asset)
-        {
-            EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("在 Inspector 中打开", GUILayout.Height(22)))
+            if (hasTitle)
             {
-                Selection.activeObject = asset;
-                EditorGUIUtility.PingObject(asset);
+                EditorGUI.indentLevel--;
+                EditorGUILayout.EndVertical();
+                GUILayout.Space(4);
             }
-            if (GUILayout.Button("定位资源", GUILayout.Height(22), GUILayout.Width(80)))
+            else
             {
-                EditorGUIUtility.PingObject(asset);
+                EditorGUILayout.EndVertical();
             }
-            EditorGUILayout.EndHorizontal();
         }
 
-        // ==================== 资源操作 ====================
-
-        private void RefreshAssets()
+        // ==================== 样式定义 ====================
+        private static class Styles
         {
-            string[] guids;
+            private static Texture2D _whiteTex;
+            private static Texture2D WhiteTex => _whiteTex ??= Texture2D.whiteTexture;
 
-            guids = AssetDatabase.FindAssets($"t:{nameof(DungeonModel_SO)}");
-            _dungeonModels = new List<DungeonModel_SO>();
-            foreach (var g in guids)
+            private static GUIStyle _headerBar, _titleBar;
+            private static GUIStyle _headerLabel, _titleLabel, _titleType;
+            private static GUIStyle _groupBox, _groupLabel;
+            private static GUIStyle _itemBox, _itemLabel, _typeLabel;
+            private static GUIStyle _dropZone, _welcome, _welcomeSubtext, _welcomeType;
+
+            public static GUIStyle HeaderBar => _headerBar ??= new GUIStyle(GUI.skin.box) { padding = new RectOffset(8, 8, 4, 4), stretchWidth = true };
+            public static GUIStyle HeaderLabel => _headerLabel ??= new GUIStyle(EditorStyles.boldLabel) { fontSize = 13, alignment = TextAnchor.MiddleLeft };
+
+            public static GUIStyle TitleBar => _titleBar ??= new GUIStyle(GUI.skin.box)
             {
-                var path = AssetDatabase.GUIDToAssetPath(g);
-                var obj = AssetDatabase.LoadAssetAtPath<DungeonModel_SO>(path);
-                if (obj != null) _dungeonModels.Add(obj);
-            }
+                padding = new RectOffset(10, 10, 8, 8),
+                stretchWidth = true,
+                normal = { background = MakeTex(32, 32, new Color(0.22f, 0.22f, 0.22f)) }
+            };
+            public static GUIStyle TitleLabel => _titleLabel ??= new GUIStyle(EditorStyles.boldLabel) { fontSize = 15, alignment = TextAnchor.MiddleLeft };
+            public static GUIStyle TitleType => _titleType ??= new GUIStyle(EditorStyles.miniLabel) { fontSize = 10, normal = { textColor = Color.gray }, alignment = TextAnchor.MiddleRight };
 
-            guids = AssetDatabase.FindAssets($"t:{nameof(RoomTemplateConfig_SO)}");
-            _roomTemplates = new List<RoomTemplateConfig_SO>();
-            foreach (var g in guids)
+            public static GUIStyle GroupBox => _groupBox ??= new GUIStyle(GUI.skin.box) { padding = new RectOffset(8, 8, 6, 6) };
+            public static GUIStyle GroupLabel => _groupLabel ??= new GUIStyle(EditorStyles.boldLabel) { fontSize = 11 };
+
+            public static GUIStyle ItemBox => _itemBox ??= new GUIStyle(GUI.skin.box)
             {
-                var path = AssetDatabase.GUIDToAssetPath(g);
-                var obj = AssetDatabase.LoadAssetAtPath<RoomTemplateConfig_SO>(path);
-                if (obj != null) _roomTemplates.Add(obj);
+                padding = new RectOffset(6, 6, 4, 4),
+                margin = new RectOffset(0, 0, 0, 0),
+                stretchWidth = true
+            };
+            public static GUIStyle ItemLabel => _itemLabel ??= new GUIStyle(EditorStyles.label) { fontSize = 11, alignment = TextAnchor.MiddleLeft };
+            public static GUIStyle TypeLabel => _typeLabel ??= new GUIStyle(EditorStyles.miniLabel) { fontSize = 9, normal = { textColor = Color.gray }, alignment = TextAnchor.MiddleRight };
+            public static GUIStyle HelpLabel => _helpLabel ??= new GUIStyle(EditorStyles.miniLabel) { fontSize = 9, normal = { textColor = Color.gray }, alignment = TextAnchor.MiddleLeft };
+            private static GUIStyle _helpLabel;
+
+            public static GUIStyle DropZone => _dropZone ??= new GUIStyle(GUI.skin.box)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontStyle = FontStyle.Italic,
+                fontSize = 11,
+                normal = { textColor = new Color(0.55f, 0.55f, 0.55f) },
+                border = new RectOffset(4, 4, 4, 4)
+            };
+            public static GUIStyle Welcome => _welcome ??= new GUIStyle(GUI.skin.box)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontStyle = FontStyle.Bold,
+                fontSize = 13,
+                normal = { textColor = new Color(0.45f, 0.45f, 0.45f) }
+            };
+            public static GUIStyle WelcomeSubtext => _welcomeSubtext ??= new GUIStyle(EditorStyles.miniLabel) { fontSize = 10, normal = { textColor = new Color(0.5f, 0.5f, 0.5f) } };
+            public static GUIStyle WelcomeType => _welcomeType ??= new GUIStyle(EditorStyles.miniLabel) { fontSize = 10, normal = { textColor = new Color(0.4f, 0.6f, 1f) } };
+
+            private static Texture2D MakeTex(int w, int h, Color c)
+            {
+                var tex = new Texture2D(w, h);
+                for (int x = 0; x < w; x++)
+                    for (int y = 0; y < h; y++)
+                        tex.SetPixel(x, y, c);
+                tex.Apply();
+                return tex;
             }
-
-            // 清理空引用
-            _dungeonModels.RemoveAll(x => x == null);
-            _roomTemplates.RemoveAll(x => x == null);
         }
-
-        private void CreateDungeonModel()
-        {
-            string path = EditorUtility.SaveFilePanelInProject(
-                "创建 DungeonModel",
-                "DungeonModel_New",
-                "asset",
-                "选择保存位置"
-            );
-
-            if (string.IsNullOrEmpty(path)) return;
-
-            var model = CreateInstance<DungeonModel_SO>();
-            AssetDatabase.CreateAsset(model, path);
-            AssetDatabase.SaveAssets();
-
-            RefreshAssets();
-            _selectedDungeonModel = model;
-            Selection.activeObject = model;
-        }
-
-        private void CreateRoomTemplate()
-        {
-            string path = EditorUtility.SaveFilePanelInProject(
-                "创建 RoomTemplate",
-                "RoomTemplate_New",
-                "asset",
-                "选择保存位置"
-            );
-
-            if (string.IsNullOrEmpty(path)) return;
-
-            var template = CreateInstance<RoomTemplateConfig_SO>();
-            template.templates = new List<RoomConfigData>();
-            AssetDatabase.CreateAsset(template, path);
-            AssetDatabase.SaveAssets();
-
-            RefreshAssets();
-            _selectedRoomTemplate = template;
-            Selection.activeObject = template;
-            _templateFoldouts.Clear();
-            _templateFoldouts.Add(true);
-        }
-
     }
 }

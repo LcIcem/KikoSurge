@@ -24,4 +24,5 @@ public enum TileType
     WallEventTile,
     WallCorridorTile,
     DoorTile,
+    EmptyTile,
 }

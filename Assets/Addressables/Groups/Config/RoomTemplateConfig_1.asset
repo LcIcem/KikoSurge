@@ -19,3 +19,39 @@ MonoBehaviour:
     maxSize: {x: 10, y: 10}
     minDistFromStart: 0
     maxDistFromStart: -1
+  - displayName: "\u666E\u901A\u623F\u95F4"
+    roomType: 1
+    minSize: {x: 5, y: 5}
+    maxSize: {x: 10, y: 10}
+    minDistFromStart: 0
+    maxDistFromStart: -1
+  - displayName: "\u76EE\u6807\u623F\u95F4"
+    roomType: 2
+    minSize: {x: 5, y: 5}
+    maxSize: {x: 10, y: 10}
+    minDistFromStart: 0
+    maxDistFromStart: -1
+  - displayName: "\u5B9D\u85CF\u623F\u95F4"
+    roomType: 3
+    minSize: {x: 5, y: 5}
+    maxSize: {x: 10, y: 10}
+    minDistFromStart: 0
+    maxDistFromStart: -1
+  - displayName: "\u5546\u5E97\u623F\u95F4"
+    roomType: 4
+    minSize: {x: 5, y: 5}
+    maxSize: {x: 10, y: 10}
+    minDistFromStart: 0
+    maxDistFromStart: -1
+  - displayName: "\u7CBE\u82F1\u623F\u95F4"
+    roomType: 5
+    minSize: {x: 5, y: 5}
+    maxSize: {x: 10, y: 10}
+    minDistFromStart: 0
+    maxDistFromStart: -1
+  - displayName: "Boss\u623F\u95F4"
+    roomType: 8
+    minSize: {x: 5, y: 5}
+    maxSize: {x: 10, y: 10}
+    minDistFromStart: 0
+    maxDistFromStart: -1

@@ -25,6 +25,13 @@ namespace ProcGen.Config
         [Header("走廊")]
         [Tooltip("走廊宽度（格）")]
         public int corridorWidth = 2;
+        
+        [Header("额外走廊")]
+        [Range(0, 100)]
+        [Tooltip("在 MST 基础上，额外添加走廊的概率（0=不添加，MST 仅有树状连接）")]
+        public int extraCorridorChance = 30;
+        [Tooltip("额外走廊的最大连接距离（曼哈顿距离格），超过此距离的房间对不尝试连接")]
+        public int extraCorridorMaxDistance = 10;
 
         [Header("普通房间")]
         [Tooltip("保证生成的普通房间数量")]

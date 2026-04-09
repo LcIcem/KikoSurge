@@ -14,6 +14,10 @@ namespace ProcGen.Core
         public int startRoomId;           // 起始房间ID
         public int goalRoomId;            // 终点房间ID
 
+        /// <summary>生成时实际使用的地图范围（可能因 ExpandMap 扩容而大于 config 原始值）</summary>
+        public RectInt mapBounds { get; internal set; }
+
+
         // O(1) 按 ID 查找
         private Dictionary<int, Room> _roomById;
         private Dictionary<int, Corridor> _corridorById;

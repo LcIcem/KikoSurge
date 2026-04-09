@@ -39,6 +39,10 @@ namespace ProcGen.Core
         public Dictionary<RoomType, HashSet<Vector2Int>> floorTilesByRoomType { get; }
         public Dictionary<RoomType, HashSet<Vector2Int>> wallTilesByRoomType { get; }
 
+        /// <summary>生成时实际使用的地图范围（可能因 ExpandMap 扩容而大于 config 原始值）</summary>
+        public RectInt mapBounds => _graph.mapBounds;
+
+
         // ==================== 空间哈希 ====================
         // >= 0: 坐标落在对应 room ID 的 Bounds 内
         // -1: 坐标落在走廊地面

@@ -21,7 +21,7 @@ namespace ProcGen.Runtime
 
 
         [Header("瓦片资源")]
-        [SerializeField] private TileInfo _tileInfo;
+        [SerializeField] private TileInfo_SO _tileInfo;
 
         [Header("生成配置")]
         [SerializeField] private DungeonModel_SO _dungeonModel; // Inspector上的地牢配置SO
@@ -30,6 +30,16 @@ namespace ProcGen.Runtime
         private IDungeonGenerator _generator; // 生成器实例
         private DungeonGraph _currentGraph;   // 当前生成的地牢图（供外部访问）
         private DungeonTileData _currentTileData; // 当前瓦片预计算数据（供外部访问）
+
+        // ==================== 公有属性 ====================
+        /// <summary>获取当前生成的地牢图（Build 之后有效）</summary>
+        public DungeonGraph GetGraph() => _currentGraph;
+
+        /// <summary>获取当前瓦片预计算数据（Build 之后有效，外部游戏代码使用）</summary>
+        public DungeonTileData GetTileData() => _currentTileData;
+
+        /// <summary>地牢是否已构建完毕（Tilemap 填充完毕后为 true）</summary>
+        public bool IsBuildCompleted { get; private set; }
 
         // ==================== Unity 生命周期 ====================
 
@@ -89,8 +99,14 @@ namespace ProcGen.Runtime
             // Step 6: 填充墙壁 Tilemap（每个房间类型单独处理）
             FillRoomWall(_wallTilemap, tileData, tileDict);
 
-            // Step 7: 填充门 Tilemap
+            // Step 7: 填充空白 Tilemap（地图范围内非地面非墙壁的格子）
+            FillVoid(_wallTilemap, tileData, tileDict);
+
+            // Step 8: 填充门 Tilemap
             FillDoor(_doorTilemap, tileData, tileDict);
+
+            // Step 9: 标记构建完毕
+            IsBuildCompleted = true;
 
             Log($"地牢生成完成：{graph.allRooms.Count} 个房间，{graph.corridors.Count} 条走廊，" +
                 $"地面 {tileData.allFloorTiles.Count} 格，墙壁 {tileData.allWallTiles.Count} 格，门 {tileData.allDoorTiles.Count} 格。");
@@ -105,22 +121,16 @@ namespace ProcGen.Runtime
             _floorTilemap?.ClearAllTiles();
             _wallTilemap?.ClearAllTiles();
             _doorTilemap?.ClearAllTiles();
+            IsBuildCompleted = false;
             _currentGraph = null;
             _currentTileData = null;
             Log("Tilemap 已清空。");
         }
 
-        /// <summary>获取当前生成的地牢图（Build 之后有效）</summary>
-        public DungeonGraph GetGraph() => _currentGraph;
-
-        /// <summary>获取当前瓦片预计算数据（Build 之后有效，外部游戏代码使用）</summary>
-        public DungeonTileData GetTileData() => _currentTileData;
-
-
         // ==================== 私有方法 ====================
 
         /// <summary>从 TileInfo 构建 TileType → TileBase 查找字典</summary>
-        private Dictionary<TileType, TileBase> BuildTileDict(TileInfo tileInfo)
+        private Dictionary<TileType, TileBase> BuildTileDict(TileInfo_SO tileInfo)
         {
             var dict = new Dictionary<TileType, TileBase>();
             if (tileInfo?.tiles == null)
@@ -195,6 +205,31 @@ namespace ProcGen.Runtime
                 if (corridorWalls.Count > 0)
                     FillTilemap(tilemap, corridorWallTile, corridorWalls);
             }
+        }
+
+        /// <summary>填充地图范围内的空白区域（既非地面也非墙壁的格子）</summary>
+        private void FillVoid(Tilemap tilemap, DungeonTileData tileData, Dictionary<TileType, TileBase> tileDict)
+        {
+            TileBase emptyTile = tileDict.GetValueOrDefault(TileType.EmptyTile, null);
+            if (emptyTile == null)
+                return;
+
+            // 使用生成时实际使用的地图范围（可能因 ExpandMap 扩容而大于 config 原始值）
+            RectInt bounds = tileData.mapBounds;
+
+            var voidTiles = new HashSet<Vector2Int>();
+            for (int x = bounds.xMin; x < bounds.xMax; x++)
+            {
+                for (int y = bounds.yMin; y < bounds.yMax; y++)
+                {
+                    var pos = new Vector2Int(x, y);
+                    if (!tileData.allFloorTiles.Contains(pos) && !tileData.allWallTiles.Contains(pos))
+                        voidTiles.Add(pos);
+                }
+            }
+
+            if (voidTiles.Count > 0)
+                FillTilemap(tilemap, emptyTile, voidTiles);
         }
 
         /// <summary>根据字典遍历所有房间，填充门 Tilemap（覆盖地面瓦片）</summary>

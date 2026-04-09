@@ -26,6 +26,9 @@ namespace ProcGen.Generator
         private GameRandom _rng;                     // 种子驱动的随机数生成器
         private Room _startRoom;                     // 起点房间缓存（放置后不再改变，避免每次 O(n) 查找）
 
+        /// <summary>已生成的走廊 key 集合（用于防止 MST 和额外走廊重复生成同一对房间的走廊）</summary>
+        private HashSet<string> _generatedCorridorPairs;
+
         // ==================== 扩容状态字段 ====================
         private int _baseMapWidth;                    // 地图原始宽度（来自 config）
         private int _baseMapHeight;                  // 地图原始高度（来自 config）
@@ -47,6 +50,7 @@ namespace ProcGen.Generator
             _rooms = new List<Room>();
             _corridors = new List<Corridor>();
             _corridorWidth = config.corridorWidth;
+            _generatedCorridorPairs = new HashSet<string>();
             _roomFloorTiles = new HashSet<Vector2Int>();
 
             // 记录原始地图尺寸
@@ -70,6 +74,9 @@ namespace ProcGen.Generator
             // Step 4: MST 连接所有房间
             BuildMST();
 
+            // Step 4.5: 额外走廊（在 MST 基础上随机添加回路，丰富地图连通性）
+            GenerateExtraCorridors();
+
             // Step 5: 确定终点 + Elite 概率补充
             FinalizeRoomTypes();
 
@@ -81,6 +88,7 @@ namespace ProcGen.Generator
 
             // Step 8: 构建返回结果
             var graph = BuildGraph();
+            graph.mapBounds = _mapBounds; // 传递实际使用的地图范围（可能因扩容而扩大）
             return (graph, new DungeonTileData(graph));
         }
 
@@ -89,13 +97,17 @@ namespace ProcGen.Generator
         private void PlaceStartRoom()
         {
             var startData = _config.GetRoomConfigData(RoomType.Start);
+            int border = _config.borderSize;
             int halfW = _mapBounds.width / 2;
             int halfH = _mapBounds.height / 2;
-            int x = _rng.Range(_mapBounds.xMin, _mapBounds.xMin + halfW);
-            int y = _rng.Range(_mapBounds.yMin, _mapBounds.yMin + halfH);
-            var size = startData == null
+            // 起点放在左上 quadrant，左下角约束到 [xMin+border, xMin+halfW) 和 [yMin+halfH, yMax-border)
+            // 房间右/上边缘也需在 border 内：xMax = xMin+halfW-border-size.x+1, yMax = yMax-border-size.y+1
+            Vector2Int size = startData == null
                 ? new Vector2Int(8, 8)
                 : startData.GetRandomSize(_rng);
+            // 起点房间放在左下 quadrant
+            int x = _rng.Range(_mapBounds.xMin + border, _mapBounds.xMin + halfW - border - size.x + 1);
+            int y = _rng.Range(_mapBounds.yMin + border, _mapBounds.yMax - halfH + border - size.y + 1);
 
             var room = new Room
             {
@@ -184,6 +196,13 @@ namespace ProcGen.Generator
             var configList = new List<RoomConfigData>(configs);
             _rng.Shuffle(configList);
 
+            int border = _config.borderSize;
+            // border 约束：房间的左/右/下/上四个边缘都必须落在 border 区域内
+            int xMin = _mapBounds.xMin + border;
+            int xMax = _mapBounds.xMax - border;
+            int yMin = _mapBounds.yMin + border;
+            int yMax = _mapBounds.yMax - border;
+
             foreach (var data in configList)
             {
                 if (data == null)
@@ -195,8 +214,9 @@ namespace ProcGen.Generator
                 while (attempts < _currentMaxAttempts)
                 {
                     Vector2Int size = data.GetRandomSize(_rng);
-                    int x = _rng.Range(_mapBounds.xMin, _mapBounds.xMax - size.x);
-                    int y = _rng.Range(_mapBounds.yMin, _mapBounds.yMax - size.y);
+                    // gridPos + size - 1 为房间右/上边缘，需 ≤ xMax-1/yMax-1
+                    int x = _rng.Range(xMin, xMax - size.x + 1);
+                    int y = _rng.Range(yMin, yMax - size.y + 1);
 
                     var candidate = new Room
                     {
@@ -253,13 +273,13 @@ namespace ProcGen.Generator
 
             int newWidth = Mathf.CeilToInt(_baseMapWidth * 1.5f);
             int newHeight = Mathf.CeilToInt(_baseMapHeight * 1.5f);
-            int newBorderSize = _config.borderSize;
 
+            // 地图范围扩展为新的完整尺寸
             var newBounds = new RectInt(
                 -newWidth / 2,
                 -newHeight / 2,
-                newWidth - newBorderSize * 2,
-                newHeight - newBorderSize * 2
+                newWidth,
+                newHeight
             );
 
             float scaleX = (float)newBounds.width / _mapBounds.width;
@@ -326,6 +346,12 @@ namespace ProcGen.Generator
             var configList = new List<RoomConfigData>(configs);
             _rng.Shuffle(configList);
 
+            int border = _config.borderSize;
+            int xMin = _mapBounds.xMin + border;
+            int xMax = _mapBounds.xMax - border;
+            int yMin = _mapBounds.yMin + border;
+            int yMax = _mapBounds.yMax - border;
+
             foreach (var data in configList)
             {
                 if (data == null)
@@ -337,8 +363,9 @@ namespace ProcGen.Generator
                 while (attempts < _currentMaxAttempts)
                 {
                     Vector2Int size = data.GetRandomSize(_rng);
-                    int x = _rng.Range(_mapBounds.xMin, _mapBounds.xMax - size.x);
-                    int y = _rng.Range(_mapBounds.yMin, _mapBounds.yMax - size.y);
+                    // gridPos + size - 1 为房间右/上边缘，需 ≤ xMax-1/yMax-1
+                    int x = _rng.Range(xMin, xMax - size.x + 1);
+                    int y = _rng.Range(yMin, yMax - size.y + 1);
 
                     var candidate = new Room
                     {
@@ -368,18 +395,18 @@ namespace ProcGen.Generator
 
         // ==================== 工具方法 ====================
 
-        /// <summary>重置地图范围为 config 中的原始尺寸</summary>
+        /// <summary>重置地图范围为 config 中的原始尺寸（border 仅约束房间 placement，不缩小地图范围）</summary>
         private void ResetMapBounds()
         {
             int width = _baseMapWidth;
             int height = _baseMapHeight;
-            int border = _config.borderSize;
 
+            // 地图范围固定为 [-W/2, W/2)，border 约束的是房间不能贴边
             _mapBounds = new RectInt(
                 -width / 2,
                 -height / 2,
-                width - border * 2,
-                height - border * 2
+                width,
+                height
             );
         }
 
@@ -470,6 +497,49 @@ namespace ProcGen.Generator
             }
         }
 
+        // ==================== Step 4.5: 额外走廊 ====================
+
+        /// <summary>
+        /// 在 MST 基础上，以一定概率为尚未直接相连且距离较近的房间对添加额外走廊，
+        /// 增加地图的回路，提升玩家路径选择多样性
+        /// </summary>
+        private void GenerateExtraCorridors()
+        {
+            if (_config.extraCorridorChance <= 0)
+                return;
+
+            int maxDist = _config.extraCorridorMaxDistance;
+
+            for (int i = 0; i < _rooms.Count; i++)
+            {
+                for (int j = i + 1; j < _rooms.Count; j++)
+                {
+                    Room a = _rooms[i];
+                    Room b = _rooms[j];
+
+                    string pair = MakePairKey(a.id, b.id);
+
+                    // 跳过已通过 MST 生成的走廊
+                    if (_generatedCorridorPairs.Contains(pair))
+                        continue;
+
+                    // 跳过已直接相连的房间对（避免重复门）
+                    if (a.connectedRoomIds.Contains(b.id))
+                        continue;
+
+                    int dist = GetManhattanDistance(a.Center, b.Center);
+                    if (dist > maxDist)
+                        continue;
+
+                    if (_rng.Range(0, 100) < _config.extraCorridorChance)
+                    {
+                        GenerateCorridorBetween(a, b);
+                        _generatedCorridorPairs.Add(pair);
+                    }
+                }
+            }
+        }
+
         // ==================== Step 5: 确定终点 + Elite 概率补充 ====================
 
         private void FinalizeRoomTypes()
@@ -479,7 +549,9 @@ namespace ProcGen.Generator
 
             int startId = FindStartRoomId();
             Room goalRoom = FindFarthestRoom(startId);
-            goalRoom.roomType = RoomType.Goal;
+            // 只有一个房间时，起点就是终点，不要把 Start 覆盖成 Goal
+            if (goalRoom.id != startId)
+                goalRoom.roomType = RoomType.Goal;
 
             if (_config.eliteRoomCount == 0 && _config.eliteExtraChance > 0)
             {
@@ -547,16 +619,14 @@ namespace ProcGen.Generator
 
         private void GenerateCorridors()
         {
-            var generatedPairs = new HashSet<string>();
-
             foreach (var room in _rooms)
             {
                 foreach (int neighborId in room.connectedRoomIds)
                 {
                     string pair = MakePairKey(room.id, neighborId);
-                    if (generatedPairs.Contains(pair))
+                    if (_generatedCorridorPairs.Contains(pair))
                         continue;
-                    generatedPairs.Add(pair);
+                    _generatedCorridorPairs.Add(pair);
 
                     GenerateCorridorBetween(room, FindRoom(neighborId));
                 }
