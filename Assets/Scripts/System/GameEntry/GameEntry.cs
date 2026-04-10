@@ -47,7 +47,6 @@ public class GameEntry : MonoBehaviour
     {
         if (ctx.performed)
         {
-            print("R Pressed");
             _builder.Build(_dungeonModel, new GameRandom(System.Environment.TickCount));
         }
         playerHandler?.RegeneratePlayer();

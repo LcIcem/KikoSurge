@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b5e858eec64e2e4185cfb0597a217ef, type: 3}
   m_Name: DungeonModel_1
   m_EditorClassIdentifier: 
-  mapWidth: 80
-  mapHeight: 60
+  mapWidth: 100
+  mapHeight: 100
   borderSize: 10
   roomTemplateConfig: {fileID: 11400000, guid: 0a08277930e02d941913ed410033089b, type: 2}
   corridorWidth: 1
   extraCorridorChance: 40
-  extraCorridorMaxDistance: 20
+  extraCorridorMaxDistance: 25
   normalRoomCount: 15
   normalExtraChance: 50
   eliteRoomCount: 3

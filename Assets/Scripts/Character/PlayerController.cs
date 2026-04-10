@@ -5,17 +5,20 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    private Rigidbody2D _rb;
-    private PlayerInput _playerInput;
+    [SerializeField] private float _moveSpeed = 10f;
 
-    private float _moveSpeed = 10f;
-    private InputAction _moveAction;
+    private Rigidbody2D _rb;
+    private Animator _animator;    
+
+    private PlayerInput _playerInput;
     private Vector2 _moveInput;
+    private InputAction _moveAction;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _playerInput = GetComponent<PlayerInput>();
+        _animator = GetComponent<Animator>();
 
         _rb.gravityScale = 0f;
         _rb.freezeRotation = true;
@@ -25,16 +28,29 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _rb.MovePosition(_rb.position + _moveInput * _moveSpeed * Time.fixedDeltaTime);
+        Move();
     }
 
     void Update()
     {
-        Move();
+        _moveInput = _moveAction.ReadValue<Vector2>().normalized;
+        SetAnim();
     }
 
     public void Move()
     {
-        _moveInput = _moveAction.ReadValue<Vector2>().normalized;
+        _rb.linearVelocity = _moveInput * _moveSpeed;
+    }
+
+    private void SetAnim()
+    {
+        if (_rb.linearVelocity != Vector2.zero)
+        {
+            _animator.SetBool("isMoving", true);
+        }
+        else
+        {
+            _animator.SetBool("isMoving", false);
+        }
     }
 }
