@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
@@ -61,17 +60,11 @@ public class UIManager : Singleton<UIManager>
 
     protected override void Init()
     {
-        _ = LoadCanvasAsync();
+        ManagerHub.Addressables.InstantiateAsync(Constants.UI_PATH + "Canvas", null, OnCanvasLoaded);
     }
 
-    /// <summary>
-    /// 异步加载 Canvas 及 EventSystem，加载完成后处理积压的 ShowPanel 请求。
-    /// </summary>
-    private async Task LoadCanvasAsync()
+    private void OnCanvasLoaded(GameObject canvasObj)
     {
-        // 通过 Addressables 实例化 Canvas
-        GameObject canvasObj = await AddressablesManager.Instance.InstantiateAsync(Constants.UI_PATH + "Canvas");
-
         if (canvasObj == null)
         {
             LogError("Canvas 加载失败: UI/Canvas");
@@ -88,7 +81,11 @@ public class UIManager : Singleton<UIManager>
         _system = Canvas.Find("System");
 
         // 异步加载 EventSystem
-        GameObject esObj = await AddressablesManager.Instance.InstantiateAsync(Constants.UI_PATH + "EventSystem");
+        ManagerHub.Addressables.InstantiateAsync(Constants.UI_PATH + "EventSystem", null, OnEventSystemLoaded);
+    }
+
+    private void OnEventSystemLoaded(GameObject esObj)
+    {
         if (esObj != null)
         {
             UnityEngine.Object.DontDestroyOnLoad(esObj);
@@ -161,53 +158,50 @@ public class UIManager : Singleton<UIManager>
         }
 
         // 异步加载面板 Prefab
-        _ = LoadPanelAsync<T>(layer, callBack);
+        LoadPanelAsync<T>(layer, callBack);
     }
 
     /// <summary>
     /// 异步加载面板 Prefab。
     /// </summary>
-    private async Task LoadPanelAsync<T>(UILayerType layer, UnityAction<T> callBack)
+    private void LoadPanelAsync<T>(UILayerType layer, UnityAction<T> callBack)
         where T : BasePanel
     {
         string panelName = typeof(T).Name;
-        GameObject obj = await AddressablesManager.Instance.InstantiateAsync($"{Constants.UI_PATH}{panelName}");
-
-        if (obj == null)
-        {
-            LogError($"面板加载失败: {Constants.UI_PATH}{panelName}");
-            return;
-        }
-
-        // 根据层级获取父级 Transform
         Transform father = GetLayerFather(layer);
 
-        // 挂载到对应层级
-        obj.transform.SetParent(father);
-
-        // 重置本地坐标，使 Rect 左下角对齐锚点中心
-        obj.transform.localPosition = Vector3.zero;
-        // 重置缩放，避免 Prefab 缩放不为 1 的问题
-        obj.transform.localScale = Vector3.one;
-
-        // 重置 RectTransform 的左右上下边距，使其撑满父级
-        RectTransform rect = obj.transform as RectTransform;
-        rect.offsetMax = Vector2.zero;  // 右、上边距归零
-        rect.offsetMin = Vector2.zero;  // 左、下边距归零
-
-        // 获取面板组件，调用 Show 并触发回调
-        T panel = obj.GetComponent<T>();
-        if (panel == null)
+        ManagerHub.Addressables.InstantiateAsync($"{Constants.UI_PATH}{panelName}", father, (obj) =>
         {
-            LogError($"面板 {panelName} 上未找到 {typeof(T).Name} 组件！");
-            return;
-        }
+            if (obj == null)
+            {
+                LogError($"面板加载失败: {Constants.UI_PATH}{panelName}");
+                return;
+            }
 
-        panel.Show();
-        callBack?.Invoke(panel);
+            // 重置本地坐标，使 Rect 左下角对齐锚点中心
+            obj.transform.localPosition = Vector3.zero;
+            // 重置缩放，避免 Prefab 缩放不为 1 的问题
+            obj.transform.localScale = Vector3.one;
 
-        // 注册到字典中，防止重复加载
-        _panelDic.Add(panelName, panel);
+            // 重置 RectTransform 的左右上下边距，使其撑满父级
+            RectTransform rect = obj.transform as RectTransform;
+            rect.offsetMax = Vector2.zero;  // 右、上边距归零
+            rect.offsetMin = Vector2.zero;  // 左、下边距归零
+
+            // 获取面板组件，调用 Show 并触发回调
+            T panel = obj.GetComponent<T>();
+            if (panel == null)
+            {
+                LogError($"面板 {panelName} 上未找到 {typeof(T).Name} 组件！");
+                return;
+            }
+
+            panel.Show();
+            callBack?.Invoke(panel);
+
+            // 注册到字典中，防止重复加载
+            _panelDic.Add(panelName, panel);
+        });
     }
 
     /// <summary>

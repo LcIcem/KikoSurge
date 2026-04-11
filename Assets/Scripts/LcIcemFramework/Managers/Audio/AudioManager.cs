@@ -39,11 +39,15 @@ public class AudioManager : SingletonMono<AudioManager>
 
     #region BGM
 
-    public async void PlayBGM(string audioId)
+    public void PlayBGM(string audioId)
     {
-        _bgmSource.clip = await ManagerHub.Addressables.LoadAsync<AudioClip>(audioId);
-        _bgmSource.volume = _bgmVolume;
-        _bgmSource.Play();
+        ManagerHub.Addressables.LoadAsync<AudioClip>(audioId, (clip) =>
+        {
+            if (clip == null) return;
+            _bgmSource.clip = clip;
+            _bgmSource.volume = _bgmVolume;
+            _bgmSource.Play();
+        });
     }
 
     public void StopBGM() => _bgmSource.Stop();
@@ -56,13 +60,18 @@ public class AudioManager : SingletonMono<AudioManager>
 
     #region SFX
 
-    public async void PlaySFX(string audioId)
+    public void PlaySFX(string audioId)
     {
         var src = _sfxSources.Find(s => !s.isPlaying);
         if (src == null) src = _sfxSources[0];
-        src.clip = await ManagerHub.Addressables.LoadAsync<AudioClip>(audioId);
-        src.volume = _sfxVolume;
-        src.Play();
+
+        ManagerHub.Addressables.LoadAsync<AudioClip>(audioId, (clip) =>
+        {
+            if (clip == null) return;
+            src.clip = clip;
+            src.volume = _sfxVolume;
+            src.Play();
+        });
     }
 
     public void StopSFX()  { foreach (var s in _sfxSources) s.Stop(); }

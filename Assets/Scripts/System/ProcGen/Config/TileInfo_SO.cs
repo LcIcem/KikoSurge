@@ -6,7 +6,7 @@ using UnityEngine.Tilemaps;
 /// 瓦片资源配置（ScriptableObject）
 /// 在 Project 窗口创建：Create → KikoSurge/Dungeon/瓦片配置
 /// </summary>
-[CreateAssetMenu(fileName = "TileInfo_", menuName = "KikoSurge/Dungeon/瓦片配置")]
+[CreateAssetMenu(fileName = "TileInfo_SO", menuName = "KikoSurge/Dungeon/瓦片配置")]
 public class TileInfo_SO : ScriptableObject
 {
     public List<Tile> tiles = new List<Tile>();

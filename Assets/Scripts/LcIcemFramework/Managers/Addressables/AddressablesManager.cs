@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -142,18 +141,6 @@ namespace LcIcemFramework.Managers.Addressables
             StartCoroutine(LoadSceneCoroutine(op, onProgress, onComplete, sceneName));
         }
 
-        /// <summary>
-        /// 异步加载场景（Task 版本）
-        /// </summary>
-        public async Task<SceneInstance> LoadSceneAsync(string sceneName)
-        {
-            var handle = UA.Addressables.LoadSceneAsync(sceneName);
-            SceneInstance result = await handle.Task;
-            if (handle.Status != AsyncOperationStatus.Succeeded)
-                LogError($"场景加载失败: {sceneName}");
-            return result;
-        }
-
         private IEnumerator LoadSceneCoroutine(
             AsyncOperationHandle<SceneInstance> op,
             UnityAction<float> onProgress,
@@ -202,69 +189,98 @@ namespace LcIcemFramework.Managers.Addressables
         // ── 通用资源加载 ─────────────────────────────────────────
 
         /// <summary>
-        /// 异步加载单个资源
+        /// 异步加载单个资源（协程回调版）
         /// </summary>
         /// <param name="address">资源的 Address 标识</param>
-        public async Task<T> LoadAsync<T>(string address) where T : Object
+        /// <param name="onComplete">加载完成回调，参数为加载的资源，失败返回 null</param>
+        public void LoadAsync<T>(string address, UnityAction<T> onComplete) where T : Object
+        {
+            StartCoroutine(LoadAssetCoroutine(address, onComplete));
+        }
+
+        private IEnumerator LoadAssetCoroutine<T>(string address, UnityAction<T> onComplete) where T : Object
         {
             var handle = UA.Addressables.LoadAssetAsync<T>(address);
-            T result = await handle.Task;
-            if (handle.Status != AsyncOperationStatus.Succeeded)
+            yield return handle;
+
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                onComplete?.Invoke(handle.Result);
+            }
+            else
             {
                 LogError($"资源加载失败: {address}");
-                return null;
+                onComplete?.Invoke(null);
             }
-            return result;
         }
 
         /// <summary>
-        /// 按标签批量加载资源
+        /// 按标签批量加载资源（协程回调版）
         /// </summary>
         /// <param name="label">标签名</param>
-        public async Task<IList<T>> LoadByLabelAsync<T>(string label) where T : Object
+        /// <param name="onComplete">加载完成回调，参数为资源列表，失败返回 null</param>
+        public void LoadByLabelAsync<T>(string label, UnityAction<IList<T>> onComplete) where T : Object
+        {
+            StartCoroutine(LoadByLabelCoroutine(label, onComplete));
+        }
+
+        private IEnumerator LoadByLabelCoroutine<T>(string label, UnityAction<IList<T>> onComplete) where T : Object
         {
             var handle = UA.Addressables.LoadAssetsAsync<T>(label, null);
-            IList<T> result = await handle.Task;
-            if (handle.Status != AsyncOperationStatus.Succeeded)
+            yield return handle;
+
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                onComplete?.Invoke(handle.Result);
+            }
+            else
             {
                 LogError($"标签加载失败: {label}");
-                return null;
+                onComplete?.Invoke(null);
             }
-            return result;
         }
 
         /// <summary>
-        /// 按地址 + 标签过滤批量加载（AND 逻辑）
+        /// 按地址 + 标签过滤批量加载（AND 逻辑，协程回调版）
         /// </summary>
         /// <param name="address">资源地址</param>
         /// <param name="label">标签名（如武器品质 "Rare"）</param>
-        public async Task<IList<T>> LoadAsync<T>(string address, string label) where T : Object
+        /// <param name="onComplete">加载完成回调，参数为过滤后的资源列表，失败返回 null</param>
+        public void LoadAsync<T>(string address, string label, UnityAction<IList<T>> onComplete) where T : Object
         {
-            // 先按地址加载所有资源，再按标签过滤
+            StartCoroutine(LoadByAddressAndLabelCoroutine(address, label, onComplete));
+        }
+
+        private IEnumerator LoadByAddressAndLabelCoroutine<T>(string address, string label, UnityAction<IList<T>> onComplete) where T : Object
+        {
+            // 先按地址加载所有资源
             var addrHandle = UA.Addressables.LoadAssetsAsync<T>(address, null);
-            IList<T> all = await addrHandle.Task;
+            yield return addrHandle;
 
             if (addrHandle.Status != AsyncOperationStatus.Succeeded)
             {
                 LogError($"地址+标签加载失败: {address} + {label}");
-                return null;
+                onComplete?.Invoke(null);
+                yield break;
             }
+
+            IList<T> all = addrHandle.Result;
 
             if (string.IsNullOrEmpty(label))
             {
-                UA.Addressables.Release(addrHandle);
-                return all;
+                onComplete?.Invoke(all);
+                yield break;
             }
 
-            // 按标签过滤（需要先获取标签对应的资源，再取交集）
+            // 按标签过滤
             var labelHandle = UA.Addressables.LoadAssetsAsync<T>(label, null);
-            IList<T> labelResult = await labelHandle.Task;
+            yield return labelHandle;
 
             var filtered = new List<T>();
             if (labelHandle.Status == AsyncOperationStatus.Succeeded)
             {
                 var labelNames = new HashSet<string>();
-                foreach (var r in labelResult)
+                foreach (var r in labelHandle.Result)
                     labelNames.Add(r.name);
 
                 foreach (var r in all)
@@ -274,22 +290,34 @@ namespace LcIcemFramework.Managers.Addressables
 
             UA.Addressables.Release(addrHandle);
             UA.Addressables.Release(labelHandle);
-            return filtered;
+            onComplete?.Invoke(filtered);
         }
 
         /// <summary>
-        /// 异步实例化 Prefab
+        /// 异步实例化 Prefab（协程回调版）
         /// </summary>
-        public async Task<GameObject> InstantiateAsync(string address, Transform parent = null)
+        /// <param name="address">Prefab 的 Address</param>
+        /// <param name="parent">父 Transform，可为 null</param>
+        /// <param name="onComplete">实例化完成回调，失败返回 null</param>
+        public void InstantiateAsync(string address, Transform parent, UnityAction<GameObject> onComplete)
+        {
+            StartCoroutine(InstantiateCoroutine(address, parent, onComplete));
+        }
+
+        private IEnumerator InstantiateCoroutine(string address, Transform parent, UnityAction<GameObject> onComplete)
         {
             var handle = UA.Addressables.InstantiateAsync(address, parent);
-            GameObject result = await handle.Task;
-            if (handle.Status != AsyncOperationStatus.Succeeded)
+            yield return handle;
+
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                onComplete?.Invoke(handle.Result);
+            }
+            else
             {
                 LogError($"Prefab 实例化失败: {address}");
-                return null;
+                onComplete?.Invoke(null);
             }
-            return result;
         }
 
         // ── 释放 ────────────────────────────────────────────────

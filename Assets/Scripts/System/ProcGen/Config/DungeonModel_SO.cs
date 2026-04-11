@@ -7,7 +7,7 @@ namespace ProcGen.Config
     /// <summary>地牢生成总配置（ScriptableObject）
     /// 引用房间模板配置 SO，以及地牢级别的生成参数
     /// </summary>
-    [CreateAssetMenu(fileName = "DungeonModel_", menuName = "KikoSurge/Dungeon/地牢配置")]
+    [CreateAssetMenu(fileName = "DungeonModel_SO", menuName = "KikoSurge/Dungeon/地牢配置")]
     public class DungeonModel_SO : ScriptableObject
     {
         [Header("地图尺寸")]

@@ -48,7 +48,7 @@ public class GameEntry : MonoBehaviour
         if (ctx.performed)
         {
             _builder.Build(_dungeonModel, new GameRandom(System.Environment.TickCount));
+            playerHandler?.RegeneratePlayer();
         }
-        playerHandler?.RegeneratePlayer();
     }
 }

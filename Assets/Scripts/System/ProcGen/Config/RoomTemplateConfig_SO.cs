@@ -7,7 +7,7 @@ namespace ProcGen.Config
     /// <summary>房间模板配置（ScriptableObject）
     /// 持有所有 RoomType 对应的尺寸配置，可批量在 Inspector 中编辑
     /// </summary>
-    [CreateAssetMenu(fileName = "RoomTemplateConfig_", menuName = "KikoSurge/Dungeon/房间模板配置")]
+    [CreateAssetMenu(fileName = "RoomTemplateConfig_SO", menuName = "KikoSurge/Dungeon/房间模板配置")]
     public class RoomTemplateConfig_SO : ScriptableObject
     {
         [Header("房间模板列表")]

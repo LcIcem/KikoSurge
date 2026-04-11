@@ -516,21 +516,23 @@ ManagerHub.Scene.UnloadCurrentScene();
 // 初始化（通常由 ManagerHub 自动调用）
 ManagerHub.Addressables.Initialize();
 
-// 加载单个资源
-Sprite sprite = await ManagerHub.Addressables.LoadAsync<Sprite>("Sprites/Player");
-GameObject prefab = await ManagerHub.Addressables.LoadAsync<GameObject>("Prefabs/Enemy");
+// 加载单个资源（协程回调版）
+ManagerHub.Addressables.LoadAsync<Sprite>("Sprites/Player", (sprite) =>
+{
+    if (sprite != null) Debug.Log($"加载了: {sprite.name}");
+});
 
 // 加载 Prefab 并实例化
-GameObject enemy = await ManagerHub.Addressables.InstantiateAsync("Prefabs/Enemy", parent);
+ManagerHub.Addressables.InstantiateAsync("Prefabs/Enemy", parent, (enemy) =>
+{
+    if (enemy != null) Debug.Log($"实例化了: {enemy.name}");
+});
 
 // 按标签批量加载
-var weapons = await ManagerHub.Addressables.LoadByLabelAsync<GameObject>("Rare");
-
-// 释放资源引用
-ManagerHub.Addressables.Release(handle);
-
-// 释放实例
-ManagerHub.Addressables.ReleaseInstance(enemyInstance);
+ManagerHub.Addressables.LoadByLabelAsync<GameObject>("Rare", (weapons) =>
+{
+    Debug.Log($"加载了 {weapons?.Count ?? 0} 个稀有武器");
+});
 ```
 
 > **Addressables 地址命名规范**：`SO_角色_名称`（如 `SO_Player_Kiko`）
