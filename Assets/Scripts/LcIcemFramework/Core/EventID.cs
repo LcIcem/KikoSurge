@@ -8,5 +8,7 @@ namespace LcIcemFramework.Core
         PlayBGM,
         PlaySFX,
         UpdateHeartDisplay,
+        PlayerIsDead,
+        RestartGame,
     }
 }

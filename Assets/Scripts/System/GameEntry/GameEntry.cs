@@ -35,6 +35,15 @@ public class GameEntry : MonoBehaviour
             _builder = gameObject.AddComponent<DungeonBuilder>();
     }
 
+    void Start()
+    {
+        EventCenter.Instance.Subscribe(EventID.RestartGame, () =>
+        {
+            _builder.Build(_dungeonModel, new GameRandom(System.Environment.TickCount));
+            playerHandler?.RegeneratePlayer();
+        });
+    }
+
     // 调试用
     [ContextMenu("重新生成地牢")]
     public void Rebuild()
