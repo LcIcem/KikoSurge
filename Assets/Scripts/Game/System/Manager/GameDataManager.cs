@@ -1,17 +1,20 @@
 using System.Collections;
 using UnityEngine;
-
 using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
+using Unity.VisualScripting;
 
-public class GameDataManager : Singleton<GameDataManager>
+/// <summary>
+/// 游戏数据管理器
+/// </summary>
+public class GameDataManager : SingletonMono<GameDataManager>
 {
     // 角色信息相关
     private RoleInfo_SO _roleInfo_SO;
     public bool IsRoleInfoLoaded { get; private set; } // 角色信息是否加载成功
     public int CurSelRoleIndex { get; set; } = 0;   // 当前选择的角色索引
     // 玩家数据相关
-    private PlayerData _playerData;
+    public PlayerData PlayerData { get; set; }
 
 
     protected override void Init()
@@ -19,6 +22,28 @@ public class GameDataManager : Singleton<GameDataManager>
         // 加载资源
         ManagerHub.Addressables.LoadAsync<RoleInfo_SO>("RoleInfo_SO", OnRoleInfoLoaded);
     }
+
+    private void Start() {
+        // 事件注册
+        // Input
+        EventCenter.Instance.Subscribe<Weapon>(EventID.AttackPerformed, onAttackPerformed);
+        // Weapon
+    }
+
+    protected override void OnDestroy() {
+        base.OnDestroy();
+
+        // Input
+        EventCenter.Instance.Unsubscribe<Weapon>(EventID.AttackPerformed, onAttackPerformed);
+        // Weapon
+    }
+
+    #region 处理事件
+    private void onAttackPerformed(Weapon weapon)
+    {
+        weapon.Attack();
+    }
+    #endregion
 
     #region RoleInfo数据相关
     // 角色信息数据 加载完毕 回调
@@ -60,16 +85,16 @@ public class GameDataManager : Singleton<GameDataManager>
         if (p == null)
             return false;
 
-        _playerData = p;
+        PlayerData = p;
         return true;
     }
 
     // 获取玩家数据
     public PlayerData GetPlayerData()
     {
-        if (_playerData == null)
+        if (PlayerData == null)
             return default;
-        return _playerData;
+        return PlayerData;
     }
 
     #endregion

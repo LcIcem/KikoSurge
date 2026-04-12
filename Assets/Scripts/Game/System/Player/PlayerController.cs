@@ -16,9 +16,8 @@ public class PlayerController : MonoBehaviour
     private Animator _animator;
 
     // 玩家输入相关
-    private PlayerInput _playerInput;
     private Vector2 _moveInput;
-    private InputAction _moveAction;
+    private float _attackInput;
 
     // 玩家状态控制相关
     public bool _isDead = false; // TODO：暂时用来调试 所以设置为公开字段，实际需要设置为只读属性
@@ -27,15 +26,11 @@ public class PlayerController : MonoBehaviour
     {
         // 获得组件
         _rb = GetComponent<Rigidbody2D>();
-        _playerInput = GetComponent<PlayerInput>();
         _animator = GetComponent<Animator>();
 
         // 初始化rigidbody
         _rb.gravityScale = 0f;
         _rb.freezeRotation = true;
-
-        // 获取移动输入的InputAction
-        _moveAction = _playerInput.actions["Move"];
     }
 
     private void FixedUpdate()
@@ -49,11 +44,13 @@ public class PlayerController : MonoBehaviour
     {
         // 处理输入
         HandleInput();
+        // 检测玩家是否攻击
+        CheckAttack();
         // 处理动画
         HandleAnim();
 
         // 监听玩家是否死亡
-        if (GameDataManager.Instance.GetPlayerData().Heath <= 0)
+        if (GameDataManager.Instance.PlayerData.Heath <= 0)
         {
             EventCenter.Instance.Publish(EventID.PlayerIsDead);
             _isDead = true;
@@ -64,13 +61,25 @@ public class PlayerController : MonoBehaviour
     // 玩家移动
     public void Move()
     {
-        _rb.linearVelocity = _moveInput * GameDataManager.Instance.GetPlayerData().moveSpeed;
+        _rb.linearVelocity = _moveInput * GameDataManager.Instance.PlayerData.moveSpeed;
+    }
+
+    // 检测玩家是否攻击
+    public void CheckAttack()
+    {
+        if (_attackInput <= 0f)
+            return;
+        Weapon weapon = transform.Find("WeaponPivot").GetChild(0).GetComponent<Weapon>();
+        EventCenter.Instance.Publish(EventID.AttackPerformed, weapon);
     }
 
     // 处理玩家输入
     void HandleInput()
     {
-        _moveInput = _moveAction.ReadValue<Vector2>().normalized;
+        InputAction moveAction = InputManager.Instance.UIActions["Move"];
+        InputAction attackAction = InputManager.Instance.UIActions["Attack"];
+        _moveInput = moveAction.ReadValue<Vector2>().normalized;
+        _attackInput = attackAction.ReadValue<float>();
     }
 
     // 处理动画

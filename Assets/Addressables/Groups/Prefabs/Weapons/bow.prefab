@@ -42,10 +42,9 @@ GameObject:
   - component: {fileID: 7633341352593952020}
   - component: {fileID: 2338134393801098866}
   - component: {fileID: 4686147715476562065}
-  - component: {fileID: 2591891590431718506}
-  - component: {fileID: -5671724965231255799}
+  - component: {fileID: 3472005946682072277}
   m_Layer: 0
-  m_Name: bow
+  m_Name: Bow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -141,7 +140,7 @@ MonoBehaviour:
   _sprite: {fileID: 2338134393801098866}
   _offset: 0.3
   isActive: 1
---- !u!114 &2591891590431718506
+--- !u!114 &3472005946682072277
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -153,37 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfd2dbcc5caf3c4428c29821e195a81b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Weapon
-  _bulletAddress: Bullet
-  _fireRate: 0.2
-  _spawnPoint: {fileID: 1073980717217089775}
-  _playerInput: {fileID: 0}
---- !u!114 &-5671724965231255799
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1645332420106596854}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
-  m_Actions: {fileID: -944628639613478452, guid: c4d66cd126c1efa47ac41743f5eac3f4, type: 3}
-  m_NotificationBehavior: 0
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents: []
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
-  m_DefaultActionMap: UI
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
+  _projectilePrefab: {fileID: 7818438112005476329, guid: d2ad3a84edef4b24bbe35e963be6d0c3, type: 3}
+  _firePoint: {fileID: 1073980717217089775}
+  attackRate: 0.2
+  pattern: {fileID: 11400000, guid: c3374d46e388df5499cb2e5cdce6c422, type: 2}

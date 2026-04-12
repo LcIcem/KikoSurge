@@ -74,9 +74,10 @@ public class PlayerHandler : MonoBehaviour
         {
             // 从GameDataManager中得到默认配置的角色数据 赋值给 实际游玩时的玩家数据
             _playerData = GameDataManager.Instance.GetRoleDataByCurSel().ConvertToPlayerData();
+
             // 设置GameDataManager中的 实际游玩时的玩家数据（这个操作必须先于所有要使用playerData的操作） 
             // 此操作仅在进入每场次游戏的开始时执行，玩家数据 后续在其它逻辑实时更新
-            GameDataManager.Instance.SetPlayerData(_playerData);
+            GameDataManager.Instance.PlayerData = _playerData;
             _isFirstPlace = false;
         }
 
