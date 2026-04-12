@@ -7,7 +7,7 @@ public class Weapon : MonoBehaviour
 {
     [Header("武器基础配置")]
     [SerializeField] private GameObject _projectilePrefab;
-    [SerializeField] private Transform _firePoint;    
+    [SerializeField] private Transform _firePoint;
     [SerializeField] private float attackRate = 0.2f;  // 攻击间隔
     [SerializeField] private FirePattern pattern;  // 攻击模式
 
@@ -35,6 +35,6 @@ public class Weapon : MonoBehaviour
         {
             pattern.Fire(_projectilePrefab, _firePoint);
             _canAttack = false;
-        }         
+        }
     }
 }

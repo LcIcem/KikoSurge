@@ -154,5 +154,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Weapon
   _projectilePrefab: {fileID: 7818438112005476329, guid: d2ad3a84edef4b24bbe35e963be6d0c3, type: 3}
   _firePoint: {fileID: 1073980717217089775}
-  attackRate: 0.2
-  pattern: {fileID: 11400000, guid: c3374d46e388df5499cb2e5cdce6c422, type: 2}
+  attackRate: 0.5
+  pattern: {fileID: 11400000, guid: 0dae10ff1e8bba04baea4bd964889569, type: 2}

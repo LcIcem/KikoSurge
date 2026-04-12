@@ -17,7 +17,6 @@ public class PlayerHandler : MonoBehaviour
 {
     [SerializeField] private Tilemap _floorTilemap;
     [SerializeField] private GameEntry _gameEntry;
-    [SerializeField] private CinemachineCamera _cinemachineCamera;
 
     // 玩家相关
     private GameObject _playerPrefabs;
@@ -94,7 +93,7 @@ public class PlayerHandler : MonoBehaviour
 
             // 设置摄像机跟随
             // Camera.main.GetComponent<CameraController>().target = _playerInstance.transform;
-            _cinemachineCamera.Follow = _playerInstance.transform;
+            CameraManager.Instance.Follow(_playerInstance.transform);
 
             // 显示游戏UI
             ManagerHub.UI.ShowPanel<GamePanel>(UILayerType.Middle, (panel) =>

@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
 
     // 玩家输入相关
     private Vector2 _moveInput;
-    private float _attackInput;
+    private bool _attackBtnPressed;
 
     // 玩家状态控制相关
     public bool _isDead = false; // TODO：暂时用来调试 所以设置为公开字段，实际需要设置为只读属性
@@ -67,10 +67,11 @@ public class PlayerController : MonoBehaviour
     // 检测玩家是否攻击
     public void CheckAttack()
     {
-        if (_attackInput <= 0f)
-            return;
-        Weapon weapon = transform.Find("WeaponPivot").GetChild(0).GetComponent<Weapon>();
-        EventCenter.Instance.Publish(EventID.AttackPerformed, weapon);
+        if (_attackBtnPressed)
+        {
+            Weapon weapon = transform.Find("WeaponPivot").GetChild(0).GetComponent<Weapon>();
+            EventCenter.Instance.Publish(EventID.AttackPerformed, weapon);
+        }
     }
 
     // 处理玩家输入
@@ -79,7 +80,7 @@ public class PlayerController : MonoBehaviour
         InputAction moveAction = InputManager.Instance.UIActions["Move"];
         InputAction attackAction = InputManager.Instance.UIActions["Attack"];
         _moveInput = moveAction.ReadValue<Vector2>().normalized;
-        _attackInput = attackAction.ReadValue<float>();
+        _attackBtnPressed = attackAction.IsPressed();
     }
 
     // 处理动画
