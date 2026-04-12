@@ -1,9 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
 using LcIcemFramework.Core;
 using LcIcemFramework.Util.Const;
+using LcIcemFramework.Managers.Addressables;
 
 namespace LcIcemFramework.Managers.Pool
 {
@@ -11,166 +13,309 @@ namespace LcIcemFramework.Managers.Pool
 /// <summary>
 /// 对象池管理器
 /// <list type="bullet">
-///     <item>统一管理所有可复用对象</item>
+///     <item>支持首次 Get 时自动注册（懒注册）</item>
+///     <item>支持池空闲超时自动清理（防内存泄漏）</item>
 /// </list>
 /// </summary>
 public class PoolManager : SingletonMono<PoolManager>
 {
+    #region 配置
+    /// <summary> 池对象闲置超时时间（秒），超时后自动销毁 </summary>
+    [SerializeField] private float _idleTimeout = 60f;
+    /// <summary> 空闲检测间隔（秒） </summary>
+    [SerializeField] private float _cleanupInterval = 10f;
+    #endregion
+
     #region 字段
     // 对象池字典  键：预设体名  值：ObjectPool对象池
     private Dictionary<string, ObjectPool<GameObject>> _pools = new Dictionary<string, ObjectPool<GameObject>>();
-    // 父对象字典  键：预设体名  值：父对象的Transform  目的是为了便于在Hierarchy中方便查看各对象池
+    // 父对象字典  键：预设体名  值：父对象的Transform
     private Dictionary<string, Transform> _parents = new Dictionary<string, Transform>();
-    // 池根对象 过场景时不销毁 作为所有 pool 父对象的父级
+    // 活跃对象字典  键：预设体名  值：该池的活跃对象数量
+    private Dictionary<string, int> _activeCounts = new Dictionary<string, int>();
+    // 池最后使用时间  键：预设体名  值：最后使用时间戳（Time.time）
+    private Dictionary<string, float> _lastUseTimes = new Dictionary<string, float>();
+    // 待清理标记  键：预设体名  值：是否正在等待清理
+    private Dictionary<string, bool> _pendingCleanup = new Dictionary<string, bool>();
+    // 活跃对象 -> 所属池名  用于 Release(obj) 时反向查找
+    private Dictionary<GameObject, string> _objToPoolName = new Dictionary<GameObject, string>();
+
+    // 活跃对象计数用锁，防止并发
+    private readonly object _lock = new object();
+
+    // 池根对象 过场景时不销毁
     private static Transform _poolRoot;
+    // 空闲检测协程
+    private Coroutine _cleanupCoroutine;
     #endregion
 
-    protected override void Init() { }
-
-    #region 对象池操作
-    /// <summary>
-    /// 注册一个预设体到对象池
-    /// </summary>
-    /// <param name="prefabName">预设体名</param>
-    /// <param name="prefab">预设体</param>
-    /// <param name="initialCount">预创建数量</param>
-    public void Register(string prefabName, GameObject prefab, int initialCount = 10, int maxSize = Constants.MAX_POOL_SIZE)
+    protected override void Init()
     {
-        // 如果该预设体已经创建过对象池了 直接返回
-        if (_pools.ContainsKey(prefabName))
-        {
-            LogWarning($"对象池 '{prefabName}' 已存在，无需重复注册。");
-            return;
-        }
+        // 启动空闲检测协程
+        _cleanupCoroutine = StartCoroutine(CleanupIdlePools());
+    }
 
-        // 首次注册时初始化池根对象 设为 DontDestroyOnLoad 保证跨场景持久化
+    #region 私有方法
+
+    /// <summary>
+    /// 懒注册：首次 Get 时如果没有池则自动注册
+    /// </summary>
+    private void EnsurePoolRegistered(string prefabName, GameObject prefab)
+    {
+        if (_pools.ContainsKey(prefabName)) return;
+
+        // 初始化池根
         if (_poolRoot == null)
         {
             GameObject poolRootObj = new GameObject("@PoolRoot");
             _poolRoot = poolRootObj.transform;
-            DontDestroyOnLoad(poolRootObj);
+            DontDestroyOnLoad(_poolRoot);
         }
+
         _parents[prefabName] = new GameObject(prefabName + "Pool").transform;
         _parents[prefabName].SetParent(_poolRoot);
 
-        // 生成一个对象池实例
-        // actionOnGet：对象从池中取出时调用
-        // actionOnRelease：对象归还池时调用
         var pool = new ObjectPool<GameObject>(
             createFunc: () => Instantiate(prefab, _parents[prefabName]),
             actionOnGet: obj =>
             {
                 obj.SetActive(true);
-                // 如果对象实现了 IPoolable，调用 OnSpawn
-                if (obj.TryGetComponent<IPoolable>(out var poolable))
+                lock (_lock)
                 {
-                    poolable.OnSpawn();
+                    if (_activeCounts.ContainsKey(prefabName))
+                        _activeCounts[prefabName]++;
+                    else
+                        _activeCounts[prefabName] = 1;
+                    _objToPoolName[obj] = prefabName;
                 }
+                if (obj.TryGetComponent<IPoolable>(out var poolable))
+                    poolable.OnSpawn();
             },
             actionOnRelease: obj =>
             {
                 obj.SetActive(false);
-                if (obj.TryGetComponent<IPoolable>(out var poolable))
+                lock (_lock)
                 {
-                    poolable.OnDespawn();
+                    if (_activeCounts.ContainsKey(prefabName))
+                        _activeCounts[prefabName]--;
+                    _objToPoolName.Remove(obj);
                 }
+                if (obj.TryGetComponent<IPoolable>(out var poolable))
+                    poolable.OnDespawn();
             },
             actionOnDestroy: obj => Destroy(obj),
             collectionCheck: false,
-            defaultCapacity: initialCount,
-            maxSize: maxSize);
+            defaultCapacity: 0,
+            maxSize: Constants.MAX_POOL_SIZE);
 
-        // 将该对象池 添加入 对象池字典
         _pools[prefabName] = pool;
-        Log($"对象池 '{prefabName}' 注册成功，预加载 {initialCount} 个对象。");
+        _activeCounts[prefabName] = 0;
+        _lastUseTimes[prefabName] = Time.time;
 
-        // 预实例化：按 initialCount 预先创建并归还对象，确保池中已有指定数量的备用对象
-        if (initialCount > 0)
+        Log($"池 '{prefabName}' 自动注册（懒注册）。");
+    }
+
+    /// <summary>
+    /// 完整销毁一个池（内部使用，由自动清理调用）
+    /// </summary>
+    private void DestroyPool(string poolName)
+    {
+        if (!_pools.TryGetValue(poolName, out var pool)) return;
+
+        // 销毁父对象（子对象全部销毁）
+        if (_parents.TryGetValue(poolName, out var parent))
+            Object.Destroy(parent.gameObject);
+
+        // 释放池内存
+        pool.Dispose();
+
+        // 从所有字典移除
+        _pools.Remove(poolName);
+        _parents.Remove(poolName);
+        _activeCounts.Remove(poolName);
+        _lastUseTimes.Remove(poolName);
+        _pendingCleanup.Remove(poolName);
+        // 清理所有指向该池的活跃对象引用
+        var keysToRemove = new List<GameObject>();
+        foreach (var kvp in _objToPoolName)
         {
-            var warmup = new GameObject[initialCount];
-            for (int i = 0; i < initialCount; i++)
+            if (kvp.Value == poolName)
+                keysToRemove.Add(kvp.Key);
+        }
+        foreach (var key in keysToRemove)
+            _objToPoolName.Remove(key);
+
+        Log($"池 '{poolName}' 已自动清理。");
+    }
+
+    /// <summary>
+    /// 空闲检测协程：定期检查所有池的闲置时间
+    /// </summary>
+    private IEnumerator CleanupIdlePools()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(_cleanupInterval);
+
+            float currentTime = Time.time;
+            var poolNames = new List<string>(_pools.Keys);
+
+            foreach (var poolName in poolNames)
             {
-                warmup[i] = pool.Get();
-            }
-            for (int i = 0; i < initialCount; i++)
-            {
-                pool.Release(warmup[i]);
+                // 有待清理标记的，跳过（由 Get 取消）
+                if (_pendingCleanup.TryGetValue(poolName, out var pending) && pending)
+                    continue;
+
+                // 没有活跃对象的池才检查
+                if (_activeCounts.TryGetValue(poolName, out var activeCount) && activeCount > 0)
+                    continue;
+
+                // 检查是否超时
+                if (_lastUseTimes.TryGetValue(poolName, out var lastUse))
+                {
+                    if (currentTime - lastUse >= _idleTimeout)
+                    {
+                        StartCoroutine(CleanupPoolCo(poolName));
+                    }
+                }
             }
         }
     }
 
     /// <summary>
-    /// 从池中获取一个对象
+    /// 清理池协程：等一帧后再真正销毁，给 Get 留出取消窗口
+    /// </summary>
+    private IEnumerator CleanupPoolCo(string poolName)
+    {
+        _pendingCleanup[poolName] = true;
+        yield return null;  // 等一帧
+
+        if (_pendingCleanup.TryGetValue(poolName, out var pending) && pending)
+        {
+            DestroyPool(poolName);
+        }
+    }
+
+    #endregion
+
+    #region 公开 API
+
+    /// <summary>
+    /// 从池中获取一个对象（自动注册）
     /// </summary>
     public GameObject Get(string prefabName, Vector3 position, Quaternion rotation)
     {
-        // 如果该池没有被注册过 直接返回
-        if (!_pools.TryGetValue(prefabName, out var pool))
+        return Get<GameObject>(prefabName, position, rotation);
+    }
+
+    /// <summary>
+    /// 从池中获取一个对象，并返回其 T 类型组件（自动注册）
+    /// </summary>
+    public T Get<T>(string prefabName, Vector3 position, Quaternion rotation) where T : class
+    {
+        // 如果有待清理标记，先取消清理
+        if (_pendingCleanup.TryGetValue(prefabName, out var pending) && pending)
         {
-            LogError($"对象池 '{prefabName}' 未找到，是否忘记注册？");
-            return null;
+            _pendingCleanup[prefabName] = false;
+            // 时间刷新，重置为未使用
+            _lastUseTimes[prefabName] = Time.time;
+            Log($"池 '{prefabName}' 清理被取消（被 Get 唤醒）。");
         }
 
-        // 否则 从池中得到一个对象 设置好位置旋转后返回出去
+        // 懒注册
+        if (!_pools.TryGetValue(prefabName, out var pool))
+        {
+            GameObject prefab = AddressablesManager.Instance.Load<GameObject>(prefabName);
+            if (prefab == null)
+            {
+                LogError($"对象池 '{prefabName}' 未注册且无法从 Addressables 加载。");
+                return null;
+            }
+            EnsurePoolRegistered(prefabName, prefab);
+            pool = _pools[prefabName];
+        }
+
         GameObject obj = pool.Get();
         obj.transform.position = position;
         obj.transform.rotation = rotation;
-        return obj;
+
+        // 更新最后使用时间
+        _lastUseTimes[prefabName] = Time.time;
+
+        return obj != null ? obj.GetComponent<T>() : null;
     }
 
     /// <summary>
     /// 归还对象到池
     /// </summary>
-    public void Release(string prefabName, GameObject obj)
+    public void Release(GameObject obj)
     {
-        // 如果该池没有被注册过 直接返回
-        if (!_pools.TryGetValue(prefabName, out var pool)) return;
-        // 否则 将该对象回收入对象池
-        pool.Release(obj);
-    }
+        if (obj == null) return;
 
-    /// <summary>
-    /// 取消注册单个对象池
-    /// </summary>
-    /// <param name="prefabName">预设体名</param>
-    /// <param name="releaseAll">是否同时释放池中所有活跃对象（推荐 true）</param>
-    public void Unregister(string prefabName, bool releaseAll = true)
-    {
-        if (!_pools.TryGetValue(prefabName, out var pool))
+        // 通过活跃对象字典找到所属池
+        if (_objToPoolName.TryGetValue(obj, out var poolName) && _pools.TryGetValue(poolName, out var pool))
         {
-            LogWarning($"对象池 '{prefabName}' 未找到。");
+            pool.Release(obj);
+            _lastUseTimes[poolName] = Time.time;
+            _objToPoolName.Remove(obj);
             return;
         }
 
-        if (releaseAll && _parents.TryGetValue(prefabName, out var parent))
-        {
-            // 直接销毁父物体即可，无需先 ReleaseAll
-            // ObjectPool.ReleaseAll 只是将对象 SetActive(false)，销毁后这些引用自然失效
-            // 注意：销毁后该 pool 绝不能再被使用
-            Object.Destroy(parent.gameObject);
-        }
-
-        // 无论 releaseAll 是否为 true，都需要 Dispose 防止内存泄漏
-        pool.Dispose();
-        _parents.Remove(prefabName);
-
-        _pools.Remove(prefabName);
-        Log($"对象池 '{prefabName}' 已取消注册。");
+        // 不在任何池中，直接销毁（兜底）
+        Object.Destroy(obj);
     }
 
     /// <summary>
-    /// 清空所有对象池
+    /// 手动清理指定池
     /// </summary>
-    /// <param name="releaseAll">是否同时释放池中所有对象</param>
-    public void ClearAll(bool releaseAll = true)
+    public void Clear(string poolName)
     {
-        // 先复制 Key 列表避免迭代中修改字典
-        foreach (var name in new List<string>(_pools.Keys))
-        {
-            Unregister(name, releaseAll);
-        }
-        Log("已清空所有对象池。");
+        if (!_pools.ContainsKey(poolName)) return;
+
+        // 取消待清理标记
+        if (_pendingCleanup.ContainsKey(poolName))
+            _pendingCleanup[poolName] = false;
+
+        DestroyPool(poolName);
+        Log($"池 '{poolName}' 已手动清理。");
     }
+
+    /// <summary>
+    /// 手动清理所有池
+    /// </summary>
+    public void ClearAll()
+    {
+        if (_cleanupCoroutine != null)
+        {
+            StopCoroutine(_cleanupCoroutine);
+            _cleanupCoroutine = null;
+        }
+
+        foreach (var poolName in new List<string>(_pools.Keys))
+        {
+            DestroyPool(poolName);
+        }
+
+        _pendingCleanup.Clear();
+        Log("已清理所有池。");
+
+        // 重新启动空闲检测
+        _cleanupCoroutine = StartCoroutine(CleanupIdlePools());
+    }
+
+    /// <summary>
+    /// 获取指定池的活跃对象数量
+    /// </summary>
+    public int GetActiveCount(string poolName)
+    {
+        return _activeCounts.TryGetValue(poolName, out var count) ? count : 0;
+    }
+
+    /// <summary>
+    /// 获取当前池数量
+    /// </summary>
+    public int GetPoolCount() => _pools.Count;
+
     #endregion
 
     #region 日志

@@ -189,6 +189,23 @@ namespace LcIcemFramework.Managers.Addressables
         // ── 通用资源加载 ─────────────────────────────────────────
 
         /// <summary>
+        /// 同步加载单个资源（首次阻塞，后续直接返回）
+        /// </summary>
+        /// <param name="address">资源的 Address 标识</param>
+        /// <returns>加载的资源，失败返回 null</returns>
+        public T Load<T>(string address) where T : Object
+        {
+            var handle = UA.Addressables.LoadAssetAsync<T>(address);
+            handle.WaitForCompletion();
+            if (handle.Status != AsyncOperationStatus.Succeeded)
+            {
+                LogError($"资源加载失败: {address}");
+                return null;
+            }
+            return handle.Result;
+        }
+
+        /// <summary>
         /// 异步加载单个资源（协程回调版）
         /// </summary>
         /// <param name="address">资源的 Address 标识</param>

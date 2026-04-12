@@ -12,18 +12,21 @@ public class TimerTask
     public bool IsRunning { get; private set; }
     /// <summary> 是否为重复计时器 </summary>
     public bool IsRepeating { get; }
+    /// <summary> 是否为 Unscaled 计时器 </summary>
+    public bool IsUnscaled { get; }
 
     private readonly float _duration; // 总时长（秒），定时任务的运行_duration秒后结束
     private float _remaining; // 剩余时间（秒）
     private readonly Action _callback; // 定时任务结束后调用的回调
 
 
-    public TimerTask(float duration, Action callback, bool repeating)
+    public TimerTask(float duration, Action callback, bool repeating, bool unscaled)
     {
         _duration = duration;
         _callback = callback;
         _remaining = duration;
         IsRepeating = repeating;
+        IsUnscaled = unscaled;
         IsRunning = true;
     }
 

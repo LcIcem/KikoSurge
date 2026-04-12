@@ -31,8 +31,9 @@ public class TimerManager : Singleton<TimerManager>
         // 如果 暂停 就停止计时
         if (IsPaused) return;
 
-        // 获得当帧的时间增量 (unscaled)
-        float dt = Time.unscaledDeltaTime;
+        // 获得当帧的时间增量
+        float unscaledDt = Time.unscaledDeltaTime;
+        float scaledDt = Time.deltaTime;
         // 克隆一份key列表 避免foreach遍历字典时直接修改字典导致异常
         var ids = new List<int>(_tasks.Keys);
 
@@ -42,6 +43,8 @@ public class TimerManager : Singleton<TimerManager>
             // 如果当前遍历的的计时器正在运行 就推进该计时器
             if (_tasks[id].IsRunning)
             {
+                // 根据计时器类型选用对应的 deltaTime
+                float dt = _tasks[id].IsUnscaled ? unscaledDt : scaledDt;
                 _tasks[id].Tick(dt);
             }
             else
@@ -53,27 +56,53 @@ public class TimerManager : Singleton<TimerManager>
     }
 
     /// <summary>
-    /// 添加延迟计时器
+    /// 添加延迟计时器（受 Time.timeScale 影响）
     /// </summary>
     /// <param name="delay">延迟时间（秒）</param>
     /// <param name="callback">到期回调</param>
     /// <returns>计时器 id，可用于取消计时器</returns>
     public int AddTimeOut(float delay, Action callback)
     {
-        TimerTask task = new TimerTask(delay, callback, false);
+        TimerTask task = new TimerTask(delay, callback, false, false);
         _tasks[++_nextId] = task;
         return _nextId;
     }
 
     /// <summary>
-    /// 添加重复计时器
+    /// 添加延迟计时器（不受 Time.timeScale 影响）
+    /// </summary>
+    /// <param name="delay">延迟时间（秒）</param>
+    /// <param name="callback">到期回调</param>
+    /// <returns>计时器 id，可用于取消计时器</returns>
+    public int AddTimeOutUnscaled(float delay, Action callback)
+    {
+        TimerTask task = new TimerTask(delay, callback, false, true);
+        _tasks[++_nextId] = task;
+        return _nextId;
+    }
+
+    /// <summary>
+    /// 添加重复计时器（受 Time.timeScale 影响）
     /// </summary>
     /// <param name="interval">重复间隔（秒）</param>
     /// <param name="callback">每次到期回调</param>
     /// <returns>计时器 id，可用于取消计时器</returns>
     public int AddRepeating(float interval, Action callback)
     {
-        TimerTask task = new TimerTask(interval, callback, true);
+        TimerTask task = new TimerTask(interval, callback, true, false);
+        _tasks[++_nextId] = task;
+        return _nextId;
+    }
+
+    /// <summary>
+    /// 添加重复计时器（不受 Time.timeScale 影响）
+    /// </summary>
+    /// <param name="interval">重复间隔（秒）</param>
+    /// <param name="callback">每次到期回调</param>
+    /// <returns>计时器 id，可用于取消计时器</returns>
+    public int AddRepeatingUnscaled(float interval, Action callback)
+    {
+        TimerTask task = new TimerTask(interval, callback, true, true);
         _tasks[++_nextId] = task;
         return _nextId;
     }
