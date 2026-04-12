@@ -17,7 +17,16 @@ namespace LcIcemFramework.Core
         // Input
         AttackPerformed,
 
-        // Weapon
-        EuipeWeapon,
+        // Combat
+        Combat_BulletSpawned,
+        Combat_BulletHit,
+        Combat_EnemyDamaged,
+        Combat_EnemyKilled,
+        Combat_EnemyAttack,
+        Combat_EnemySpawned,
+        Combat_WaveStart,
+        Combat_WaveComplete,
+        Combat_AllWavesComplete,
+
     }
 }

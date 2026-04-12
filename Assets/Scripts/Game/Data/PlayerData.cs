@@ -12,6 +12,9 @@ public class PlayerData
     public float atk = 1;           // 当前攻击力
     public float def = 1;           // 当前防御力
     public float moveSpeed = 4;     // 当前移动速度
+    public float DashSpeed = 7;     // 冲刺速度
+    public float dashDuration = 0.5f; // 冲刺持续时间
+    public float invincibleDuration = 0.2f; // 无敌时间
 
 
     // 注意： 每当有生命值和最大生命值同时变化时，要先变化最大生命值。否则会因为 最大生命值 没来得及更新导致 生命值 出现错误
