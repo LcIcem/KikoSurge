@@ -31,8 +31,8 @@ public class Player : MonoBehaviour, IPoolable
     // ========== Unity 生命周期 ==========
     private void Awake()
     {
-        _fsm = new PlayerFSM(this, _animator);
         _animator = GetComponent<Animator>();
+        _fsm = new PlayerFSM(this, _animator);
         _rigidbody = GetComponent<Rigidbody2D>();
         _sprite = GetComponent<SpriteRenderer>();
         _weaponHandler = new WeaponHandler(this, _animator);
