@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// 控制人物翻转组件
@@ -9,7 +10,7 @@ public class FlipController : MonoBehaviour
     [SerializeField] private SpriteRenderer _sprite;
     [SerializeField] private Rigidbody2D _entity;
 
-    [Header("Flipping References")]
+    [Header("翻转相关")]
     [SerializeField] private bool _useMouseForFlipping;
     [SerializeField] private bool _flipX = true;
 
@@ -17,9 +18,25 @@ public class FlipController : MonoBehaviour
 
     void Update()
     {
-        FlipBaseOnInput();
+        if (_useMouseForFlipping)
+            FlipBaseOnMosue();
+        else
+            FlipBaseOnInput();
     }
 
+    // 根据鼠标位置判断是否旋转
+    private void FlipBaseOnMosue()
+    {
+        // 检查是否达到翻转条件
+        Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        bool shouldFaceRight = mouseWorldPos.x > transform.position.x;
+        if (shouldFaceRight != _isFacingRight)
+        {
+            FlipSprite(shouldFaceRight);
+        }
+    }
+
+    // 根据输入判断是否翻转
     private void FlipBaseOnInput()
     {
         // 检查是否存在水平输入
@@ -33,6 +50,7 @@ public class FlipController : MonoBehaviour
         }
     }
 
+    // 翻转Sprite
     private void FlipSprite(bool faceRight)
     {
         _isFacingRight = faceRight;
