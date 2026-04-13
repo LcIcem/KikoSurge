@@ -27,11 +27,11 @@ public class FlipController : MonoBehaviour
 
     private void CheckSwitchInput()
     {
-        InputAction switchAction = InputManager.Instance.UIActions["SwitchWeapon"];
-        if (switchAction.WasPerformedThisFrame())
-        {
-            _useMouseForFlipping = !_useMouseForFlipping;
-        }
+        // InputAction switchAction = InputManager.Instance.UIActions["Switch"];
+        // if (switchAction.WasPerformedThisFrame())
+        // {
+        //     _useMouseForFlipping = !_useMouseForFlipping;
+        // }
     }
 
     // 根据鼠标位置判断是否旋转

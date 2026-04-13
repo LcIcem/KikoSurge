@@ -30,6 +30,7 @@ namespace LcIcemFramework.Core
         Combat_AllWavesComplete,
         Combat_Reloading,
         Combat_Reloaded,
+        Combat_CancelReload,
 
     }
 }

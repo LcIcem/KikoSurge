@@ -20,11 +20,15 @@ public class GunWeapon : WeaponBase
         ReloadTime = 1.5f;
         MagazineSize = 30;
         CurrentAmmo = MagazineSize;
+        recoilForce = 1f;
     }
 
     public override void Fire(Vector3 direction)
     {
-        if (!CanFire) return;
+        if (!CanFire)
+        {
+            return;
+        }
 
         ConsumeAmmo();
 
@@ -37,7 +41,9 @@ public class GunWeapon : WeaponBase
 
         // 自动装填
         if (CurrentAmmo <= 0)
+        {
             Reload();
+        }
     }
 
     protected virtual void SpawnBullet(Vector3 direction)

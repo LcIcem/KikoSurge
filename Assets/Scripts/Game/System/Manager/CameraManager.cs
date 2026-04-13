@@ -14,13 +14,13 @@ public class CameraManager : SingletonMono<CameraManager>
 
     protected override void Init()
     {
-        EventCenter.Instance.Subscribe(EventID.ShootPerformed, () => ScreenShake());
+        EventCenter.Instance.Subscribe<WeaponBase>(EventID.ShootPerformed, ScreenShake);
     }
 
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        EventCenter.Instance.Unsubscribe(EventID.ShootPerformed, () => ScreenShake());
+        EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.ShootPerformed, ScreenShake);
     }
 
     // 设置摄像机跟随
@@ -30,12 +30,12 @@ public class CameraManager : SingletonMono<CameraManager>
         _cinemachineCam.Follow = target;
     }
 
-    public void ScreenShake()
+    public void ScreenShake(WeaponBase weapon)
     {
         impulseSrc = Target.gameObject.GetComponent<CinemachineImpulseSource>();
         if (impulseSrc != null)
         {
-            impulseSrc.GenerateImpulse();
+            impulseSrc.GenerateImpulse(weapon.recoilForce);
         }
     }
 

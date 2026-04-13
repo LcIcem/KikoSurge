@@ -1,3 +1,4 @@
+using LcIcemFramework.Core;
 using LcIcemFramework.FSM;
 using UnityEngine;
 
@@ -67,7 +68,8 @@ public class PlayerFSM : FSM
         // Shoot
         AddTransition(Idle, Shoot, () => CheckTrigger("shoot"));
         AddTransition(Move, Shoot, () => CheckTrigger("shoot"));
-        AddTransition(Shoot, Idle, () => !CheckTrigger("shoot"));
+        AddTransition(Shoot, Idle, () => GetBool("isIdle"));
+        AddTransition(Shoot, Move, () => GetBool("isMoving"));
 
         // Dash
         AddTransition(Move, Dash, () => CheckTrigger("dash") && GetFloat("dashGapTimer") <= 0f);
@@ -78,6 +80,7 @@ public class PlayerFSM : FSM
         AddTransition(Move, Reload, () => GetBool("isReload"));
         AddTransition(Shoot, Reload, () => GetBool("isReload"));
         AddTransition(Reload, Idle, () => !GetBool("isReload"));
+        AddTransition(Reload, Dash, () => CheckTrigger("dash") && GetFloat("dashGapTimer") <= 0f);
 
         // Any → Hurt（任意状态可受击）
         AddAnyTransition(Hurt, () => CheckTrigger("hurt") && !GetBool("isDead"));
@@ -111,9 +114,6 @@ public class PlayerFSM : FSM
             _animator.SetFloat(param, value);
     }
 
-    /// <summary>
-    /// 重写 Update：Dead 状态下跳过全局转换检查，防止被 hurt 等 trigger 中断
-    /// </summary>
     public override void Update()
     {
         base.Update();

@@ -6,14 +6,11 @@ using UnityEngine;
 /// </summary>
 public class ShotgunWeapon : GunWeapon
 {
-    /// <summary>弹丸数量</summary>
-    public int PelletCount { get; set; } = 6;
+    public int PelletCount { get; set; } = 6;       // 弹丸数量
 
-    /// <summary>散布总角度（度）</summary>
-    public float SpreadAngle { get; set; } = 30f;
+    public float SpreadAngle { get; set; } = 30f;   //散布总角度（度）
 
-    /// <summary>伤害衰减开始距离</summary>
-    public float FalloffStart { get; set; } = 5f;
+    public float FalloffStart { get; set; } = 5f;   // 伤害衰减开始距离
 
     public ShotgunWeapon(Player owner) : base(owner)
     {
@@ -23,6 +20,7 @@ public class ShotgunWeapon : GunWeapon
         ReloadTime = 2.5f;
         MagazineSize = 6;
         CurrentAmmo = MagazineSize;
+        recoilForce = 10f;
         PelletCount = 6;
         SpreadAngle = 30f;
     }

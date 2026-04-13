@@ -6,13 +6,14 @@ using UnityEngine;
 /// </summary>
 public abstract class WeaponBase
 {
-    public WeaponType Type { get; protected set; }  //武器类型
-    public float Damage { get; protected set; }     //基础伤害
-    public float FireRate { get; protected set; }   //射速（秒/发）
-    public float ReloadTime { get; protected set; } //装填时间（秒）
-    public int MagazineSize { get; protected set; } //弹匣容量
-    public int CurrentAmmo { get; protected set; }  //当前弹药
-    public bool IsReloading { get; protected set; } //是否在装填
+    public WeaponType Type { get; protected set; }  // 武器类型
+    public float Damage { get; protected set; }     // 基础伤害
+    public float FireRate { get; protected set; }   // 射速（秒/发）
+    public float ReloadTime { get; protected set; } // 装填时间（秒）
+    public int MagazineSize { get; protected set; } // 弹匣容量
+    public int CurrentAmmo { get; protected set; }  // 当前弹药
+    public bool IsReloading { get; protected set; } // 是否在装填
+    public float recoilForce { get; protected set; } // 后坐力
 
     protected Player _owner; //武器所有者引用
 
@@ -74,5 +75,16 @@ public abstract class WeaponBase
     {
         CurrentAmmo--;
         _fireCooldown = FireRate;
+    }
+
+    /// 取消装填
+    public void CancelReload()
+    {
+        if (!IsReloading) return;
+        IsReloading = false;
+        _reloadTimer = 0f;
+
+        // 发布取消装填事件
+        EventCenter.Instance.Publish(EventID.Combat_CancelReload);
     }
 }

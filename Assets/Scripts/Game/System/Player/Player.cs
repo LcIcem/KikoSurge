@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using LcIcemFramework.Core;
 using UnityEngine.Rendering.Universal;
+using System.Collections.Generic;
 
 
 /// <summary>
@@ -33,13 +34,28 @@ public class Player : MonoBehaviour
     public Vector2 AimDir { get; private set; }
     private Vector3? _mouseWorldPos;
 
+    // 调试
+    private List<WeaponBase> _weapons = new List<WeaponBase>();
+    private int _weaponIndex = 0;
+    public int WeaponIndex
+    {
+        get
+        {
+            return _weaponIndex;
+        }
+        set
+        {
+            _weaponIndex = value % 2;
+        }
+    }
+
     private void Awake()
     {
         _animator = GetComponent<Animator>();
         _fsm = new PlayerFSM(this, _animator);
         _rigidbody = GetComponent<Rigidbody2D>();
         _sprite = GetComponent<SpriteRenderer>();
-        weaponHandler = new WeaponHandler(this, _animator);
+        weaponHandler = new WeaponHandler(this);
 
         _moveInput = Vector2.zero;
     }
@@ -47,12 +63,23 @@ public class Player : MonoBehaviour
     private void Start()
     {
         _fsm.Start();
-        var gunWeapon = new GunWeapon(this);
-        gunWeapon.BulletPrefab = _bulletPrefab;
+        var gunWeapon = new GunWeapon(this)
+        {
+            BulletPrefab = _bulletPrefab
+        };
         weaponHandler.Initialize(gunWeapon);
+        _weapons.Add(gunWeapon);
+
+        var shotgunWeapon = new ShotgunWeapon(this)
+        {
+            BulletPrefab = _bulletPrefab
+        };
+        weaponHandler.Initialize(shotgunWeapon);
+        _weapons.Add(shotgunWeapon);
 
         EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloaded, OnReloaded);
+        EventCenter.Instance.Subscribe(EventID.Combat_CancelReload, OnCancelReload);
     }
 
     void OnDestroy()
@@ -61,6 +88,7 @@ public class Player : MonoBehaviour
 
         EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.Combat_Reloaded, OnReloaded);
+        EventCenter.Instance.Unsubscribe(EventID.Combat_CancelReload, OnCancelReload);
     }
 
     private float _curSpeed = 0f;
@@ -75,7 +103,6 @@ public class Player : MonoBehaviour
             _ => 0f
         };
 
-        Debug.Log("当前速度" + _curSpeed);
         if (_fsm.CurrentState is not PlayerDashState)
             _rigidbody.MovePosition(_rigidbody.position + MoveDir * _curSpeed * Time.fixedDeltaTime);
     }
@@ -132,6 +159,12 @@ public class Player : MonoBehaviour
         {
             _fsm.SetTrigger("hurt");
         }
+        if (InputManager.Instance.UIActions["Switch"].WasPressedThisFrame())
+        {
+            WeaponIndex++;
+            weaponHandler.SwitchWeapon(_weapons[WeaponIndex]);
+            Debug.Log("当前武器为" + weaponHandler.CurrentWeapon.Type.ToString() + ", 武器当前容量：" + weaponHandler.CurrentWeapon.CurrentAmmo);
+        }
     }
 
     // 伤害处理 
@@ -160,6 +193,11 @@ public class Player : MonoBehaviour
     }
 
     private void OnReloaded(WeaponBase weapon)
+    {
+        _fsm.SetBool("isReload", false);
+    }
+
+    private void OnCancelReload()
     {
         _fsm.SetBool("isReload", false);
     }

@@ -17,12 +17,11 @@ public class PlayerShootState : StateBase
 
         // 驱动射击动画
         playerFSM.SetAnimatorTrigger("shoot");
-
         // 使用当前武器进行射击
         player.weaponHandler.Fire(player.AimDir);
 
         // 摄像机抖动
-        EventCenter.Instance.Publish(EventID.ShootPerformed);
+        EventCenter.Instance.Publish(EventID.ShootPerformed, player.weaponHandler.CurrentWeapon);
     }
 
     public override void Exec() { }
