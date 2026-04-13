@@ -1,17 +1,18 @@
+using LcIcemFramework.Core;
 using LcIcemFramework.FSM;
 using LcIcemFramework.Managers.Mono;
 using UnityEngine;
 
 /// <summary>
-/// 移动状态：设置 isMoving=true，持续更新移动向量。
-/// 动画由 AnimatorController 根据 isMoving=true 自动播放行走动画。
+/// 装填状态
 /// </summary>
-public class PlayerMoveState : StateBase
+public class PlayerReloadState : StateBase
 {
     public override void Enter()
     {
+        Debug.Log("开始装填");
         PlayerFSM playerFSM = _fsm as PlayerFSM;
-        playerFSM.SetAnimatorBool("isMoving", true);
+        playerFSM.SetAnimatorBool("isReload", true);
     }
 
     public override void Exec()
@@ -21,7 +22,8 @@ public class PlayerMoveState : StateBase
 
     public override void Exit()
     {
+        Debug.Log("结束装填");
         PlayerFSM playerFSM = _fsm as PlayerFSM;
-        playerFSM.SetAnimatorBool("isMoving", false);
+        playerFSM.SetAnimatorBool("isReload", false);
     }
 }

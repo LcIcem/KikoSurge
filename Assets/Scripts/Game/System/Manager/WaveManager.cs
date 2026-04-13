@@ -49,7 +49,7 @@ public class WaveManager : SingletonMono<WaveManager>
         _spawnTimer = 0f;
 
         EventCenter.Instance.Publish(EventID.Combat_WaveStart,
-            new WaveStartParams { waveNum, totalEnemies = _spawnQueue.Count });
+            new WaveStartParams { waveNum = waveNum, totalEnemies = _spawnQueue.Count });
     }
 
     private void Update()

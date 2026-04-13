@@ -1,5 +1,7 @@
+using LcIcemFramework.Core;
 using LcIcemFramework.FSM;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 /// <summary>
 /// 射击状态（瞬时）：触发射击动画后立即切回 Move。
@@ -7,24 +9,23 @@ using UnityEngine;
 /// </summary>
 public class PlayerShootState : StateBase
 {
+
     public override void Enter()
     {
         PlayerFSM playerFSM = _fsm as PlayerFSM;
         var player = Owner<Player>();
+
         // 驱动射击动画
-        playerFSM.SetAnimatorTrigger("Fire");
-        // 触发武器开火
-        player._weaponHandler.Fire(player.AimDir);
-        _fsm.SetBool("isShooting", true);
+        playerFSM.SetAnimatorTrigger("shoot");
+
+        // 使用当前武器进行射击
+        player.weaponHandler.Fire(player.AimDir);
+
+        // 摄像机抖动
+        EventCenter.Instance.Publish(EventID.ShootPerformed);
     }
 
-    public override void Exec()
-    {
-        // 射击是瞬时行为，Exec 中无额外逻辑
-    }
+    public override void Exec() { }
 
-    public override void Exit()
-    {
-        _fsm.SetBool("isShooting", false);
-    }
+    public override void Exit() { }
 }

@@ -1,4 +1,5 @@
 using LcIcemFramework.FSM;
+using Pathfinding;
 using UnityEngine;
 
 /// <summary>

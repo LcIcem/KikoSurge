@@ -12,7 +12,7 @@ public class EnemyFSM : FSM
     public EnemyAttackState Attack { get; private set; }
     public EnemyDeadState Dead { get; private set; }
 
-    /// <summary>持有者 Animator（驱动动画）</summary>
+    /// 持有者 Animator（驱动动画）
     private readonly Animator _animator;
 
     public EnemyFSM(EnemyBase enemy, Animator animator) : base(enemy)
@@ -32,36 +32,38 @@ public class EnemyFSM : FSM
         AddState(Attack);
         AddState(Dead);
 
-        // ========== 配置转换条件 ==========
+        // 配置转换条件
+        EnemyBase enemy = Owner as EnemyBase;
+
 
         // Idle → Chase
         AddTransition(Idle, Chase, () =>
-            Owner<EnemyBase>().DistanceToPlayer < Owner<EnemyBase>().DetectRange);
+            enemy.DistanceToPlayer < enemy.DetectRange);
 
         // Chase → Attack
         AddTransition(Chase, Attack, () =>
-            Owner<EnemyBase>().DistanceToPlayer < Owner<EnemyBase>().AttackRange);
+            enemy.DistanceToPlayer < enemy.AttackRange);
 
         // Chase → Idle（脱离追踪范围）
         AddTransition(Chase, Idle, () =>
-            Owner<EnemyBase>().DistanceToPlayer > Owner<EnemyBase>().LoseRange);
+            enemy.DistanceToPlayer > enemy.LoseRange);
 
         // Attack → Chase（脱离攻击范围）
         AddTransition(Attack, Chase, () =>
-            Owner<EnemyBase>().DistanceToPlayer >= Owner<EnemyBase>().AttackRange);
+            enemy.DistanceToPlayer >= enemy.AttackRange);
 
         // Any → Dead（任意状态可死亡）
         AddAnyTransition(Dead, () => CheckTrigger("Dead"));
     }
 
-    /// <summary>驱动 Animator Bool 参数</summary>
+    // 驱动 Animator Bool 参数
     public void SetAnimatorBool(string param, bool value)
     {
         if (_animator != null)
             _animator.SetBool(param, value);
     }
 
-    /// <summary>驱动 Animator Trigger 参数</summary>
+    // 驱动 Animator Trigger 参数
     public void SetAnimatorTrigger(string param)
     {
         if (_animator != null)

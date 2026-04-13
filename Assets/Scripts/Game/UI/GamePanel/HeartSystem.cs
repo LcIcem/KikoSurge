@@ -42,7 +42,7 @@ public class HeartSystem : MonoBehaviour
         CheckModify(playerData);
 
         int index = 0;
-        float curHealth = playerData.Heath;
+        float curHealth = playerData.Health;
         int lastFullHeart = Mathf.FloorToInt(curHealth); // 最后一颗完整的心的索引
 
         foreach (Transform heart in _heartContainer)

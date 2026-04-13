@@ -24,25 +24,16 @@ public class GameDataManager : SingletonMono<GameDataManager>
     }
 
     private void Start() {
-        // 事件注册
-        // Input
-        EventCenter.Instance.Subscribe<Weapon>(EventID.AttackPerformed, onAttackPerformed);
-        // Weapon
+        // 订阅事件
     }
 
     protected override void OnDestroy() {
         base.OnDestroy();
-
-        // Input
-        EventCenter.Instance.Unsubscribe<Weapon>(EventID.AttackPerformed, onAttackPerformed);
-        // Weapon
+        // 退订事件
     }
 
     #region 处理事件
-    private void onAttackPerformed(Weapon weapon)
-    {
-        weapon.Attack();
-    }
+
     #endregion
 
     #region RoleInfo数据相关

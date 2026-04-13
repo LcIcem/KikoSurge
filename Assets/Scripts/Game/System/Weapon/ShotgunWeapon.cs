@@ -15,7 +15,7 @@ public class ShotgunWeapon : GunWeapon
     /// <summary>伤害衰减开始距离</summary>
     public float FalloffStart { get; set; } = 5f;
 
-    public ShotgunWeapon(Player owner, Animator animator) : base(owner, animator)
+    public ShotgunWeapon(Player owner) : base(owner)
     {
         Type = WeaponType.Shotgun;
         Damage = 8f;
@@ -42,7 +42,7 @@ public class ShotgunWeapon : GunWeapon
 
             GameObject pelletObj = ManagerHub.Pool.Get(bulletName, spawnPos, Quaternion.identity);
             var pellet = pelletObj.GetComponent<Bullet>();
-            pellet.Init(bulletName, Damage, pelletDir, BulletSpeed, Range);
+            pellet.Init(Damage, pelletDir, BulletSpeed, Range);
         }
     }
 }

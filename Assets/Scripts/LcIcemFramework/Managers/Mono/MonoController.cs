@@ -20,10 +20,16 @@ namespace LcIcemFramework.Managers.Mono
 internal class MonoController : MonoBehaviour
 {
     private event UnityAction _updateEvent;
+    private event UnityAction _fixedUpdateEvent;
 
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void FixedUpdate()
+    {
+        _fixedUpdateEvent?.Invoke();
     }
 
     private void Update()
@@ -31,10 +37,17 @@ internal class MonoController : MonoBehaviour
         _updateEvent?.Invoke();
     }
 
+    /// <summary>注册 FixedUpdate 帧回调。</summary>
+    public void AddFixedUpdateListener(UnityAction action) => _fixedUpdateEvent += action;
+
+    /// <summary>取消注册 FixedUpdate 帧回调。</summary>
+    public void RemoveFixedUpdateListener(UnityAction action) => _fixedUpdateEvent -= action;
+
     /// <summary>注册 Update 帧回调。</summary>
     public void AddUpdateListener(UnityAction action) => _updateEvent += action;
 
     /// <summary>取消注册 Update 帧回调。</summary>
     public void RemoveUpdateListener(UnityAction action) => _updateEvent -= action;
+    
 }
 }

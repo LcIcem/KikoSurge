@@ -1,4 +1,5 @@
 using LcIcemFramework.FSM;
+using Pathfinding;
 using UnityEngine;
 
 /// <summary>
@@ -21,7 +22,7 @@ public class EnemyChaseState : StateBase
         var enemy = Owner<EnemyBase>();
         if (enemy._player != null)
         {
-            enemy.MoveTo(enemy._player.position);
+            enemy.MoveTo(enemy._player);
             enemy.FacePlayer();
         }
     }

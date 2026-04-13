@@ -242,6 +242,11 @@ public class PoolManager : SingletonMono<PoolManager>
         // 更新最后使用时间
         _lastUseTimes[prefabName] = Time.time;
 
+        if (typeof(T).Name == "GameObject")
+        {
+            return obj as T;
+        }
+                
         return obj != null ? obj.GetComponent<T>() : null;
     }
 

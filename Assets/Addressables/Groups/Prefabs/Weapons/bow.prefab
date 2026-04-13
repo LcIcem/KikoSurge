@@ -41,8 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7633341352593952020}
   - component: {fileID: 2338134393801098866}
-  - component: {fileID: 4686147715476562065}
-  - component: {fileID: 3472005946682072277}
+  - component: {fileID: 7862926315998275775}
   m_Layer: 0
   m_Name: Bow
   m_TagString: Untagged
@@ -125,7 +124,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &4686147715476562065
+--- !u!114 &7862926315998275775
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -140,19 +139,3 @@ MonoBehaviour:
   _sprite: {fileID: 2338134393801098866}
   _offset: 0.3
   isActive: 1
---- !u!114 &3472005946682072277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1645332420106596854}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dfd2dbcc5caf3c4428c29821e195a81b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Weapon
-  _projectilePrefab: {fileID: 7818438112005476329, guid: d2ad3a84edef4b24bbe35e963be6d0c3, type: 3}
-  _firePoint: {fileID: 1073980717217089775}
-  attackRate: 0.5
-  pattern: {fileID: 11400000, guid: 0dae10ff1e8bba04baea4bd964889569, type: 2}

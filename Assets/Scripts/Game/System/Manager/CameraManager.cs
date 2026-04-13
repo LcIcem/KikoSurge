@@ -14,13 +14,13 @@ public class CameraManager : SingletonMono<CameraManager>
 
     protected override void Init()
     {
-        EventCenter.Instance.Subscribe<Weapon>(EventID.AttackPerformed, (w) => ScreenShake());
+        EventCenter.Instance.Subscribe(EventID.ShootPerformed, () => ScreenShake());
     }
 
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        EventCenter.Instance.Unsubscribe<Weapon>(EventID.AttackPerformed, (w) => ScreenShake());
+        EventCenter.Instance.Unsubscribe(EventID.ShootPerformed, () => ScreenShake());
     }
 
     // 设置摄像机跟随

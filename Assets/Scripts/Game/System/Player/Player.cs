@@ -1,48 +1,83 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using LcIcemFramework.Core;
+using UnityEngine.Rendering.Universal;
+
 
 /// <summary>
 /// 玩家角色：持有 FSM、武器、输入（通过 PlayerInput），处理移动/射击/受击。
 /// 注意：动画由 AnimatorController 驱动，FSM 只负责逻辑状态和设置 Animator 参数。
 /// </summary>
-public class Player : MonoBehaviour, IPoolable
+public class Player : MonoBehaviour
 {
     // 组件引用 
-    [SerializeField] private CircleCollider2D _hitCollider;
+    [SerializeField] private CapsuleCollider2D _hitCollider;
     [HideInInspector] public Rigidbody2D _rigidbody;
     private SpriteRenderer _sprite;
     private Animator _animator;
 
 
-    // 子系统 
+    // 子系统
     private PlayerFSM _fsm;
-    private WeaponHandler _weaponHandler;
+    public WeaponHandler weaponHandler;
 
-    // ========== 运行时状态 ==========
-    public float HP { get; private set; }
-    public bool IsAlive => HP > 0f;
+    [SerializeField] private GameObject _bulletPrefab;
 
-    /// <summary>当前移动方向（供 FSM/其他系统读取）</summary>
+    // 输入状态
+    private Vector2 _moveInput;
+
+    // 当前移动方向（供 FSM/其他系统读取）
     public Vector2 MoveDir { get; private set; }
 
-    /// <summary>当前瞄准方向（供 FSM/其他系统读取）</summary>
+    // 当前瞄准方向（供 FSM/其他系统读取）
     public Vector2 AimDir { get; private set; }
+    private Vector3? _mouseWorldPos;
 
-    // ========== Unity 生命周期 ==========
     private void Awake()
     {
         _animator = GetComponent<Animator>();
         _fsm = new PlayerFSM(this, _animator);
         _rigidbody = GetComponent<Rigidbody2D>();
         _sprite = GetComponent<SpriteRenderer>();
-        _weaponHandler = new WeaponHandler(this, _animator);
+        weaponHandler = new WeaponHandler(this, _animator);
 
-        HP = _data.MaxHp;
+        _moveInput = Vector2.zero;
     }
 
     private void Start()
     {
         _fsm.Start();
+        var gunWeapon = new GunWeapon(this);
+        gunWeapon.BulletPrefab = _bulletPrefab;
+        weaponHandler.Initialize(gunWeapon);
+
+        EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloading, OnReloading);
+        EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloaded, OnReloaded);
+    }
+
+    void OnDestroy()
+    {
+        _fsm.Stop();
+
+        EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.Combat_Reloading, OnReloading);
+        EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.Combat_Reloaded, OnReloaded);
+    }
+
+    private float _curSpeed = 0f;
+    void FixedUpdate()
+    {
+        _curSpeed = _fsm.CurrentState switch
+        {
+            PlayerMoveState => GameDataManager.Instance.PlayerData.moveSpeed,
+            PlayerShootState => GameDataManager.Instance.PlayerData.moveSpeed * 0.5f,
+            PlayerReloadState => GameDataManager.Instance.PlayerData.moveSpeed * 0.7f,
+            PlayerHurtState => GameDataManager.Instance.PlayerData.moveSpeed * 0.9f,
+            _ => 0f
+        };
+
+        Debug.Log("当前速度" + _curSpeed);
+        if (_fsm.CurrentState is not PlayerDashState)
+            _rigidbody.MovePosition(_rigidbody.position + MoveDir * _curSpeed * Time.fixedDeltaTime);
     }
 
     private void Update()
@@ -57,6 +92,9 @@ public class Player : MonoBehaviour, IPoolable
                 AimDir = aimDir;
         }
 
+        // 更新武器相关信息，用于维护武器状态（比如：武器冷却）
+        weaponHandler.Update();
+
         // FSM 驱动
         _fsm.Update();
     }
@@ -64,73 +102,65 @@ public class Player : MonoBehaviour, IPoolable
     // 处理玩家输入
     private void HandleInput()
     {
-        MoveDir = InputManager.Instance.UIActions["Move"].ReadValue<Vector2>().normalized;
+        // 处理移动
+        _moveInput = InputManager.Instance.UIActions["Move"].ReadValue<Vector2>();
+        MoveDir = _moveInput.normalized;
+        _fsm.SetBool("isMoving", MoveDir.magnitude >= 0.1f);
+        _fsm.SetBool("isIdle", MoveDir.magnitude < 0.1f);
+
+        // 处理鼠标位置
         _mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-    }
 
-    private void FixedUpdate()
-    {
-        if (_fsm.CurrentState is PlayerMoveState)
-            _rigidbody.MovePosition(_rigidbody.position + MoveDir * _data.MoveSpeed * Time.fixedDeltaTime);
-    }
-
-    // ========== PlayerInput 回调（由 InputSystem 自动调用） ==========
-    private Vector3? _mouseWorldPos;
-
-    public void OnMove(InputAction.CallbackContext context)
-    {
-        _moveInput = context.ReadValue<Vector2>();
-    }
-
-    public void OnShoot(InputAction.CallbackContext context)
-    {
-        if (context.started)  // 按下瞬间触发
-            _fsm.SetTrigger("shoot");
-    }
-
-    public void OnDash(InputAction.CallbackContext context)
-    {
-        if (context.started)
-            _fsm.SetTrigger("dash");
-    }
-
-    public void OnAim(InputAction.CallbackContext context)
-    {
-        // 鼠标位置：屏幕坐标 → 世界坐标（Z=0 平面）
-        Vector2 screenPos = context.ReadValue<Vector2>();
-        Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0));
-        worldPos.z = 0;
-        _mouseWorldPos = worldPos;
-    }
-
-    // ========== 伤害处理 ==========
-    public void TakeDamage(float damage)
-    {
-        if (!IsAlive) return;
-
-        HP -= damage;
-        _fsm.SetTrigger("hurt");
-
-        EventCenter.Instance.Publish(EventID.Combat_PlayerDamaged,
-            new DamageParams { damage, from = transform.position });
-
-        if (HP <= 0f)
+        // 处理射击
+        if (weaponHandler.CurrentWeapon.CanFire && InputManager.Instance.UIActions["Shoot"].IsPressed())
         {
-            HP = 0f;
-            _fsm.SetTrigger("dead");
+            _fsm.SetTrigger("shoot");
+        }
+
+        // 处理冲刺
+        if (InputManager.Instance.UIActions["Dash"].WasPressedThisFrame())
+        {
+            _fsm.SetTrigger("dash");
+        }
+
+        // 调试用
+        if (InputManager.Instance.UIActions["Dead"].WasPressedThisFrame())
+        {
+            _fsm.SetBool("isDead", true);
+        }
+        if (InputManager.Instance.UIActions["Hurt"].WasPressedThisFrame())
+        {
+            _fsm.SetTrigger("hurt");
         }
     }
 
-    // ========== IPoolable ==========
-    public void OnSpawn()
+    // 伤害处理 
+    public void TakeDamage(float damage)
     {
-        HP = _data.MaxHp;
-        gameObject.SetActive(true);
+        float hp = GameDataManager.Instance.PlayerData.Health;
+        if (hp <= 0) return;
+
+        hp -= damage;
+        _fsm.SetTrigger("hurt");
+
+        EventCenter.Instance.Publish(EventID.Combat_PlayerDamaged,
+            new DamageParams { damage = damage, from = transform.position });
+
+        if (hp <= 0f)
+        {
+            _fsm.SetTrigger("dead");
+        }
+
+        GameDataManager.Instance.PlayerData.Health = hp;
     }
 
-    public void OnDespawn()
+    private void OnReloading(WeaponBase weapon)
     {
-        _fsm.Stop();
-        gameObject.SetActive(false);
+        _fsm.SetBool("isReload", true);
+    }
+
+    private void OnReloaded(WeaponBase weapon)
+    {
+        _fsm.SetBool("isReload", false);
     }
 }

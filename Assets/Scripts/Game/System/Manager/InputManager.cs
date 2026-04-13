@@ -23,6 +23,15 @@ public class InputManager : SingletonMono<InputManager>
         }
     }
 
+    // 开启或关闭输入系统
+    public void TurnOn(bool on)
+    {
+        if (on)
+            _playerInput.ActivateInput();
+        else
+            _playerInput.DeactivateInput();
+    }
+
     #region 日志
     private void Log(string msg) => Debug.Log("[InputManager] " + msg);
     private void LogWarning(string msg) => Debug.LogWarning("[InputManager] " + msg);

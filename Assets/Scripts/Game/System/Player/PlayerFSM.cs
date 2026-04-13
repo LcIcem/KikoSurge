@@ -13,6 +13,7 @@ public class PlayerFSM : FSM
     public PlayerDashState Dash { get; private set; }
     public PlayerHurtState Hurt { get; private set; }
     public PlayerDeadState Dead { get; private set; }
+    public PlayerReloadState Reload { get; private set; }
 
     /// <summary>持有者 Animator（驱动动画）</summary>
     private readonly Animator _animator;
@@ -24,12 +25,15 @@ public class PlayerFSM : FSM
 
     protected override void OnSetup()
     {
+        Player player = Owner as Player;
+
         Idle = new PlayerIdleState();
         Move = new PlayerMoveState();
         Shoot = new PlayerShootState();
         Dash = new PlayerDashState();
         Hurt = new PlayerHurtState();
         Dead = new PlayerDeadState();
+        Reload = new PlayerReloadState();
 
         AddState(Idle);
         AddState(Move);
@@ -37,41 +41,53 @@ public class PlayerFSM : FSM
         AddState(Dash);
         AddState(Hurt);
         AddState(Dead);
+        AddState(Reload);
 
         // 声明 Animator 参数 
         AddBool("isMoving");
         AddBool("isIdle");
-        AddBool("isShooting");
+        AddBool("isDead");
+        AddBool("isReload");
         AddFloat("dashTimer");
+        AddFloat("dashGapTimer");
         AddFloat("hurtTimer");
         AddTrigger("shoot");
         AddTrigger("dash");
         AddTrigger("hurt");
-        AddTrigger("dead");
 
         // 配置转换条件 
+
+        // Entry -> Idle
+        AddTransition(EntryState, Idle, () => true);
 
         // Idle ↔ Move
         AddTransition(Idle, Move, () => GetBool("isMoving"));
         AddTransition(Move, Idle, () => !GetBool("isMoving"));
 
-        // Move → Shoot（射击是瞬时状态，Trigger 触发后立即切回）
+        // Shoot
+        AddTransition(Idle, Shoot, () => CheckTrigger("shoot"));
         AddTransition(Move, Shoot, () => CheckTrigger("shoot"));
-        AddTransition(Shoot, Move, () => !GetBool("isShooting"));
+        AddTransition(Shoot, Idle, () => !CheckTrigger("shoot"));
 
-        // Move → Dash
-        AddTransition(Move, Dash, () => CheckTrigger("dash"));
+        // Dash
+        AddTransition(Move, Dash, () => CheckTrigger("dash") && GetFloat("dashGapTimer") <= 0f);
         AddTransition(Dash, Move, () => GetFloat("dashTimer") >= GameDataManager.Instance.PlayerData.dashDuration);
 
+        // Reload
+        AddTransition(Idle, Reload, () => GetBool("isReload"));
+        AddTransition(Move, Reload, () => GetBool("isReload"));
+        AddTransition(Shoot, Reload, () => GetBool("isReload"));
+        AddTransition(Reload, Idle, () => !GetBool("isReload"));
+
         // Any → Hurt（任意状态可受击）
-        AddAnyTransition(Hurt, () => CheckTrigger("hurt"));
+        AddAnyTransition(Hurt, () => CheckTrigger("hurt") && !GetBool("isDead"));
 
         // Hurt → Idle（无敌帧结束）
         AddTransition(Hurt, Idle, () =>
             GetFloat("hurtTimer") >= GameDataManager.Instance.PlayerData.invincibleDuration);
 
         // Any → Dead（任意状态可死亡）
-        AddAnyTransition(Dead, () => CheckTrigger("dead"));
+        AddAnyTransition(Dead, () => GetBool("isDead"));
     }
 
     /// 驱动 Animator Bool 参数
@@ -93,5 +109,15 @@ public class PlayerFSM : FSM
     {
         if (_animator != null)
             _animator.SetFloat(param, value);
+    }
+
+    /// <summary>
+    /// 重写 Update：Dead 状态下跳过全局转换检查，防止被 hurt 等 trigger 中断
+    /// </summary>
+    public override void Update()
+    {
+        base.Update();
+
+        SetFloat("dashGapTimer", GetFloat("dashGapTimer") - Time.deltaTime);
     }
 }

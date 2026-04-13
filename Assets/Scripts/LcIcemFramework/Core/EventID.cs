@@ -15,9 +15,10 @@ namespace LcIcemFramework.Core
         RestartGame,
 
         // Input
-        AttackPerformed,
+        ShootPerformed,
 
         // Combat
+        Combat_PlayerDamaged,
         Combat_BulletSpawned,
         Combat_BulletHit,
         Combat_EnemyDamaged,
@@ -27,6 +28,8 @@ namespace LcIcemFramework.Core
         Combat_WaveStart,
         Combat_WaveComplete,
         Combat_AllWavesComplete,
+        Combat_Reloading,
+        Combat_Reloaded,
 
     }
 }

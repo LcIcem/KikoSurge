@@ -42,6 +42,9 @@ public class UIManager : Singleton<UIManager>
     /// <summary>已加载面板字典。key 为面板名称，value 为面板实例，防止同一面板被重复加载。</summary>
     private Dictionary<string, BasePanel> _panelDic = new Dictionary<string, BasePanel>();
 
+    /// <summary>正在加载中的面板名称集合，防止异步加载期间重复触发。</summary>
+    private HashSet<string> _loadingPanels = new HashSet<string>();
+
     /// <summary>Canvas 各层级根节点。</summary>
     private Transform _bottom;
     private Transform _middle;
@@ -157,6 +160,13 @@ public class UIManager : Singleton<UIManager>
             return;
         }
 
+        // 正在加载中，防止重复触发
+        if (_loadingPanels.Contains(panelName))
+        {
+            Log($"{panelName} 正在加载中，忽略重复请求。");
+            return;
+        }
+
         // 异步加载面板 Prefab
         LoadPanelAsync<T>(layer, callBack);
     }
@@ -170,8 +180,15 @@ public class UIManager : Singleton<UIManager>
         string panelName = typeof(T).Name;
         Transform father = GetLayerFather(layer);
 
+        // 标记为正在加载
+        _loadingPanels.Add(panelName);
+
         ManagerHub.Addressables.InstantiateAsync($"{Constants.UI_PATH}{panelName}", father, (obj) =>
         {
+            // 无论成功失败，都要移除加载标记
+            _loadingPanels.Remove(panelName);
+
+            if (obj == null)
             if (obj == null)
             {
                 LogError($"面板加载失败: {Constants.UI_PATH}{panelName}");
@@ -200,6 +217,11 @@ public class UIManager : Singleton<UIManager>
             callBack?.Invoke(panel);
 
             // 注册到字典中，防止重复加载
+            if (_panelDic.ContainsKey(panelName))
+            {
+                Log($"面板 {panelName} 已存在，跳过重复添加");
+                return;
+            }
             _panelDic.Add(panelName, panel);
         });
     }

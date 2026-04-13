@@ -11,7 +11,7 @@ public class PlayerHurtState : StateBase
     public override void Enter()
     {
         PlayerFSM playerFSM = _fsm as PlayerFSM;
-        playerFSM.SetAnimatorTrigger("Hurt");
+        playerFSM.SetAnimatorTrigger("hurt");
         _timer = 0f;
     }
 

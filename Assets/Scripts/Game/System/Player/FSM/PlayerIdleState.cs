@@ -10,7 +10,7 @@ public class PlayerIdleState : StateBase
     public override void Enter()
     {
         PlayerFSM playerFSM = _fsm as PlayerFSM;
-        playerFSM.SetAnimatorBool("isMoving", false);
+
         playerFSM.SetAnimatorBool("isIdle", true);
     }
 

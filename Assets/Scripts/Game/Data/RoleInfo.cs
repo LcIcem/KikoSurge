@@ -32,7 +32,7 @@ public class RoleInfo
             id = id,
             name = name,
             maxHealth = maxHealth,
-            Heath = health,
+            Health = health,
             atk = atk,
             def = def,
             moveSpeed = moveSpeed

@@ -5,6 +5,8 @@ using ProcGen.Config;
 using ProcGen.Core;
 using ProcGen.Generator;
 using ProcGen.Seed;
+using Pathfinding;
+using System.Collections;
 
 namespace ProcGen.Runtime
 {
@@ -111,8 +113,32 @@ namespace ProcGen.Runtime
             Log($"地牢生成完成：{graph.allRooms.Count} 个房间，{graph.corridors.Count} 条走廊，" +
                 $"地面 {tileData.allFloorTiles.Count} 格，墙壁 {tileData.allWallTiles.Count} 格，门 {tileData.allDoorTiles.Count} 格。");
 
-            // Step 7: 打印房间类型分布
+            // 打印房间类型分布
             LogRoomTypeSummary(graph);
+
+            // 生成AStarPath
+            var astar = AstarPath.active;
+            var grid = astar.data.gridGraph;
+
+            // 设置寻路网格尺寸和原点（center 必须对齐 mapBounds 中心，否则网格和地牢错位）
+            int gridW = _currentGraph.mapBounds.width;
+            int gridH = _currentGraph.mapBounds.height;
+            Vector3 gridCenter = new Vector3(
+                _currentGraph.mapBounds.xMin + gridW * 0.5f,
+                _currentGraph.mapBounds.yMin + gridH * 0.5f,
+                0.1f
+            );
+
+            grid.SetDimensions(gridW, gridH, 1);
+            grid.center = gridCenter;
+            StartCoroutine(ScanAfterPhysicsUpdate(astar));
+        }
+
+        private IEnumerator ScanAfterPhysicsUpdate(AstarPath astar)
+        {
+            yield return null; // 等待一帧，让 TilemapCollider2D 完成物理更新
+            yield return new WaitForFixedUpdate(); // 等待物理系统处理碰撞
+            astar.Scan();
         }
 
         /// <summary>清空所有 Tilemap</summary>
@@ -277,6 +303,27 @@ namespace ProcGen.Runtime
                 RoomType.Rest => TileType.FloorEventTile,
                 _ => TileType.FloorNormalTile,
             };
+        }
+
+        /// <summary>根据实际瓦片位置计算包围盒</summary>
+        private RectInt CalculateActualBounds(HashSet<Vector2Int> tiles)
+        {
+            if (tiles == null || tiles.Count == 0)
+                return new RectInt(0, 0, 0, 0);
+
+            int minX = int.MaxValue, minY = int.MaxValue;
+            int maxX = int.MinValue, maxY = int.MinValue;
+
+            foreach (var pos in tiles)
+            {
+                if (pos.x < minX) minX = pos.x;
+                if (pos.x > maxX) maxX = pos.x;
+                if (pos.y < minY) minY = pos.y;
+                if (pos.y > maxY) maxY = pos.y;
+            }
+
+            // 加1因为max是最右/上边界，需要包含它
+            return new RectInt(minX, minY, maxX - minX + 1, maxY - minY + 1);
         }
 
         /// <summary>向指定 Tilemap 填充一组格子</summary>

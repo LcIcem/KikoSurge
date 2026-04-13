@@ -50,9 +50,9 @@ public class FlipController : MonoBehaviour
     private void FlipBaseOnInput()
     {
         // 检查是否存在水平输入
-        if (Mathf.Abs(_entity.linearVelocityX) > 0.1f)
+        if (Mathf.Abs(_entity.linearVelocity.x) > 0.1f)
         {
-            bool shouldFaceRight = _entity.linearVelocityX > 0;
+            bool shouldFaceRight = _entity.linearVelocity.x > 0;
             if (shouldFaceRight != _isFacingRight)
             {
                 FlipSprite(shouldFaceRight);

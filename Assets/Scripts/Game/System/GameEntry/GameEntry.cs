@@ -45,13 +45,6 @@ public class GameEntry : MonoBehaviour
     }
 
     // 调试用
-    [ContextMenu("重新生成地牢")]
-    public void Rebuild()
-    {
-        _rng.Reset();
-        _builder.Build(_dungeonModel, _rng);
-    }
-
     public void OnPressRBtn(InputAction.CallbackContext ctx)
     {
         if (ctx.performed)

@@ -15,7 +15,7 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
 
     protected override void Init()
     {
-        throw new System.NotImplementedException();
+        // 懒初始化，当前不需要额外逻辑
     }
 
     /// 注册敌人 Prefab
@@ -29,9 +29,7 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
     /// 创建敌人（从对象池）
     public EnemyBase Create(EnemySpawnParams p)
     {
-        EnemyBase enemy;
-
-        ManagerHub.Pool.Get<EnemyBase>(p.PrefabName, p.Position, Quaternion.identity);
+        EnemyBase enemy = ManagerHub.Pool.Get<EnemyBase>(p.PrefabName, p.Position, Quaternion.identity);
 
         EventCenter.Instance.Publish(EventID.Combat_EnemySpawned,
             new EnemySpawnedParams { enemy = enemy, type = p.Type });
@@ -45,12 +43,5 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
         if (enemy == null) return;
 
         ManagerHub.Pool.Release(enemy.gameObject);
-    }
-
-    private EnemyType GetEnemyType(EnemyBase enemy)
-    {
-        if (enemy is BossEnemy) return EnemyType.Boss;
-        if (enemy is EliteEnemy) return EnemyType.Elite;
-        return EnemyType.Grunt;
     }
 }

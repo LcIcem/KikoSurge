@@ -1,3 +1,4 @@
+using LcIcemFramework.Core;
 using UnityEngine;
 
 /// <summary>
@@ -14,15 +15,13 @@ public abstract class WeaponBase
     public bool IsReloading { get; protected set; } //是否在装填
 
     protected Player _owner; //武器所有者引用
-    protected Animator _animator;   //武器所有者 Animator（驱动射击动画）
 
     protected float _fireCooldown;  // 开火冷却
     protected float _reloadTimer;   // 装填时间计时器
 
-    public WeaponBase(Player owner, Animator animator)
+    public WeaponBase(Player owner)
     {
         _owner = owner;
-        _animator = animator;
     }
 
     public virtual void Update()
@@ -37,6 +36,8 @@ public abstract class WeaponBase
             {
                 CurrentAmmo = MagazineSize;
                 IsReloading = false;
+                // 发布装填结束事件
+                EventCenter.Instance.Publish(EventID.Combat_Reloaded, this);
             }
         }
     }
@@ -53,16 +54,19 @@ public abstract class WeaponBase
         // 否则 开始装填
         IsReloading = true;
         _reloadTimer = ReloadTime;
-        // 播放装填动画
-        _animator?.SetTrigger("Reload");
+        // 发布装填开始事件
+        EventCenter.Instance.Publish(EventID.Combat_Reloading, this);
     }
 
     /// 能否开火
-    protected bool CanFire()
+    public bool CanFire
     {
-        return !IsReloading
+        get
+        {
+            return !IsReloading
             && CurrentAmmo > 0
             && _fireCooldown <= 0f;
+        }
     }
 
     /// 消耗弹药

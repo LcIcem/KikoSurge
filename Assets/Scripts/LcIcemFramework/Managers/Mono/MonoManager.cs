@@ -43,6 +43,20 @@ public class MonoManager : Singleton<MonoManager>
         _controller.RemoveUpdateListener(action);
     }
 
+    /// <summary>注册 FixedUpdate 帧回调。</summary>
+    /// <param name="action">无参无返回的回调方法。</param>
+    public void AddFixedUpdateListener(UnityAction action)
+    {
+        _controller.AddFixedUpdateListener(action);
+    }
+
+    /// <summary>取消注册 FixedUpdate 帧回调，需与 AddFixedUpdateListener 配对使用。</summary>
+    /// <param name="action">已注册的回调方法引用。</param>
+    public void RemoveFixedUpdateListener(UnityAction action)
+    {
+        _controller.RemoveFixedUpdateListener(action);
+    }
+
     /// <summary>启动协程。</summary>
     /// <param name="routine">协程方法。</param>
     /// <returns>Coroutine 实例，可用于 StopCoroutine。</returns>

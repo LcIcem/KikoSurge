@@ -12,11 +12,11 @@ public class GunWeapon : WeaponBase
     public float Spread { get; set; } = 2f;         // 散布角度（度）
     public float Range { get; set; } = 50f;         // 射程
 
-    public GunWeapon(Player owner, Animator animator) : base(owner, animator)
+    public GunWeapon(Player owner) : base(owner)
     {
         Type = WeaponType.Gun;
         Damage = 10f;
-        FireRate = 0.15f;
+        FireRate = 0.2f;
         ReloadTime = 1.5f;
         MagazineSize = 30;
         CurrentAmmo = MagazineSize;
@@ -24,12 +24,9 @@ public class GunWeapon : WeaponBase
 
     public override void Fire(Vector3 direction)
     {
-        if (!CanFire()) return;
+        if (!CanFire) return;
 
         ConsumeAmmo();
-
-        // 驱动射击动画（由 AnimatorController 播放）
-        _animator?.SetTrigger("Fire");
 
         // 应用散布
         float spreadRad = Spread * Mathf.Deg2Rad;
@@ -45,13 +42,28 @@ public class GunWeapon : WeaponBase
 
     protected virtual void SpawnBullet(Vector3 direction)
     {
-        // 从对象池获取子弹（字符串 API：prefab名, 位置, 旋转）
-        string bulletName = BulletPrefab != null ? BulletPrefab.name : "Bullet";
+        if (BulletPrefab == null)
+        {
+            Debug.LogError("[GunWeapon] 子弹预设体为null");
+            return;
+        }
 
+        // 从对象池获取子弹（字符串 API：prefab名, 位置, 旋转）
+        string bulletName = BulletPrefab.name;
         Vector3 spawnPos = _owner.transform.position + direction * 1f;
         GameObject bulletObj = ManagerHub.Pool.Get(bulletName, spawnPos, Quaternion.identity);
+        if (bulletObj == null) {
+            Debug.LogError("[GunWeapon] 子弹获取失败");
+            return;
+        }
+
         var bullet = bulletObj.GetComponent<Bullet>();
-        bullet.Init(bulletName, Damage, direction, BulletSpeed, Range);
+        if (bullet == null)
+        {
+            Debug.LogError($"[GunWeapon] Bullet component not found on pooled object '{bulletName}'.");
+            return;
+        }
+        bullet.Init(Damage, direction, BulletSpeed, Range);
 
         // 发布事件
         EventCenter.Instance.Publish(EventID.Combat_BulletSpawned,

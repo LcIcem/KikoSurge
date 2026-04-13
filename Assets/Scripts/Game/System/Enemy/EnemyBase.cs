@@ -2,6 +2,7 @@ using System.Collections;
 using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
 using LcIcemFramework.Managers.Pool;
+using Pathfinding;
 using UnityEngine;
 
 /// <summary>
@@ -103,7 +104,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
         HP -= damage;
 
         EventCenter.Instance.Publish(EventID.Combat_EnemyDamaged,
-            new EnemyDamagedParams { enemy = this, damage, currentHP = HP });
+            new EnemyDamagedParams { enemy = this, damage = damage, currentHP = HP });
 
         if (HP <= 0f)
         {
@@ -131,7 +132,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     }
 
     // 寻路
-    public void MoveTo(Vector3 target)
+    public void MoveTo(Transform target)
     {
         if (_aiPath != null)
         {
@@ -140,7 +141,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
         else
         {
             // 备用：手动移动
-            Vector2 dir = (target - transform.position).normalized;
+            Vector2 dir = ((Vector3)target.position - transform.position).normalized;
             _rigidbody.MovePosition(_rigidbody.position + dir * MoveSpeed * Time.deltaTime);
         }
     }
