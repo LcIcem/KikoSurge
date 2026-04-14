@@ -2,6 +2,7 @@ using System.Collections;
 using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
 using LcIcemFramework.Managers.Pool;
+using LcIcemFramework.Managers.Timer;
 using UnityEngine;
 
 /// <summary>
@@ -26,6 +27,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
     protected Animator _animator;
     protected EnemyFSM _fsm;
     protected EnemyPathfinder _pathfinder;
+
+    // 颜色缓存
+    private Color _tmpColor;
 
     // 目标引用
     [HideInInspector]
@@ -52,10 +56,12 @@ public class EnemyBase : MonoBehaviour, IPoolable
     protected virtual void Awake()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
-        _sprite = GetComponentInChildren<SpriteRenderer>();
+        _sprite = transform.Find("Sprite").GetComponent<SpriteRenderer>();
         _animator = GetComponent<Animator>();
         _pathfinder = GetComponent<EnemyPathfinder>();
         _fsm = new EnemyFSM(this, _animator);
+        // 缓存颜色
+        _tmpColor = _sprite.color;
     }
 
     protected virtual void Update()
@@ -67,8 +73,8 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _fsm.Update();
     }
 
-    // ========== 初始化（从对象池取出时调用） ==========
-    public void Init(EnemyConfig config)
+    // 初始化（从对象池取出时调用）
+    public void Init(EnemyDefBase config)
     {
         MaxHP = config.MaxHP;
         HP = MaxHP;
@@ -83,8 +89,12 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // IPoolable
     public void OnSpawn()
     {
+        // 重置死亡标记
+        _fsm.SetAnimatorBool("dead", false);
+        _fsm.CheckTrigger("dead"); // 重置 FSM 内部的 dead trigger
+        // 重置碰撞器
+        GetComponent<Collider2D>().enabled = true;
         _player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        Debug.Log($"[OnSpawn] _player = {_player}");  // 加这行
         _fsm.Start();
     }
 
@@ -97,6 +107,14 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public virtual void TakeDamage(float damage)
     {
         if (!IsAlive) return;
+
+        // 显示受击颜色
+        _sprite.color = new Color(_tmpColor.r, _tmpColor.g, _tmpColor.b, 125);
+        // 0.5秒后恢复原来颜色
+        TimerManager.Instance.AddTimeOutUnscaled(0.2f, () =>
+        {
+            _sprite.color = _tmpColor;
+        });
 
         HP -= damage;
 
@@ -113,7 +131,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 死亡处理
     protected virtual void Die()
     {
-        _fsm.SetTrigger("Dead");
+        _fsm.SetAnimatorBool("dead", true);
 
         EventCenter.Instance.Publish(EventID.Combat_EnemyKilled,
             new EnemyKilledParams { enemy = this, position = transform.position });
@@ -131,10 +149,8 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 开始寻路到目标
     public void ChaseTarget()
     {
-        Debug.Log("开始Chase");
         if (_pathfinder != null)
         {
-            Debug.Log("开始使用Pathfinder");
             _pathfinder.StartMoveTo(_player.transform);
         }
         else

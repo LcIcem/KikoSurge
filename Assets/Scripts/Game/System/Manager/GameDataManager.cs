@@ -21,15 +21,21 @@ public class GameDataManager : SingletonMono<GameDataManager>
     private Dictionary<int, WeaponDefBase> _weaponConfigDict = new();
     public Dictionary<int, WeaponDefBase> WeaponConfigDict => _weaponConfigDict;
 
+    // 敌人配置字典：Key = EnemyId, Value = 配置SO
+    private Dictionary<int, EnemyDefBase> _enemyConfigDict = new();
+    public Dictionary<int, EnemyDefBase> EnemyConfigDict => _enemyConfigDict;
+
 
     protected override void Init()
     {
         // 加载角色信息
         ManagerHub.Addressables.LoadAsync<RoleInfo_SO>("RoleInfo_SO", OnRoleInfoLoaded);
 
-        // 加载武器配置
-        ManagerHub.Addressables.LoadAsync<GunWeaponDef_SO>("GunWeaponDef_SO", so => OnWeaponDefLoaded(so));
-        ManagerHub.Addressables.LoadAsync<ShotgunWeaponDef_SO>("ShotgunWeaponDef_SO", so => OnWeaponDefLoaded(so));
+        // 加载武器配置（统一SO）
+        ManagerHub.Addressables.LoadAsync<AllWeaponDefs_SO>("AllWeaponDefs_SO", OnAllWeaponDefsLoaded);
+
+        // 加载敌人配置（统一SO）
+        ManagerHub.Addressables.LoadAsync<AllEnemyDefs_SO>("AllEnemyDefs_SO", OnAllEnemyDefsLoaded);
     }
 
     private void Start() {
@@ -102,20 +108,29 @@ public class GameDataManager : SingletonMono<GameDataManager>
     #region WeaponData武器配置相关
 
     /// <summary>
-    /// 武器配置加载完毕回调
+    /// 所有武器配置加载完毕回调
     /// </summary>
-    private void OnWeaponDefLoaded(WeaponDefBase so)
+    private void OnAllWeaponDefsLoaded(AllWeaponDefs_SO so)
     {
-        if (so == null) return;
-
-        if (_weaponConfigDict.ContainsKey(so.WeaponId))
+        if (so == null || so.weaponDefs == null)
         {
-            LogError($"武器ID冲突: {so.WeaponId}");
+            LogError("武器配置加载失败");
             return;
         }
 
-        _weaponConfigDict[so.WeaponId] = so;
-        Log($"武器配置加载完成: ID={so.WeaponId}, Name={so.WeaponName}");
+        foreach (var weaponDef in so.weaponDefs)
+        {
+            if (weaponDef == null) continue;
+
+            if (_weaponConfigDict.ContainsKey(weaponDef.WeaponId))
+            {
+                LogError($"武器ID冲突: {weaponDef.WeaponId}");
+                continue;
+            }
+
+            _weaponConfigDict[weaponDef.WeaponId] = weaponDef;
+            Log($"武器配置加载完成: ID={weaponDef.WeaponId}, Name={weaponDef.WeaponName}");
+        }
     }
 
     /// <summary>
@@ -126,6 +141,47 @@ public class GameDataManager : SingletonMono<GameDataManager>
         if (_weaponConfigDict.TryGetValue(weaponId, out var config))
             return config;
         LogWarning($"未找到武器配置: ID={weaponId}");
+        return null;
+    }
+
+    #endregion
+
+    #region EnemyData敌人配置相关
+
+    /// <summary>
+    /// 所有敌人配置加载完毕回调
+    /// </summary>
+    private void OnAllEnemyDefsLoaded(AllEnemyDefs_SO so)
+    {
+        if (so == null || so.enemyDefs == null)
+        {
+            LogError("敌人配置加载失败");
+            return;
+        }
+
+        foreach (var enemyDef in so.enemyDefs)
+        {
+            if (enemyDef == null) continue;
+
+            if (_enemyConfigDict.ContainsKey(enemyDef.EnemyId))
+            {
+                LogError($"敌人ID冲突: {enemyDef.EnemyId}");
+                continue;
+            }
+
+            _enemyConfigDict[enemyDef.EnemyId] = enemyDef;
+            Log($"敌人配置加载完成: ID={enemyDef.EnemyId}, Name={enemyDef.EnemyName}");
+        }
+    }
+
+    /// <summary>
+    /// 根据敌人ID获取敌人配置（O(1) 查找）
+    /// </summary>
+    public EnemyDefBase GetEnemyConfig(int enemyId)
+    {
+        if (_enemyConfigDict.TryGetValue(enemyId, out var config))
+            return config;
+        LogWarning($"未找到敌人配置: ID={enemyId}");
         return null;
     }
 

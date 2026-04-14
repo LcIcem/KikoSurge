@@ -32,8 +32,11 @@ public class EnemyFSM : FSM
         AddState(Attack);
         AddState(Dead);
 
-        // 配置转换条件
+        AddTrigger("dead");
+
+        // 配置转换条件（带缓冲区间防止震荡）
         EnemyBase enemy = Owner as EnemyBase;
+
 
         // Entry → Idle
         AddTransition(EntryState, Idle, () => true);
@@ -44,14 +47,14 @@ public class EnemyFSM : FSM
         // Chase → Attack
         AddTransition(Chase, Attack, () => enemy.DistanceToPlayer < enemy.AttackRange);
 
-        // Chase → Idle（脱离追踪范围）
+        // Chase → Idle
         AddTransition(Chase, Idle, () => enemy.DistanceToPlayer > enemy.LoseRange);
 
         // Attack → Chase（脱离攻击范围）
         AddTransition(Attack, Chase, () => enemy.DistanceToPlayer >= enemy.AttackRange);
 
         // Any → Dead（任意状态可死亡）
-        AddAnyTransition(Dead, () => CheckTrigger("Dead"));
+        AddAnyTransition(Dead, () => CheckTrigger("dead"));
     }
 
     // 驱动 Animator Bool 参数

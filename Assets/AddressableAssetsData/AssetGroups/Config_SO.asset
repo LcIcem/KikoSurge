@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2b2f1ec96d1accf40b678afd21ad4de4
+    m_Address: AllEnemyDefs_SO
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4ad6cd1c1d4fa0f4682cb4fb0fb9a845
     m_Address: TileInfo_SO
     m_ReadOnly: 0
@@ -35,13 +40,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: db3972d82b88c374d856fbbd658b385f
-    m_Address: GunWeaponDef_SO
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f2b10aff3415327449cde75e67fd5782
-    m_Address: ShotgunWeaponDef_SO
+  - m_GUID: ebd1b180297804342a7b459248516608
+    m_Address: AllWeaponDefs_SO
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -15,7 +15,7 @@ MonoBehaviour:
   WeaponId: 101
   WeaponName: "\u5355\u53D1\u67AA\u68B0"
   Type: 0
-  Damage: 10
+  Damage: 2
   FireRate: 0.15
   ReloadTime: 1
   MagazineSize: 20
