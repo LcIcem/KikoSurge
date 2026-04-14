@@ -21,6 +21,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public float LoseRange { get; protected set; }
     public bool IsAlive => HP > 0f;
     public EnemyType Type { get; protected set; }
+    public int RoomId { get; set; } = -1;
 
     // 组件
     protected Rigidbody2D _rigidbody;

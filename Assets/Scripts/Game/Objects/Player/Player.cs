@@ -82,17 +82,6 @@ public class Player : MonoBehaviour
             });
         }
 
-        // 调试
-        // 生成敌人
-        var enemyConfig = GameDataManager.Instance.GetEnemyConfig(101);
-        if (enemyConfig != null)
-        {
-            EnemyFactory.Instance.Create(enemyConfig, transform.position + Vector3.right * 2f, enemy =>
-            {
-                Debug.Log("敌人已经生成");
-            });
-        }
-
         // 订阅事件
         EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloaded, OnReloaded);

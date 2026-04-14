@@ -23,6 +23,10 @@ public class LevelController : MonoBehaviour
     [Header("Tilemap 引用")]
     [SerializeField] private Tilemap _floorTilemap;
 
+    [Header("房间行为配置")]
+    [SerializeField] private RoomBehaviorTable_SO _roomBehaviorTable;
+
+    private RoomController _roomController;
     private PlayerHandler _playerHandler;
 
     private DungeonBuilder _builder;
@@ -42,7 +46,16 @@ public class LevelController : MonoBehaviour
         if (_builder == null)
             _builder = gameObject.AddComponent<DungeonBuilder>();
 
+        _roomController = new RoomController();
         _playerHandler = new PlayerHandler();
+    }
+
+    private void Update()
+    {
+        if (_roomController != null && _playerHandler.PlayerInstance != null)
+        {
+            _roomController.CheckAndSpawnInRoom(_playerHandler.PlayerInstance.transform.position);
+        }
     }
 
     /// <summary>
@@ -64,6 +77,9 @@ public class LevelController : MonoBehaviour
 
         _builder.Build(GetCurrentLayerModel(), _rng);
 
+        // 初始化 RoomController
+        _roomController.Initialize(_builder.GetTileData(), _roomBehaviorTable, _rng);
+
         // 获取起始位置并创建玩家
         Vector3 startWorldPos = GetStartRoomWorldPos();
         _playerHandler.CreatePlayer(startWorldPos);
@@ -72,7 +88,7 @@ public class LevelController : MonoBehaviour
     }
 
     /// <summary>
-    /// 进入下一层（R 键触发）
+    /// 进入下一层
     /// </summary>
     public void EnterNextLayer()
     {
@@ -94,6 +110,9 @@ public class LevelController : MonoBehaviour
 
         // 构建新地牢
         _builder.Build(GetCurrentLayerModel(), _rng);
+
+        // 重新初始化 RoomController
+        _roomController.Initialize(_builder.GetTileData(), _roomBehaviorTable, _rng);
 
         // 获取新地牢的起始位置并激活玩家
         Vector3 startWorldPos = GetStartRoomWorldPos();
