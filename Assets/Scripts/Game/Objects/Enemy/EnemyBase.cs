@@ -20,6 +20,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public float AttackRange { get; protected set; }
     public float LoseRange { get; protected set; }
     public bool IsAlive => HP > 0f;
+    public EnemyType Type { get; protected set; }
 
     // 组件
     protected Rigidbody2D _rigidbody;
@@ -76,6 +77,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 初始化（从对象池取出时调用）
     public void Init(EnemyDefBase config)
     {
+        Type = config.Type;
         MaxHP = config.MaxHP;
         HP = MaxHP;
         MoveSpeed = config.MoveSpeed;
@@ -133,6 +135,8 @@ public class EnemyBase : MonoBehaviour, IPoolable
     {
         _fsm.SetAnimatorBool("dead", true);
 
+        _rigidbody.linearVelocity = Vector2.zero;
+        StopChaseTarget();
         EventCenter.Instance.Publish(EventID.Combat_EnemyKilled,
             new EnemyKilledParams { enemy = this, position = transform.position });
 

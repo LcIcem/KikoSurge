@@ -7,7 +7,7 @@ public static class GameConstants
 {
     // 物理
     public const float GRAVITY = 0f; // 俯视角无重力
-    public const float PIXEL_PER_UNIT = 16f; // PPU = 16
+    public const float PIXEL_PER_UNIT = 32f; // PPU = 16
 
     // 游戏数值
     public const int MAX_ENEMY_COUNT = 30;
@@ -20,5 +20,8 @@ public static class GameConstants
 
     // 输入
     public const float MOUSE_SENSITIVITY = 1f; // 鼠标灵敏度
+
+    // 掉落物品的Addressables地址
+    public const string LOOT_ITEM_PREFAB_ADDRESS = "LootItem";
 }
 }

@@ -25,6 +25,10 @@ public class GameDataManager : SingletonMono<GameDataManager>
     private Dictionary<int, EnemyDefBase> _enemyConfigDict = new();
     public Dictionary<int, EnemyDefBase> EnemyConfigDict => _enemyConfigDict;
 
+    // 掉落表字典：Key = EnemyType, Value = LootTable_SO
+    private Dictionary<EnemyType, LootTable_SO> _lootTableDict = new();
+    public Dictionary<EnemyType, LootTable_SO> LootTableDict => _lootTableDict;
+
 
     protected override void Init()
     {
@@ -36,6 +40,9 @@ public class GameDataManager : SingletonMono<GameDataManager>
 
         // 加载敌人配置（统一SO）
         ManagerHub.Addressables.LoadAsync<AllEnemyDefs_SO>("AllEnemyDefs_SO", OnAllEnemyDefsLoaded);
+
+        // 加载掉落表配置（统一SO）
+        ManagerHub.Addressables.LoadAsync<AllLootTables_SO>("AllLootTables_SO", OnAllLootTablesLoaded);
     }
 
     private void Start() {
@@ -182,6 +189,46 @@ public class GameDataManager : SingletonMono<GameDataManager>
         if (_enemyConfigDict.TryGetValue(enemyId, out var config))
             return config;
         LogWarning($"未找到敌人配置: ID={enemyId}");
+        return null;
+    }
+
+    #endregion
+
+    #region LootData掉落表配置相关
+
+    /// <summary>
+    /// 所有掉落表配置加载完毕回调
+    /// </summary>
+    private void OnAllLootTablesLoaded(AllLootTables_SO so)
+    {
+        if (so == null || so.lootTables == null)
+        {
+            LogError("掉落表配置加载失败");
+            return;
+        }
+
+        foreach (var table in so.lootTables)
+        {
+            if (table == null) continue;
+
+            if (_lootTableDict.ContainsKey(table.EnemyType))
+            {
+                LogWarning($"掉落表重复: {table.EnemyType}");
+                continue;
+            }
+
+            _lootTableDict[table.EnemyType] = table;
+            Log($"掉落表加载完成: EnemyType={table.EnemyType}, Entries={table.Entries.Count}");
+        }
+    }
+
+    /// <summary>
+    /// 根据敌人类型获取掉落表
+    /// </summary>
+    public LootTable_SO GetLootTable(EnemyType enemyType)
+    {
+        if (_lootTableDict.TryGetValue(enemyType, out var table))
+            return table;
         return null;
     }
 

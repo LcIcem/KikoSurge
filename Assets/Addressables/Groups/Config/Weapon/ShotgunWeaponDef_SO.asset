@@ -22,7 +22,7 @@ MonoBehaviour:
   RecoilForce: 10
   WeaponPrefabAddress: Bow
   BulletPrefabAddress: Bullet
-  BulletSpeed: 20
+  BulletSpeed: 60
   PelletCount: 6
   SpreadAngle: 30
   FalloffStart: 5
