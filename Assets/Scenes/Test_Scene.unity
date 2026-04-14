@@ -778,52 +778,6 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
---- !u!1 &1033683878
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1033683880}
-  - component: {fileID: 1033683881}
-  m_Layer: 0
-  m_Name: PlayerHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1033683880
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1033683878}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.60336, y: 0.65779, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1033683881
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1033683878}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42fa06f97a1caee488d68b71c84f5e8e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHandler
-  _floorTilemap: {fileID: 642803664}
-  _gameEntry: {fileID: 1366556452}
 --- !u!1 &1366556451
 GameObject:
   m_ObjectHideFlags: 0
@@ -834,30 +788,14 @@ GameObject:
   m_Component:
   - component: {fileID: 1366556454}
   - component: {fileID: 1366556453}
-  - component: {fileID: 1366556452}
-  - component: {fileID: 1366556455}
+  - component: {fileID: 1366556456}
   m_Layer: 0
-  m_Name: GameEntry
+  m_Name: LevelController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1366556452
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1366556451}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ca734fb8624e1142a56d8cdd2cf0668, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameEntry
-  _dungeonModel: {fileID: 11400000, guid: 5cf029b7d503ffa4699240e59bd8c353, type: 2}
-  _seed: 0
-  playerHandler: {fileID: 1033683881}
 --- !u!114 &1366556453
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -874,7 +812,6 @@ MonoBehaviour:
   _wallTilemap: {fileID: 1629354999}
   _doorTilemap: {fileID: 1947829663}
   _tileInfo: {fileID: 11400000, guid: 4ad6cd1c1d4fa0f4682cb4fb0fb9a845, type: 2}
-  _dungeonModel: {fileID: 0}
 --- !u!4 &1366556454
 Transform:
   m_ObjectHideFlags: 0
@@ -890,7 +827,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1366556455
+--- !u!114 &1366556456
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -899,67 +836,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1366556451}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Script: {fileID: 11500000, guid: c671ffb580838b442821316f9de250fd, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
-  m_Actions: {fileID: -944628639613478452, guid: c4d66cd126c1efa47ac41743f5eac3f4, type: 3}
-  m_NotificationBehavior: 2
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents:
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1366556452}
-        m_TargetAssemblyTypeName: GameEntry, Assembly-CSharp
-        m_MethodName: OnPressRBtn
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 90f06b96-5113-4e5d-a6e9-20c5df2b6a58
-    m_ActionName: 'UI/Restart[/Keyboard/r]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: b7bf890a-f22f-4d2d-8119-b20efca6595c
-    m_ActionName: 'UI/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: e7d6754f-e2b5-4478-be08-0d65973fd090
-    m_ActionName: 'UI/Fire[/Mouse/leftButton]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 2733fbc2-c98d-4042-9ec5-e9b8ced62f15
-    m_ActionName: 'UI/SwitchWeapon[/Keyboard/1]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 77a8a445-d518-45d8-91cf-dbd419faa142
-    m_ActionName: 'UI/Dash[/Keyboard/leftShift]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: add9865a-078f-435c-a250-7ccf690a0ce9
-    m_ActionName: 'UI/Hurt[/Keyboard/1]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: b6928e56-258a-41ed-bc10-fb39cacfda5c
-    m_ActionName: 'UI/Dead[/Keyboard/2]'
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
-  m_DefaultActionMap: UI
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::LevelController
+  _dungeonModels:
+  - {fileID: 11400000, guid: 5cf029b7d503ffa4699240e59bd8c353, type: 2}
+  - {fileID: 11400000, guid: 5cf029b7d503ffa4699240e59bd8c353, type: 2}
+  - {fileID: 11400000, guid: 1890941cf1c30ab449c6a37d58bfd831, type: 2}
+  _floorTilemap: {fileID: 642803664}
+  _roomBehaviorTable: {fileID: 11400000, guid: 81931ea53afc2bb49b3ba6baa4b33769, type: 2}
+  _checkpointPrefab: {fileID: 140860234070293769, guid: d86705153f4c96f4abf28e9638d742ef, type: 3}
 --- !u!1 &1459324918
 GameObject:
   m_ObjectHideFlags: 0
@@ -1921,7 +1807,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 2.8125
+  orthographic size: 3.75
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -2008,6 +1894,52 @@ MonoBehaviour:
   m_CropFrameX: 0
   m_CropFrameY: 0
   m_StretchFill: 0
+--- !u!1 &2018529839
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2018529841}
+  - component: {fileID: 2018529840}
+  m_Layer: 0
+  m_Name: GameLifeCycleManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2018529840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018529839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a71b8ac602d78d44ab0979b8dc9ce17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameLifecycleManager
+  _levelController: {fileID: 1366556456}
+  _debugSeed: 12345
+--- !u!4 &2018529841
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018529839}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -5.25929, y: 1.08813, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2016,10 +1948,10 @@ SceneRoots:
   - {fileID: 1964034687}
   - {fileID: 1630199663}
   - {fileID: 1366556454}
-  - {fileID: 1033683880}
   - {fileID: 353920868}
   - {fileID: 636862318}
   - {fileID: 639524670}
   - {fileID: 63678939}
   - {fileID: 1753982137}
   - {fileID: 1686833806}
+  - {fileID: 2018529841}

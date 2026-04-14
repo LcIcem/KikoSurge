@@ -22,11 +22,11 @@ MonoBehaviour:
   - type: 3
     tile: {fileID: 11400000, guid: 03514b77c9d4b5647ac3c7f1571b127a, type: 2}
   - type: 4
-    tile: {fileID: 0}
+    tile: {fileID: 11400000, guid: 37dbd47bb6364a447805d74dc81186f5, type: 2}
   - type: 5
     tile: {fileID: 0}
   - type: 6
-    tile: {fileID: 0}
+    tile: {fileID: 11400000, guid: 91315630dcf28e54d85a40d00a7e6804, type: 2}
   - type: 7
     tile: {fileID: 0}
   - type: 9
