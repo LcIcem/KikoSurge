@@ -12,6 +12,9 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
     // 对象池（通过 PoolManager 管理，这里只做统计）
     private readonly Dictionary<EnemyType, int> _spawnedCounts = new();
 
+    // 追踪所有活跃敌人（用于切换层时清理）
+    private readonly HashSet<EnemyBase> _activeEnemies = new();
+
     protected override void Init()
     {
         // 懒初始化
@@ -45,6 +48,9 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
         // 使用配置初始化敌人
         enemy.Init(config);
 
+        // 追踪活跃敌人
+        _activeEnemies.Add(enemy);
+
         // 统计
         if (_spawnedCounts.ContainsKey(config.Type))
             _spawnedCounts[config.Type]++;
@@ -64,6 +70,9 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
     {
         if (enemy == null) return;
 
+        // 移除追踪
+        _activeEnemies.Remove(enemy);
+
         // 统计
         EnemyDefBase config = GetEnemyConfigByEnemy(enemy);
         if (config != null && _spawnedCounts.ContainsKey(config.Type))
@@ -74,6 +83,20 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
         }
 
         ManagerHub.Pool.Release(enemy.gameObject);
+    }
+
+    /// <summary>
+    /// 释放所有活跃敌人（切换层时调用）
+    /// </summary>
+    public void ReleaseAll()
+    {
+        foreach (var enemy in _activeEnemies)
+        {
+            if (enemy != null)
+                enemy.ReleaseImmediately();
+        }
+        _activeEnemies.Clear();
+        _spawnedCounts.Clear();
     }
 
     /// <summary>

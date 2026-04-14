@@ -272,6 +272,20 @@ public class PoolManager : SingletonMono<PoolManager>
             }
             GameObject prefab = AddressablesManager.Instance.Load<GameObject>(prefabName);
             obj = Instantiate(prefab, _parents[prefabName]);
+
+            // 手动注册到池的追踪系统
+            lock (_lock)
+            {
+                if (_activeCounts.ContainsKey(prefabName))
+                    _activeCounts[prefabName]++;
+                else
+                    _activeCounts[prefabName] = 1;
+                _objToPoolName[obj] = prefabName;
+            }
+
+            // 调用 OnSpawn
+            if (obj.TryGetComponent<IPoolable>(out var poolable))
+                poolable.OnSpawn();
         }
 
         obj.transform.position = position;

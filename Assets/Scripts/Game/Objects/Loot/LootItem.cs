@@ -47,6 +47,10 @@ public class LootItem : MonoBehaviour, IPoolable
     // 数量
     public int Quantity { get; private set; }
 
+    // 保存的初始化参数（用于池化后重置）
+    private LootItemDefBase _savedItemDef;
+    private int _savedQuantity;
+
     // 视觉组件
     private SpriteRenderer _spriteRenderer;
     private BoxCollider2D _collider;
@@ -63,6 +67,8 @@ public class LootItem : MonoBehaviour, IPoolable
     /// </summary>
     public void Initialize(LootItemDefBase itemDef, int quantity)
     {
+        _savedItemDef = itemDef;
+        _savedQuantity = quantity;
         ItemDef = itemDef;
         Quantity = quantity;
         _canPickup = false;
@@ -163,12 +169,20 @@ public class LootItem : MonoBehaviour, IPoolable
     // IPoolable: 对象从池中取出时调用
     public void OnSpawn()
     {
+        // 重新初始化（使用保存的参数）
+        if (_savedItemDef != null)
+        {
+            Initialize(_savedItemDef, _savedQuantity);
+        }
+
         StopAllCoroutines();
         _canPickup = false;
         _blinkCoroutine = null;
         _floatCoroutine = null;
+
         // 重置位置
         transform.position = _basePosition;
+
         // 重置颜色
         if (_spriteRenderer != null)
         {

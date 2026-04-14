@@ -553,6 +553,9 @@ namespace ProcGen.Generator
             if (goalRoom.id != startId)
                 goalRoom.roomType = RoomType.Goal;
 
+            // 确保 Boss 房间是终点的前一个房间
+            EnsureBossIsBeforeGoal(startId, goalRoom.id);
+
             if (_config.eliteRoomCount == 0 && _config.eliteExtraChance > 0)
             {
                 foreach (var room in _rooms)
@@ -564,6 +567,78 @@ namespace ProcGen.Generator
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 确保 Boss 房间是终点的前一个房间（从起点到终点的路径上）
+        /// 如果存在 Boss 房间但不在该位置，则与终点前一个房间交换类型
+        /// </summary>
+        private void EnsureBossIsBeforeGoal(int startId, int goalId)
+        {
+            Room bossRoom = FindBossRoom();
+            if (bossRoom == null)
+                return;
+
+            Room goalPredecessor = FindGoalPredecessor(startId, goalId);
+            if (goalPredecessor == null)
+                return;
+
+            // 如果 Boss 房间已经在终点前一个位置，不需要处理
+            if (bossRoom.id == goalPredecessor.id)
+                return;
+
+            // 交换类型：Boss 房间变为终点前一个房间的类型，终点前一个房间变为 Boss
+            var predecessorType = goalPredecessor.roomType;
+            goalPredecessor.roomType = RoomType.Boss;
+            bossRoom.roomType = predecessorType;
+        }
+
+        /// <summary>
+        /// 查找 Boss 房间
+        /// </summary>
+        private Room FindBossRoom()
+        {
+            foreach (var room in _rooms)
+            {
+                if (room.roomType == RoomType.Boss)
+                    return room;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 查找从起点到终点的路径中，终点的前一个房间
+        /// </summary>
+        private Room FindGoalPredecessor(int startId, int goalId)
+        {
+            // BFS 记录每个节点的父节点
+            var parent = new Dictionary<int, int>();
+            var queue = new Queue<int>();
+            queue.Enqueue(startId);
+            parent[startId] = -1;
+
+            while (queue.Count > 0)
+            {
+                int current = queue.Dequeue();
+                if (current == goalId)
+                    break;
+
+                Room room = FindRoom(current);
+                foreach (int neighborId in room.connectedRoomIds)
+                {
+                    if (!parent.ContainsKey(neighborId))
+                    {
+                        parent[neighborId] = current;
+                        queue.Enqueue(neighborId);
+                    }
+                }
+            }
+
+            // 返回终点的父节点（路径上的前一个房间）
+            if (parent.TryGetValue(goalId, out int predecessorId) && predecessorId != -1)
+                return FindRoom(predecessorId);
+
+            return null;
         }
 
         private int FindStartRoomId()

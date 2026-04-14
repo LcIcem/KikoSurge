@@ -19,6 +19,9 @@ public class LootManager : SingletonMono<LootManager>
     // 武器工厂
     private WeaponFactory _weaponFactory;
 
+    // 追踪所有活跃掉落物（用于切换层时清理）
+    private readonly HashSet<LootItem> _activeLootItems = new();
+
     protected override void Init()
     {
         // 不在此处初始化，等待 Start() 确保所有 Manager 已完成 Awake
@@ -100,7 +103,21 @@ public class LootManager : SingletonMono<LootManager>
         }
 
         lootItem.Initialize(itemDef, quantity);
+        _activeLootItems.Add(lootItem);
         Log($"掉落物品: {itemDef.ItemName} x{quantity} at {position}");
+    }
+
+    /// <summary>
+    /// 清理所有掉落物（切换层时调用）
+    /// </summary>
+    public void ClearAll()
+    {
+        foreach (var lootItem in _activeLootItems)
+        {
+            if (lootItem != null)
+                ManagerHub.Pool.Release(lootItem.gameObject);
+        }
+        _activeLootItems.Clear();
     }
 
     /// <summary>

@@ -23,6 +23,12 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public EnemyType Type { get; protected set; }
     public int RoomId { get; set; } = -1;
 
+    // 保存的配置引用（用于池化后重置）
+    private EnemyDefBase _config;
+
+    // 防止重复释放的标记
+    private bool _isReleased;
+
     // 组件
     protected Rigidbody2D _rigidbody;
     protected SpriteRenderer _sprite;
@@ -78,6 +84,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 初始化（从对象池取出时调用）
     public void Init(EnemyDefBase config)
     {
+        _config = config;
         Type = config.Type;
         MaxHP = config.MaxHP;
         HP = MaxHP;
@@ -92,12 +99,30 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // IPoolable
     public void OnSpawn()
     {
+        // 重置释放标记
+        _isReleased = false;
+
+        // 重新初始化（使用保存的配置）
+        if (_config != null)
+        {
+            Init(_config);
+        }
+
+        // 重置旋转和速度（位置由 PoolManager.Get 设置，这里不覆盖）
+        transform.localRotation = Quaternion.identity;
+        _rigidbody.linearVelocity = Vector2.zero;
+
         // 重置死亡标记
         _fsm.SetAnimatorBool("dead", false);
         _fsm.CheckTrigger("dead"); // 重置 FSM 内部的 dead trigger
+
         // 重置碰撞器
         GetComponent<Collider2D>().enabled = true;
+
+        // 重置 Player 引用
         _player = GameObject.FindGameObjectWithTag("Player")?.transform;
+
+        // 重启 FSM
         _fsm.Start();
     }
 
@@ -148,6 +173,20 @@ public class EnemyBase : MonoBehaviour, IPoolable
     private IEnumerator DelayRelease()
     {
         yield return new WaitForSeconds(1f);
+        if (!_isReleased)
+        {
+            _isReleased = true;
+            ManagerHub.Pool.Release(gameObject);
+        }
+    }
+
+    // 立即释放到对象池（切换层时调用）
+    public void ReleaseImmediately()
+    {
+        if (_isReleased)
+            return;
+        _isReleased = true;
+        StopAllCoroutines();
         ManagerHub.Pool.Release(gameObject);
     }
 

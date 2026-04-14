@@ -26,6 +26,9 @@ public class LevelController : MonoBehaviour
     [Header("房间行为配置")]
     [SerializeField] private RoomBehaviorTable_SO _roomBehaviorTable;
 
+    [Header("终点检查点预设体")]
+    [SerializeField] private GameObject _checkpointPrefab;
+
     private RoomController _roomController;
     private PlayerHandler _playerHandler;
 
@@ -33,6 +36,7 @@ public class LevelController : MonoBehaviour
     private GameRandom _rng;
     private int _currentLayerIndex;
     private long _sessionSeed;
+    private GameObject _currentCheckpoint;  // 当前检查点
 
     public DungeonGraph CurrentGraph => _builder?.GetGraph();
     public bool IsBuildCompleted => _builder?.IsBuildCompleted ?? false;
@@ -55,6 +59,37 @@ public class LevelController : MonoBehaviour
         if (_roomController != null && _playerHandler.PlayerInstance != null)
         {
             _roomController.CheckAndSpawnInRoom(_playerHandler.PlayerInstance.transform.position);
+        }
+
+        // 检查 E 键按下（检查点交互）
+        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            TryInteractCheckpoint();
+        }
+    }
+
+    /// <summary>
+    /// 尝试与检查点交互
+    /// </summary>
+    private void TryInteractCheckpoint()
+    {
+        if (_currentCheckpoint == null)
+            return;
+
+        Checkpoint checkpoint = _currentCheckpoint.GetComponent<Checkpoint>();
+        if (checkpoint == null || !checkpoint.CanInteract)
+            return;
+
+        checkpoint.Interact();
+
+        if (IsLastLayer)
+        {
+            Debug.Log("[LevelController] 最后一层，关卡完成");
+            EventCenter.Instance.Publish(GameEventID.OnLayerComplete, _currentLayerIndex);
+        }
+        else
+        {
+            EnterNextLayer();
         }
     }
 
@@ -84,6 +119,9 @@ public class LevelController : MonoBehaviour
         Vector3 startWorldPos = GetStartRoomWorldPos();
         _playerHandler.CreatePlayer(startWorldPos);
 
+        // 生成终点检查点
+        SpawnCheckpoint();
+
         EventCenter.Instance.Publish(GameEventID.OnLayerEnter, _currentLayerIndex);
     }
 
@@ -108,6 +146,10 @@ public class LevelController : MonoBehaviour
         // 失活玩家
         _playerHandler.DeactivatePlayer();
 
+        // 清理上一层的敌人和掉落物
+        EnemyFactory.Instance.ReleaseAll();
+        LootManager.Instance.ClearAll();
+
         // 构建新地牢
         _builder.Build(GetCurrentLayerModel(), _rng);
 
@@ -117,6 +159,9 @@ public class LevelController : MonoBehaviour
         // 获取新地牢的起始位置并激活玩家
         Vector3 startWorldPos = GetStartRoomWorldPos();
         _playerHandler.ReactivatePlayer(startWorldPos);
+
+        // 生成终点检查点
+        SpawnCheckpoint();
 
         EventCenter.Instance.Publish(GameEventID.OnLayerEnter, _currentLayerIndex);
     }
@@ -156,6 +201,42 @@ public class LevelController : MonoBehaviour
         Room startRoom = graph.GetRoom(graph.startRoomId);
         Vector2Int center = startRoom.Center;
         return _floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
+    }
+
+    /// <summary>
+    /// 获取终点房间的世界坐标
+    /// </summary>
+    private Vector3 GetGoalRoomWorldPos()
+    {
+        var graph = CurrentGraph;
+        if (graph == null || _floorTilemap == null)
+        {
+            Debug.LogWarning("[LevelController] Graph or Tilemap is null");
+            return Vector3.zero;
+        }
+
+        Room goalRoom = graph.GetRoom(graph.goalRoomId);
+        Vector2Int center = goalRoom.Center;
+        return _floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
+    }
+
+    /// <summary>
+    /// 生成终点检查点
+    /// </summary>
+    private void SpawnCheckpoint()
+    {
+        // 销毁旧的检查点
+        if (_currentCheckpoint != null)
+        {
+            Destroy(_currentCheckpoint);
+            _currentCheckpoint = null;
+        }
+
+        if (_checkpointPrefab == null)
+            return;
+
+        Vector3 goalPos = GetGoalRoomWorldPos();
+        _currentCheckpoint = Instantiate(_checkpointPrefab, goalPos, Quaternion.identity);
     }
 
     /// <summary>
