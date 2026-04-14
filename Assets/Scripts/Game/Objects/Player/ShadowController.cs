@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using LcIcemFramework.Managers;
 using LcIcemFramework.Managers.Pool;
 using UnityEngine;
 using UnityEngine.Events;
@@ -22,7 +23,6 @@ public class ShadowController : MonoBehaviour, IPoolable
     private Queue<bool> flipQueue = new();
     private Vector3 chasePos;
 
-    public UnityAction onCompelete;
 
     void Awake()
     {
@@ -108,6 +108,6 @@ public class ShadowController : MonoBehaviour, IPoolable
                 break;
             }
         }
-        onCompelete?.Invoke();
+        ManagerHub.Pool.Release(gameObject);
     }
 }

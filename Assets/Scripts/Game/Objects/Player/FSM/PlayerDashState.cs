@@ -25,11 +25,6 @@ public class PlayerDashState : StateBase
         // 残影特效
         // ShadowController shadow = ManagerHub.Pool.Get<ShadowController>("Shadow", Vector3.one, Quaternion.identity);
         // shadow.Init(player.GetComponent<SpriteRenderer>());
-        // shadow.onCompelete += () =>
-        // {
-        //     ManagerHub.Pool.Release(shadow.gameObject);
-        //     Debug.Log("销毁" + shadow.gameObject);
-        // };
     }
 
     public override void Exec()

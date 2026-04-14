@@ -74,7 +74,7 @@ public class EnemyPathfinder : MonoBehaviour
         if (p.error) return;
 
         _path = p;
-        _waypointIndex = 0;
+        _waypointIndex = Mathf.Min(1, _path.vectorPath.Count - 1);
     }
 
     // 停止移动

@@ -1094,6 +1094,18 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 2733fbc2-c98d-4042-9ec5-e9b8ced62f15
     m_ActionName: 'UI/SwitchWeapon[/Keyboard/1]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 77a8a445-d518-45d8-91cf-dbd419faa142
+    m_ActionName: 'UI/Dash[/Keyboard/leftShift]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: add9865a-078f-435c-a250-7ccf690a0ce9
+    m_ActionName: 'UI/Hurt[/Keyboard/1]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b6928e56-258a-41ed-bc10-fb39cacfda5c
+    m_ActionName: 'UI/Dead[/Keyboard/2]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: UI

@@ -27,9 +27,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
     protected EnemyFSM _fsm;
     protected EnemyPathfinder _pathfinder;
 
-    // 公开访问器（供外部状态机使用）
-    public EnemyPathfinder Pathfinder => _pathfinder;
-
     // 目标引用
     [HideInInspector]
     public Transform _player;   // 玩家位置程序化生成的，无法在Inspector拖拽
@@ -61,15 +58,12 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _fsm = new EnemyFSM(this, _animator);
     }
 
-    protected virtual void Start()
-    {
-        _player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        _fsm.Start();
-    }
-
     protected virtual void Update()
     {
         if (!IsAlive) return;
+        if (_player == null) {
+            _player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        }
         _fsm.Update();
     }
 
@@ -83,12 +77,14 @@ public class EnemyBase : MonoBehaviour, IPoolable
         DetectRange = config.DetectRange;
         AttackRange = config.AttackRange;
         LoseRange = config.LoseRange;
+        _pathfinder.SetSpeed(MoveSpeed);
     }
 
     // IPoolable
     public void OnSpawn()
     {
         _player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        Debug.Log($"[OnSpawn] _player = {_player}");  // 加这行
         _fsm.Start();
     }
 

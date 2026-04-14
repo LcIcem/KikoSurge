@@ -9,7 +9,6 @@ public class EnemyChaseState : StateBase
 {
     public override void Enter()
     {
-        Debug.Log("进入Chase");
         var enemy = Owner<EnemyBase>();
         // 播放行走动画
         EnemyFSM enemyFSM = _fsm as EnemyFSM;
@@ -28,7 +27,7 @@ public class EnemyChaseState : StateBase
 
     public override void Exit()
     {
-        Debug.Log("退出Chase");
+
         var enemy = Owner<EnemyBase>();
         enemy.StopChaseTarget();
         // 停止行走动画
