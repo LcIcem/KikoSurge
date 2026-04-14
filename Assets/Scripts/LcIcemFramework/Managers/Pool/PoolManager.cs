@@ -79,7 +79,16 @@ public class PoolManager : SingletonMono<PoolManager>
             createFunc: () => Instantiate(prefab, _parents[prefabName]),
             actionOnGet: obj =>
             {
-                obj.SetActive(true);
+                try
+                {
+                    obj.SetActive(true);
+                }
+                catch (MissingReferenceException)
+                {
+                    // 对象已被销毁，创建新的
+                    obj = Instantiate(prefab, _parents[prefabName]);
+                    obj.SetActive(true);
+                }
                 lock (_lock)
                 {
                     if (_activeCounts.ContainsKey(prefabName))
@@ -236,6 +245,35 @@ public class PoolManager : SingletonMono<PoolManager>
         }
 
         GameObject obj = pool.Get();
+
+        // 检查对象是否有效
+        bool isValid = false;
+        try
+        {
+            // 尝试访问 transform 来验证对象是否有效
+            _ = obj.transform;
+            isValid = true;
+        }
+        catch (MissingReferenceException)
+        {
+            isValid = false;
+        }
+
+        if (!isValid)
+        {
+            LogWarning($"池 '{prefabName}' 返回了无效对象，尝试重新加载。");
+            try
+            {
+                pool.Release(obj);
+            }
+            catch (System.Exception)
+            {
+                // 忽略释放失败
+            }
+            GameObject prefab = AddressablesManager.Instance.Load<GameObject>(prefabName);
+            obj = Instantiate(prefab, _parents[prefabName]);
+        }
+
         obj.transform.position = position;
         obj.transform.rotation = rotation;
 

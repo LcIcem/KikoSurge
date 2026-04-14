@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Game.Event;
 using LcIcemFramework.Core;
 using ProcGen.Core;
@@ -11,14 +10,23 @@ using UnityEngine;
 /// </summary>
 public enum RoomState
 {
-    Unvisited,  // 未访问
-    InProgress,  // 进行中（敌人存活）
-    Cleared     // 已清理（敌人全死亡）
+    Unvisited,      // 未访问
+    InProgress,     // 进行中
+    Cleared         // 已清理
+}
+
+/// <summary>
+/// 房间波次状态
+/// </summary>
+public class RoomBehaviorState
+{
+    public List<RoomBehaviorEntry> entries;  // 行为条目列表
+    public int pendingCount;                 // 待完成的行为数
 }
 
 /// <summary>
 /// 房间行为管理器
-/// <para>负责检测玩家进入房间、触发房间行为（生成敌人/宝藏等）、判断房间完成</para>
+/// <para>负责检测玩家进入房间、调用房间行为、判断房间完成</para>
 /// </summary>
 public class RoomController
 {
@@ -27,7 +35,7 @@ public class RoomController
     private GameRandom _rng;
     private int _currentRoomId = -1;
     private readonly Dictionary<int, RoomState> _roomStates = new();
-    private readonly Dictionary<int, List<EnemyBase>> _roomEnemies = new();
+    private readonly Dictionary<int, RoomBehaviorState> _roomBehaviorStates = new();
 
     /// <summary>
     /// 初始化
@@ -39,7 +47,7 @@ public class RoomController
         _rng = rng;
         _currentRoomId = -1;
         _roomStates.Clear();
-        _roomEnemies.Clear();
+        _roomBehaviorStates.Clear();
 
         EventCenter.Instance.Subscribe<EnemyKilledParams>(EventID.Combat_EnemyKilled, OnEnemyKilled);
     }
@@ -65,11 +73,11 @@ public class RoomController
         if (!IsRoomUnvisited(newRoomId))
             return;
 
-        ProcGen.Core.Room room = _tileData.GetRoom(newRoomId);
+        Room room = _tileData.GetRoom(newRoomId);
         if (room == null)
             return;
 
-        VisitRoom(room);
+        VisitRoom(room, playerPos);
     }
 
     private bool IsRoomUnvisited(int roomId)
@@ -77,7 +85,7 @@ public class RoomController
         return !_roomStates.TryGetValue(roomId, out var state) || state == RoomState.Unvisited;
     }
 
-    private void VisitRoom(ProcGen.Core.Room room)
+    private void VisitRoom(Room room, Vector2 playerPos)
     {
         switch (room.roomType)
         {
@@ -90,7 +98,7 @@ public class RoomController
             case RoomType.Elite:
             case RoomType.Boss:
                 _roomStates[room.id] = RoomState.InProgress;
-                SpawnEnemiesForRoom(room);
+                ExecuteRoomBehaviors(room, playerPos);
                 break;
 
             default:
@@ -99,7 +107,7 @@ public class RoomController
         }
     }
 
-    private void SpawnEnemiesForRoom(ProcGen.Core.Room room)
+    private void ExecuteRoomBehaviors(Room room, Vector2 playerPos)
     {
         if (_behaviorTable == null)
         {
@@ -114,65 +122,56 @@ public class RoomController
             return;
         }
 
-        if (!_tileData.TryGetRoomFloorTiles(room.id, out var floorTiles) || floorTiles.Count == 0)
-            return;
+        // 记录行为状态
+        var behaviorState = new RoomBehaviorState
+        {
+            entries = entries,
+            pendingCount = entries.Count
+        };
+        _roomBehaviorStates[room.id] = behaviorState;
 
-        var enemiesInRoom = new List<EnemyBase>();
-
-        // 计算总权重（归一化用）
-        int totalWeight = 0;
+        // 执行每个行为
         foreach (var entry in entries)
         {
-            if (entry.enemyDef != null)
-                totalWeight += entry.weight;
+            entry.OnWaveComplete = () => OnBehaviorComplete(room.id);
+            entry.Execute(room, _tileData, _rng, playerPos);
         }
+    }
 
-        if (totalWeight <= 0)
-        {
-            MarkRoomCleared(room.id);
+    private void OnBehaviorComplete(int roomId)
+    {
+        if (!_roomBehaviorStates.TryGetValue(roomId, out var behaviorState))
             return;
-        }
 
-        foreach (var entry in entries)
+        behaviorState.pendingCount--;
+
+        if (behaviorState.pendingCount <= 0)
         {
-            if (entry.enemyDef == null)
-                continue;
-
-            // 归一化权重选择
-            if (_rng.Range(0, totalWeight) >= entry.weight)
-            {
-                totalWeight -= entry.weight;
-                continue;
-            }
-            totalWeight -= entry.weight;
-
-            int count = _rng.Range(entry.minCount, entry.maxCount + 1);
-
-            for (int i = 0; i < count; i++)
-            {
-                Vector2Int tilePos = floorTiles.ElementAt(_rng.Range(0, floorTiles.Count));
-                Vector3 worldPos = new Vector3(tilePos.x, tilePos.y, 0);
-
-                EnemyFactory.Instance.Create(entry.enemyDef, worldPos, enemy =>
-                {
-                    enemy.RoomId = room.id;
-                    enemiesInRoom.Add(enemy);
-                });
-            }
+            // 所有行为完成
+            CheckRoomClear(roomId);
         }
-
-        _roomEnemies[room.id] = enemiesInRoom;
-
-        EventCenter.Instance.Publish(EventID.Combat_WaveStart,
-            new WaveStartParams { waveNum = 1, totalEnemies = enemiesInRoom.Count });
     }
 
     private void OnEnemyKilled(EnemyKilledParams param)
     {
-        if (param.enemy != null)
+        if (param.enemy == null)
+            return;
+
+        int roomId = param.enemy.RoomId;
+
+        // 通知 sequential 模式的行为
+        if (_roomBehaviorStates.TryGetValue(roomId, out var behaviorState))
         {
-            CheckRoomClear(param.enemy.RoomId);
+            foreach (var entry in behaviorState.entries)
+            {
+                if (entry is EnemyBehaviorEntry enemyEntry)
+                {
+                    enemyEntry.NotifyEnemyKilled();
+                }
+            }
         }
+
+        CheckRoomClear(roomId);
     }
 
     private void CheckRoomClear(int roomId)
@@ -180,17 +179,28 @@ public class RoomController
         if (!_roomStates.TryGetValue(roomId, out var state) || state != RoomState.InProgress)
             return;
 
-        if (_roomEnemies.TryGetValue(roomId, out var enemies))
-            enemies.RemoveAll(e => e == null);
+        // 检查是否还有待完成的行为
+        if (_roomBehaviorStates.TryGetValue(roomId, out var behaviorState))
+        {
+            if (behaviorState.pendingCount > 0)
+                return;
 
-        if (enemies == null || enemies.Count == 0)
-            MarkRoomCleared(roomId);
+            // 检查所有行为是否完成
+            foreach (var entry in behaviorState.entries)
+            {
+                if (!entry.IsComplete())
+                    return;
+            }
+        }
+
+        // 房间清理完成
+        MarkRoomCleared(roomId);
     }
 
     private void MarkRoomCleared(int roomId)
     {
         _roomStates[roomId] = RoomState.Cleared;
-        _roomEnemies.Remove(roomId);
+        _roomBehaviorStates.Remove(roomId);
         EventCenter.Instance.Publish(GameEventID.OnRoomCleared, roomId);
     }
 
