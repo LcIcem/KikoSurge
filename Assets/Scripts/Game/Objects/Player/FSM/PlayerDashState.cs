@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using LcIcemFramework.FSM;
+using LcIcemFramework.Managers;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// 闪避状态：定时器驱动，冲刺移动。
@@ -18,6 +21,15 @@ public class PlayerDashState : StateBase
         playerFSM.SetAnimatorTrigger("dash");
         _timer = 0f;
         _dir = player.MoveDir;  // 记录进入冲刺状态时的方向
+
+        // 残影特效
+        // ShadowController shadow = ManagerHub.Pool.Get<ShadowController>("Shadow", Vector3.one, Quaternion.identity);
+        // shadow.Init(player.GetComponent<SpriteRenderer>());
+        // shadow.onCompelete += () =>
+        // {
+        //     ManagerHub.Pool.Release(shadow.gameObject);
+        //     Debug.Log("销毁" + shadow.gameObject);
+        // };
     }
 
     public override void Exec()
