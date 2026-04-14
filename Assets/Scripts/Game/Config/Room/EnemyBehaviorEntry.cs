@@ -6,20 +6,27 @@ using ProcGen.Seed;
 using UnityEngine;
 
 /// <summary>
+/// 敌人生成选项（单种敌人配置）
+/// </summary>
+[Serializable]
+public class EnemyChoice
+{
+    public EnemyDefBase enemyDef;
+    public int weight = 1;
+}
+
+/// <summary>
 /// 敌人生成行为条目
 /// </summary>
 [Serializable]
 public class EnemyBehaviorEntry : RoomBehaviorEntry
 {
-    [Header("敌人配置")]
-    public EnemyDefBase enemyDef;
+    [Header("敌人选项列表（按权重随机）")]
+    public List<EnemyChoice> enemyChoices = new();
 
     [Header("生成数量（每波次）")]
     public int minCount = 1;
     public int maxCount = 3;
-
-    [Header("权重（归一化选择用）")]
-    public int weight = 1;
 
     [Header("生成位置")]
     public int minSpawnDist = 3;  // 距离玩家最小生成距离（格）
@@ -68,6 +75,39 @@ public class EnemyBehaviorEntry : RoomBehaviorEntry
             _validTiles.AddRange(_floorTiles);
     }
 
+    private EnemyDefBase SelectEnemyByWeight()
+    {
+        if (enemyChoices == null || enemyChoices.Count == 0)
+            return null;
+
+        // 计算总权重
+        int totalWeight = 0;
+        foreach (var choice in enemyChoices)
+        {
+            if (choice.enemyDef != null)
+                totalWeight += choice.weight;
+        }
+
+        if (totalWeight <= 0)
+            return null;
+
+        // 随机选择
+        int roll = _rng.Range(0, totalWeight);
+        int cumulative = 0;
+
+        foreach (var choice in enemyChoices)
+        {
+            if (choice.enemyDef == null)
+                continue;
+            cumulative += choice.weight;
+            if (roll < cumulative)
+                return choice.enemyDef;
+        }
+
+        // 兜底返回最后一个
+        return enemyChoices[enemyChoices.Count - 1].enemyDef;
+    }
+
     private void SpawnCurrentWave()
     {
         if (_currentWave >= _totalWaves)
@@ -86,7 +126,11 @@ public class EnemyBehaviorEntry : RoomBehaviorEntry
             var tilePos = _validTiles[_rng.Range(0, _validTiles.Count)];
             Vector3 worldPos = new Vector3(tilePos.x, tilePos.y, 0);
 
-            EnemyFactory.Instance.Create(enemyDef, worldPos, enemy =>
+            EnemyDefBase selectedEnemy = SelectEnemyByWeight();
+            if (selectedEnemy == null)
+                continue;
+
+            EnemyFactory.Instance.Create(selectedEnemy, worldPos, enemy =>
             {
                 enemy.RoomId = _room.id;
             });
