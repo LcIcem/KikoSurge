@@ -25,9 +25,6 @@ namespace ProcGen.Runtime
         [Header("瓦片资源")]
         [SerializeField] private TileInfo_SO _tileInfo;
 
-        [Header("生成配置")]
-        [SerializeField] private DungeonModel_SO _dungeonModel; // Inspector上的地牢配置SO
-
         // ==================== 私有字段 ====================
         private IDungeonGenerator _generator; // 生成器实例
         private DungeonGraph _currentGraph;   // 当前生成的地牢图（供外部访问）
@@ -60,9 +57,6 @@ namespace ProcGen.Runtime
         /// <param name="rng">随机数生成器</param>
         public void Build(DungeonModel_SO config, GameRandom rng)
         {
-            // 参数优先级：传入 > Inspector
-            config ??= _dungeonModel;
-
             if (config == null)
             {
                 LogError("地牢配置为空，请传入 DungeonModel_SO 或在 Inspector 中指定。");
