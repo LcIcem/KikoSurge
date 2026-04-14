@@ -9,9 +9,10 @@ public class EnemyIdleState : StateBase
 {
     public override void Enter()
     {
+        Debug.Log("进入Idle");
         var enemy = Owner<EnemyBase>();
         enemy.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
-        // FSM 驱动动画：停止移动
+        // 停止移动
         EnemyFSM enemyFSM = _fsm as EnemyFSM;
         enemyFSM.SetAnimatorBool("isMoving", false);
     }
@@ -23,5 +24,6 @@ public class EnemyIdleState : StateBase
 
     public override void Exit()
     {
+        Debug.Log("退出Idle");
     }
 }

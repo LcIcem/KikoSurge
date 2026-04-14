@@ -2,7 +2,6 @@ using System.Collections;
 using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
 using LcIcemFramework.Managers.Pool;
-using Pathfinding;
 using UnityEngine;
 
 /// <summary>
@@ -26,13 +25,17 @@ public class EnemyBase : MonoBehaviour, IPoolable
     protected SpriteRenderer _sprite;
     protected Animator _animator;
     protected EnemyFSM _fsm;
-    protected AIDestinationSetter _aiPath;
+    protected EnemyPathfinder _pathfinder;
+
+    // 公开访问器（供外部状态机使用）
+    public EnemyPathfinder Pathfinder => _pathfinder;
 
     // 目标引用
-    public Transform _player;
+    [HideInInspector]
+    public Transform _player;   // 玩家位置程序化生成的，无法在Inspector拖拽
 
     // 工具属性
-    // 于玩家的距离
+    // 与玩家的距离
     public float DistanceToPlayer
     {
         get
@@ -52,15 +55,16 @@ public class EnemyBase : MonoBehaviour, IPoolable
     protected virtual void Awake()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
-        _sprite = GetComponent<SpriteRenderer>();
+        _sprite = GetComponentInChildren<SpriteRenderer>();
         _animator = GetComponent<Animator>();
-        _aiPath = GetComponent<AIDestinationSetter>();
+        _pathfinder = GetComponent<EnemyPathfinder>();
+        _fsm = new EnemyFSM(this, _animator);
     }
 
     protected virtual void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        _fsm = new EnemyFSM(this, _animator);
+        _fsm.Start();
     }
 
     protected virtual void Update()
@@ -70,7 +74,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     }
 
     // ========== 初始化（从对象池取出时调用） ==========
-    public void Init(string prefabName, EnemyConfig config)
+    public void Init(EnemyConfig config)
     {
         MaxHP = config.MaxHP;
         HP = MaxHP;
@@ -79,13 +83,12 @@ public class EnemyBase : MonoBehaviour, IPoolable
         DetectRange = config.DetectRange;
         AttackRange = config.AttackRange;
         LoseRange = config.LoseRange;
-
-        gameObject.SetActive(true);
     }
 
     // IPoolable
     public void OnSpawn()
     {
+        _player = GameObject.FindGameObjectWithTag("Player")?.transform;
         _fsm.Start();
     }
 
@@ -129,18 +132,34 @@ public class EnemyBase : MonoBehaviour, IPoolable
         ManagerHub.Pool.Release(gameObject);
     }
 
-    // 寻路
-    public void MoveTo(Transform target)
+    // 开始寻路到目标
+    public void ChaseTarget()
     {
-        if (_aiPath != null)
+        Debug.Log("开始Chase");
+        if (_pathfinder != null)
         {
-            _aiPath.target = target;
+            Debug.Log("开始使用Pathfinder");
+            _pathfinder.StartMoveTo(_player.transform);
         }
         else
         {
-            // 备用：手动移动
-            Vector2 dir = ((Vector3)target.position - transform.position).normalized;
+            // 如果没有_pathfinder 则使用固定方向移动
+            Vector2 dir = (_player.position - transform.position).normalized;
             _rigidbody.MovePosition(_rigidbody.position + dir * MoveSpeed * Time.deltaTime);
+        }
+    }
+
+    // 停止寻路到目标
+    public void StopChaseTarget()
+    {
+        if (_pathfinder != null)
+        {
+            _pathfinder.StopMove();
+        }
+        else
+        {
+            // 如果没有_pathfinder 则将速度设为0
+            _rigidbody.linearVelocity = Vector2.zero;
         }
     }
 
@@ -151,5 +170,23 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         EventCenter.Instance.Publish(EventID.Combat_EnemyAttack,
             new EnemyAttackParams { enemy = this, target = _player, damage = Attack });
+    }
+
+    // 调试
+    private void OnDrawGizmos()
+    {
+        if (!Application.isPlaying) return;
+
+        // 检测范围 - 绿色
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, DetectRange);
+
+        // 攻击范围 - 红色
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, AttackRange);
+
+        // 丢失范围 - 黄色
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, LoseRange);
     }
 }

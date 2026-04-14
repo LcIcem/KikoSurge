@@ -9,13 +9,14 @@ public class EnemyDeadState : StateBase
 {
     public override void Enter()
     {
+        Debug.Log("进入Dead");
         var enemy = Owner<EnemyBase>();
         enemy.GetComponent<Collider2D>().enabled = false;
         enemy.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
         // FSM 驱动动画：播放死亡动画
         EnemyFSM enemyFSM = _fsm as EnemyFSM;
         enemyFSM.SetAnimatorBool("isMoving", false);
-        enemyFSM.SetAnimatorTrigger("Dead");
+        enemyFSM.SetAnimatorTrigger("dead");
     }
 
     public override void Exec()

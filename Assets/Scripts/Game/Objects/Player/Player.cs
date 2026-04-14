@@ -82,6 +82,26 @@ public class Player : MonoBehaviour
             });
         }
 
+        // 调试
+        // 生成敌人
+        EnemyConfig Config = new EnemyConfig()
+        {
+            MaxHP = 10,
+            MoveSpeed = 3,
+            Attack = 1,
+            DetectRange = 2,
+            AttackRange = 1,
+            LoseRange = 3
+        };
+        EnemyBase e = EnemyFactory.Instance.Create(new EnemySpawnParams()
+        {
+            Type = EnemyType.Grunt,
+            PrefabName = "Enemy",
+            Position = transform.position + Vector3.right * 2f,
+            Config = Config
+        });
+        e.Init(Config);
+
         // 订阅事件
         EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloaded, OnReloaded);

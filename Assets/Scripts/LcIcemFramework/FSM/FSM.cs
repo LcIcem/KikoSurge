@@ -55,7 +55,7 @@ public abstract class FSM
     public virtual void Start()
     {
         _isRunning = true;
-        ChangeState(EntryState);
+        ChangeState(EntryState); 
     }
 
     /// <summary>每帧：检查 Any 转换 → 检查当前转换 → Exec</summary>
@@ -79,7 +79,8 @@ public abstract class FSM
 
         CurrentState?.Exit();
         PreviousState = CurrentState;
-        CurrentState = newState;
+            CurrentState = newState;
+        
         newState.Enter();
     }
 

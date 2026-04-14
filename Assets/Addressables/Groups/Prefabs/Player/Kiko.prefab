@@ -19,7 +19,7 @@ GameObject:
   - component: {fileID: 4606069832840529454}
   m_Layer: 0
   m_Name: Kiko
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -350,69 +350,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 5121584336265296202}
+  m_Children: []
   m_Father: {fileID: 971543460441603291}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &3385746315196871774
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 7184763047501895454}
-    m_Modifications:
-    - target: {fileID: 1645332420106596854, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_Name
-      value: Bow
-      objectReference: {fileID: 0}
-    - target: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.45011
-      objectReference: {fileID: 0}
-    - target: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.04582
-      objectReference: {fileID: 0}
-    - target: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
---- !u!4 &5121584336265296202 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7633341352593952020, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-  m_PrefabInstance: {fileID: 3385746315196871774}
-  m_PrefabAsset: {fileID: 0}

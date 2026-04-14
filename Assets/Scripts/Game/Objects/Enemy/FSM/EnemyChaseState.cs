@@ -1,5 +1,4 @@
 using LcIcemFramework.FSM;
-using Pathfinding;
 using UnityEngine;
 
 /// <summary>
@@ -10,9 +9,9 @@ public class EnemyChaseState : StateBase
 {
     public override void Enter()
     {
+        Debug.Log("进入Chase");
         var enemy = Owner<EnemyBase>();
-        enemy.GetComponent<AIDestinationSetter>().enabled = true;
-        // FSM 驱动动画：播放行走动画
+        // 播放行走动画
         EnemyFSM enemyFSM = _fsm as EnemyFSM;
         enemyFSM.SetAnimatorBool("isMoving", true);
     }
@@ -22,14 +21,17 @@ public class EnemyChaseState : StateBase
         var enemy = Owner<EnemyBase>();
         if (enemy._player != null)
         {
-            enemy.MoveTo(enemy._player);
+            enemy.ChaseTarget();
             enemy.FacePlayer();
         }
     }
 
     public override void Exit()
     {
-        // FSM 驱动动画：停止行走动画
+        Debug.Log("退出Chase");
+        var enemy = Owner<EnemyBase>();
+        enemy.StopChaseTarget();
+        // 停止行走动画
         EnemyFSM enemyFSM = _fsm as EnemyFSM;
         enemyFSM.SetAnimatorBool("isMoving", false);
     }

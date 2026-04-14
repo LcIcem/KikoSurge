@@ -1,5 +1,4 @@
 using LcIcemFramework.FSM;
-using Pathfinding;
 using UnityEngine;
 
 /// <summary>
@@ -10,12 +9,14 @@ public class EnemyAttackState : StateBase
 {
     public override void Enter()
     {
-        var enemy = Owner<EnemyBase>();
-        enemy.GetComponent<AIDestinationSetter>().enabled = false;
-        // FSM 驱动动画：停止移动，触发攻击动画
+        Debug.Log("进入Attack");
+
+        EnemyBase enemy = Owner<EnemyBase>();
+        enemy.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
+        // 停止移动，触发攻击动画
         EnemyFSM enemyFSM = _fsm as EnemyFSM;
         enemyFSM.SetAnimatorBool("isMoving", false);
-        enemyFSM.SetAnimatorTrigger("Attack");
+        enemyFSM.SetAnimatorTrigger("attack");
     }
 
     public override void Exec()
@@ -28,5 +29,6 @@ public class EnemyAttackState : StateBase
 
     public override void Exit()
     {
+        Debug.Log("退出Attack");
     }
 }
