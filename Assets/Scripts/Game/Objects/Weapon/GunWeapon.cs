@@ -14,13 +14,23 @@ public class GunWeapon : WeaponBase
 
     public GunWeapon(Player owner) : base(owner)
     {
+    }
+
+    /// <summary>
+    /// 从配置数据初始化武器属性
+    /// </summary>
+    public void Init(float damage, float fireRate, float reloadTime,
+        int magazineSize, float recoilForce,
+        GameObject bulletPrefab, float bulletSpeed, float spread, float range)
+    {
+        base.Init(damage, fireRate, reloadTime, magazineSize, recoilForce);
+
+        BulletPrefab = bulletPrefab;
+        BulletSpeed = bulletSpeed;
+        Spread = spread;
+        Range = range;
+
         Type = WeaponType.Gun;
-        Damage = 10f;
-        FireRate = 0.2f;
-        ReloadTime = 1.5f;
-        MagazineSize = 30;
-        CurrentAmmo = MagazineSize;
-        recoilForce = 1f;
     }
 
     public override void Fire(Vector3 direction)

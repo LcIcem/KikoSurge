@@ -14,15 +14,26 @@ public class ShotgunWeapon : GunWeapon
 
     public ShotgunWeapon(Player owner) : base(owner)
     {
+    }
+
+    /// <summary>
+    /// 从配置数据初始化武器属性
+    /// </summary>
+    public void Init(float damage, float fireRate, float reloadTime,
+        int magazineSize, float recoilForce,
+        GameObject bulletPrefab, float bulletSpeed,
+        int pelletCount, float spreadAngle, float falloffStart, float range)
+    {
+        base.Init(damage, fireRate, reloadTime, magazineSize, recoilForce);
+
+        BulletPrefab = bulletPrefab;
+        BulletSpeed = bulletSpeed;
+        PelletCount = pelletCount;
+        SpreadAngle = spreadAngle;
+        FalloffStart = falloffStart;
+        Range = range;
+
         Type = WeaponType.Shotgun;
-        Damage = 8f;
-        FireRate = 0.8f;
-        ReloadTime = 2.5f;
-        MagazineSize = 6;
-        CurrentAmmo = MagazineSize;
-        recoilForce = 10f;
-        PelletCount = 6;
-        SpreadAngle = 30f;
     }
 
     protected override void SpawnBullet(Vector3 direction)

@@ -64,6 +64,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2ad31c422066e02408a2fd4f67ad57d3, type: 2}
   - {fileID: 11400000, guid: 0d2d5035caf50d446ae38010ba8a661d, type: 2}
   - {fileID: 11400000, guid: 4def5a2ec82148a4ca9888dbd5fe2827, type: 2}
+  - {fileID: 11400000, guid: 38fb845199f84e544bdf1b09b7e455f4, type: 2}
   - {fileID: 11400000, guid: 896f679d28ad1de45be83bdd1336f0af, type: 2}
   m_BuildSettings:
     m_LogResourceManagerExceptions: 1

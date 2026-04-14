@@ -13,9 +13,10 @@ public abstract class WeaponBase
     public int MagazineSize { get; protected set; } // 弹匣容量
     public int CurrentAmmo { get; protected set; }  // 当前弹药
     public bool IsReloading { get; protected set; } // 是否在装填
-    public float recoilForce { get; protected set; } // 后坐力
+    public float RecoilForce { get; protected set; } // 后坐力
 
     protected Player _owner; //武器所有者引用
+    protected GameObject _weaponPrefab; // 武器可视化预设体实例
 
     protected float _fireCooldown;  // 开火冷却
     protected float _reloadTimer;   // 装填时间计时器
@@ -23,6 +24,20 @@ public abstract class WeaponBase
     public WeaponBase(Player owner)
     {
         _owner = owner;
+    }
+
+    /// <summary>
+    /// 从配置数据初始化武器属性
+    /// </summary>
+    public virtual void Init(float damage, float fireRate, float reloadTime,
+        int magazineSize, float recoilForce)
+    {
+        Damage = damage;
+        FireRate = fireRate;
+        ReloadTime = reloadTime;
+        MagazineSize = magazineSize;
+        RecoilForce = recoilForce;
+        CurrentAmmo = MagazineSize;
     }
 
     public virtual void Update()
@@ -86,5 +101,21 @@ public abstract class WeaponBase
 
         // 发布取消装填事件
         EventCenter.Instance.Publish(EventID.Combat_CancelReload);
+    }
+
+    /// <summary>
+    /// 设置武器可视化预设体实例
+    /// </summary>
+    public void SetWeaponPrefab(GameObject prefab)
+    {
+        _weaponPrefab = prefab;
+    }
+
+    /// <summary>
+    /// 获取武器可视化预设体实例
+    /// </summary>
+    public GameObject GetWeaponPrefab()
+    {
+        return _weaponPrefab;
     }
 }

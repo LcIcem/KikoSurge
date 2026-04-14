@@ -61,7 +61,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
     {
         _player = GameObject.FindGameObjectWithTag("Player")?.transform;
         _fsm = new EnemyFSM(this, _animator);
-        _fsm.Start();
     }
 
     protected virtual void Update()
@@ -84,19 +83,18 @@ public class EnemyBase : MonoBehaviour, IPoolable
         gameObject.SetActive(true);
     }
 
-    // ========== IPoolable ==========
+    // IPoolable
     public void OnSpawn()
     {
-        gameObject.SetActive(true);
+        _fsm.Start();
     }
 
     public void OnDespawn()
     {
-        gameObject.SetActive(false);
         _fsm?.Stop();
     }
 
-    // ========== 受伤处理 ==========
+    // 受伤处理
     public virtual void TakeDamage(float damage)
     {
         if (!IsAlive) return;

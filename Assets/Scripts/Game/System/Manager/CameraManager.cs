@@ -35,7 +35,7 @@ public class CameraManager : SingletonMono<CameraManager>
         impulseSrc = Target.gameObject.GetComponent<CinemachineImpulseSource>();
         if (impulseSrc != null)
         {
-            impulseSrc.GenerateImpulse(weapon.recoilForce);
+            impulseSrc.GenerateImpulse(weapon.RecoilForce);
         }
     }
 

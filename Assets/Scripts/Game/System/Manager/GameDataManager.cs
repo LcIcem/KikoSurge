@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
@@ -16,11 +17,19 @@ public class GameDataManager : SingletonMono<GameDataManager>
     // 玩家数据相关
     public PlayerData PlayerData { get; set; }
 
+    // 武器配置字典：Key = WeaponId, Value = 配置SO
+    private Dictionary<int, WeaponDefBase> _weaponConfigDict = new();
+    public Dictionary<int, WeaponDefBase> WeaponConfigDict => _weaponConfigDict;
+
 
     protected override void Init()
     {
-        // 加载资源
+        // 加载角色信息
         ManagerHub.Addressables.LoadAsync<RoleInfo_SO>("RoleInfo_SO", OnRoleInfoLoaded);
+
+        // 加载武器配置
+        ManagerHub.Addressables.LoadAsync<GunWeaponDef_SO>("GunWeaponDef_SO", so => OnWeaponDefLoaded(so));
+        ManagerHub.Addressables.LoadAsync<ShotgunWeaponDef_SO>("ShotgunWeaponDef_SO", so => OnWeaponDefLoaded(so));
     }
 
     private void Start() {
@@ -86,6 +95,38 @@ public class GameDataManager : SingletonMono<GameDataManager>
         if (PlayerData == null)
             return default;
         return PlayerData;
+    }
+
+    #endregion
+
+    #region WeaponData武器配置相关
+
+    /// <summary>
+    /// 武器配置加载完毕回调
+    /// </summary>
+    private void OnWeaponDefLoaded(WeaponDefBase so)
+    {
+        if (so == null) return;
+
+        if (_weaponConfigDict.ContainsKey(so.WeaponId))
+        {
+            LogError($"武器ID冲突: {so.WeaponId}");
+            return;
+        }
+
+        _weaponConfigDict[so.WeaponId] = so;
+        Log($"武器配置加载完成: ID={so.WeaponId}, Name={so.WeaponName}");
+    }
+
+    /// <summary>
+    /// 根据武器ID获取武器配置（O(1) 查找）
+    /// </summary>
+    public WeaponDefBase GetWeaponConfig(int weaponId)
+    {
+        if (_weaponConfigDict.TryGetValue(weaponId, out var config))
+            return config;
+        LogWarning($"未找到武器配置: ID={weaponId}");
+        return null;
     }
 
     #endregion

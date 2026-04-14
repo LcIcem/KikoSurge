@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using LcIcemFramework.Core;
 using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
+using LcIcemFramework.Managers;
 
 
 /// <summary>
@@ -21,6 +22,7 @@ public class Player : MonoBehaviour
     // 子系统
     private PlayerFSM _fsm;
     public WeaponHandler weaponHandler;
+    private WeaponFactory _weaponFactory;
 
     [SerializeField] private GameObject _bulletPrefab;
 
@@ -34,21 +36,6 @@ public class Player : MonoBehaviour
     public Vector2 AimDir { get; private set; }
     private Vector3? _mouseWorldPos;
 
-    // 调试
-    private List<WeaponBase> _weapons = new List<WeaponBase>();
-    private int _weaponIndex = 0;
-    public int WeaponIndex
-    {
-        get
-        {
-            return _weaponIndex;
-        }
-        set
-        {
-            _weaponIndex = value % 2;
-        }
-    }
-
     private void Awake()
     {
         _animator = GetComponent<Animator>();
@@ -56,6 +43,7 @@ public class Player : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody2D>();
         _sprite = GetComponent<SpriteRenderer>();
         weaponHandler = new WeaponHandler(this);
+        _weaponFactory = new WeaponFactory();
 
         _moveInput = Vector2.zero;
     }
@@ -63,20 +51,38 @@ public class Player : MonoBehaviour
     private void Start()
     {
         _fsm.Start();
-        var gunWeapon = new GunWeapon(this)
-        {
-            BulletPrefab = _bulletPrefab
-        };
-        weaponHandler.Initialize(gunWeapon);
-        _weapons.Add(gunWeapon);
 
-        var shotgunWeapon = new ShotgunWeapon(this)
-        {
-            BulletPrefab = _bulletPrefab
-        };
-        weaponHandler.Initialize(shotgunWeapon);
-        _weapons.Add(shotgunWeapon);
+        // 从配置加载初始武器
+        var initialWeaponIds = new[] { 101, 102 }; // 枪械ID=101, 霰弹枪ID=102
 
+        // 开始加载武器
+        int loadedCount = 0;
+        foreach (var weaponId in initialWeaponIds)
+        {
+            var config = GameDataManager.Instance.GetWeaponConfig(weaponId);
+            if (config == null)
+            {
+                loadedCount++;
+                continue;
+            }
+
+            _weaponFactory.CreateWeapon(config, this, weapon =>
+            {
+                if (weapon != null)
+                {
+                    weaponHandler.AddWeapon(weapon);
+                }
+
+                loadedCount++;
+                if (loadedCount >= initialWeaponIds.Length)
+                {
+                    // 所有武器加载完毕后再装备第一把
+                    weaponHandler.EquipWeapon(0);
+                }
+            });
+        }
+
+        // 订阅事件
         EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloaded, OnReloaded);
         EventCenter.Instance.Subscribe(EventID.Combat_CancelReload, OnCancelReload);
@@ -86,6 +92,7 @@ public class Player : MonoBehaviour
     {
         _fsm.Stop();
 
+        // 退订事件
         EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.Combat_Reloaded, OnReloaded);
         EventCenter.Instance.Unsubscribe(EventID.Combat_CancelReload, OnCancelReload);
@@ -139,7 +146,9 @@ public class Player : MonoBehaviour
         _mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
 
         // 处理射击
-        if (weaponHandler.CurrentWeapon.CanFire && InputManager.Instance.UIActions["Shoot"].IsPressed())
+        if (weaponHandler.CurrentWeapon != null &&
+            weaponHandler.CurrentWeapon.CanFire &&
+            InputManager.Instance.UIActions["Shoot"].IsPressed())
         {
             _fsm.SetTrigger("shoot");
         }
@@ -161,9 +170,10 @@ public class Player : MonoBehaviour
         }
         if (InputManager.Instance.UIActions["Switch"].WasPressedThisFrame())
         {
-            WeaponIndex++;
-            weaponHandler.SwitchWeapon(_weapons[WeaponIndex]);
-            Debug.Log("当前武器为" + weaponHandler.CurrentWeapon.Type.ToString() + ", 武器当前容量：" + weaponHandler.CurrentWeapon.CurrentAmmo);
+            weaponHandler.SwitchToNextWeapon();
+            var weapon = weaponHandler.CurrentWeapon;
+            if (weapon != null)
+                Debug.Log("当前武器为" + weapon.Type.ToString() + ", 武器当前容量：" + weapon.CurrentAmmo);
         }
     }
 
