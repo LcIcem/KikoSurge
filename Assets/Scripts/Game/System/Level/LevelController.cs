@@ -39,6 +39,7 @@ public class LevelController : MonoBehaviour
     private GameObject _currentCheckpoint;  // 当前检查点
 
     public DungeonGraph CurrentGraph => _builder?.GetGraph();
+    public DungeonTileData GetTileData() => _builder?.GetTileData();
     public bool IsBuildCompleted => _builder?.IsBuildCompleted ?? false;
     public int CurrentLayerIndex => _currentLayerIndex;
     public int MaxLayerCount => _dungeonModels?.Count ?? 0;
