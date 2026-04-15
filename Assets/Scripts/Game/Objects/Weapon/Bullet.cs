@@ -98,14 +98,14 @@ public class Bullet : MonoBehaviour, IPoolable
         if (config.bulletType == BulletType.Parabola)
         {
             _rigidbody.gravityScale = 1f;
-            _rigidbody.isKinematic = false;
+            _rigidbody.bodyType = RigidbodyType2D.Kinematic;
             _rigidbody.freezeRotation = true;
             _rigidbody.linearVelocity = Direction * Speed;
         }
         else
         {
             _rigidbody.gravityScale = 0f;
-            _rigidbody.isKinematic = true;
+            _rigidbody.bodyType = RigidbodyType2D.Kinematic;
             _rigidbody.freezeRotation = true;
         }
 
