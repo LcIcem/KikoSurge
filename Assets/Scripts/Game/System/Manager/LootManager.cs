@@ -17,9 +17,6 @@ public class LootManager : SingletonMono<LootManager>
     // 玩家引用（用于武器拾取）
     private Player _player;
 
-    // 武器工厂
-    private WeaponFactory _weaponFactory;
-
     // 追踪所有活跃掉落物（用于切换层时清理）
     private readonly HashSet<LootItem> _activeLootItems = new();
 
@@ -30,8 +27,6 @@ public class LootManager : SingletonMono<LootManager>
 
     private void Start()
     {
-        _weaponFactory = new WeaponFactory();
-
         // 获取玩家引用
         _player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
 
@@ -124,24 +119,36 @@ public class LootManager : SingletonMono<LootManager>
     /// <summary>
     /// 为玩家创建武器（从掉落物拾取时调用）
     /// </summary>
-    public void CreateWeaponForPlayer(WeaponDefBase weaponDef)
+    public void CreateWeaponForPlayer(GunConfig config)
     {
         if (_player == null)
             _player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
-        if (weaponDef == null || _player == null)
+        if (config == null || _player == null)
         {
-            LogError("武器创建失败: weaponDef 或 player 为 null");
+            LogError("武器创建失败: config 或 player 为 null");
             return;
         }
 
-        _weaponFactory.CreateWeapon(weaponDef, _player, weapon =>
+        if (config.gunPrefab == null)
         {
-            if (weapon != null)
-            {
-                _player.weaponHandler.AddWeapon(weapon);
-                Log($"武器添加到玩家: {weaponDef.WeaponName}");
-            }
-        });
+            LogError($"[LootManager] 武器配置 {config.gunName} 没有指定预设体");
+            return;
+        }
+
+        // 实例化武器预设体
+        var weaponObj = Object.Instantiate(config.gunPrefab, _player.transform);
+        weaponObj.SetActive(false);
+
+        var weapon = weaponObj.GetComponent<WeaponBase>();
+        if (weapon == null)
+        {
+            LogError($"[LootManager] 武器预设体 {config.gunName} 上没有 WeaponBase 组件");
+            return;
+        }
+
+        weapon.Init(config);
+        _player.weaponHandler.AddWeapon(weapon);
+        Log($"武器添加到玩家: {config.gunName}");
     }
 
     // 日志

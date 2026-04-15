@@ -210,7 +210,7 @@ public class PoolManager : SingletonMono<PoolManager>
     #region 公开 API
 
     /// <summary>
-    /// 从池中获取一个对象（自动注册）
+    /// 从池中获取一个对象（通过预设体名称，自动注册）
     /// </summary>
     public GameObject Get(string prefabName, Vector3 position, Quaternion rotation)
     {
@@ -218,7 +218,102 @@ public class PoolManager : SingletonMono<PoolManager>
     }
 
     /// <summary>
-    /// 从池中获取一个对象，并返回其 T 类型组件（自动注册）
+    /// 从池中获取一个对象（通过预设体，直接使用预设体实例化）
+    /// </summary>
+    public GameObject Get(GameObject prefab, Vector3 position, Quaternion rotation)
+    {
+        if (prefab == null)
+        {
+            LogError("[PoolManager] 预设体为 null，无法获取对象");
+            return null;
+        }
+
+        string prefabName = prefab.name;
+
+        // 如果有待清理标记，先取消清理
+        if (_pendingCleanup.TryGetValue(prefabName, out var pending) && pending)
+        {
+            _pendingCleanup[prefabName] = false;
+            _lastUseTimes[prefabName] = Time.time;
+            Log($"池 '{prefabName}' 清理被取消（被 Get 唤醒）。");
+        }
+
+        // 懒注册（使用传入的 prefab，不走 Addressables）
+        if (!_pools.TryGetValue(prefabName, out var pool))
+        {
+            EnsurePoolRegistered(prefabName, prefab);
+            pool = _pools[prefabName];
+        }
+
+        GameObject obj = pool.Get();
+
+        // 检查对象是否有效
+        bool isValid = false;
+        try
+        {
+            _ = obj.transform;
+            isValid = true;
+        }
+        catch (MissingReferenceException)
+        {
+            isValid = false;
+        }
+
+        if (!isValid)
+        {
+            LogWarning($"池 '{prefabName}' 返回了无效对象，尝试重新实例化。");
+            try
+            {
+                pool.Release(obj);
+            }
+            catch (System.Exception)
+            {
+                // 忽略释放失败
+            }
+            // 直接用传入的 prefab 实例化
+            obj = Instantiate(prefab, _parents[prefabName]);
+
+            // 手动注册到池的追踪系统
+            lock (_lock)
+            {
+                if (_activeCounts.ContainsKey(prefabName))
+                    _activeCounts[prefabName]++;
+                else
+                    _activeCounts[prefabName] = 1;
+                _objToPoolName[obj] = prefabName;
+            }
+
+            // 调用 OnSpawn
+            if (obj.TryGetComponent<IPoolable>(out var poolable))
+                poolable.OnSpawn();
+        }
+
+        obj.transform.position = position;
+        obj.transform.rotation = rotation;
+
+        // 更新最后使用时间
+        _lastUseTimes[prefabName] = Time.time;
+
+        return obj;
+    }
+
+    /// <summary>
+    /// 从池中获取一个对象，并返回其 T 类型组件（通过预设体，直接使用预设体实例化）
+    /// </summary>
+    public T Get<T>(GameObject prefab, Vector3 position, Quaternion rotation) where T : class
+    {
+        GameObject obj = Get(prefab, position, rotation);
+        if (obj == null) return null;
+
+        if (typeof(T).Name == "GameObject")
+            return obj as T;
+
+        return obj.GetComponent<T>();
+    }
+
+    /// <summary>
+    /// 从池中获取一个对象，并返回其 T 类型组件（通过预设体名称，自动注册）
+    /// 注意：此方法通过 Addressables 加载预设体
     /// </summary>
     public T Get<T>(string prefabName, Vector3 position, Quaternion rotation) where T : class
     {

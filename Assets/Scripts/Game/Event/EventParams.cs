@@ -87,15 +87,6 @@ public class WaveUpdateParams
 }
 
 /// <summary>
-/// 子弹生成事件参数
-/// </summary>
-public class BulletSpawnParams
-{
-    public Bullet bullet;
-    public WeaponType weaponType;
-}
-
-/// <summary>
 /// 子弹命中事件参数
 /// </summary>
 public class BulletHitParams

@@ -253,10 +253,10 @@ public class LootItem : MonoBehaviour, IPoolable
 
     private void HandleWeaponPickup()
     {
-        if (ItemDef is WeaponLootItemDef_SO weaponLoot && weaponLoot.WeaponDef != null)
+        if (ItemDef is WeaponLootItemDef_SO weaponLoot && weaponLoot.gunConfig != null)
         {
             // 通过 LootManager 创建武器并添加给玩家
-            LootManager.Instance?.CreateWeaponForPlayer(weaponLoot.WeaponDef);
+            LootManager.Instance?.CreateWeaponForPlayer(weaponLoot.gunConfig);
         }
     }
 

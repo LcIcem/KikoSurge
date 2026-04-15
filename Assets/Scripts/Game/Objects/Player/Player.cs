@@ -23,9 +23,9 @@ public class Player : MonoBehaviour
     // 子系统
     private PlayerFSM _fsm;
     public WeaponHandler weaponHandler;
-    private WeaponFactory _weaponFactory;
 
-    [SerializeField] private GameObject _bulletPrefab;
+    [Header("初始武器配置")]
+    [SerializeField] private GunConfig[] _initialWeapons;
 
     // 输入状态
     private Vector2 _moveInput;
@@ -44,7 +44,6 @@ public class Player : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody2D>();
         _sprite = GetComponent<SpriteRenderer>();
         weaponHandler = new WeaponHandler(this);
-        _weaponFactory = new WeaponFactory();
 
         _moveInput = Vector2.zero;
     }
@@ -54,39 +53,50 @@ public class Player : MonoBehaviour
         _fsm.Start();
 
         // 从配置加载初始武器
-        var initialWeaponIds = new[] { 101, 102 }; // 枪械ID=101, 霰弹枪ID=102
-
-        // 开始加载武器
-        int loadedCount = 0;
-        foreach (var weaponId in initialWeaponIds)
+        if (_initialWeapons != null)
         {
-            var config = GameDataManager.Instance.GetWeaponConfig(weaponId);
-            if (config == null)
+            foreach (var config in _initialWeapons)
             {
-                loadedCount++;
-                continue;
+                if (config == null) continue;
+                CreateWeaponFromConfig(config);
             }
 
-            _weaponFactory.CreateWeapon(config, this, weapon =>
+            if (_initialWeapons.Length > 0)
             {
-                if (weapon != null)
-                {
-                    weaponHandler.AddWeapon(weapon);
-                }
-
-                loadedCount++;
-                if (loadedCount >= initialWeaponIds.Length)
-                {
-                    // 所有武器加载完毕后再装备第一把
-                    weaponHandler.EquipWeapon(0);
-                }
-            });
+                weaponHandler.EquipWeapon(0);
+            }
         }
 
         // 订阅事件
         EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloaded, OnReloaded);
         EventCenter.Instance.Subscribe(GameEventID.Combat_CancelReload, OnCancelReload);
+    }
+
+    /// <summary>
+    /// 根据配置创建武器
+    /// </summary>
+    private void CreateWeaponFromConfig(GunConfig config)
+    {
+        if (config.gunPrefab == null)
+        {
+            Debug.LogError($"[Player] 武器配置 {config.gunName} 没有指定预设体");
+            return;
+        }
+
+        // 实例化武器预设体（预设体上挂载 WeaponBase 组件）
+        var weaponObj = Instantiate(config.gunPrefab, transform);
+        weaponObj.SetActive(false);
+
+        var weapon = weaponObj.GetComponent<WeaponBase>();
+        if (weapon == null)
+        {
+            Debug.LogError($"[Player] 武器预设体 {config.gunName} 上没有 WeaponBase 组件");
+            return;
+        }
+
+        weapon.Init(config);
+        weaponHandler.AddWeapon(weapon);
     }
 
     void OnDestroy()
@@ -126,9 +136,6 @@ public class Player : MonoBehaviour
             if (aimDir.magnitude > 0.01f)
                 AimDir = aimDir;
         }
-
-        // 更新武器相关信息，用于维护武器状态（比如：武器冷却）
-        weaponHandler.Update();
 
         // FSM 驱动
         _fsm.Update();
@@ -174,7 +181,7 @@ public class Player : MonoBehaviour
             weaponHandler.SwitchToNextWeapon();
             var weapon = weaponHandler.CurrentWeapon;
             if (weapon != null)
-                Debug.Log("当前武器为" + weapon.Type.ToString() + ", 武器当前容量：" + weapon.CurrentAmmo);
+                Debug.Log("当前武器为" + weapon.Config.gunName + ", 武器当前容量：" + weapon.CurrentAmmo);
         }
     }
 

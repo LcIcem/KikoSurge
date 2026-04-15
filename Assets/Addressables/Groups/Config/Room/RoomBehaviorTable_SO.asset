@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoomBehaviorTable_SO
   normalRoomEntries:
   - rid: 6093166113566228718
-  - rid: 6093166113566228722
   eliteRoomEntries:
   - rid: 6093166113566228719
   bossRoomEntries:
@@ -25,6 +24,7 @@ MonoBehaviour:
     - rid: 6093166113566228718
       type: {class: EnemyBehaviorEntry, ns: , asm: Assembly-CSharp}
       data:
+        behaviorName: "\u654C\u4EBA\u751F\u6210"
         minWaves: 1
         maxWaves: 3
         waveDelay: 1
@@ -38,33 +38,28 @@ MonoBehaviour:
     - rid: 6093166113566228719
       type: {class: EnemyBehaviorEntry, ns: , asm: Assembly-CSharp}
       data:
+        behaviorName: "\u7CBE\u82F1\u751F\u6210"
         minWaves: 1
         maxWaves: 3
         waveDelay: 1
-        spawnMode: 0
-        enemyChoices: []
+        spawnMode: 1
+        enemyChoices:
+        - enemyDef: {fileID: 11400000, guid: 15a534ecfba6cc04ba7077673ec737f4, type: 2}
+          weight: 1
         minCount: 1
         maxCount: 3
         minSpawnDist: 3
     - rid: 6093166113566228720
       type: {class: EnemyBehaviorEntry, ns: , asm: Assembly-CSharp}
       data:
+        behaviorName: "Boss\u751F\u6210"
         minWaves: 1
         maxWaves: 3
         waveDelay: 1
         spawnMode: 0
-        enemyChoices: []
-        minCount: 1
-        maxCount: 3
-        minSpawnDist: 3
-    - rid: 6093166113566228722
-      type: {class: EnemyBehaviorEntry, ns: , asm: Assembly-CSharp}
-      data:
-        minWaves: 3
-        maxWaves: 3
-        waveDelay: 2
-        spawnMode: 0
-        enemyChoices: []
+        enemyChoices:
+        - enemyDef: {fileID: 11400000, guid: 15a534ecfba6cc04ba7077673ec737f4, type: 2}
+          weight: 1
         minCount: 1
         maxCount: 3
         minSpawnDist: 3

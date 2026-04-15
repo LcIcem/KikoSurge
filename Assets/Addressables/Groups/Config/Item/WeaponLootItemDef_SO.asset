@@ -19,4 +19,4 @@ MonoBehaviour:
   Weight: 1
   MinQuantity: 1
   MaxQuantity: 1
-  WeaponDef: {fileID: 11400000, guid: db3972d82b88c374d856fbbd658b385f, type: 2}
+  gunConfig: {fileID: 11400000, guid: 01e0bd06ab925ec4dbf640011f17cfe0, type: 2}

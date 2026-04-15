@@ -439,7 +439,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
   m_Actions: {fileID: -944628639613478452, guid: c4d66cd126c1efa47ac41743f5eac3f4, type: 3}
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 2
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -450,7 +450,63 @@ MonoBehaviour:
   m_ControlsChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-  m_ActionEvents: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2018529840}
+        m_TargetAssemblyTypeName: GameLifecycleManager, Assembly-CSharp
+        m_MethodName: DebugEnterNextLayer
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 90f06b96-5113-4e5d-a6e9-20c5df2b6a58
+    m_ActionName: 'UI/Restart[/Keyboard/r]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b7bf890a-f22f-4d2d-8119-b20efca6595c
+    m_ActionName: 'UI/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: e7d6754f-e2b5-4478-be08-0d65973fd090
+    m_ActionName: 'UI/Shoot[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 2733fbc2-c98d-4042-9ec5-e9b8ced62f15
+    m_ActionName: 'UI/Switch[/Keyboard/q]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 77a8a445-d518-45d8-91cf-dbd419faa142
+    m_ActionName: 'UI/Dash[/Keyboard/leftShift]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: add9865a-078f-435c-a250-7ccf690a0ce9
+    m_ActionName: 'UI/Hurt[/Keyboard/1]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b6928e56-258a-41ed-bc10-fb39cacfda5c
+    m_ActionName: 'UI/Dead[/Keyboard/2]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2018529840}
+        m_TargetAssemblyTypeName: GameLifecycleManager, Assembly-CSharp
+        m_MethodName: DebugStartNewGame
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: adaa679e-504e-4167-9e3b-a9547e3ab583
+    m_ActionName: 'UI/StartNew[/Keyboard/z]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: UI
@@ -468,7 +524,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dbccd6eea604534fa2d5ba85b9fac83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputManager
-  _playerInput: {fileID: 639524668}
+  _playerInput: {fileID: 0}
 --- !u!4 &639524670
 Transform:
   m_ObjectHideFlags: 0
@@ -1807,7 +1863,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 3.75
+  orthographic size: 2.8125
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

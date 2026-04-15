@@ -17,9 +17,9 @@ public class GameDataManager : SingletonMono<GameDataManager>
     // 玩家数据相关
     public PlayerData PlayerData { get; set; }
 
-    // 武器配置字典：Key = WeaponId, Value = 配置SO
-    private Dictionary<int, WeaponDefBase> _weaponConfigDict = new();
-    public Dictionary<int, WeaponDefBase> WeaponConfigDict => _weaponConfigDict;
+    // 武器配置字典：Key = WeaponName, Value = 配置SO
+    private Dictionary<string, GunConfig> _weaponConfigDict = new();
+    public Dictionary<string, GunConfig> WeaponConfigDict => _weaponConfigDict;
 
     // 敌人配置字典：Key = EnemyId, Value = 配置SO
     private Dictionary<int, EnemyDefBase> _enemyConfigDict = new();
@@ -119,35 +119,37 @@ public class GameDataManager : SingletonMono<GameDataManager>
     /// </summary>
     private void OnAllWeaponDefsLoaded(AllWeaponDefs_SO so)
     {
-        if (so == null || so.weaponDefs == null)
+        if (so == null || so.weaponConfigs == null)
         {
             LogError("武器配置加载失败");
             return;
         }
 
-        foreach (var weaponDef in so.weaponDefs)
+        foreach (var config in so.weaponConfigs)
         {
-            if (weaponDef == null) continue;
+            if (config == null) continue;
 
-            if (_weaponConfigDict.ContainsKey(weaponDef.WeaponId))
+            // 使用 Config 自己的 ID 或者名字做 key
+            string key = config.gunName;
+            if (_weaponConfigDict.ContainsKey(key))
             {
-                LogError($"武器ID冲突: {weaponDef.WeaponId}");
+                LogWarning($"武器配置重复: {key}");
                 continue;
             }
 
-            _weaponConfigDict[weaponDef.WeaponId] = weaponDef;
-            Log($"武器配置加载完成: ID={weaponDef.WeaponId}, Name={weaponDef.WeaponName}");
+            _weaponConfigDict[key] = config;
+            Log($"武器配置加载完成: Name={config.gunName}");
         }
     }
 
     /// <summary>
-    /// 根据武器ID获取武器配置（O(1) 查找）
+    /// 根据武器名称获取武器配置
     /// </summary>
-    public WeaponDefBase GetWeaponConfig(int weaponId)
+    public GunConfig GetWeaponConfig(string weaponName)
     {
-        if (_weaponConfigDict.TryGetValue(weaponId, out var config))
+        if (_weaponConfigDict.TryGetValue(weaponName, out var config))
             return config;
-        LogWarning($"未找到武器配置: ID={weaponId}");
+        LogWarning($"未找到武器配置: {weaponName}");
         return null;
     }
 
