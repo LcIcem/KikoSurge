@@ -24,7 +24,7 @@ public class LevelController : MonoBehaviour
     [SerializeField] private Tilemap _floorTilemap;
 
     [Header("房间行为配置")]
-    [SerializeField] private RoomBehaviorTable_SO _roomBehaviorTable;
+    [SerializeField] private RoomBehaviourTable_SO _roomBehaviourTable;
 
     [Header("终点检查点预设体")]
     [SerializeField] private GameObject _checkpointPrefab;
@@ -58,7 +58,10 @@ public class LevelController : MonoBehaviour
 
     private void OnRequestRoomRefresh()
     {
-        _roomController.RefreshCurrentRoom();
+        if (_playerHandler != null && _playerHandler.PlayerInstance != null)
+        {
+            _roomController.RefreshCurrentRoom(_playerHandler.PlayerInstance.transform.position);
+        }
     }
 
     private void Update()
@@ -120,7 +123,7 @@ public class LevelController : MonoBehaviour
         _builder.Build(GetCurrentLayerModel(), _rng);
 
         // 初始化 RoomController
-        _roomController.Initialize(_builder.GetTileData(), _roomBehaviorTable, _rng);
+        _roomController.Initialize(_builder.GetTileData(), _roomBehaviourTable, _rng);
 
         // 获取起始位置并创建玩家
         Vector3 startWorldPos = GetStartRoomWorldPos();
@@ -164,7 +167,7 @@ public class LevelController : MonoBehaviour
         _builder.Build(GetCurrentLayerModel(), _rng);
 
         // 重新初始化 RoomController
-        _roomController.Initialize(_builder.GetTileData(), _roomBehaviorTable, _rng);
+        _roomController.Initialize(_builder.GetTileData(), _roomBehaviourTable, _rng);
 
         // 获取新地牢的起始位置并激活玩家
         Vector3 startWorldPos = GetStartRoomWorldPos();

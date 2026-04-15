@@ -53,7 +53,7 @@ public class EnemyAttackParams
 /// </summary>
 public class WaveStartParams
 {
-    public string behaviorName;      // 行为名称
+    public string behaviourName;      // 行为名称
     public int currentWave;          // 当前波次
     public int totalWaves;           // 总波次数
     public int enemiesInWave;        // 当前波敌人数
@@ -80,7 +80,7 @@ public class WaveClearedParams
 /// </summary>
 public class WaveUpdateParams
 {
-    public string behaviorName;
+    public string behaviourName;
     public int currentWave;
     public int totalWaves;
     public int remainingEnemies;

@@ -64,7 +64,7 @@ public class HubPanel : BasePanel
         EventCenter.Instance.Subscribe<WaveClearedParams>(GameEventID.OnWaveCleared, OnWaveCleared);
         EventCenter.Instance.Subscribe<WaveUpdateParams>(GameEventID.OnWaveUpdate, OnWaveUpdate);
         EventCenter.Instance.Subscribe<DamageParams>(GameEventID.OnPlayerDamaged, OnPlayerDamaged);
-        EventCenter.Instance.Subscribe<RoomBehaviorEntry>(GameEventID.OnBehaviorEnd, OnBehaviorEnd);
+        EventCenter.Instance.Subscribe<RoomBehaviourEntry>(GameEventID.OnBehaviourEnd, OnBehaviourEnd);
         EventCenter.Instance.Subscribe<RoomEnterParams>(GameEventID.OnRoomEnter, OnRoomEnter);
         EventCenter.Instance.Subscribe<CorridorEnterParams>(GameEventID.OnCorridorEnter, OnCorridorEnter);
     }
@@ -79,7 +79,7 @@ public class HubPanel : BasePanel
         EventCenter.Instance.Unsubscribe<WaveClearedParams>(GameEventID.OnWaveCleared, OnWaveCleared);
         EventCenter.Instance.Unsubscribe<WaveUpdateParams>(GameEventID.OnWaveUpdate, OnWaveUpdate);
         EventCenter.Instance.Unsubscribe<DamageParams>(GameEventID.OnPlayerDamaged, OnPlayerDamaged);
-        EventCenter.Instance.Unsubscribe<RoomBehaviorEntry>(GameEventID.OnBehaviorEnd, OnBehaviorEnd);
+        EventCenter.Instance.Unsubscribe<RoomBehaviourEntry>(GameEventID.OnBehaviourEnd, OnBehaviourEnd);
         EventCenter.Instance.Unsubscribe<RoomEnterParams>(GameEventID.OnRoomEnter, OnRoomEnter);
         EventCenter.Instance.Unsubscribe<CorridorEnterParams>(GameEventID.OnCorridorEnter, OnCorridorEnter);
     }
@@ -152,7 +152,7 @@ public class HubPanel : BasePanel
         if (text != null)
         {
             text.gameObject.SetActive(true);
-            text.text = $"{p.behaviorName} {p.currentWave}/{p.totalWaves} ({p.enemiesInWave})";
+            text.text = $"{p.behaviourName} {p.currentWave}/{p.totalWaves} ({p.enemiesInWave})";
             FadeInWave(text);
         }
     }
@@ -173,11 +173,11 @@ public class HubPanel : BasePanel
         if (text != null)
         {
             // 异步模式下更新：行为名 波次/总波次 (剩余敌人)
-            text.text = $"{p.behaviorName} {p.currentWave}/{p.totalWaves} ({p.remainingEnemies})";
+            text.text = $"{p.behaviourName} {p.currentWave}/{p.totalWaves} ({p.remainingEnemies})";
         }
     }
 
-    private void OnBehaviorEnd(RoomBehaviorEntry behavior)
+    private void OnBehaviourEnd(RoomBehaviourEntry behaviour)
     {
         var text = GetControl<Text>(TXT_WAVE);
         if (text != null)

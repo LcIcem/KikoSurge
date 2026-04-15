@@ -18,9 +18,9 @@ public enum RoomState
 /// <summary>
 /// 房间波次状态
 /// </summary>
-public class RoomBehaviorState
+public class RoomBehaviourState
 {
-    public List<RoomBehaviorEntry> entries;  // 行为条目列表
+    public List<RoomBehaviourEntry> entries;  // 行为条目列表
     public int pendingCount;                 // 待完成的行为数
 }
 
@@ -31,11 +31,11 @@ public class RoomBehaviorState
 public class RoomController
 {
     private DungeonTileData _tileData;
-    private RoomBehaviorTable_SO _behaviorTable;
+    private RoomBehaviourTable_SO _behaviourTable;
     private GameRandom _rng;
     private int _currentRoomId = -1;
     private readonly Dictionary<int, RoomState> _roomStates = new();
-    private readonly Dictionary<int, RoomBehaviorState> _roomBehaviorStates = new();
+    private readonly Dictionary<int, RoomBehaviourState> _roomBehaviourStates = new();
 
     public RoomController()
     {
@@ -45,14 +45,14 @@ public class RoomController
     /// <summary>
     /// 初始化
     /// </summary>
-    public void Initialize(DungeonTileData tileData, RoomBehaviorTable_SO behaviorTable, GameRandom rng)
+    public void Initialize(DungeonTileData tileData, RoomBehaviourTable_SO behaviourTable, GameRandom rng)
     {
         _tileData = tileData;
-        _behaviorTable = behaviorTable;
+        _behaviourTable = behaviourTable;
         _rng = rng;
         _currentRoomId = -1;
         _roomStates.Clear();
-        _roomBehaviorStates.Clear();
+        _roomBehaviourStates.Clear();
     }
 
     /// <summary>
@@ -66,10 +66,9 @@ public class RoomController
     /// <summary>
     /// 强制刷新当前位置的房间信息（用于UI初始化时读取当前房间类型）
     /// </summary>
-    public void RefreshCurrentRoom()
+    public void RefreshCurrentRoom(Vector2 playerPos)
     {
-        // 强制将 _currentRoomId 设置为 -1，这样下次检测一定会触发事件
-        _currentRoomId = -1;
+        PublishLocationEvent(playerPos);
     }
 
     private void PublishLocationEvent(Vector2 playerPos)
@@ -166,7 +165,7 @@ public class RoomController
             case RoomType.Elite:
             case RoomType.Boss:
                 _roomStates[room.id] = RoomState.InProgress;
-                ExecuteRoomBehaviors(room, playerPos);
+                ExecuteRoomBehaviours(room, playerPos);
                 break;
 
             default:
@@ -175,15 +174,15 @@ public class RoomController
         }
     }
 
-    private void ExecuteRoomBehaviors(Room room, Vector2 playerPos)
+    private void ExecuteRoomBehaviours(Room room, Vector2 playerPos)
     {
-        if (_behaviorTable == null)
+        if (_behaviourTable == null)
         {
             MarkRoomCleared(room.id);
             return;
         }
 
-        var entries = _behaviorTable.GetEntriesByRoomType(room.roomType);
+        var entries = _behaviourTable.GetEntriesByRoomType(room.roomType);
         if (entries == null || entries.Count == 0)
         {
             MarkRoomCleared(room.id);
@@ -191,29 +190,29 @@ public class RoomController
         }
 
         // 记录行为状态
-        var behaviorState = new RoomBehaviorState
+        var behaviourState = new RoomBehaviourState
         {
             entries = entries,
             pendingCount = entries.Count
         };
-        _roomBehaviorStates[room.id] = behaviorState;
+        _roomBehaviourStates[room.id] = behaviourState;
 
         // 执行每个行为
         foreach (var entry in entries)
         {
-            entry.OnWaveComplete = () => OnBehaviorComplete(room.id);
+            entry.OnWaveComplete = () => OnBehaviourComplete(room.id);
             entry.Execute(room, _tileData, _rng, playerPos);
         }
     }
 
-    private void OnBehaviorComplete(int roomId)
+    private void OnBehaviourComplete(int roomId)
     {
-        if (!_roomBehaviorStates.TryGetValue(roomId, out var behaviorState))
+        if (!_roomBehaviourStates.TryGetValue(roomId, out var behaviourState))
             return;
 
-        behaviorState.pendingCount--;
+        behaviourState.pendingCount--;
 
-        if (behaviorState.pendingCount <= 0)
+        if (behaviourState.pendingCount <= 0)
         {
             // 所有行为完成
             CheckRoomClear(roomId);
@@ -228,11 +227,11 @@ public class RoomController
         int roomId = param.enemy.RoomId;
 
         // 通知 sequential 模式的行为
-        if (_roomBehaviorStates.TryGetValue(roomId, out var behaviorState))
+        if (_roomBehaviourStates.TryGetValue(roomId, out var behaviourState))
         {
-            foreach (var entry in behaviorState.entries)
+            foreach (var entry in behaviourState.entries)
             {
-                if (entry is EnemyBehaviorEntry enemyEntry)
+                if (entry is EnemyBehaviourEntry enemyEntry)
                 {
                     enemyEntry.NotifyEnemyKilled(roomId);
                 }
@@ -248,13 +247,13 @@ public class RoomController
             return;
 
         // 检查是否还有待完成的行为
-        if (_roomBehaviorStates.TryGetValue(roomId, out var behaviorState))
+        if (_roomBehaviourStates.TryGetValue(roomId, out var behaviourState))
         {
-            if (behaviorState.pendingCount > 0)
+            if (behaviourState.pendingCount > 0)
                 return;
 
             // 检查所有行为是否完成
-            foreach (var entry in behaviorState.entries)
+            foreach (var entry in behaviourState.entries)
             {
                 if (!entry.IsComplete())
                     return;
@@ -268,7 +267,7 @@ public class RoomController
     private void MarkRoomCleared(int roomId)
     {
         _roomStates[roomId] = RoomState.Cleared;
-        _roomBehaviorStates.Remove(roomId);
+        _roomBehaviourStates.Remove(roomId);
         EventCenter.Instance.Publish(GameEventID.OnRoomCleared, roomId);
     }
 

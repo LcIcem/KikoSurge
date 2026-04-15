@@ -79,7 +79,7 @@ public class GunWeapon : WeaponBase
             Debug.LogError($"[GunWeapon] Bullet component not found on pooled object '{bulletName}'.");
             return;
         }
-        bullet.Init(Damage, direction, BulletSpeed, Range);
+        bullet.Init(direction, BulletSpeed, Range, 0, this);
 
         // 发布事件
         EventCenter.Instance.Publish(GameEventID.Combat_BulletSpawned,

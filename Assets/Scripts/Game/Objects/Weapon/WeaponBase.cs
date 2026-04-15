@@ -5,7 +5,7 @@ using Game.Event;
 /// <summary>
 /// 武器基类。
 /// </summary>
-public abstract class WeaponBase
+public abstract class WeaponBase : IDamageSource
 {
     public string Name { get; protected set; }     // 武器名称
     public WeaponType Type { get; protected set; }  // 武器类型
@@ -135,4 +135,8 @@ public abstract class WeaponBase
     {
         return _weaponPrefab;
     }
+
+    // IDamageSource 实现
+    public float GetDamage() => Damage;
+    public GameObject GetGameObject() => _owner?.gameObject;
 }

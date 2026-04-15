@@ -2,8 +2,8 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(RoomBehaviorTable_SO))]
-public class RoomBehaviorTableEditor : Editor
+[CustomEditor(typeof(RoomBehaviourTable_SO))]
+public class RoomBehaviourTableEditor : Editor
 {
     private SerializedProperty GetListProperty(string fieldName)
     {
@@ -18,14 +18,14 @@ public class RoomBehaviorTableEditor : Editor
         DrawPropertiesExcluding(serializedObject, "normalRoomEntries", "eliteRoomEntries", "bossRoomEntries");
 
         // 绘制每个房间类型的行为列表
-        DrawBehaviorList("普通房间", GetListProperty("normalRoomEntries"));
-        DrawBehaviorList("精英房间", GetListProperty("eliteRoomEntries"));
-        DrawBehaviorList("Boss房间", GetListProperty("bossRoomEntries"));
+        DrawBehaviourList("普通房间", GetListProperty("normalRoomEntries"));
+        DrawBehaviourList("精英房间", GetListProperty("eliteRoomEntries"));
+        DrawBehaviourList("Boss房间", GetListProperty("bossRoomEntries"));
 
         serializedObject.ApplyModifiedProperties();
     }
 
-    private void DrawBehaviorList(string header, SerializedProperty listProperty)
+    private void DrawBehaviourList(string header, SerializedProperty listProperty)
     {
         EditorGUILayout.Space();
         EditorGUILayout.LabelField(header, EditorStyles.boldLabel);
@@ -90,7 +90,7 @@ public class RoomBehaviorTableEditor : Editor
     {
         GenericMenu menu = new GenericMenu();
 
-        menu.AddItem(new GUIContent("敌人生成 (EnemyBehaviorEntry)"), false, () =>
+        menu.AddItem(new GUIContent("敌人生成 (EnemyBehaviourEntry)"), false, () =>
         {
             serializedObject.Update();
             var listProperty = serializedObject.FindProperty(propertyPath);
@@ -101,7 +101,7 @@ public class RoomBehaviorTableEditor : Editor
 
             // 先置空，再设置新实例，避免复制上一个元素的数据
             element.managedReferenceValue = null;
-            element.managedReferenceValue = Activator.CreateInstance(typeof(EnemyBehaviorEntry));
+            element.managedReferenceValue = Activator.CreateInstance(typeof(EnemyBehaviourEntry));
             serializedObject.ApplyModifiedProperties();
         });
 

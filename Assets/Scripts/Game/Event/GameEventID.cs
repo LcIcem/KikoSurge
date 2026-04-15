@@ -45,8 +45,8 @@ namespace Game.Event
         public static readonly EventID OnWaveStarted = (EventID)5002;       // 波次开始
         public static readonly EventID OnWaveCleared = (EventID)5003;       // 波次完成
         public static readonly EventID OnWaveUpdate = (EventID)5006;       // 波次更新（异步模式敌人死亡时更新UI）
-        public static readonly EventID OnBehaviorStart = (EventID)5004;      // 行为开始
-        public static readonly EventID OnBehaviorEnd = (EventID)5005;        // 行为结束
+        public static readonly EventID OnBehaviourStart = (EventID)5004;      // 行为开始
+        public static readonly EventID OnBehaviourEnd = (EventID)5005;        // 行为结束
 
         // 6000-6999: Meta 进度
         public static readonly EventID OnMetaSave = (EventID)6000;          // Meta 保存

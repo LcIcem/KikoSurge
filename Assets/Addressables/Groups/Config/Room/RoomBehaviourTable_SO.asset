@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b1ff9adcbda6bd5409fcf3d50e3e8186, type: 3}
-  m_Name: RoomBehaviorTable_SO
-  m_EditorClassIdentifier: Assembly-CSharp::RoomBehaviorTable_SO
+  m_Name: RoomBehaviourTable_SO
+  m_EditorClassIdentifier: Assembly-CSharp::RoomBehaviourTable_SO
   normalRoomEntries:
   - rid: 6093166113566228718
   - rid: 6093166113566228722
@@ -23,7 +23,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 6093166113566228718
-      type: {class: EnemyBehaviorEntry, ns: , asm: Assembly-CSharp}
+      type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
       data:
         minWaves: 1
         maxWaves: 3
@@ -36,7 +36,7 @@ MonoBehaviour:
         maxCount: 3
         minSpawnDist: 3
     - rid: 6093166113566228719
-      type: {class: EnemyBehaviorEntry, ns: , asm: Assembly-CSharp}
+      type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
       data:
         minWaves: 1
         maxWaves: 3
@@ -47,7 +47,7 @@ MonoBehaviour:
         maxCount: 3
         minSpawnDist: 3
     - rid: 6093166113566228720
-      type: {class: EnemyBehaviorEntry, ns: , asm: Assembly-CSharp}
+      type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
       data:
         minWaves: 1
         maxWaves: 3
@@ -58,7 +58,7 @@ MonoBehaviour:
         maxCount: 3
         minSpawnDist: 3
     - rid: 6093166113566228722
-      type: {class: EnemyBehaviorEntry, ns: , asm: Assembly-CSharp}
+      type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
       data:
         minWaves: 3
         maxWaves: 3

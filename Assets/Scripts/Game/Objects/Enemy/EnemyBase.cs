@@ -10,7 +10,7 @@ using Game.Event;
 /// 敌人基类：处理受伤、死亡、寻路、攻击。
 /// 实现 IPoolable 支持对象池。
 /// </summary>
-public class EnemyBase : MonoBehaviour, IPoolable
+public class EnemyBase : MonoBehaviour, IPoolable, IDamageSource
 {
     // 属性
     public float HP { get; private set; }
@@ -254,4 +254,8 @@ public class EnemyBase : MonoBehaviour, IPoolable
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, LoseRange);
     }
+
+    // IDamageSource 实现
+    float IDamageSource.GetDamage() => Attack;
+    GameObject IDamageSource.GetGameObject() => gameObject;
 }

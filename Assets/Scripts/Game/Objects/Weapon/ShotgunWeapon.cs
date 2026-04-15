@@ -51,7 +51,7 @@ public class ShotgunWeapon : GunWeapon
 
             GameObject pelletObj = ManagerHub.Pool.Get(bulletName, spawnPos, Quaternion.identity);
             var pellet = pelletObj.GetComponent<Bullet>();
-            pellet.Init(Damage, pelletDir, BulletSpeed, Range);
+            pellet.Init(pelletDir, BulletSpeed, Range, 0, this);
         }
     }
 }

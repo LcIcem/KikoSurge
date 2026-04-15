@@ -17,10 +17,10 @@ public enum WaveSpawnMode
 /// <para>通过继承扩展不同类型的行为（敌人生成、宝藏、事件等）</para>
 /// </summary>
 [Serializable]
-public abstract class RoomBehaviorEntry
+public abstract class RoomBehaviourEntry
 {
     [Header("行为名称（用于UI显示）")]
-    public string behaviorName = "未命名行为";
+    public string behaviourName = "未命名行为";
 
     [Header("波次配置")]
     public int minWaves = 1;
