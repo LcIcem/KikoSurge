@@ -26,4 +26,8 @@ public abstract class WeaponDefBase : ScriptableObject
 
     [Tooltip("子弹预设体的 Addressables 地址")]
     public string BulletPrefabAddress;
+
+    [Header("UI图标")]
+    [Tooltip("HUD显示用的武器图标")]
+    public Sprite Icon;
 }

@@ -4,6 +4,7 @@ using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
 using LcIcemFramework.Managers.Pool;
 using Game.Util.Const;
+using Game.Event;
 
 /// <summary>
 /// 掉落物管理器：处理敌人死亡时的物品掉落逻辑
@@ -35,14 +36,14 @@ public class LootManager : SingletonMono<LootManager>
         _player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
 
         // 订阅敌人死亡事件
-        EventCenter.Instance.Subscribe<EnemyKilledParams>(EventID.Combat_EnemyKilled, OnEnemyKilled);
+        EventCenter.Instance.Subscribe<EnemyKilledParams>(GameEventID.Combat_EnemyKilled, OnEnemyKilled);
     }
 
     protected override void OnDestroy()
     {
         base.OnDestroy();
         // 退订事件
-        EventCenter.Instance.Unsubscribe<EnemyKilledParams>(EventID.Combat_EnemyKilled, OnEnemyKilled);
+        EventCenter.Instance.Unsubscribe<EnemyKilledParams>(GameEventID.Combat_EnemyKilled, OnEnemyKilled);
     }
 
     /// <summary>

@@ -52,8 +52,10 @@ public class EnemyAttackParams
 /// </summary>
 public class WaveStartParams
 {
-    public int waveNum;
-    public int totalEnemies;
+    public string behaviorName;      // 行为名称
+    public int currentWave;          // 当前波次
+    public int totalWaves;           // 总波次数
+    public int enemiesInWave;        // 当前波敌人数
 }
 
 /// <summary>
@@ -62,6 +64,25 @@ public class WaveStartParams
 public class WaveCompleteParams
 {
     public int waveNum;
+}
+
+/// <summary>
+/// 波次清理完成事件参数
+/// </summary>
+public class WaveClearedParams
+{
+    public int waveNum;
+}
+
+/// <summary>
+/// 波次更新事件参数（异步模式敌人死亡时）
+/// </summary>
+public class WaveUpdateParams
+{
+    public string behaviorName;
+    public int currentWave;
+    public int totalWaves;
+    public int remainingEnemies;
 }
 
 /// <summary>
@@ -81,4 +102,13 @@ public class BulletHitParams
     public Bullet bullet;
     public Transform target;
     public float damage;
+}
+
+/// <summary>
+/// 换弹进度事件参数
+/// </summary>
+public class ReloadProgressParams
+{
+    public WeaponBase weapon;
+    public float progress;  // 0~1
 }

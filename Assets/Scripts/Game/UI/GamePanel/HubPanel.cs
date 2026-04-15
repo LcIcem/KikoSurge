@@ -1,0 +1,257 @@
+using LcIcemFramework.Managers.UI;
+using UnityEngine;
+using UnityEngine.UI;
+using LcIcemFramework.Managers;
+using LcIcemFramework.Core;
+using LcIcemFramework.Managers.Timer;
+using Game.Event;
+using LcIcemFramework.Managers.Mono;
+using Unity.VisualScripting;
+using System.Collections;
+
+/// <summary>
+/// 游戏内战斗HUD面板
+/// <para>统一管理血量、金币、武器、波次等HUD元素的显示</para>
+/// <para>使用约定：子控件 GameObject 名称即 GetControl 的 key</para>
+/// </summary>
+public class HubPanel : BasePanel
+{
+    // HUD 控件名称常量（与子对象名字一一对应）
+    private const string IMG_GOLD = "img_gold";
+    private const string TXT_GOLD = "txt_gold";
+    private const string IMG_WEAPON = "img_weapon";
+    private const string TXT_WEAPON = "txt_weapon";
+    private const string IMG_AMMO = "img_ammo";
+    private const string TXT_AMMO = "txt_ammo";
+    private const string TXT_WAVE = "txt_wave";
+    private const string IMG_ITEM_SLOT_1 = "img_itemSlot1";
+    private const string IMG_ITEM_SLOT_2 = "img_itemSlot2";
+    private const string IMG_ITEM_SLOT_3 = "img_itemSlot3";
+    private const string IMG_ITEM_SLOT_4 = "img_itemSlot4";
+    private const string TXT_ITEM_COUNT = "txt_itemCount";
+
+    // 波次淡入淡出时长
+    private const float WAVE_FADE_DURATION = 0.3f;
+
+    // 波次淡入协程标识
+    private IEnumerator _waveFadeInCoroutine;
+    // 波次淡出协程标识
+    private IEnumerator _waveFadeOutCoroutine;
+
+    public override void Show()
+    {
+        base.Show();
+        SubscribeEvents();
+    }
+
+    public override void Hide()
+    {
+        base.Hide();
+        UnsubscribeEvents();
+    }
+
+    private void SubscribeEvents()
+    {
+        EventCenter.Instance.Subscribe<int>(GameEventID.OnGoldChanged, OnGoldChanged);
+        EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.OnCurrentWeaponChanged, OnWeaponChanged);
+        EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.OnAmmoChanged, OnAmmoChanged);
+        EventCenter.Instance.Subscribe<ReloadProgressParams>(GameEventID.OnReloadProgress, OnReloadProgress);
+        EventCenter.Instance.Subscribe<WaveStartParams>(GameEventID.OnWaveStarted, OnWaveStarted);
+        EventCenter.Instance.Subscribe<WaveClearedParams>(GameEventID.OnWaveCleared, OnWaveCleared);
+        EventCenter.Instance.Subscribe<WaveUpdateParams>(GameEventID.OnWaveUpdate, OnWaveUpdate);
+        EventCenter.Instance.Subscribe<DamageParams>(GameEventID.OnPlayerDamaged, OnPlayerDamaged);
+        EventCenter.Instance.Subscribe<RoomBehaviorEntry>(GameEventID.OnBehaviorEnd, OnBehaviorEnd);
+    }
+
+    private void UnsubscribeEvents()
+    {
+        EventCenter.Instance.Unsubscribe<int>(GameEventID.OnGoldChanged, OnGoldChanged);
+        EventCenter.Instance.Unsubscribe<WeaponBase>(GameEventID.OnCurrentWeaponChanged, OnWeaponChanged);
+        EventCenter.Instance.Unsubscribe<WeaponBase>(GameEventID.OnAmmoChanged, OnAmmoChanged);
+        EventCenter.Instance.Unsubscribe<ReloadProgressParams>(GameEventID.OnReloadProgress, OnReloadProgress);
+        EventCenter.Instance.Unsubscribe<WaveStartParams>(GameEventID.OnWaveStarted, OnWaveStarted);
+        EventCenter.Instance.Unsubscribe<WaveClearedParams>(GameEventID.OnWaveCleared, OnWaveCleared);
+        EventCenter.Instance.Unsubscribe<WaveUpdateParams>(GameEventID.OnWaveUpdate, OnWaveUpdate);
+        EventCenter.Instance.Unsubscribe<DamageParams>(GameEventID.OnPlayerDamaged, OnPlayerDamaged);
+        EventCenter.Instance.Unsubscribe<RoomBehaviorEntry>(GameEventID.OnBehaviorEnd, OnBehaviorEnd);
+    }
+
+    #region 事件处理
+
+    private void OnGoldChanged(int gold)
+    {
+        var text = GetControl<Text>(TXT_GOLD);
+        if (text != null)
+            text.text = gold.ToString();
+    }
+
+    private void OnWeaponChanged(WeaponBase weapon)
+    {
+        var weaponImg = GetControl<Image>(IMG_WEAPON);
+        var weaponText = GetControl<Text>(TXT_WEAPON);
+        var ammoImg = GetControl<Image>(IMG_AMMO);
+        var ammoText = GetControl<Text>(TXT_AMMO);
+
+        if (weaponImg != null && weapon != null && weapon.Icon != null)
+            weaponImg.sprite = weapon.Icon;
+
+        if (weaponText != null && weapon != null)
+            weaponText.text = weapon.Name;
+
+        UpdateAmmoDisplay(weapon, ammoImg, ammoText);
+    }
+
+    private void OnAmmoChanged(WeaponBase weapon)
+    {
+        var ammoImg = GetControl<Image>(IMG_AMMO);
+        var ammoText = GetControl<Text>(TXT_AMMO);
+        UpdateAmmoDisplay(weapon, ammoImg, ammoText);
+    }
+
+    private void OnReloadProgress(ReloadProgressParams p)
+    {
+        var ammoImg = GetControl<Image>(IMG_AMMO);
+        if (ammoImg != null)
+        {
+            ammoImg.fillAmount = p.progress;
+            ammoImg.color = Color.yellow;
+        }
+    }
+
+    private void UpdateAmmoDisplay(WeaponBase weapon, Image ammoImg, Text ammoText)
+    {
+        if (weapon == null) return;
+
+        if (ammoText != null)
+            ammoText.text = $"{weapon.CurrentAmmo}/{weapon.MagazineSize}";
+
+        if (ammoImg != null && weapon.BulletPrefab != null)
+        {
+            var bullet = weapon.BulletPrefab.GetComponent<Bullet>();
+            if (bullet != null && bullet.Icon != null)
+                ammoImg.sprite = bullet.Icon;
+
+            ammoImg.fillAmount = 1f;
+
+            float ratio = (float)weapon.CurrentAmmo / weapon.MagazineSize;
+            ammoImg.color = ratio <= 0.2f ? Color.red.WithAlpha(125) : Color.white;
+        }
+    }
+
+    private void OnWaveStarted(WaveStartParams p)
+    {
+        var text = GetControl<Text>(TXT_WAVE);
+        if (text != null)
+        {
+            text.gameObject.SetActive(true);
+            text.text = $"{p.behaviorName} {p.currentWave}/{p.totalWaves} ({p.enemiesInWave})";
+            FadeInWave(text);
+        }
+    }
+
+    private void OnWaveCleared(WaveClearedParams p)
+    {
+        var text = GetControl<Text>(TXT_WAVE);
+        if (text != null)
+        {
+            // 异步模式下 OnWaveCleared 可能不会被调用，这里只淡出
+            FadeOutWave(text);
+        }
+    }
+
+    private void OnWaveUpdate(WaveUpdateParams p)
+    {
+        var text = GetControl<Text>(TXT_WAVE);
+        if (text != null)
+        {
+            // 异步模式下更新：行为名 波次/总波次 (剩余敌人)
+            text.text = $"{p.behaviorName} {p.currentWave}/{p.totalWaves} ({p.remainingEnemies})";
+        }
+    }
+
+    private void OnBehaviorEnd(RoomBehaviorEntry behavior)
+    {
+        var text = GetControl<Text>(TXT_WAVE);
+        if (text != null)
+        {
+            // 立即隐藏，不等待淡出
+            text.gameObject.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 波次UI淡入
+    /// </summary>
+    private void FadeInWave(Text text)
+    {
+        // 停止之前的淡入/淡出协程
+        if (_waveFadeInCoroutine != null)
+            MonoManager.Instance.StopCoroutine(_waveFadeInCoroutine);
+        if (_waveFadeOutCoroutine != null)
+            MonoManager.Instance.StopCoroutine(_waveFadeOutCoroutine);
+
+        text.color = new Color(text.color.r, text.color.g, text.color.b, 0f);
+        text.gameObject.SetActive(true);
+        _waveFadeInCoroutine = FadeTextAlpha(text, 0f, 1f, WAVE_FADE_DURATION);
+        MonoManager.Instance.StartCoroutine(_waveFadeInCoroutine);
+    }
+
+    /// <summary>
+    /// 波次UI淡出（延迟后隐藏）
+    /// </summary>
+    private void FadeOutWave(Text text)
+    {
+        // 停止之前的淡入/淡出协程
+        if (_waveFadeInCoroutine != null)
+            MonoManager.Instance.StopCoroutine(_waveFadeInCoroutine);
+        if (_waveFadeOutCoroutine != null)
+            MonoManager.Instance.StopCoroutine(_waveFadeOutCoroutine);
+
+        // 先完成淡入，再淡出
+        _waveFadeOutCoroutine = FadeOutSequence(text);
+        MonoManager.Instance.StartCoroutine(_waveFadeOutCoroutine);
+    }
+
+    private IEnumerator FadeOutSequence(Text text)
+    {
+        // 先完成淡入（如果有淡入在进行中）
+        if (_waveFadeInCoroutine != null)
+        {
+            yield return _waveFadeInCoroutine;
+        }
+
+        // 延迟1秒后开始淡出
+        yield return new WaitForSeconds(1f);
+
+        yield return FadeTextAlpha(text, 1f, 0f, WAVE_FADE_DURATION);
+    }
+
+    /// <summary>
+    /// 文本透明度渐变协程
+    /// </summary>
+    private IEnumerator FadeTextAlpha(Text text, float from, float to, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float alpha = Mathf.Lerp(from, to, t);
+            text.color = new Color(text.color.r, text.color.g, text.color.b, alpha);
+            yield return null;
+        }
+        text.color = new Color(text.color.r, text.color.g, text.color.b, to);
+    }
+
+    private void OnPlayerDamaged(DamageParams p)
+    {
+        // TODO: 受伤红屏特效
+    }
+
+    #endregion
+
+    protected override void OnClick(string btnName)
+    {
+        // 可扩展：快捷键响应等
+    }
+}

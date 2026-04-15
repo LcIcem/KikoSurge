@@ -5,6 +5,7 @@ using LcIcemFramework.Managers;
 using LcIcemFramework.Managers.Mono;
 using LcIcemFramework.Managers.UI;
 using UnityEngine;
+using Game.Event;
 
 /// <summary>
 /// 玩家处理类
@@ -57,9 +58,9 @@ public class PlayerHandler
 
         CameraManager.Instance.Follow(_playerInstance.transform);
 
-        ManagerHub.UI.ShowPanel<GamePanel>(UILayerType.Middle, (panel) =>
+        ManagerHub.UI.ShowPanel<HubPanel>(UILayerType.Middle, (panel) =>
         {
-            EventCenter.Instance.Publish(EventID.UpdateHeartDisplay, playerData);
+            EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, playerData);
         });
     }
 

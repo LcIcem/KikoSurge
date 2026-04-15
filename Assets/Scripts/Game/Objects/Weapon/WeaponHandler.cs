@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using LcIcemFramework.Core;
+using Game.Event;
 
 /// <summary>
 /// 武器处理器：管理玩家当前武器，执行射击和切换。
@@ -69,6 +71,9 @@ public class WeaponHandler
 
         if (newWeapon.CurrentAmmo <= 0)
             newWeapon.Reload();
+
+        // 发布武器切换事件
+        EventCenter.Instance.Publish(GameEventID.OnCurrentWeaponChanged, newWeapon);
     }
 
     /// <summary>

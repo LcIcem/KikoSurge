@@ -4,6 +4,7 @@ using LcIcemFramework.Managers;
 using LcIcemFramework.Managers.Pool;
 using LcIcemFramework.Managers.Timer;
 using UnityEngine;
+using Game.Event;
 
 /// <summary>
 /// 敌人基类：处理受伤、死亡、寻路、攻击。
@@ -128,6 +129,12 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
     public void OnDespawn()
     {
+        // 停止死亡协程，防止复用时错误释放
+        if (_deathCoroutine != null)
+        {
+            StopCoroutine(_deathCoroutine);
+            _deathCoroutine = null;
+        }
         _fsm?.Stop();
     }
 
@@ -146,7 +153,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         HP -= damage;
 
-        EventCenter.Instance.Publish(EventID.Combat_EnemyDamaged,
+        EventCenter.Instance.Publish(GameEventID.Combat_EnemyDamaged,
             new EnemyDamagedParams { enemy = this, damage = damage, currentHP = HP });
 
         if (HP <= 0f)
@@ -163,12 +170,14 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         _rigidbody.linearVelocity = Vector2.zero;
         StopChaseTarget();
-        EventCenter.Instance.Publish(EventID.Combat_EnemyKilled,
+        EventCenter.Instance.Publish(GameEventID.Combat_EnemyKilled,
             new EnemyKilledParams { enemy = this, position = transform.position });
 
         // 延迟回收至对象池（等待死亡动画播放）
-        StartCoroutine(DelayRelease());
+        _deathCoroutine = StartCoroutine(DelayRelease());
     }
+
+    private Coroutine _deathCoroutine;
 
     private IEnumerator DelayRelease()
     {
@@ -224,7 +233,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     {
         if (_player == null) return;
 
-        EventCenter.Instance.Publish(EventID.Combat_EnemyAttack,
+        EventCenter.Instance.Publish(GameEventID.Combat_EnemyAttack,
             new EnemyAttackParams { enemy = this, target = _player, damage = Attack });
     }
 

@@ -97,26 +97,32 @@ public class WeaponFactory
     /// </summary>
     private WeaponBase CreateWeaponCore(WeaponDefBase config, Player owner, GameObject bulletPrefab)
     {
+        WeaponBase weapon = null;
+
         switch (config)
         {
             case GunWeaponDef_SO gun:
                 var gunWeapon = new GunWeapon(owner);
-                gunWeapon.Init(gun.Damage, gun.FireRate, gun.ReloadTime,
-                    gun.MagazineSize, gun.RecoilForce,
+                gunWeapon.Init(gun.WeaponName, gun.Damage, gun.FireRate, gun.ReloadTime,
+                    gun.MagazineSize, gun.RecoilForce, gun.Icon,
                     bulletPrefab, gun.BulletSpeed, gun.Spread, gun.Range);
-                return gunWeapon;
+                weapon = gunWeapon;
+                break;
 
             case ShotgunWeaponDef_SO shotgun:
                 var shotgunWeapon = new ShotgunWeapon(owner);
-                shotgunWeapon.Init(shotgun.Damage, shotgun.FireRate, shotgun.ReloadTime,
-                    shotgun.MagazineSize, shotgun.RecoilForce,
+                shotgunWeapon.Init(shotgun.WeaponName, shotgun.Damage, shotgun.FireRate, shotgun.ReloadTime,
+                    shotgun.MagazineSize, shotgun.RecoilForce, shotgun.Icon,
                     bulletPrefab, shotgun.BulletSpeed,
                     shotgun.PelletCount, shotgun.SpreadAngle, shotgun.FalloffStart, shotgun.Range);
-                return shotgunWeapon;
+                weapon = shotgunWeapon;
+                break;
 
             default:
                 Debug.LogError($"[WeaponFactory] 未知的武器配置类型: {config.GetType()}");
                 return null;
         }
+
+        return weapon;
     }
 }

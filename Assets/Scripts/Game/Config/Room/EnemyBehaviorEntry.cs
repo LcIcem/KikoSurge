@@ -4,6 +4,8 @@ using LcIcemFramework.Managers;
 using ProcGen.Core;
 using ProcGen.Seed;
 using UnityEngine;
+using Game.Event;
+using LcIcemFramework.Core;
 
 /// <summary>
 /// 敌人生成选项（单种敌人配置）
@@ -42,6 +44,8 @@ public class EnemyBehaviorEntry : RoomBehaviorEntry
 
     // Sequential 模式用：追踪当前波次的存活敌人数
     private int _enemiesAliveInCurrentWave;
+    // 异步模式用：追踪所有波次存活敌人数
+    private int _totalEnemiesAlive;
 
     public override void Execute(Room room, DungeonTileData tileData, GameRandom rng, Vector2 playerPos)
     {
@@ -50,12 +54,17 @@ public class EnemyBehaviorEntry : RoomBehaviorEntry
         _playerPos = playerPos;
         _currentWave = 0;
         _totalWaves = rng.Range(minWaves, maxWaves + 1);
+        _totalEnemiesAlive = 0;
+        _enemiesAliveInCurrentWave = 0;
 
         // 从 tileData 获取 floor tiles
         tileData.TryGetRoomFloorTiles(room.id, out _floorTiles);
 
         // 预计算有效生成位置
         CalculateValidTiles();
+
+        // 发布行为开始
+        EventCenter.Instance.Publish(GameEventID.OnBehaviorStart, (RoomBehaviorEntry)this);
 
         // 执行第一波
         SpawnCurrentWave();
@@ -112,7 +121,8 @@ public class EnemyBehaviorEntry : RoomBehaviorEntry
     {
         if (_currentWave >= _totalWaves)
         {
-            // 所有波次生成完毕
+            // 所有波次生成完毕，发布行为结束
+            EventCenter.Instance.Publish(GameEventID.OnBehaviorEnd, (RoomBehaviorEntry)this);
             OnWaveComplete?.Invoke();
             return;
         }
@@ -120,6 +130,11 @@ public class EnemyBehaviorEntry : RoomBehaviorEntry
         // 生成当前波次敌人
         int count = _rng.Range(minCount, maxCount + 1);
         _enemiesAliveInCurrentWave = count;
+        // 异步模式累加总数，顺序模式重置为当前波数量
+        if (spawnMode == WaveSpawnMode.Async)
+            _totalEnemiesAlive += count;
+        else
+            _totalEnemiesAlive = count;
 
         for (int i = 0; i < count; i++)
         {
@@ -138,6 +153,10 @@ public class EnemyBehaviorEntry : RoomBehaviorEntry
 
         _currentWave++;
 
+        // 发布波次开始
+        EventCenter.Instance.Publish(GameEventID.OnWaveStarted,
+            new WaveStartParams { behaviorName = behaviorName, currentWave = _currentWave, totalWaves = _totalWaves, enemiesInWave = _totalEnemiesAlive });
+
         if (spawnMode == WaveSpawnMode.Sequential)
         {
             // 队列式：等待敌人死亡后再生成下一波
@@ -150,33 +169,57 @@ public class EnemyBehaviorEntry : RoomBehaviorEntry
             {
                 ManagerHub.Timer.AddTimeOut(waveDelay, () => SpawnCurrentWave());
             }
-            else
-            {
-                // 所有波次生成完毕
-                OnWaveComplete?.Invoke();
-            }
+            // 注意：异步模式下 OnBehaviorEnd 在 NotifyEnemyKilled 中发布（所有敌人都死亡时）
         }
     }
 
     /// <summary>
-    /// 通知敌人死亡（由 RoomController 调用，仅 Sequential 模式使用）
+    /// 通知敌人死亡（由 RoomController 调用）
     /// </summary>
-    public void NotifyEnemyKilled()
+    public void NotifyEnemyKilled(int enemyRoomId)
     {
-        if (spawnMode != WaveSpawnMode.Sequential)
+        // 验证敌人是否属于当前行为实例的房间
+        if (enemyRoomId != _room.id)
             return;
 
         _enemiesAliveInCurrentWave--;
+        _totalEnemiesAlive--;
 
-        if (_enemiesAliveInCurrentWave <= 0 && _currentWave < _totalWaves)
+        // 发布波次更新（实时更新剩余敌人数）
+        // 顺序模式用当前波剩余数，异步模式用所有波剩余总数
+        int remaining = spawnMode == WaveSpawnMode.Sequential ? _enemiesAliveInCurrentWave : _totalEnemiesAlive;
+        EventCenter.Instance.Publish(GameEventID.OnWaveUpdate,
+            new WaveUpdateParams { behaviorName = behaviorName, currentWave = _currentWave, totalWaves = _totalWaves, remainingEnemies = remaining });
+
+        if (spawnMode == WaveSpawnMode.Sequential)
         {
-            // 当前波次敌人全死，延迟后生成下一波
-            ManagerHub.Timer.AddTimeOut(waveDelay, () => SpawnCurrentWave());
+            if (_enemiesAliveInCurrentWave <= 0)
+            {
+                // 发布波次清理完成
+                EventCenter.Instance.Publish(GameEventID.OnWaveCleared,
+                    new WaveClearedParams { waveNum = _currentWave });
+            }
+
+            if (_enemiesAliveInCurrentWave <= 0 && _currentWave < _totalWaves)
+            {
+                // 当前波次敌人全死，延迟后生成下一波
+                ManagerHub.Timer.AddTimeOut(waveDelay, () => SpawnCurrentWave());
+            }
+            else if (_enemiesAliveInCurrentWave <= 0 && _currentWave >= _totalWaves)
+            {
+                // 所有波次完成
+                EventCenter.Instance.Publish(GameEventID.OnBehaviorEnd, (RoomBehaviorEntry)this);
+                OnWaveComplete?.Invoke();
+            }
         }
-        else if (_enemiesAliveInCurrentWave <= 0 && _currentWave >= _totalWaves)
+        else
         {
-            // 所有波次完成
-            OnWaveComplete?.Invoke();
+            // 异步模式：检查是否所有敌人都死亡且所有波次已生成
+            if (_totalEnemiesAlive <= 0 && _currentWave >= _totalWaves)
+            {
+                EventCenter.Instance.Publish(GameEventID.OnBehaviorEnd, (RoomBehaviorEntry)this);
+                OnWaveComplete?.Invoke();
+            }
         }
     }
 

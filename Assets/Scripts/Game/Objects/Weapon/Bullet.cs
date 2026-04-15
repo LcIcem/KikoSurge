@@ -2,6 +2,7 @@ using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
 using LcIcemFramework.Managers.Pool;
 using UnityEngine;
+using Game.Event;
 
 /// <summary>
 /// 子弹：处理飞行、命中检测、伤害。
@@ -15,6 +16,10 @@ public class Bullet : MonoBehaviour, IPoolable
     private float _maxDistance;
     private Vector3 _spawnPos;
     private int _pierceCount;
+
+    [Header("HUD图标")]
+    [Tooltip("HUD显示用的子弹图标")]
+    public Sprite Icon;
 
     // 组件
     private Rigidbody2D _rigidbody;
@@ -78,7 +83,7 @@ public class Bullet : MonoBehaviour, IPoolable
             {
                 enemy.TakeDamage(_damage);
 
-                EventCenter.Instance.Publish(EventID.Combat_BulletHit,
+                EventCenter.Instance.Publish(GameEventID.Combat_BulletHit,
                     new BulletHitParams
                     {
                         bullet = this,

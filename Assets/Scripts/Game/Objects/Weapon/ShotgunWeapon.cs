@@ -19,14 +19,14 @@ public class ShotgunWeapon : GunWeapon
     /// <summary>
     /// 从配置数据初始化武器属性
     /// </summary>
-    public void Init(float damage, float fireRate, float reloadTime,
-        int magazineSize, float recoilForce,
+    public void Init(string name, float damage, float fireRate, float reloadTime,
+        int magazineSize, float recoilForce, Sprite icon,
         GameObject bulletPrefab, float bulletSpeed,
         int pelletCount, float spreadAngle, float falloffStart, float range)
     {
-        base.Init(damage, fireRate, reloadTime, magazineSize, recoilForce);
+        base.Init(name, damage, fireRate, reloadTime, magazineSize, recoilForce, icon,
+            bulletPrefab, bulletSpeed, 0, range);  // spread 不用于霰弹枪
 
-        BulletPrefab = bulletPrefab;
         BulletSpeed = bulletSpeed;
         PelletCount = pelletCount;
         SpreadAngle = spreadAngle;

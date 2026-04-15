@@ -1,13 +1,13 @@
 using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
 using UnityEngine;
+using Game.Event;
 
 /// <summary>
 /// 枪械武器（单发射击）。
 /// </summary>
 public class GunWeapon : WeaponBase
 {
-    public GameObject BulletPrefab { get; set; }    // 子弹 Prefab
     public float BulletSpeed { get; set; } = 20f;   // 子弹速度
     public float Spread { get; set; } = 2f;         // 散布角度（度）
     public float Range { get; set; } = 50f;         // 射程
@@ -19,13 +19,13 @@ public class GunWeapon : WeaponBase
     /// <summary>
     /// 从配置数据初始化武器属性
     /// </summary>
-    public void Init(float damage, float fireRate, float reloadTime,
-        int magazineSize, float recoilForce,
+    public void Init(string name, float damage, float fireRate, float reloadTime,
+        int magazineSize, float recoilForce, Sprite icon,
         GameObject bulletPrefab, float bulletSpeed, float spread, float range)
     {
-        base.Init(damage, fireRate, reloadTime, magazineSize, recoilForce);
+        base.Init(name, damage, fireRate, reloadTime, magazineSize, recoilForce, icon);
 
-        BulletPrefab = bulletPrefab;
+        this.BulletPrefab = bulletPrefab;
         BulletSpeed = bulletSpeed;
         Spread = spread;
         Range = range;
@@ -82,7 +82,7 @@ public class GunWeapon : WeaponBase
         bullet.Init(Damage, direction, BulletSpeed, Range);
 
         // 发布事件
-        EventCenter.Instance.Publish(EventID.Combat_BulletSpawned,
+        EventCenter.Instance.Publish(GameEventID.Combat_BulletSpawned,
             new BulletSpawnParams { bullet = bullet, weaponType = Type });
     }
 }

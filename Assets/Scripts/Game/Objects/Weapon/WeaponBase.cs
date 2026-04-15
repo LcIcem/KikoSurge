@@ -1,11 +1,13 @@
 using LcIcemFramework.Core;
 using UnityEngine;
+using Game.Event;
 
 /// <summary>
 /// 武器基类。
 /// </summary>
 public abstract class WeaponBase
 {
+    public string Name { get; protected set; }     // 武器名称
     public WeaponType Type { get; protected set; }  // 武器类型
     public float Damage { get; protected set; }     // 基础伤害
     public float FireRate { get; protected set; }   // 射速（秒/发）
@@ -14,6 +16,8 @@ public abstract class WeaponBase
     public int CurrentAmmo { get; protected set; }  // 当前弹药
     public bool IsReloading { get; protected set; } // 是否在装填
     public float RecoilForce { get; protected set; } // 后坐力
+    public Sprite Icon { get; set; }     // HUD图标
+    public GameObject BulletPrefab { get; protected set; }  // 子弹预设体
 
     protected Player _owner; //武器所有者引用
     protected GameObject _weaponPrefab; // 武器可视化预设体实例
@@ -29,15 +33,17 @@ public abstract class WeaponBase
     /// <summary>
     /// 从配置数据初始化武器属性
     /// </summary>
-    public virtual void Init(float damage, float fireRate, float reloadTime,
-        int magazineSize, float recoilForce)
+    public virtual void Init(string name, float damage, float fireRate, float reloadTime,
+        int magazineSize, float recoilForce, Sprite icon = null)
     {
+        Name = name;
         Damage = damage;
         FireRate = fireRate;
         ReloadTime = reloadTime;
         MagazineSize = magazineSize;
         RecoilForce = recoilForce;
         CurrentAmmo = MagazineSize;
+        Icon = icon;
     }
 
     public virtual void Update()
@@ -53,7 +59,16 @@ public abstract class WeaponBase
                 CurrentAmmo = MagazineSize;
                 IsReloading = false;
                 // 发布装填结束事件
-                EventCenter.Instance.Publish(EventID.Combat_Reloaded, this);
+                EventCenter.Instance.Publish(GameEventID.Combat_Reloaded, this);
+                // 发布弹药变化事件
+                EventCenter.Instance.Publish(GameEventID.OnAmmoChanged, this);
+            }
+            else
+            {
+                // 发布换弹进度事件
+                float progress = 1f - (_reloadTimer / ReloadTime);
+                EventCenter.Instance.Publish(GameEventID.OnReloadProgress,
+                    new ReloadProgressParams { weapon = this, progress = progress });
             }
         }
     }
@@ -71,7 +86,7 @@ public abstract class WeaponBase
         IsReloading = true;
         _reloadTimer = ReloadTime;
         // 发布装填开始事件
-        EventCenter.Instance.Publish(EventID.Combat_Reloading, this);
+        EventCenter.Instance.Publish(GameEventID.Combat_Reloading, this);
     }
 
     /// 能否开火
@@ -90,6 +105,8 @@ public abstract class WeaponBase
     {
         CurrentAmmo--;
         _fireCooldown = FireRate;
+        // 发布弹药变化事件
+        EventCenter.Instance.Publish(GameEventID.OnAmmoChanged, this);
     }
 
     /// 取消装填
@@ -100,7 +117,7 @@ public abstract class WeaponBase
         _reloadTimer = 0f;
 
         // 发布取消装填事件
-        EventCenter.Instance.Publish(EventID.Combat_CancelReload);
+        EventCenter.Instance.Publish(GameEventID.Combat_CancelReload);
     }
 
     /// <summary>

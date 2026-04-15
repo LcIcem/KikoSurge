@@ -4,6 +4,7 @@ using LcIcemFramework.Core;
 using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
 using LcIcemFramework.Managers;
+using Game.Event;
 
 
 /// <summary>
@@ -83,9 +84,9 @@ public class Player : MonoBehaviour
         }
 
         // 订阅事件
-        EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloading, OnReloading);
-        EventCenter.Instance.Subscribe<WeaponBase>(EventID.Combat_Reloaded, OnReloaded);
-        EventCenter.Instance.Subscribe(EventID.Combat_CancelReload, OnCancelReload);
+        EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloading, OnReloading);
+        EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloaded, OnReloaded);
+        EventCenter.Instance.Subscribe(GameEventID.Combat_CancelReload, OnCancelReload);
     }
 
     void OnDestroy()
@@ -93,9 +94,9 @@ public class Player : MonoBehaviour
         _fsm.Stop();
 
         // 退订事件
-        EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.Combat_Reloading, OnReloading);
-        EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.Combat_Reloaded, OnReloaded);
-        EventCenter.Instance.Unsubscribe(EventID.Combat_CancelReload, OnCancelReload);
+        EventCenter.Instance.Unsubscribe<WeaponBase>(GameEventID.Combat_Reloading, OnReloading);
+        EventCenter.Instance.Unsubscribe<WeaponBase>(GameEventID.Combat_Reloaded, OnReloaded);
+        EventCenter.Instance.Unsubscribe(GameEventID.Combat_CancelReload, OnCancelReload);
     }
 
     private float _curSpeed = 0f;
@@ -186,7 +187,7 @@ public class Player : MonoBehaviour
         hp -= damage;
         _fsm.SetTrigger("hurt");
 
-        EventCenter.Instance.Publish(EventID.Combat_PlayerDamaged,
+        EventCenter.Instance.Publish(GameEventID.Combat_PlayerDamaged,
             new DamageParams { damage = damage, from = transform.position });
 
         if (hp <= 0f)

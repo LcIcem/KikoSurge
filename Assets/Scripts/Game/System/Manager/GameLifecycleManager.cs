@@ -3,6 +3,7 @@ using Game.Event;
 using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// 游戏状态
@@ -161,19 +162,18 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// <summary>
     /// 调试：使用默认种子开始新游戏
     /// </summary>
-    [ContextMenu("Debug/Start New Game (Debug Seed)")]
-    public void DebugStartNewGame()
+    public void DebugStartNewGame(InputAction.CallbackContext ctx)
     {
-        StartNewGame(0, _debugSeed);
+        if (ctx.performed)
+            StartNewGame(0, _debugSeed);
     }
 
     /// <summary>
     /// 调试：进入下一层
     /// </summary>
-    [ContextMenu("Debug/Enter Next Layer")]
-    public void DebugEnterNextLayer()
+    public void DebugEnterNextLayer(InputAction.CallbackContext ctx)
     {
-        if (_levelController != null && CurrentState == GameState.Playing)
+        if (ctx.performed && _levelController != null && CurrentState == GameState.Playing)
         {
             _levelController.EnterNextLayer();
         }

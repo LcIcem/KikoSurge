@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine;
 using LcIcemFramework.Managers;
 using LcIcemFramework.Core;
+using Game.Event;
 
 /// <summary>
 /// 生命值系统
@@ -26,13 +27,13 @@ public class HeartSystem : MonoBehaviour
     void Start()
     {
         // 订阅更新血量显示事件
-        EventCenter.Instance.Subscribe<PlayerData>(EventID.UpdateHeartDisplay, UpdateHeartDisplay);
+        EventCenter.Instance.Subscribe<PlayerData>(GameEventID.UpdateHeartDisplay, UpdateHeartDisplay);
     }
 
     void OnDestroy()
     {
         // 退订更新血量显示事件
-        EventCenter.Instance.Unsubscribe<PlayerData>(EventID.UpdateHeartDisplay, UpdateHeartDisplay);
+        EventCenter.Instance.Unsubscribe<PlayerData>(GameEventID.UpdateHeartDisplay, UpdateHeartDisplay);
     }
 
     // 更新生命值的显示

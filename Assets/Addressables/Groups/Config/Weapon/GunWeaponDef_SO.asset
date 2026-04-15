@@ -22,6 +22,7 @@ MonoBehaviour:
   RecoilForce: 1
   WeaponPrefabAddress: Bow
   BulletPrefabAddress: Bullet
+  Icon: {fileID: -9095717837082945937, guid: 51e95766f1053e544acc76d6f0799c42, type: 3}
   BulletSpeed: 20
   Spread: 2
   Range: 50

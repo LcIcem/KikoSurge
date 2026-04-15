@@ -3,6 +3,7 @@ using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
 using UnityEngine;
 using UnityEngine.Events;
+using Game.Event;
 
 /// <summary>
 /// 敌人工厂：根据配置创建敌人实例，支持 Addressables 预设体加载。
@@ -57,7 +58,7 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
         else
             _spawnedCounts[config.Type] = 1;
 
-        EventCenter.Instance.Publish(EventID.Combat_EnemySpawned,
+        EventCenter.Instance.Publish(GameEventID.Combat_EnemySpawned,
             new EnemySpawnedParams { enemy = enemy, type = config.Type });
 
         onCreated?.Invoke(enemy);

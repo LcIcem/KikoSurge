@@ -37,6 +37,11 @@ public class RoomController
     private readonly Dictionary<int, RoomState> _roomStates = new();
     private readonly Dictionary<int, RoomBehaviorState> _roomBehaviorStates = new();
 
+    public RoomController()
+    {
+        EventCenter.Instance.Subscribe<EnemyKilledParams>(GameEventID.Combat_EnemyKilled, OnEnemyKilled);
+    }
+
     /// <summary>
     /// 初始化
     /// </summary>
@@ -48,8 +53,6 @@ public class RoomController
         _currentRoomId = -1;
         _roomStates.Clear();
         _roomBehaviorStates.Clear();
-
-        EventCenter.Instance.Subscribe<EnemyKilledParams>(EventID.Combat_EnemyKilled, OnEnemyKilled);
     }
 
     /// <summary>
@@ -166,7 +169,7 @@ public class RoomController
             {
                 if (entry is EnemyBehaviorEntry enemyEntry)
                 {
-                    enemyEntry.NotifyEnemyKilled();
+                    enemyEntry.NotifyEnemyKilled(roomId);
                 }
             }
         }
@@ -222,6 +225,6 @@ public class RoomController
     /// </summary>
     public void Dispose()
     {
-        EventCenter.Instance.Unsubscribe<EnemyKilledParams>(EventID.Combat_EnemyKilled, OnEnemyKilled);
+        EventCenter.Instance.Unsubscribe<EnemyKilledParams>(GameEventID.Combat_EnemyKilled, OnEnemyKilled);
     }
 }

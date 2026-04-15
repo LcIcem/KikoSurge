@@ -246,4 +246,9 @@ public class LevelController : MonoBehaviour
     {
         return sessionSeed + layerIndex * 100;
     }
+
+    private void OnDestroy()
+    {
+        _roomController?.Dispose();
+    }
 }

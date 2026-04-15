@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -63,7 +62,7 @@ public class RoomBehaviorTableEditor : Editor
         GUILayout.FlexibleSpace();
         if (GUILayout.Button("+ 添加行为", GUILayout.Width(100)))
         {
-            ShowAddMenu(listProperty);
+            ShowAddMenu(listProperty.propertyPath);
         }
         EditorGUILayout.EndHorizontal();
         EditorGUI.indentLevel--;
@@ -82,33 +81,26 @@ public class RoomBehaviorTableEditor : Editor
 
     private void DrawElementFields(SerializedProperty element)
     {
-        // 绘制 managedReference 修改后的字段
-        var property = element.Copy();
-        var endProperty = element.GetEndProperty();
-
-        while (property.NextVisible(true) && !SerializedProperty.EqualContents(property, endProperty))
-        {
-            // 跳过 managedReferenceFullTypename 和 managedReferenceId
-            if (property.propertyPath.Contains("managedReference"))
-                continue;
-
-            EditorGUILayout.PropertyField(property, true);
-        }
+        // 直接绘制整个元素，让 Unity 处理 List/Array 的展开显示
+        // 这样不会重复绘制子属性
+        EditorGUILayout.PropertyField(element, true);
     }
 
-    private void ShowAddMenu(SerializedProperty listProperty)
+    private void ShowAddMenu(string propertyPath)
     {
         GenericMenu menu = new GenericMenu();
 
         menu.AddItem(new GUIContent("敌人生成 (EnemyBehaviorEntry)"), false, () =>
         {
             serializedObject.Update();
-            int index = listProperty.arraySize;
-            listProperty.InsertArrayElementAtIndex(index);
-            var element = listProperty.GetArrayElementAtIndex(index);
+            var listProperty = serializedObject.FindProperty(propertyPath);
 
-            // 设置类型为 EnemyBehaviorEntry
-            string fullTypeName = $"{typeof(EnemyBehaviorEntry).Assembly.GetName().Name}.{typeof(EnemyBehaviorEntry).FullName}";
+            // 直接增加数组大小
+            listProperty.arraySize++;
+            var element = listProperty.GetArrayElementAtIndex(listProperty.arraySize - 1);
+
+            // 先置空，再设置新实例，避免复制上一个元素的数据
+            element.managedReferenceValue = null;
             element.managedReferenceValue = Activator.CreateInstance(typeof(EnemyBehaviorEntry));
             serializedObject.ApplyModifiedProperties();
         });

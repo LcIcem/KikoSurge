@@ -19,6 +19,9 @@ public enum WaveSpawnMode
 [Serializable]
 public abstract class RoomBehaviorEntry
 {
+    [Header("行为名称（用于UI显示）")]
+    public string behaviorName = "未命名行为";
+
     [Header("波次配置")]
     public int minWaves = 1;
     public int maxWaves = 1;
