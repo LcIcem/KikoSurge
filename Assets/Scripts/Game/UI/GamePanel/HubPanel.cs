@@ -8,6 +8,7 @@ using Game.Event;
 using LcIcemFramework.Managers.Mono;
 using Unity.VisualScripting;
 using System.Collections;
+using ProcGen.Core;
 
 /// <summary>
 /// 游戏内战斗HUD面板
@@ -24,6 +25,7 @@ public class HubPanel : BasePanel
     private const string IMG_AMMO = "img_ammo";
     private const string TXT_AMMO = "txt_ammo";
     private const string TXT_WAVE = "txt_wave";
+    private const string TXT_ROOM = "txt_room";
     private const string IMG_ITEM_SLOT_1 = "img_itemSlot1";
     private const string IMG_ITEM_SLOT_2 = "img_itemSlot2";
     private const string IMG_ITEM_SLOT_3 = "img_itemSlot3";
@@ -42,6 +44,8 @@ public class HubPanel : BasePanel
     {
         base.Show();
         SubscribeEvents();
+        // 请求刷新当前房间UI
+        EventCenter.Instance.Publish(GameEventID.OnRequestRoomRefresh);
     }
 
     public override void Hide()
@@ -61,6 +65,8 @@ public class HubPanel : BasePanel
         EventCenter.Instance.Subscribe<WaveUpdateParams>(GameEventID.OnWaveUpdate, OnWaveUpdate);
         EventCenter.Instance.Subscribe<DamageParams>(GameEventID.OnPlayerDamaged, OnPlayerDamaged);
         EventCenter.Instance.Subscribe<RoomBehaviorEntry>(GameEventID.OnBehaviorEnd, OnBehaviorEnd);
+        EventCenter.Instance.Subscribe<RoomEnterParams>(GameEventID.OnRoomEnter, OnRoomEnter);
+        EventCenter.Instance.Subscribe<CorridorEnterParams>(GameEventID.OnCorridorEnter, OnCorridorEnter);
     }
 
     private void UnsubscribeEvents()
@@ -74,6 +80,8 @@ public class HubPanel : BasePanel
         EventCenter.Instance.Unsubscribe<WaveUpdateParams>(GameEventID.OnWaveUpdate, OnWaveUpdate);
         EventCenter.Instance.Unsubscribe<DamageParams>(GameEventID.OnPlayerDamaged, OnPlayerDamaged);
         EventCenter.Instance.Unsubscribe<RoomBehaviorEntry>(GameEventID.OnBehaviorEnd, OnBehaviorEnd);
+        EventCenter.Instance.Unsubscribe<RoomEnterParams>(GameEventID.OnRoomEnter, OnRoomEnter);
+        EventCenter.Instance.Unsubscribe<CorridorEnterParams>(GameEventID.OnCorridorEnter, OnCorridorEnter);
     }
 
     #region 事件处理
@@ -246,6 +254,41 @@ public class HubPanel : BasePanel
     private void OnPlayerDamaged(DamageParams p)
     {
         // TODO: 受伤红屏特效
+    }
+
+    private void OnRoomEnter(RoomEnterParams p)
+    {
+        var text = GetControl<Text>(TXT_ROOM);
+        if (text != null)
+        {
+            text.text = GetRoomDisplayName(p.roomType);
+        }
+    }
+
+    private void OnCorridorEnter(CorridorEnterParams p)
+    {
+        var text = GetControl<Text>(TXT_ROOM);
+        if (text != null)
+        {
+            text.text = "走廊";
+        }
+    }
+
+    private string GetRoomDisplayName(RoomType roomType)
+    {
+        return roomType switch
+        {
+            RoomType.Start => "起始房间",
+            RoomType.Normal => "普通房间",
+            RoomType.Goal => "终点房间",
+            RoomType.Treasure => "宝藏间",
+            RoomType.Shop => "商店",
+            RoomType.Elite => "精英房",
+            RoomType.Rest => "休息室",
+            RoomType.Event => "事件房",
+            RoomType.Boss => "Boss房",
+            _ => "未知房间"
+        };
     }
 
     #endregion

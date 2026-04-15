@@ -56,6 +56,52 @@ public class RoomController
     }
 
     /// <summary>
+    /// 玩家创建/激活后立即检测当前房间并发布事件（用于首帧刷新UI）
+    /// </summary>
+    public void DetectCurrentRoom(Vector2 playerPos)
+    {
+        PublishLocationEvent(playerPos);
+    }
+
+    /// <summary>
+    /// 强制刷新当前位置的房间信息（用于UI初始化时读取当前房间类型）
+    /// </summary>
+    public void RefreshCurrentRoom()
+    {
+        // 强制将 _currentRoomId 设置为 -1，这样下次检测一定会触发事件
+        _currentRoomId = -1;
+    }
+
+    private void PublishLocationEvent(Vector2 playerPos)
+    {
+        if (_tileData == null)
+            return;
+
+        int roomId = _tileData.GetRoomIdAt(Vector2Int.FloorToInt(playerPos));
+
+        if (roomId >= 0)
+        {
+            Room room = _tileData.GetRoom(roomId);
+            if (room != null)
+            {
+                EventCenter.Instance.Publish(GameEventID.OnRoomEnter, new RoomEnterParams
+                {
+                    roomId = room.id,
+                    roomType = room.roomType
+                });
+            }
+        }
+        else
+        {
+            int corridorId = _tileData.GetCorridorIdAt(Vector2Int.FloorToInt(playerPos));
+            EventCenter.Instance.Publish(GameEventID.OnCorridorEnter, new CorridorEnterParams
+            {
+                corridorId = corridorId
+            });
+        }
+    }
+
+    /// <summary>
     /// 每帧检测玩家位置
     /// </summary>
     public void CheckAndSpawnInRoom(Vector2 playerPos)
@@ -71,12 +117,31 @@ public class RoomController
         _currentRoomId = newRoomId;
 
         if (newRoomId < 0)
+        {
+            // 玩家进入走廊，发布走廊事件
+            int corridorId = _tileData.GetCorridorIdAt(Vector2Int.FloorToInt(playerPos));
+            EventCenter.Instance.Publish(GameEventID.OnCorridorEnter, new CorridorEnterParams
+            {
+                corridorId = corridorId
+            });
             return;
+        }
 
+        // 每次进入房间都发布事件（供UI刷新）
+        Room room = _tileData.GetRoom(newRoomId);
+        if (room != null)
+        {
+            EventCenter.Instance.Publish(GameEventID.OnRoomEnter, new RoomEnterParams
+            {
+                roomId = room.id,
+                roomType = room.roomType
+            });
+        }
+
+        // 仅未访问的房间需要执行行为逻辑
         if (!IsRoomUnvisited(newRoomId))
             return;
 
-        Room room = _tileData.GetRoom(newRoomId);
         if (room == null)
             return;
 

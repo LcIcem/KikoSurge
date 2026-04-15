@@ -25,6 +25,8 @@ namespace Game.Event
         public static readonly EventID OnRoomEnter = (EventID)3000;         // 进入房间
         public static readonly EventID OnRoomCleared = (EventID)3001;      // 房间清理完成
         public static readonly EventID OnRoomExit = (EventID)3002;          // 离开房间
+        public static readonly EventID OnCorridorEnter = (EventID)3003;     // 进入走廊
+        public static readonly EventID OnRequestRoomRefresh = (EventID)3004; // 请求刷新当前房间UI
 
         // 4000-4999: 玩家状态
         public static readonly EventID OnPlayerDamaged = (EventID)4000;     // 玩家受伤

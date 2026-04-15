@@ -1,3 +1,4 @@
+using ProcGen.Core;
 using UnityEngine;
 
 /// <summary>
@@ -111,4 +112,21 @@ public class ReloadProgressParams
 {
     public WeaponBase weapon;
     public float progress;  // 0~1
+}
+
+/// <summary>
+/// 进入房间事件参数
+/// </summary>
+public class RoomEnterParams
+{
+    public int roomId;
+    public RoomType roomType;
+}
+
+/// <summary>
+/// 进入走廊事件参数
+/// </summary>
+public class CorridorEnterParams
+{
+    public int corridorId;
 }

@@ -52,6 +52,13 @@ public class LevelController : MonoBehaviour
 
         _roomController = new RoomController();
         _playerHandler = new PlayerHandler();
+
+        EventCenter.Instance.Subscribe(GameEventID.OnRequestRoomRefresh, OnRequestRoomRefresh);
+    }
+
+    private void OnRequestRoomRefresh()
+    {
+        _roomController.RefreshCurrentRoom();
     }
 
     private void Update()
@@ -119,6 +126,9 @@ public class LevelController : MonoBehaviour
         Vector3 startWorldPos = GetStartRoomWorldPos();
         _playerHandler.CreatePlayer(startWorldPos);
 
+        // 立即检测当前房间并发布事件（刷新UI）
+        _roomController.DetectCurrentRoom(startWorldPos);
+
         // 生成终点检查点
         SpawnCheckpoint();
 
@@ -159,6 +169,9 @@ public class LevelController : MonoBehaviour
         // 获取新地牢的起始位置并激活玩家
         Vector3 startWorldPos = GetStartRoomWorldPos();
         _playerHandler.ReactivatePlayer(startWorldPos);
+
+        // 立即检测当前房间并发布事件（刷新UI）
+        _roomController.DetectCurrentRoom(startWorldPos);
 
         // 生成终点检查点
         SpawnCheckpoint();
