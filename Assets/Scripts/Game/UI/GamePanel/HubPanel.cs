@@ -100,11 +100,11 @@ public class HubPanel : BasePanel
         var ammoImg = GetControl<Image>(IMG_AMMO);
         var ammoText = GetControl<Text>(TXT_AMMO);
 
-        if (weaponImg != null && weapon != null && weapon.Icon != null)
-            weaponImg.sprite = weapon.Icon;
+        if (weaponImg != null && weapon != null && weapon.Config.icon != null)
+            weaponImg.sprite = weapon.Config.icon;
 
         if (weaponText != null && weapon != null)
-            weaponText.text = weapon.Name;
+            weaponText.text = weapon.Config.gunName;
 
         UpdateAmmoDisplay(weapon, ammoImg, ammoText);
     }
@@ -131,17 +131,17 @@ public class HubPanel : BasePanel
         if (weapon == null) return;
 
         if (ammoText != null)
-            ammoText.text = $"{weapon.CurrentAmmo}/{weapon.MagazineSize}";
+            ammoText.text = $"{weapon.CurrentAmmo}/{weapon.Config.magazineSize}";
 
-        if (ammoImg != null && weapon.BulletPrefab != null)
+        if (ammoImg != null && weapon.Config.bulletConfig != null && weapon.Config.bulletConfig.bulletPrefab != null)
         {
-            var bullet = weapon.BulletPrefab.GetComponent<Bullet>();
+            var bullet = weapon.Config.bulletConfig.bulletPrefab.GetComponent<Bullet>();
             if (bullet != null && bullet.Icon != null)
                 ammoImg.sprite = bullet.Icon;
 
             ammoImg.fillAmount = 1f;
 
-            float ratio = (float)weapon.CurrentAmmo / weapon.MagazineSize;
+            float ratio = (float)weapon.CurrentAmmo / weapon.Config.magazineSize;
             ammoImg.color = ratio <= 0.2f ? Color.red.WithAlpha(125) : Color.white;
         }
     }

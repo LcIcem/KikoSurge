@@ -7,5 +7,5 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AllWeaponDefs_SO", menuName = "KikoSurge/武器/所有武器集中配置")]
 public class AllWeaponDefs_SO : ScriptableObject
 {
-    public List<WeaponDefBase> weaponDefs;
+    public List<GunConfig> weaponConfigs;
 }

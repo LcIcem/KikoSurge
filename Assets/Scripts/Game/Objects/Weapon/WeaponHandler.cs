@@ -53,9 +53,7 @@ public class WeaponHandler
         if (_currentWeaponIndex >= 0)
         {
             var previousWeapon = _weapons[_currentWeaponIndex];
-            var currentPrefab = previousWeapon.GetWeaponPrefab();
-            if (currentPrefab != null)
-                currentPrefab.SetActive(false);
+            previousWeapon.gameObject.SetActive(false);
 
             if (previousWeapon.IsReloading)
                 previousWeapon.CancelReload();
@@ -65,9 +63,7 @@ public class WeaponHandler
 
         // 显示新武器预设体
         var newWeapon = _weapons[index];
-        var newPrefab = newWeapon.GetWeaponPrefab();
-        if (newPrefab != null)
-            newPrefab.SetActive(true);
+        newWeapon.gameObject.SetActive(true);
 
         if (newWeapon.CurrentAmmo <= 0)
             newWeapon.Reload();
@@ -92,13 +88,5 @@ public class WeaponHandler
     public void Fire(Vector3 direction)
     {
         CurrentWeapon?.Fire(direction);
-    }
-
-    /// <summary>
-    /// 每帧更新
-    /// </summary>
-    public void Update()
-    {
-        CurrentWeapon?.Update();
     }
 }

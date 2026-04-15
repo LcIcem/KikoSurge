@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f64f63ba929c114cab7bd045cf1a501, type: 3}
   m_Name: AllWeaponDefs_SO
   m_EditorClassIdentifier: Assembly-CSharp::AllWeaponDefs_SO
-  weaponDefs:
-  - {fileID: 11400000, guid: db3972d82b88c374d856fbbd658b385f, type: 2}
-  - {fileID: 11400000, guid: f2b10aff3415327449cde75e67fd5782, type: 2}
+  weaponConfigs:
+  - {fileID: 11400000, guid: 01e0bd06ab925ec4dbf640011f17cfe0, type: 2}
+  - {fileID: 11400000, guid: db43a77544f75d54988382e04f122bab, type: 2}

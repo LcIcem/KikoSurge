@@ -8,7 +8,7 @@ public class WeaponLootItemDef_SO : LootItemDefBase
 {
     [Header("武器掉落配置")]
     [Tooltip("引用的武器配置")]
-    public WeaponDefBase WeaponDef;
+    public GunConfig gunConfig;
 
     private void OnValidate()
     {
