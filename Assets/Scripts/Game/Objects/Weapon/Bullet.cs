@@ -1,162 +1,150 @@
 using LcIcemFramework.Core;
 using LcIcemFramework.Managers;
-using LcIcemFramework.Managers.Pool;
 using UnityEngine;
 using Game.Event;
+using LcIcemFramework.Managers.Pool;
 
 /// <summary>
-/// 子弹：处理飞行、命中检测、伤害。
-/// 子弹伤害和来源由发射者（IDamageSource）决定。
+/// 子弹：处理碰撞、伤害、效果
+/// 移动逻辑由 BulletModule 分发
 /// </summary>
 public class Bullet : MonoBehaviour, IPoolable
 {
-    // 属性
-    private Vector3 _direction;
-    private float _speed;
-    private float _maxDistance;
-    private Vector3 _spawnPos;
-    private int _pierceCount;
-    private IDamageSource _damageSource;  // 伤害源（武器或敌人）
-
     [Header("HUD图标")]
     [Tooltip("HUD显示用的子弹图标")]
     public Sprite Icon;
 
-    // 组件
+    // 飞行参数
+    public int Damage { get; private set; }
+    public Vector3 Direction { get; private set; }
+    public float Speed { get; private set; }
+    public float MaxDistance { get; private set; }
+    public Vector3 SpawnPos { get; private set; }
+    public int PierceCount { get; private set; }
+    public BulletType BulletType { get; private set; }
+    public HitEffect HitEffect { get; private set; }
+    public float EffectValue { get; private set; }
+    public Rigidbody2D Rigidbody => _rigidbody;
+
+    // 追踪参数
+    private Vector3 _currentDir;
+    private float _homingRange;
+    private float _homingStrength;
+    public float HomingRange => _homingRange;
+    public float HomingStrength => _homingStrength;
+
+    public Vector3 CurrentDir
+    {
+        get => _currentDir;
+        set => _currentDir = value.normalized;
+    }
+
+    // 物理
     private Rigidbody2D _rigidbody;
     private CircleCollider2D _collider;
-    private SpriteRenderer _sprite;
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
         _collider = GetComponent<CircleCollider2D>();
-        _sprite = GetComponent<SpriteRenderer>();
     }
 
     private void Update()
     {
-        // 飞行
-        _rigidbody.MovePosition(_rigidbody.position +
-            (Vector2)_direction * _speed * Time.deltaTime);
-
-        // 超距检测
-        if (Vector3.Distance(transform.position, _spawnPos) > _maxDistance)
-        {
-            ManagerHub.Pool.Release(gameObject);
-        }
+        BulletModule.Move(this);
     }
 
     // IPoolable
     public void OnSpawn()
     {
         _collider.enabled = true;
+        _rigidbody.linearVelocity = Vector2.zero;
+        _rigidbody.angularVelocity = 0f;
     }
 
     public void OnDespawn()
     {
         _collider.enabled = false;
-        _damageSource = null;
     }
 
     /// <summary>
-    /// 初始化子弹
+    /// 超过最大飞行距离
     /// </summary>
-    /// <param name="direction">飞行方向</param>
-    /// <param name="speed">飞行速度</param>
-    /// <param name="maxDistance">最大飞行距离</param>
-    /// <param name="pierce">穿透次数</param>
-    /// <param name="damageSource">伤害源（武器或敌人）</param>
-    public void Init(Vector3 direction, float speed, float maxDistance, int pierce, IDamageSource damageSource)
-    {
-        _direction = direction.normalized;
-        _speed = speed;
-        _maxDistance = maxDistance;
-        _spawnPos = transform.position;
-        _pierceCount = pierce;
-        _damageSource = damageSource;
+    public bool IsExceedMaxDistance =>
+        Vector3.Distance(transform.position, SpawnPos) > MaxDistance;
 
-        // 朝飞行方向旋转
-        float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
+    /// <summary>
+    /// 初始化子弹（统一入口）
+    /// </summary>
+    public void Init(BulletConfig config, Vector3 direction)
+    {
+        Damage = config.damage;
+        Direction = direction.normalized;
+        Speed = config.bulletSpeed;
+        BulletType = config.bulletType;
+        HitEffect = config.hitEffect;
+        EffectValue = config.effectValue;
+        PierceCount = config.penetrateCount;
+        MaxDistance = config.maxDistance;
+        _homingRange = config.homingRange;
+        _homingStrength = config.homingStrength;
+        SpawnPos = transform.position;
+
+        // 追踪子弹初始方向
+        _currentDir = direction.normalized;
+
+        // 抛物线子弹使用 Dynamic，velocity 驱动 + 重力
+        // 其他子弹使用 Kinematic，MovePosition 驱动
+        if (config.bulletType == BulletType.Parabola)
+        {
+            _rigidbody.gravityScale = 1f;
+            _rigidbody.isKinematic = false;
+            _rigidbody.freezeRotation = true;
+            _rigidbody.linearVelocity = Direction * Speed;
+        }
+        else
+        {
+            _rigidbody.gravityScale = 0f;
+            _rigidbody.isKinematic = true;
+            _rigidbody.freezeRotation = true;
+        }
+
+        float angle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0, 0, angle);
     }
-
-    /// <summary>
-    /// 获取当前子弹伤害值
-    /// </summary>
-    private float GetDamage() => _damageSource?.GetDamage() ?? 0f;
-
-    /// <summary>
-    /// 获取子弹发射者的GameObject
-    /// </summary>
-    private GameObject GetOwner() => _damageSource?.GetGameObject();
 
     // 碰撞检测
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // 跳过发射者自身
-        if (other.gameObject == GetOwner())
-            return;
-
-        float damage = GetDamage();
-
-        // 根据发射者类型判断命中逻辑
-        if (_damageSource is WeaponBase)
+        if (other.CompareTag("Enemy"))
         {
-            // 玩家武器：击中敌人
-            if (other.CompareTag("Enemy"))
+            var enemy = other.GetComponent<EnemyBase>();
+            if (enemy != null)
             {
-                var enemy = other.GetComponent<EnemyBase>();
-                if (enemy != null)
-                {
-                    enemy.TakeDamage(damage);
+                enemy.TakeDamage(Damage);
 
-                    EventCenter.Instance.Publish(GameEventID.Combat_BulletHit,
-                        new BulletHitParams
-                        {
-                            bullet = this,
-                            target = enemy.transform,
-                            damage = damage
-                        });
-                }
-
-                // 穿透逻辑
-                if (_pierceCount > 0)
-                {
-                    _pierceCount--;
-                }
-                else
-                {
-                    ManagerHub.Pool.Release(gameObject);
-                }
+                EventCenter.Instance.Publish(GameEventID.Combat_BulletHit,
+                    new BulletHitParams
+                    {
+                        bullet = this,
+                        target = enemy.transform,
+                        damage = Damage
+                    });
             }
-            else if (other.CompareTag("Solid"))
+
+            HitEffectModule.Apply(other.gameObject, HitEffect, EffectValue);
+
+            if (PierceCount > 0)
             {
-                // 碰到墙壁，回收
+                PierceCount--;
+            }
+            else
+            {
                 ManagerHub.Pool.Release(gameObject);
             }
         }
-        else if (_damageSource is EnemyBase)
+        else if (other.CompareTag("Solid"))
         {
-            // 敌人武器：击中玩家
-            if (other.CompareTag("Player"))
-            {
-                var player = other.GetComponent<Player>();
-                if (player != null)
-                {
-                    player.TakeDamage(damage);
-                }
-                ManagerHub.Pool.Release(gameObject);
-            }
-            else if (other.CompareTag("Solid"))
-            {
-                // 碰到墙壁，回收
-                ManagerHub.Pool.Release(gameObject);
-            }
-        }
-        else
-        {
-            // 未知来源，碰到任何东西都回收
             ManagerHub.Pool.Release(gameObject);
         }
     }

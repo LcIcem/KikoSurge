@@ -3,52 +3,56 @@ using UnityEngine;
 using Game.Event;
 
 /// <summary>
-/// 武器基类。
+/// 武器基类 - 配置驱动架构
+/// 所有武器共用此类，通过 GunConfig 配置不同行为
 /// </summary>
-public abstract class WeaponBase : IDamageSource
+public class WeaponBase : MonoBehaviour
 {
-    public string Name { get; protected set; }     // 武器名称
-    public WeaponType Type { get; protected set; }  // 武器类型
-    public float Damage { get; protected set; }     // 基础伤害
-    public float FireRate { get; protected set; }   // 射速（秒/发）
-    public float ReloadTime { get; protected set; } // 装填时间（秒）
-    public int MagazineSize { get; protected set; } // 弹匣容量
-    public int CurrentAmmo { get; protected set; }  // 当前弹药
-    public bool IsReloading { get; protected set; } // 是否在装填
-    public float RecoilForce { get; protected set; } // 后坐力
-    public Sprite Icon { get; set; }     // HUD图标
-    public GameObject BulletPrefab { get; protected set; }  // 子弹预设体
+    /// <summary>
+    /// 武器配置（核心）
+    /// </summary>
+    public GunConfig Config { get; private set; }
 
-    protected Player _owner; //武器所有者引用
-    protected GameObject _weaponPrefab; // 武器可视化预设体实例
+    /// <summary>
+    /// 武器所有者
+    /// </summary>
+    public Player Owner { get; private set; }
 
-    protected float _fireCooldown;  // 开火冷却
-    protected float _reloadTimer;   // 装填时间计时器
+    /// <summary>
+    /// 枪口位置（子弹生成点）
+    /// </summary>
+    public Transform Muzzle { get; private set; }
 
-    public WeaponBase(Player owner)
+    // 运行时状态
+    public int CurrentAmmo { get; private set; }
+    public bool IsReloading { get; private set; }
+    public bool CanFire => !IsReloading && !_isBursting && CurrentAmmo > 0 && _fireCooldown <= 0f;
+
+    private float _fireCooldown;
+    private float _reloadTimer;
+    private bool _isBursting;
+
+    private void Awake()
     {
-        _owner = owner;
+        Owner = GetComponentInParent<Player>();
     }
 
     /// <summary>
-    /// 从配置数据初始化武器属性
+    /// 从配置初始化武器
     /// </summary>
-    public virtual void Init(string name, float damage, float fireRate, float reloadTime,
-        int magazineSize, float recoilForce, Sprite icon = null)
+    public void Init(GunConfig config)
     {
-        Name = name;
-        Damage = damage;
-        FireRate = fireRate;
-        ReloadTime = reloadTime;
-        MagazineSize = magazineSize;
-        RecoilForce = recoilForce;
-        CurrentAmmo = MagazineSize;
-        Icon = icon;
+        Config = config;
+        CurrentAmmo = config.magazineSize;
+
+        // 自动查找枪口点
+        Muzzle = transform.Find("Muzzle");
+        if (Muzzle == null)
+            Muzzle = transform;
     }
 
-    public virtual void Update()
+    private void Update()
     {
-        // 维护装填时间计时器
         _fireCooldown -= Time.deltaTime;
 
         if (IsReloading)
@@ -56,87 +60,80 @@ public abstract class WeaponBase : IDamageSource
             _reloadTimer -= Time.deltaTime;
             if (_reloadTimer <= 0f)
             {
-                CurrentAmmo = MagazineSize;
+                CurrentAmmo = Config.magazineSize;
                 IsReloading = false;
-                // 发布装填结束事件
                 EventCenter.Instance.Publish(GameEventID.Combat_Reloaded, this);
-                // 发布弹药变化事件
                 EventCenter.Instance.Publish(GameEventID.OnAmmoChanged, this);
             }
             else
             {
-                // 发布换弹进度事件
-                float progress = 1f - (_reloadTimer / ReloadTime);
+                float progress = 1f - (_reloadTimer / Config.reloadTime);
                 EventCenter.Instance.Publish(GameEventID.OnReloadProgress,
                     new ReloadProgressParams { weapon = this, progress = progress });
             }
         }
     }
 
-    // 开火（由 WeaponHandler 调用）
-    public abstract void Fire(Vector3 direction);
+    /// <summary>
+    /// 开火
+    /// </summary>
+    public void Fire(Vector3 direction)
+    {
+        if (!CanFire) return;
 
-    // 开始装填
+        // 调用开火模块（弹药消耗由模块内部处理）
+        // 冷却由模块内部处理（连发模式需要等全部射出后才开始冷却）
+        FireModule.Fire(this);
+    }
+
+    /// <summary>
+    /// 消耗一颗子弹的弹药
+    /// </summary>
+    public void ConsumeAmmo()
+    {
+        CurrentAmmo--;
+        EventCenter.Instance.Publish(GameEventID.OnAmmoChanged, this);
+
+        if (CurrentAmmo <= 0)
+            Reload();
+    }
+
+    /// <summary>
+    /// 开始装填
+    /// </summary>
     public void Reload()
     {
-        // 如果正在装填 或 弹匣已满 直接返回
-        if (IsReloading || CurrentAmmo == MagazineSize) return;
+        if (IsReloading || CurrentAmmo == Config.magazineSize) return;
 
-        // 否则 开始装填
         IsReloading = true;
-        _reloadTimer = ReloadTime;
-        // 发布装填开始事件
+        _reloadTimer = Config.reloadTime;
         EventCenter.Instance.Publish(GameEventID.Combat_Reloading, this);
     }
 
-    /// 能否开火
-    public bool CanFire
+    /// <summary>
+    /// 设置开火冷却（由 FireModule 调用）
+    /// </summary>
+    public void SetFireCooldown(float cooldown)
     {
-        get
-        {
-            return !IsReloading
-            && CurrentAmmo > 0
-            && _fireCooldown <= 0f;
-        }
+        _fireCooldown = cooldown;
     }
 
-    /// 消耗弹药
-    protected void ConsumeAmmo()
+    /// <summary>
+    /// 设置连发状态（由 FireModule 调用）
+    /// </summary>
+    public void SetBursting(bool bursting)
     {
-        CurrentAmmo--;
-        _fireCooldown = FireRate;
-        // 发布弹药变化事件
-        EventCenter.Instance.Publish(GameEventID.OnAmmoChanged, this);
+        _isBursting = bursting;
     }
 
+    /// <summary>
     /// 取消装填
+    /// </summary>
     public void CancelReload()
     {
         if (!IsReloading) return;
         IsReloading = false;
         _reloadTimer = 0f;
-
-        // 发布取消装填事件
         EventCenter.Instance.Publish(GameEventID.Combat_CancelReload);
     }
-
-    /// <summary>
-    /// 设置武器可视化预设体实例
-    /// </summary>
-    public void SetWeaponPrefab(GameObject prefab)
-    {
-        _weaponPrefab = prefab;
-    }
-
-    /// <summary>
-    /// 获取武器可视化预设体实例
-    /// </summary>
-    public GameObject GetWeaponPrefab()
-    {
-        return _weaponPrefab;
-    }
-
-    // IDamageSource 实现
-    public float GetDamage() => Damage;
-    public GameObject GetGameObject() => _owner?.gameObject;
 }
