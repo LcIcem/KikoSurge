@@ -24,5 +24,6 @@ public enum TileType
     WallEventTile,
     WallCorridorTile,
     DoorTile,
+    ClosedDoorTile,  // 关闭的门（墙壁瓦片覆盖）
     EmptyTile,
 }

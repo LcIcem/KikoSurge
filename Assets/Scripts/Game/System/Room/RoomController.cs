@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using Game.Event;
 using LcIcemFramework.Core;
+using ProcGen.Config;
 using ProcGen.Core;
 using ProcGen.Seed;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 /// <summary>
 /// 房间状态
@@ -37,6 +39,10 @@ public class RoomController
     private readonly Dictionary<int, RoomState> _roomStates = new();
     private readonly Dictionary<int, RoomBehaviourState> _roomBehaviourStates = new();
 
+    // 门控制
+    private Tilemap _wallTilemap;
+    private TileInfo_SO _tileInfo;
+
     public RoomController()
     {
         EventCenter.Instance.Subscribe<EnemyKilledParams>(GameEventID.Combat_EnemyKilled, OnEnemyKilled);
@@ -45,7 +51,8 @@ public class RoomController
     /// <summary>
     /// 初始化
     /// </summary>
-    public void Initialize(DungeonTileData tileData, RoomBehaviourTable_SO behaviourTable, GameRandom rng)
+    public void Initialize(DungeonTileData tileData, RoomBehaviourTable_SO behaviourTable, GameRandom rng,
+        Tilemap wallTilemap, TileInfo_SO tileInfo)
     {
         _tileData = tileData;
         _behaviourTable = behaviourTable;
@@ -53,6 +60,8 @@ public class RoomController
         _currentRoomId = -1;
         _roomStates.Clear();
         _roomBehaviourStates.Clear();
+        _wallTilemap = wallTilemap;
+        _tileInfo = tileInfo;
     }
 
     /// <summary>
@@ -165,6 +174,7 @@ public class RoomController
             case RoomType.Elite:
             case RoomType.Boss:
                 _roomStates[room.id] = RoomState.InProgress;
+                CloseDoors(room.id);  // 关门
                 ExecuteRoomBehaviours(room, playerPos);
                 break;
 
@@ -268,7 +278,46 @@ public class RoomController
     {
         _roomStates[roomId] = RoomState.Cleared;
         _roomBehaviourStates.Remove(roomId);
+        OpenDoors(roomId);  // 开门
         EventCenter.Instance.Publish(GameEventID.OnRoomCleared, roomId);
+    }
+
+    /// <summary>
+    /// 关闭指定房间的门（在 wallTilemap 上覆盖墙壁瓦片）
+    /// </summary>
+    private void CloseDoors(int roomId)
+    {
+        if (_wallTilemap == null || _tileInfo == null)
+            return;
+
+        var closedDoorTile = _tileInfo.GetTile(TileType.ClosedDoorTile);
+        if (closedDoorTile == null)
+            return;
+
+        if (!_tileData.TryGetRoomDoorTiles(roomId, out var doorTiles))
+            return;
+
+        foreach (var pos in doorTiles)
+        {
+            _wallTilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), closedDoorTile);
+        }
+    }
+
+    /// <summary>
+    /// 打开指定房间的门（擦除 wallTilemap 上的覆盖瓦片，露出下层 doorTilemap 的门）
+    /// </summary>
+    private void OpenDoors(int roomId)
+    {
+        if (_wallTilemap == null)
+            return;
+
+        if (!_tileData.TryGetRoomDoorTiles(roomId, out var doorTiles))
+            return;
+
+        foreach (var pos in doorTiles)
+        {
+            _wallTilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), null);
+        }
     }
 
     /// <summary>

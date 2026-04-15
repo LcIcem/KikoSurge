@@ -123,7 +123,8 @@ public class LevelController : MonoBehaviour
         _builder.Build(GetCurrentLayerModel(), _rng);
 
         // 初始化 RoomController
-        _roomController.Initialize(_builder.GetTileData(), _roomBehaviourTable, _rng);
+        _roomController.Initialize(_builder.GetTileData(), _roomBehaviourTable, _rng,
+            _builder.WallTilemap, _builder.TileInfo);
 
         // 获取起始位置并创建玩家
         Vector3 startWorldPos = GetStartRoomWorldPos();
@@ -167,7 +168,8 @@ public class LevelController : MonoBehaviour
         _builder.Build(GetCurrentLayerModel(), _rng);
 
         // 重新初始化 RoomController
-        _roomController.Initialize(_builder.GetTileData(), _roomBehaviourTable, _rng);
+        _roomController.Initialize(_builder.GetTileData(), _roomBehaviourTable, _rng,
+            _builder.WallTilemap, _builder.TileInfo);
 
         // 获取新地牢的起始位置并激活玩家
         Vector3 startWorldPos = GetStartRoomWorldPos();

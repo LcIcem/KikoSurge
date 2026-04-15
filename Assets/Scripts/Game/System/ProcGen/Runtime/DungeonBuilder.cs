@@ -40,6 +40,12 @@ namespace ProcGen.Runtime
         /// <summary>地牢是否已构建完毕（Tilemap 填充完毕后为 true）</summary>
         public bool IsBuildCompleted { get; private set; }
 
+        /// <summary>获取墙壁层 Tilemap（供 RoomController 关门/开门使用）</summary>
+        public Tilemap WallTilemap => _wallTilemap;
+
+        /// <summary>获取瓦片信息配置</summary>
+        public TileInfo_SO TileInfo => _tileInfo;
+
         // ==================== Unity 生命周期 ====================
 
         private void Awake()

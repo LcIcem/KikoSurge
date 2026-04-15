@@ -10,6 +10,19 @@ using UnityEngine.Tilemaps;
 public class TileInfo_SO : ScriptableObject
 {
     public List<Tile> tiles = new List<Tile>();
+
+    /// <summary>
+    /// 根据 TileType 获取对应的瓦片
+    /// </summary>
+    public TileBase GetTile(TileType type)
+    {
+        foreach (var t in tiles)
+        {
+            if (t.type == type)
+                return t.tile;
+        }
+        return null;
+    }
 }
 
 /// <summary>
