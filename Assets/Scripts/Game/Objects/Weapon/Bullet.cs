@@ -24,6 +24,7 @@ public class Bullet : MonoBehaviour, IPoolable
     public BulletType BulletType { get; private set; }
     public HitEffect HitEffect { get; private set; }
     public float EffectValue { get; private set; }
+    public Rigidbody2D Rigidbody => _rigidbody;
 
     // 追踪参数
     private Vector3 _currentDir;
@@ -57,13 +58,20 @@ public class Bullet : MonoBehaviour, IPoolable
     public void OnSpawn()
     {
         _collider.enabled = true;
-        _rigidbody.gravityScale = 0f;
+        _rigidbody.linearVelocity = Vector2.zero;
+        _rigidbody.angularVelocity = 0f;
     }
 
     public void OnDespawn()
     {
         _collider.enabled = false;
     }
+
+    /// <summary>
+    /// 超过最大飞行距离
+    /// </summary>
+    public bool IsExceedMaxDistance =>
+        Vector3.Distance(transform.position, SpawnPos) > MaxDistance;
 
     /// <summary>
     /// 初始化子弹（统一入口）
@@ -85,8 +93,21 @@ public class Bullet : MonoBehaviour, IPoolable
         // 追踪子弹初始方向
         _currentDir = direction.normalized;
 
-        // 抛物线设置重力
-        _rigidbody.gravityScale = (config.bulletType == BulletType.Parabola) ? 1f : 0f;
+        // 抛物线子弹使用 Dynamic，velocity 驱动 + 重力
+        // 其他子弹使用 Kinematic，MovePosition 驱动
+        if (config.bulletType == BulletType.Parabola)
+        {
+            _rigidbody.gravityScale = 1f;
+            _rigidbody.isKinematic = false;
+            _rigidbody.freezeRotation = true;
+            _rigidbody.linearVelocity = Direction * Speed;
+        }
+        else
+        {
+            _rigidbody.gravityScale = 0f;
+            _rigidbody.isKinematic = true;
+            _rigidbody.freezeRotation = true;
+        }
 
         float angle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0, 0, angle);

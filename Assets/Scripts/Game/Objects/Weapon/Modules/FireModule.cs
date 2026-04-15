@@ -18,26 +18,26 @@ public static class FireModule
         switch (config.fireMode)
         {
             case FireMode.Single:
-                FireSingle(gun);
+                FireSingle(gun, config);
                 // 单发：立即设置冷却
                 gun.SetFireCooldown(config.fireRate);
                 break;
             case FireMode.Spread:
-                FireSpread(gun);
+                FireSpread(gun, config);
                 // 散射：立即设置冷却
                 gun.SetFireCooldown(config.fireRate);
                 break;
             case FireMode.Burst:
-                FireBurst(gun);
+                FireBurst(gun, config);
                 // 连发：冷却由 FireBurst 内部在最后一发射出后设置
                 break;
             case FireMode.Continuous:
-                FireSingle(gun);
+                FireSingle(gun, config);
                 // 持续模式：立即设置冷却
                 gun.SetFireCooldown(config.fireRate);
                 break;
             case FireMode.Charge:
-                FireSingle(gun);
+                FireSingle(gun, config);
                 // 蓄力模式：立即设置冷却
                 gun.SetFireCooldown(config.fireRate);
                 break;
@@ -47,10 +47,8 @@ public static class FireModule
     /// <summary>
     /// 单发
     /// </summary>
-    private static void FireSingle(WeaponBase gun)
+    private static void FireSingle(WeaponBase gun, GunConfig config)
     {
-        GunConfig config = gun.Config;
-
         // 消耗弹药并发射
         gun.ConsumeAmmo();
         BulletModule.Spawn(gun, 0, config.randomSpreadAngle);
@@ -59,9 +57,8 @@ public static class FireModule
     /// <summary>
     /// 散射（霰弹）
     /// </summary>
-    private static void FireSpread(WeaponBase gun)
+    private static void FireSpread(WeaponBase gun, GunConfig config)
     {
-        GunConfig config = gun.Config;
         int bulletCount = config.bulletCount;
         float shotgunAngle = config.shotgunSpreadAngle;
         float randomSpread = config.randomSpreadAngle;
@@ -69,7 +66,7 @@ public static class FireModule
         // 如果只有一颗子弹，直接发射
         if (bulletCount <= 1)
         {
-            FireSingle(gun);
+            FireSingle(gun, config);
             return;
         }
 
@@ -78,7 +75,7 @@ public static class FireModule
         float startAngle = -shotgunAngle;
 
         gun.ConsumeAmmo();
-        
+
         for (int i = 0; i < bulletCount; i++)
         {
             float angle = startAngle + step * i;
@@ -91,9 +88,8 @@ public static class FireModule
     /// 连发（三连发等）- 带延迟，每颗子弹检查并消耗弹药
     /// 冷却在最后一发射出后才开始计算
     /// </summary>
-    private static void FireBurst(WeaponBase gun)
+    private static void FireBurst(WeaponBase gun, GunConfig config)
     {
-        GunConfig config = gun.Config;
         float burstSpeed = config.burstSpeed;
         float randomSpread = config.randomSpreadAngle;
         int burstCount = config.burstCount;

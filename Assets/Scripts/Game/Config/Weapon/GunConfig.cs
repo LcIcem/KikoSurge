@@ -8,24 +8,26 @@ public class GunConfig : ScriptableObject
 {
     [Header("基础信息")]
     public string gunName;
-    public GameObject gunPrefab;    // 武器预设体（表现层）
+    public GameObject gunPrefab;
     public Sprite icon;
 
-    [Header("开火设置")]
+    [Header("开火模式")]
     public FireMode fireMode = FireMode.Single;
-    public float fireRate = 0.5f;       // 每次射击之间的间隔
-    public int burstCount = 3;           // 连发子弹数量
-    public float burstSpeed = 0.05f;    // 连发子弹之间的间隔
 
-    [Header("随机散布")]
-    public float randomSpreadAngle = 0f;  // 每颗子弹的随机散布角度（所有武器适用）
+    [Header("射速与散布")]
+    public float fireRate = 0.5f;
+    public float randomSpreadAngle = 0f;
 
-    [Header("霰弹设置")]
-    public int bulletCount = 1;              // 霰弹子弹数量
-    public float shotgunSpreadAngle = 0f;    // 霰弹扇形扩散角度
+    [Header("=== 霰弹（Spread专用）===")]
+    [Min(1)] public int bulletCount = 1;
+    public float shotgunSpreadAngle = 0f;
 
-    [Header("子弹配置")]
-    public BulletConfig bulletConfig;
+    [Header("=== 连发（Burst专用）===")]
+    [Min(2)] public int burstCount = 3;
+    public float burstSpeed = 0.05f;
+
+    [Header("=== 蓄力（Charge专用）===")]
+    public float chargeTime = 1f;
 
     [Header("弹药")]
     public int magazineSize = 30;
@@ -36,4 +38,7 @@ public class GunConfig : ScriptableObject
 
     [Header("随机权重")]
     public int weight = 10;
+
+    [Header("子弹配置")]
+    public BulletConfig bulletConfig;
 }

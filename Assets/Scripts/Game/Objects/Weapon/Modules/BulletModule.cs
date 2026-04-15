@@ -35,16 +35,19 @@ public static class BulletModule
 
     /// <summary>
     /// 更新子弹移动（由 Bullet.Update 每帧调用）
+    /// 直线和追踪子弹使用 Rigidbody2D.MovePosition 物理引擎驱动
+    /// 抛物线子弹由 Rigidbody2D 物理引擎自动处理（velocity + gravityScale）
     /// </summary>
     public static void Move(Bullet bullet)
     {
+        // 抛物线子弹由物理引擎自动处理（velocity + gravityScale），不需要 MovePosition
+        if (bullet.BulletType == BulletType.Parabola)
+            return;
+
         switch (bullet.BulletType)
         {
             case BulletType.Straight:
                 MoveStraight(bullet);
-                break;
-            case BulletType.Parabola:
-                MoveParabola(bullet);
                 break;
             case BulletType.Homing:
                 MoveHoming(bullet);
@@ -52,30 +55,23 @@ public static class BulletModule
         }
 
         // 超距检测
-        if (Vector3.Distance(bullet.transform.position, bullet.SpawnPos) > bullet.MaxDistance)
+        if (bullet.IsExceedMaxDistance)
         {
             ManagerHub.Pool.Release(bullet.gameObject);
         }
     }
 
     /// <summary>
-    /// 直线移动
+    /// 直线移动 - 使用物理引擎 MovePosition
     /// </summary>
     private static void MoveStraight(Bullet bullet)
     {
-        bullet.transform.position += bullet.Direction * bullet.Speed * Time.deltaTime;
+        Vector3 nextPos = bullet.transform.position + bullet.Direction * bullet.Speed * Time.deltaTime;
+        bullet.Rigidbody.MovePosition(nextPos);
     }
 
     /// <summary>
-    /// 抛物线移动
-    /// </summary>
-    private static void MoveParabola(Bullet bullet)
-    {
-        bullet.transform.position += bullet.Direction * bullet.Speed * Time.deltaTime;
-    }
-
-    /// <summary>
-    /// 追踪移动（持续检测范围内目标，有目标则转向）
+    /// 追踪移动 - 使用物理引擎 MovePosition
     /// </summary>
     private static void MoveHoming(Bullet bullet)
     {
@@ -89,8 +85,8 @@ public static class BulletModule
             bullet.CurrentDir = Vector3.Lerp(bullet.CurrentDir, targetDir, bullet.HomingStrength * Time.deltaTime).normalized;
         }
 
-        // 按当前方向移动
-        bullet.transform.position += bullet.CurrentDir * bullet.Speed * Time.deltaTime;
+        Vector3 nextPos = bullet.transform.position + bullet.CurrentDir * bullet.Speed * Time.deltaTime;
+        bullet.Rigidbody.MovePosition(nextPos);
 
         // 朝移动方向旋转
         float angle = Mathf.Atan2(bullet.CurrentDir.y, bullet.CurrentDir.x) * Mathf.Rad2Deg;
@@ -110,7 +106,6 @@ public static class BulletModule
 
         foreach (var hit in hits)
         {
-            // 使用 tag 判断是否是敌人
             if (hit.CompareTag("Enemy"))
             {
                 float dist = Vector3.Distance(from, hit.transform.position);
