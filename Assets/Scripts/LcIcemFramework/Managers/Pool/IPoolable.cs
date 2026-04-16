@@ -1,4 +1,4 @@
-namespace LcIcemFramework.Managers.Pool
+namespace LcIcemFramework
 {
 /// <summary>
 /// 池化对象接口 所有需要对象池管理的类都需要实现该接口

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace LcIcemFramework.Managers.UI
+namespace LcIcemFramework
 {
 /// <summary>
 /// UI 面板基类，提供通用的子控件查找与缓存机制。

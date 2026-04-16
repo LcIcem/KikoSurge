@@ -9,7 +9,7 @@ using UnityEngine.AddressableAssets;
 using LcIcemFramework.Core;
 using UA = UnityEngine.AddressableAssets;
 
-namespace LcIcemFramework.Managers.Addressables
+namespace LcIcemFramework
 {
     /// <summary>
     /// Addressables 资源管理器

@@ -3,9 +3,9 @@ using UnityEngine;
 using UnityEngine.Events;
 
 using LcIcemFramework.Core;
-using LcIcemFramework.Managers.Mono;
+using LcIcemFramework;
 
-namespace LcIcemFramework.Managers.Res
+namespace LcIcemFramework
 {
 
 /// <summary>

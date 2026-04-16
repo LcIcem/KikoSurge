@@ -1,9 +1,7 @@
 using System.Collections;
 using LcIcemFramework.Camera;
 using LcIcemFramework.Core;
-using LcIcemFramework.Managers;
-using LcIcemFramework.Managers.Mono;
-using LcIcemFramework.Managers.UI;
+using LcIcemFramework;
 using UnityEngine;
 using Game.Event;
 

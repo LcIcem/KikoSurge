@@ -1,6 +1,5 @@
 using UnityEngine;
-using LcIcemFramework.Managers.Pool;
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 using System.Collections;
 
 /// <summary>

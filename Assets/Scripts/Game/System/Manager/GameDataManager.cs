@@ -4,7 +4,7 @@ using System.IO;
 using UnityEngine;
 using LcIcemFramework.Core;
 using LcIcemFramework.Data;
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 using LcIcemFramework.Util.Data;
 using Unity.VisualScripting;
 
@@ -55,6 +55,7 @@ public class GameDataManager : SingletonMono<GameDataManager>
 
     private void Start() {
         LoadSettings();
+        LoadKeybindings();
     }
 
     protected override void OnDestroy() {
@@ -281,6 +282,47 @@ public class GameDataManager : SingletonMono<GameDataManager>
         if (_settingsData == null)
             LoadSettings();
         return _settingsData;
+    }
+
+    #endregion
+
+    #region Keybindings键位数据相关
+
+    /// <summary>
+    /// 保存键位设置
+    /// </summary>
+    public void SaveKeybindings()
+    {
+        if (_settingsData == null) return;
+        _settingsData.keybindingsJson = ManagerHub.Input.SaveBindingOverrides();
+        SaveSettings();
+        Log("键位设置已保存");
+    }
+
+    /// <summary>
+    /// 加载键位设置
+    /// </summary>
+    public void LoadKeybindings()
+    {
+        if (_settingsData == null || string.IsNullOrEmpty(_settingsData.keybindingsJson))
+        {
+            Log("无键位覆盖数据或为空");
+            return;
+        }
+        ManagerHub.Input.LoadBindingOverrides(_settingsData.keybindingsJson);
+        Log("键位设置已加载");
+    }
+
+    /// <summary>
+    /// 重置键位设置
+    /// </summary>
+    public void ResetKeybindings()
+    {
+        if (_settingsData == null) return;
+        _settingsData.keybindingsJson = "";
+        SaveSettings();
+        ManagerHub.Input.ResetBindingOverrides();
+        Log("键位设置已重置");
     }
 
     #endregion

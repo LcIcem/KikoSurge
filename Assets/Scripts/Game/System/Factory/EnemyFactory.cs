@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using LcIcemFramework.Core;
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 using UnityEngine;
 using UnityEngine.Events;
 using Game.Event;

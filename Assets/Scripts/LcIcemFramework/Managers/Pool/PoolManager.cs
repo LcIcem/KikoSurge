@@ -5,9 +5,9 @@ using UnityEngine.Pool;
 
 using LcIcemFramework.Core;
 using LcIcemFramework.Util.Const;
-using LcIcemFramework.Managers.Addressables;
+using LcIcemFramework;
 
-namespace LcIcemFramework.Managers.Pool
+namespace LcIcemFramework
 {
 
 /// <summary>

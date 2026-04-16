@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace LcIcemFramework.Managers.Mono
+namespace LcIcemFramework
 {
 /// <summary>
 /// Unity 生命周期的内部驱动类。

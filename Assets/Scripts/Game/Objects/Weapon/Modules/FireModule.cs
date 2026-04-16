@@ -1,5 +1,5 @@
 using UnityEngine;
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 
 /// <summary>
 /// 开火模块 - 根据开火模式决定发射几发、怎么发

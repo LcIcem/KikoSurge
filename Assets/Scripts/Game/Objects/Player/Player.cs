@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 using LcIcemFramework.Core;
 using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 using Game.Event;
 
 

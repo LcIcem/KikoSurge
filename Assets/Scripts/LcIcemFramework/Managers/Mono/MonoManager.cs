@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 using LcIcemFramework.Core;
 
-namespace LcIcemFramework.Managers.Mono
+namespace LcIcemFramework
 {
 /// <summary>
 /// 非 MonoBehaviour 类的生命周期管理器（单例）。

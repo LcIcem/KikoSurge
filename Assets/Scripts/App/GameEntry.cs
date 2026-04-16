@@ -1,7 +1,6 @@
 using UnityEngine;
 using LcIcemFramework.Core;
-using LcIcemFramework.Managers;
-using LcIcemFramework.Managers.UI;
+using LcIcemFramework;
 
 /// <summary>
 /// 游戏入口管理器
@@ -19,7 +18,8 @@ public class GameEntry : MonoBehaviour
         // 显示游戏开始面板
         Log("Game started");
         ManagerHub.UI.ShowPanel<LoginPanel>(UILayerType.Middle);
-        // 播放背景音乐
+        // 播放背景音乐（启动时同步一次持久化数据）
+        ManagerHub.Audio.ApplySettings();
         ManagerHub.Audio.PlayBGM("BGM-1");
     }
 }

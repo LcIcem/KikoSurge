@@ -1,5 +1,4 @@
-using LcIcemFramework.Managers;
-using LcIcemFramework.Managers.UI;
+using LcIcemFramework;
 using UnityEngine;
 using UnityEngine.UI;
 

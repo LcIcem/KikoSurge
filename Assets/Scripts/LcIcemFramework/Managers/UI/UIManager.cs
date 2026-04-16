@@ -5,10 +5,10 @@ using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
 using LcIcemFramework.Core;
-using LcIcemFramework.Managers.Addressables;
+using LcIcemFramework;
 using LcIcemFramework.Util.Const;
 
-namespace LcIcemFramework.Managers.UI
+namespace LcIcemFramework
 {
 
 /// <summary>

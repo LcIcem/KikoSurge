@@ -1,5 +1,5 @@
 using LcIcemFramework.FSM;
-using LcIcemFramework.Managers.Mono;
+using LcIcemFramework;
 using UnityEngine;
 
 /// <summary>

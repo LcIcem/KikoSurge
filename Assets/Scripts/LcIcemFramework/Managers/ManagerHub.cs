@@ -1,17 +1,7 @@
 using UnityEngine;
-
 using LcIcemFramework.Core;
-using LcIcemFramework.Managers.Mono;
-using LcIcemFramework.Managers.Timer;
-using LcIcemFramework.Managers.Pool;
-using LcIcemFramework.Managers.Res;
-using LcIcemFramework.Managers.Save;
-using LcIcemFramework.Managers.Audio;
-using LcIcemFramework.Managers.Addressables;
-using LcIcemFramework.Managers.UI;
-using LcIcemFramework.Managers.Scenes;
 
-namespace LcIcemFramework.Managers
+namespace LcIcemFramework
 {
 
 /// <summary>
@@ -27,7 +17,7 @@ namespace LcIcemFramework.Managers
 ///   <item>所有 Manager 在 ManagerHub 首次被访问时自动初始化，无需手动调用</item>
 ///   <item>初始化顺序：MonoManager → EventCenter → ResManager → TimerManager
 ///         → PoolManager → SaveManager → AudioManager
-///         → AddressablesManager → UIManager → GameSceneManager → GameManager</item>
+///         → AddressablesManager → UIManager → GameSceneManager → GameManager → InputManager</item>
 /// </list>
 /// </para>
 /// </summary>
@@ -51,6 +41,8 @@ public class ManagerHub : SingletonMono<ManagerHub>
     public static UIManager UI => _ui;
     /// <summary>场景管理器（Scene Manager）</summary>
     public static GameSceneManager Scene => _scene;
+    /// <summary>输入管理器（Input Manager）</summary>
+    public static InputManager Input => _input;
 
     #endregion
 
@@ -64,6 +56,7 @@ public class ManagerHub : SingletonMono<ManagerHub>
     private static AddressablesManager _addressables;
     private static UIManager _ui;
     private static GameSceneManager _scene;
+    private static InputManager _input;
 
     #endregion
 
@@ -107,6 +100,9 @@ public class ManagerHub : SingletonMono<ManagerHub>
 
         // 10. GameSceneManager（独立）
         _scene = GameSceneManager.Instance;
+
+        // 11. InputManager（独立）
+        _input = InputManager.Instance;
 
         Log("ManagerHub 初始化完成。");
     }

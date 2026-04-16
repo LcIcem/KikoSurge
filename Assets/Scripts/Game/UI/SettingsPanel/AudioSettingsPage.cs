@@ -1,21 +1,16 @@
-using LcIcemFramework.Managers;
-using LcIcemFramework.Managers.Audio;
-using LcIcemFramework.Managers.UI;
+using LcIcemFramework;
+using LcIcemFramework.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 音频设置页面
+/// 音频设置页面（零拖拽，通过 BasePanel.GetControl 访问控件）
 /// </summary>
 public class AudioSettingsPage : ISettingsPage
 {
-    // 控件名称常量
-    private const string TOG_BGM = "tog_BGM";
-    private const string SLI_BGM = "sli_BGM";
-    private const string TOG_SFX = "tog_SFX";
-    private const string SLI_SFX = "sli_SFX";
-
     private BasePanel _ownerPanel;
+
+    public string PageKey => "panel_audio";
 
     public void Init(BasePanel ownerPanel)
     {
@@ -24,79 +19,62 @@ public class AudioSettingsPage : ISettingsPage
 
     public void OnEnter()
     {
-        ApplyToAudioManager();
         RefreshUI();
     }
 
     public void OnExit()
     {
+        GameDataManager.Instance.SaveSettings();
     }
 
     public void OnTogValueChanged(string togName, bool value)
     {
+        var settings = GameDataManager.Instance.GetSettingsData();
         switch (togName)
         {
-            case TOG_BGM:
+            case "tog_BGM":
                 if (value) AudioManager.Instance.UnmuteBGM();
                 else AudioManager.Instance.MuteBGM();
-                GameDataManager.Instance.GetSettingsData().bgmMuted = !value;
-                GameDataManager.Instance.SaveSettings();
+                settings.bgmMuted = !value;
                 break;
-            case TOG_SFX:
+            case "tog_SFX":
                 if (value) AudioManager.Instance.UnmuteSFX();
                 else AudioManager.Instance.MuteSFX();
-                GameDataManager.Instance.GetSettingsData().sfxMuted = !value;
-                GameDataManager.Instance.SaveSettings();
+                settings.sfxMuted = !value;
                 break;
         }
     }
 
     public void OnSliderValueChanged(string sliderName, float value)
     {
+        var settings = GameDataManager.Instance.GetSettingsData();
         switch (sliderName)
         {
-            case SLI_BGM:
+            case "sli_BGM":
                 AudioManager.Instance.SetBGMVolume(value);
-                GameDataManager.Instance.GetSettingsData().bgmVolume = value;
-                GameDataManager.Instance.SaveSettings();
+                settings.bgmVolume = value;
                 break;
-            case SLI_SFX:
+            case "sli_SFX":
                 AudioManager.Instance.SetSFXVolume(value);
-                GameDataManager.Instance.GetSettingsData().sfxVolume = value;
-                GameDataManager.Instance.SaveSettings();
+                settings.sfxVolume = value;
                 break;
         }
     }
 
-    private void ApplyToAudioManager()
+    public void OnClick(string btnName)
     {
-        var settings = GameDataManager.Instance.GetSettingsData();
-        if (settings == null) return;
-        AudioManager.Instance.SetBGMVolume(settings.bgmVolume);
-        AudioManager.Instance.SetSFXVolume(settings.sfxVolume);
-        if (settings.bgmMuted) AudioManager.Instance.MuteBGM();
-        else AudioManager.Instance.UnmuteBGM();
-        if (settings.sfxMuted) AudioManager.Instance.MuteSFX();
-        else AudioManager.Instance.UnmuteSFX();
     }
 
     private void RefreshUI()
     {
-        if (_ownerPanel == null) return;
+        var bgmToggle = _ownerPanel?.GetControl<Toggle>("tog_BGM");
+        var bgmSlider = _ownerPanel?.GetControl<Slider>("sli_BGM");
+        var sfxToggle = _ownerPanel?.GetControl<Toggle>("tog_SFX");
+        var sfxSlider = _ownerPanel?.GetControl<Slider>("sli_SFX");
 
-        var bgmToggle = _ownerPanel.GetControl<Toggle>(TOG_BGM);
-        var bgmSlider = _ownerPanel.GetControl<Slider>(SLI_BGM);
-        var sfxToggle = _ownerPanel.GetControl<Toggle>(TOG_SFX);
-        var sfxSlider = _ownerPanel.GetControl<Slider>(SLI_SFX);
-
-        if (bgmToggle != null)
-            bgmToggle.isOn = !AudioManager.Instance.IsBgmMuted();
-        if (bgmSlider != null)
-            bgmSlider.value = AudioManager.Instance.GetBGMVolume();
-
-        if (sfxToggle != null)
-            sfxToggle.isOn = !AudioManager.Instance.IsSfxMuted();
-        if (sfxSlider != null)
-            sfxSlider.value = AudioManager.Instance.GetSFXVolume();
+        if (bgmToggle != null) bgmToggle.isOn = !AudioManager.Instance.IsBgmMuted();
+        if (bgmSlider != null) bgmSlider.value = AudioManager.Instance.GetBGMVolume();
+        if (sfxToggle != null) sfxToggle.isOn = !AudioManager.Instance.IsSfxMuted();
+        if (sfxSlider != null) sfxSlider.value = AudioManager.Instance.GetSFXVolume();
     }
 }

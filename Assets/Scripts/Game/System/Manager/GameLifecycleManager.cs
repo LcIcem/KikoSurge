@@ -1,7 +1,7 @@
 using System;
 using Game.Event;
 using LcIcemFramework.Core;
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 

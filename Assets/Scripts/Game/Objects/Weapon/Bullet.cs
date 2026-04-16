@@ -1,8 +1,7 @@
 using LcIcemFramework.Core;
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 using UnityEngine;
 using Game.Event;
-using LcIcemFramework.Managers.Pool;
 
 /// <summary>
 /// 子弹：处理碰撞、伤害、效果

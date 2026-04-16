@@ -1,8 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using LcIcemFramework.Managers;
-using LcIcemFramework.Managers.Pool;
+using LcIcemFramework;
 using UnityEngine;
 using UnityEngine.Events;
 

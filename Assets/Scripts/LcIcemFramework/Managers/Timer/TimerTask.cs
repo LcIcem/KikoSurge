@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace LcIcemFramework.Managers.Timer
+namespace LcIcemFramework
 {
 /// <summary>
 /// 单个计时任务的数据结构

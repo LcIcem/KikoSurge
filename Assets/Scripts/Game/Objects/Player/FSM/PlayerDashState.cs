@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using LcIcemFramework.FSM;
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 using UnityEngine;
 using UnityEngine.UI;
 

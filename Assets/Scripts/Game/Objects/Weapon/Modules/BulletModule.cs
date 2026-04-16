@@ -1,4 +1,4 @@
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 using UnityEngine;
 
 /// <summary>

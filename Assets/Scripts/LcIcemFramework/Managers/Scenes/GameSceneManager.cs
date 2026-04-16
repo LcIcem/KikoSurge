@@ -8,7 +8,7 @@ using UA = UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace LcIcemFramework.Managers.Scenes
+namespace LcIcemFramework
 {
     /// <summary>
     /// 场景切换管理器（基于 Addressables.LoadSceneAsync）

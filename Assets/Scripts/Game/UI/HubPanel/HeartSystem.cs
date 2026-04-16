@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using LcIcemFramework.Util.Ext;
 using UnityEngine.UI;
 using UnityEngine;
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 using LcIcemFramework.Core;
 using Game.Event;
 

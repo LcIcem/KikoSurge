@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using LcIcemFramework.Core;
-using LcIcemFramework.Managers;
-using LcIcemFramework.Managers.Pool;
+using LcIcemFramework;
 using Game.Util.Const;
 using Game.Event;
 

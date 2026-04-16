@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using LcIcemFramework.Managers;
+using LcIcemFramework;
 using ProcGen.Core;
 using ProcGen.Seed;
 using UnityEngine;

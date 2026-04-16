@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using LcIcemFramework.Core;
-using LcIcemFramework.Managers.Mono;
+using LcIcemFramework;
 
-namespace LcIcemFramework.Managers.Timer
+namespace LcIcemFramework
 {
 
 /// <summary>

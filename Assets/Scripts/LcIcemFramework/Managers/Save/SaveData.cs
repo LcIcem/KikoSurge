@@ -1,4 +1,4 @@
-namespace LcIcemFramework.Managers.Save
+namespace LcIcemFramework
 {
 /// <summary>
 /// 存档数据结构

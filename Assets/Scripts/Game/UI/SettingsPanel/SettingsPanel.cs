@@ -1,26 +1,27 @@
 using System.Collections.Generic;
-using LcIcemFramework.Managers;
-using LcIcemFramework.Managers.UI;
+using LcIcemFramework;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
-/// 设置面板：音频设置 + 键位设置预留
+/// 设置面板：音频设置 + 键位设置
 /// </summary>
 public class SettingsPanel : BasePanel
 {
-    // 控件名称常量
     private const string BTN_CLOSE = "btn_close";
     private const string BTN_CATEGORY_AUDIO = "btn_category_audio";
     private const string BTN_CATEGORY_KEYS = "btn_category_keys";
 
-    // 设置面板名称
-    private const string PANEL_AUDIO = "panel_audio";
-    private const string PANEL_KEYS = "panel_keys";
+    // 键位页拖拽配置（仅 KeysSettingsPage 需要）
+    [Header("键位页配置")]
+    [SerializeField] private RectTransform _keysContentContainer;
+    [SerializeField] private GameObject _keysItemTemplate;
+    [SerializeField] private Button _keysBtnResetAll;
 
-    // 所有设置页面容器
-    private Dictionary<string, ISettingsPage> _pages = new Dictionary<string, ISettingsPage>();
+    // 页面实例（代码创建）
+    private readonly ISettingsPage _audioPage = new AudioSettingsPage();
+    private readonly ISettingsPage _keysPage = new KeysSettingsPage();
 
-    // 当前设置的页面
     private ISettingsPage _curPage;
 
     #region 生命周期
@@ -28,31 +29,35 @@ public class SettingsPanel : BasePanel
     protected override void Awake()
     {
         base.Awake();
-        RegisterPages();
+        SetupPages();
     }
 
     public override void Show()
     {
         base.Show();
-        // 默认显示第一个注册的页面
-        var enumerator = _pages.GetEnumerator();
-        if (enumerator.MoveNext())
-            ShowSettings(enumerator.Current.Key);
+        ShowSettings(_audioPage.PageKey);
     }
+
+    public override void Hide()
+    {
+        _curPage?.OnExit();
+        base.Hide();
+    }
+
 
     #endregion
 
-    #region 页面注册
+    #region 页面初始化
 
-    private void RegisterPages()
+    private void SetupPages()
     {
-        var audioPage = new AudioSettingsPage();
-        audioPage.Init(this);
-        _pages[PANEL_AUDIO] = audioPage;
+        Debug.Log($"[SettingsPanel] SetupPages. keysContainer={_keysContentContainer}, template={_keysItemTemplate}");
 
-        var keysPage = new KeysSettingsPage();
-        keysPage.Init(this);
-        _pages[PANEL_KEYS] = keysPage;
+        _audioPage.Init(this);
+
+        _keysPage.Init(this);
+        if (_keysPage is KeysSettingsPage keys)
+            keys.SetDraggedRefs(_keysContentContainer, _keysItemTemplate, _keysBtnResetAll);
     }
 
     #endregion
@@ -67,10 +72,13 @@ public class SettingsPanel : BasePanel
                 ManagerHub.UI.HidePanel<SettingsPanel>();
                 break;
             case BTN_CATEGORY_AUDIO:
-                ShowSettings(PANEL_AUDIO);
+                ShowSettings(_audioPage.PageKey);
                 break;
             case BTN_CATEGORY_KEYS:
-                ShowSettings(PANEL_KEYS);
+                ShowSettings(_keysPage.PageKey);
+                break;
+            default:
+                _curPage?.OnClick(btnName);
                 break;
         }
     }
@@ -91,17 +99,15 @@ public class SettingsPanel : BasePanel
 
     private void ShowSettings(string pageName)
     {
-        // 激活目标页面
-        foreach (var page in _pages)
-        {
-            print(page.Key);
-            var panelObj = transform.Find("RightPanel/" + page.Key)?.gameObject;
-            if (panelObj != null)
-                panelObj.SetActive(page.Key == pageName);
-        }
+        Debug.Log($"[SettingsPanel] ShowSettings: {pageName}");
 
-        // 触发页面进入/退出
-        if (_pages.TryGetValue(pageName, out var newPage) && newPage != _curPage)
+        var panelAudio = transform.Find("RightPanel/panel_audio")?.gameObject;
+        var panelKeys = transform.Find("RightPanel/panel_keys")?.gameObject;
+        if (panelAudio != null) panelAudio.SetActive(pageName == _audioPage.PageKey);
+        if (panelKeys != null) panelKeys.SetActive(pageName == _keysPage.PageKey);
+
+        ISettingsPage newPage = pageName == _audioPage.PageKey ? _audioPage : _keysPage;
+        if (newPage != null && newPage != _curPage)
         {
             _curPage?.OnExit();
             _curPage = newPage;

@@ -1,4 +1,4 @@
-namespace LcIcemFramework.Managers.Audio
+namespace LcIcemFramework
 {
 /// <summary>
 /// 音频 ID 常量

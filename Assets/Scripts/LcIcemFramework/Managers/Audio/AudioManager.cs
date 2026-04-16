@@ -4,7 +4,7 @@ using UnityEngine;
 using LcIcemFramework.Core;
 using LcIcemFramework.Util.Const;
 
-namespace LcIcemFramework.Managers.Audio
+namespace LcIcemFramework
 {
 
 /// <summary>
@@ -105,6 +105,23 @@ public class AudioManager : SingletonMono<AudioManager>
 
     public bool IsBgmMuted() => _bgmSource.mute;
     public bool IsSfxMuted() => _sfxSources.Count > 0 ? _sfxSources[0].mute : false;
+
+    #endregion
+
+    #region 启动同步
+
+    /// <summary>
+    /// 从 GameDataManager 加载并应用音频设置（启动时调用一次）
+    /// </summary>
+    public void ApplySettings()
+    {
+        var settings = GameDataManager.Instance?.GetSettingsData();
+        if (settings == null) return;
+        SetBGMVolume(settings.bgmVolume);
+        SetSFXVolume(settings.sfxVolume);
+        if (settings.bgmMuted) MuteBGM(); else UnmuteBGM();
+        if (settings.sfxMuted) MuteSFX(); else UnmuteSFX();
+    }
 
     #endregion
 }

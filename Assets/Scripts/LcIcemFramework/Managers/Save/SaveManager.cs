@@ -8,7 +8,7 @@ using LcIcemFramework.Util.Const;
 using LcIcemFramework.Util.Data;
 using LcIcemFramework.Util.Crypto;
 
-namespace LcIcemFramework.Managers.Save
+namespace LcIcemFramework
 {
 
 /// <summary>
