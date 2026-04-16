@@ -328,6 +328,8 @@ public class LevelController : MonoBehaviour
 
     private void OnDestroy()
     {
+        EnemyFactory.Instance.ReleaseAll();
+        LootManager.Instance.ClearAll();
         _roomController?.Dispose();
     }
 }
