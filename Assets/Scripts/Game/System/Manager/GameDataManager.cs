@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using LcIcemFramework.Core;
+using LcIcemFramework.Data;
 using LcIcemFramework.Managers;
+using LcIcemFramework.Util.Data;
 using Unity.VisualScripting;
 
 /// <summary>
@@ -29,6 +32,11 @@ public class GameDataManager : SingletonMono<GameDataManager>
     private Dictionary<EnemyType, LootTable_SO> _lootTableDict = new();
     public Dictionary<EnemyType, LootTable_SO> LootTableDict => _lootTableDict;
 
+    // 设置数据
+    private SettingsData _settingsData;
+    public SettingsData SettingsData => _settingsData;
+    private string _settingsFilePath => Path.Combine(Application.persistentDataPath, "settings.json");
+
 
     protected override void Init()
     {
@@ -46,7 +54,7 @@ public class GameDataManager : SingletonMono<GameDataManager>
     }
 
     private void Start() {
-        // 订阅事件
+        LoadSettings();
     }
 
     protected override void OnDestroy() {
@@ -232,6 +240,47 @@ public class GameDataManager : SingletonMono<GameDataManager>
         if (_lootTableDict.TryGetValue(enemyType, out var table))
             return table;
         return null;
+    }
+
+    #endregion
+
+    #region SettingsData设置数据相关
+
+    /// <summary>
+    /// 加载设置数据
+    /// </summary>
+    public void LoadSettings()
+    {
+        _settingsData = JsonUtil.LoadFromFile<SettingsData>(_settingsFilePath);
+        if (_settingsData == null)
+        {
+            _settingsData = new SettingsData();
+            Log("未找到设置文件，使用默认设置");
+        }
+        else
+        {
+            Log("设置数据加载完成");
+        }
+    }
+
+    /// <summary>
+    /// 保存设置数据
+    /// </summary>
+    public void SaveSettings()
+    {
+        if (_settingsData == null) return;
+        JsonUtil.SaveToFile(_settingsFilePath, _settingsData);
+        Log("设置数据已保存");
+    }
+
+    /// <summary>
+    /// 获取设置数据
+    /// </summary>
+    public SettingsData GetSettingsData()
+    {
+        if (_settingsData == null)
+            LoadSettings();
+        return _settingsData;
     }
 
     #endregion

@@ -100,5 +100,12 @@ public class AudioManager : SingletonMono<AudioManager>
     public float GetSFXVolume() => _sfxVolume;
 
     #endregion
+
+    #region 静音状态查询
+
+    public bool IsBgmMuted() => _bgmSource.mute;
+    public bool IsSfxMuted() => _sfxSources.Count > 0 ? _sfxSources[0].mute : false;
+
+    #endregion
 }
 }

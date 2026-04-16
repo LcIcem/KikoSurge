@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Prefabs-UI
   m_GUID: 8249f4b528f2f6344a2371a8822ba267
   m_SerializeEntries:
+  - m_GUID: 1f9ec03a6840a92468fa5e59fdfdbedb
+    m_Address: SettingsPanel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2cdb87a545785484dbdb99e09a485383
     m_Address: EventSystem
     m_ReadOnly: 0

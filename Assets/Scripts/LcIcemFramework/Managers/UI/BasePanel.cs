@@ -60,7 +60,14 @@ public class BasePanel : MonoBehaviour
     /// </summary>
     /// <param name="togName">状态变化的 Toggle 的 GameObject 名称。</param>
     /// <param name="value">Toggle 当前值（true = 选中）。</param>
-    protected virtual void OnValueChanged(string togName, bool value) { }
+    protected virtual void OnTogValueChanged(string togName, bool value) { }
+
+    /// <summary>
+    /// Slider 值变化事件的统一回调入口。子类重写以响应滑块值变化。
+    /// </summary>
+    /// <param name="sliderName">值变化的 Slider 的 GameObject 名称。</param>
+    /// <param name="value">Slider 当前值（0~1）。</param>
+    protected virtual void OnSliderValueChanged(string sliderName, float value) { }
 
     /// <summary>
     /// 根据控件名称和类型获取对应的 UI 组件。
@@ -69,7 +76,7 @@ public class BasePanel : MonoBehaviour
     /// <typeparam name="T">UIBehaviour 子类类型，如 Button、Image、Text 等。</typeparam>
     /// <param name="controlName">子控件 GameObject 的名称。</param>
     /// <returns>匹配的组件，未找到返回 null。</returns>
-    protected T GetControl<T>(string controlName) where T : UIBehaviour
+    public T GetControl<T>(string controlName) where T : UIBehaviour
     {
         // 先按名称找到对应的列表，再从中筛选出目标类型
         if (_controlDic.ContainsKey(controlName))
@@ -118,7 +125,15 @@ public class BasePanel : MonoBehaviour
                 string togName = control.name;
                 (control as Toggle).onValueChanged.AddListener((value) =>
                 {
-                    OnValueChanged(togName, value);
+                    OnTogValueChanged(togName, value);
+                });
+            }
+            else if (control is Slider)
+            {
+                string sldName = control.name;
+                (control as Slider).onValueChanged.AddListener((value) =>
+                {
+                    OnSliderValueChanged(sldName, value);
                 });
             }
         }

@@ -43,7 +43,7 @@ public class LoginPanel : BasePanel
                     GameLifecycleManager.Instance.ContinueGame(0);
                 break;
             case BTN_SETTINGS:
-                // TODO: 预留设置面板入口
+                ManagerHub.UI.ShowPanel<SettingsPanel>();
                 break;
             case BTN_QUIT:
                 GameLifecycleManager.Instance.QuitGame();

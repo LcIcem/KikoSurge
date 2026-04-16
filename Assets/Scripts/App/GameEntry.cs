@@ -19,5 +19,7 @@ public class GameEntry : MonoBehaviour
         // 显示游戏开始面板
         Log("Game started");
         ManagerHub.UI.ShowPanel<LoginPanel>(UILayerType.Middle);
+        // 播放背景音乐
+        ManagerHub.Audio.PlayBGM("BGM-1");
     }
 }
