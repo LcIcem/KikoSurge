@@ -67,3 +67,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1890941cf1c30ab449c6a37d58bfd831, type: 2}
   _roomBehaviourTable: {fileID: 11400000, guid: 81931ea53afc2bb49b3ba6baa4b33769, type: 2}
   _checkpointPrefab: {fileID: 140860234070293769, guid: 73f6790a547bcac4b81076e4cf17e59f, type: 3}
+  _tileInfo: {fileID: 11400000, guid: 4ad6cd1c1d4fa0f4682cb4fb0fb9a845, type: 2}
+  _tilemapPrefab: {fileID: 5379538912178641955, guid: a93c450d8d6aa25469165555f01182d0, type: 3}

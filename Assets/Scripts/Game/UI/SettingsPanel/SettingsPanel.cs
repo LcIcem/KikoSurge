@@ -35,12 +35,14 @@ public class SettingsPanel : BasePanel
     public override void Show()
     {
         base.Show();
+        GameLifecycleManager.Instance.IsSettingsPanelBlocking = true;
         ShowSettings(_audioPage.PageKey);
     }
 
     public override void Hide()
     {
         _curPage?.OnExit();
+        GameLifecycleManager.Instance.IsSettingsPanelBlocking = false;
         base.Hide();
     }
 

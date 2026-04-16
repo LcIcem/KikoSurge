@@ -26,6 +26,12 @@ public class LevelController : MonoBehaviour
     [Header("终点检查点预设体")]
     [SerializeField] private GameObject _checkpointPrefab;
 
+    [Header("瓦片配置")]
+    [SerializeField] private TileInfo_SO _tileInfo;
+
+    [Header("Tilemap 预设体（包含 Grid 及子 Tilemap）")]
+    [SerializeField] private GameObject _tilemapPrefab;
+
     private RoomController _roomController;
     private PlayerHandler _playerHandler;
 
@@ -48,17 +54,8 @@ public class LevelController : MonoBehaviour
         if (_builder == null)
             _builder = gameObject.AddComponent<DungeonBuilder>();
 
-        // 从场景锚点获取 Tilemap 引用
-        var anchor = SceneLevelAnchor.Instance;
-        if (anchor != null)
-        {
-            _builder.SetTilemapReferences(anchor.FloorTilemap, anchor.WallTilemap, anchor.DoorTilemap);
-            _builder.SetTileInfo(anchor.TileInfo);
-        }
-        else
-        {
-            Debug.LogWarning("[LevelController] SceneLevelAnchor not found in scene.");
-        }
+        // 在场景中直接查找 Tilemap 引用
+        FindTilemapReferences();
 
         _roomController = new RoomController();
         _playerHandler = new PlayerHandler();
@@ -66,11 +63,63 @@ public class LevelController : MonoBehaviour
         EventCenter.Instance.Subscribe(GameEventID.OnRequestRoomRefresh, OnRequestRoomRefresh);
     }
 
+    /// <summary>
+    /// 实例化 Tilemap 预设体并提取子 Tilemap 引用
+    /// </summary>
+    private void FindTilemapReferences()
+    {
+        if (_tilemapPrefab == null)
+        {
+            Debug.LogError("[LevelController] _tilemapPrefab is not assigned! Please assign a Tilemap prefab in Inspector.");
+            return;
+        }
+
+        // 实例化预设体
+        var instantiated = Instantiate(_tilemapPrefab, Vector3.zero, Quaternion.identity);
+        instantiated.name = "TilemapGrid";
+
+        // 从实例化后的子对象中找 Tilemap
+        Tilemap floor = null, wall = null, door = null;
+
+        foreach (var tm in instantiated.GetComponentsInChildren<Tilemap>())
+        {
+            string lowerName = tm.gameObject.name.ToLower();
+
+            if (lowerName.Contains("floor") && floor == null)
+                floor = tm;
+            else if (lowerName.Contains("wall") && wall == null)
+                wall = tm;
+            else if (lowerName.Contains("door") && door == null)
+                door = tm;
+        }
+
+        Debug.Log($"[LevelController] Tilemap instantiated, Floor:{floor?.gameObject.name ?? "null"}, Wall:{wall?.gameObject.name ?? "null"}, Door:{door?.gameObject.name ?? "null"}");
+
+        if (floor == null || wall == null)
+        {
+            Debug.LogError("[LevelController] Could not find Floor/Wall tilemap in prefab. Make sure the prefab's child Tilemap GameObjects contain 'Floor'/'Wall'/'Door' in their names.");
+            return;
+        }
+
+        _builder.SetTilemapReferences(floor, wall, door);
+        Debug.Log($"[LevelController] TileInfo_SO: {_tileInfo?.name ?? "null"}");
+        _builder.SetTileInfo(_tileInfo);
+    }
+
     private void OnRequestRoomRefresh()
     {
+        // 如果玩家已创建，使用玩家位置刷新
         if (_playerHandler != null && _playerHandler.PlayerInstance != null)
         {
             _roomController.RefreshCurrentRoom(_playerHandler.PlayerInstance.transform.position);
+            return;
+        }
+
+        // 玩家未创建但地牢已构建（异步加载期间），使用起始房间位置刷新
+        if (_currentLayerIndex >= 0)
+        {
+            Vector3 startPos = GetStartRoomWorldPos();
+            _roomController.RefreshCurrentRoom(startPos);
         }
     }
 

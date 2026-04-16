@@ -293,10 +293,22 @@ public class GameDataManager : SingletonMono<GameDataManager>
     /// </summary>
     public void SaveKeybindings()
     {
+        SaveKeybindings(ManagerHub.Input.GetCurrentActionMapName());
+    }
+
+    /// <summary>
+    /// 保存键位设置（指定 Map）
+    /// </summary>
+    /// <param name="mapName">要保存的 Map 名称</param>
+    public void SaveKeybindings(string mapName)
+    {
         if (_settingsData == null) return;
-        _settingsData.keybindingsJson = ManagerHub.Input.SaveBindingOverrides();
+
+        // 合并：先把磁盘已有数据加载进来，再合并当前内存覆盖（避免丢失其他 Map 的覆盖）
+        string existingJson = _settingsData.keybindingsJson;
+        _settingsData.keybindingsJson = ManagerHub.Input.SaveBindingOverridesWithMerge(mapName, existingJson);
         SaveSettings();
-        Log("键位设置已保存");
+        Log($"键位设置已保存 (map={mapName})");
     }
 
     /// <summary>

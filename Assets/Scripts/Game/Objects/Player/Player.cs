@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using LcIcemFramework.Core;
 using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
@@ -35,7 +34,6 @@ public class Player : MonoBehaviour
 
     // 当前瞄准方向（供 FSM/其他系统读取）
     public Vector2 AimDir { get; private set; }
-    private Vector3? _mouseWorldPos;
 
     private void Awake()
     {
@@ -130,12 +128,7 @@ public class Player : MonoBehaviour
         HandleInput();
 
         // 瞄准方向
-        if (_mouseWorldPos.HasValue)
-        {
-            Vector2 aimDir = ((Vector2)_mouseWorldPos.Value - (Vector2)transform.position).normalized;
-            if (aimDir.magnitude > 0.01f)
-                AimDir = aimDir;
-        }
+        AimDir = InputManager.Instance.GetAimDirection(transform.position);
 
         // FSM 驱动
         _fsm.Update();
@@ -144,39 +137,40 @@ public class Player : MonoBehaviour
     // 处理玩家输入
     private void HandleInput()
     {
+        // Guard: Only process input when Player action map is active
+        if (!InputManager.Instance.Actions.ContainsKey("Move"))
+            return;
+
         // 处理移动
-        _moveInput = InputManager.Instance.UIActions["Move"].ReadValue<Vector2>();
+        _moveInput = InputManager.Instance.Actions["Move"].ReadValue<Vector2>();
         MoveDir = _moveInput.normalized;
         _fsm.SetBool("isMoving", MoveDir.magnitude >= 0.1f);
         _fsm.SetBool("isIdle", MoveDir.magnitude < 0.1f);
 
-        // 处理鼠标位置
-        _mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-
         // 处理射击
         if (weaponHandler.CurrentWeapon != null &&
             weaponHandler.CurrentWeapon.CanFire &&
-            InputManager.Instance.UIActions["Shoot"].IsPressed())
+            InputManager.Instance.Actions["Shoot"].IsPressed())
         {
             _fsm.SetTrigger("shoot");
         }
 
         // 处理冲刺
-        if (InputManager.Instance.UIActions["Dash"].WasPressedThisFrame())
+        if (InputManager.Instance.Actions["Dash"].WasPressedThisFrame())
         {
             _fsm.SetTrigger("dash");
         }
 
         // 调试用
-        if (InputManager.Instance.UIActions["Dead"].WasPressedThisFrame())
+        if (InputManager.Instance.Actions["Dead"].WasPressedThisFrame())
         {
             _fsm.SetBool("isDead", true);
         }
-        if (InputManager.Instance.UIActions["Hurt"].WasPressedThisFrame())
+        if (InputManager.Instance.Actions["Hurt"].WasPressedThisFrame())
         {
             _fsm.SetTrigger("hurt");
         }
-        if (InputManager.Instance.UIActions["Switch"].WasPressedThisFrame())
+        if (InputManager.Instance.Actions["SwitchWeapon"].WasPressedThisFrame())
         {
             weaponHandler.SwitchToNextWeapon();
             var weapon = weaponHandler.CurrentWeapon;

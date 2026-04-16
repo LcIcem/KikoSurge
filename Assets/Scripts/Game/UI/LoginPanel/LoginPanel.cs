@@ -34,12 +34,18 @@ public class LoginPanel : BasePanel
                 ManagerHub.Scene.LoadSceneAsync("Game_Scene", null, () =>
                 {
                     GameLifecycleManager.Instance.StartNewGame(0);
+                    GameLifecycleManager.Instance.EnterPlaying();
                 });
                 ManagerHub.UI.HidePanel<LoginPanel>();
                 break;
             case BTN_CONTINUE:
                 if (ManagerHub.Save.Exists(0))
-                    GameLifecycleManager.Instance.ContinueGame(0);
+                {
+                    ManagerHub.Scene.LoadSceneAsync("Game_Scene", null, () =>
+                    {
+                        GameLifecycleManager.Instance.ContinueGame(0);
+                    });
+                }
                 break;
             case BTN_SETTINGS:
                 ManagerHub.UI.ShowPanel<SettingsPanel>();

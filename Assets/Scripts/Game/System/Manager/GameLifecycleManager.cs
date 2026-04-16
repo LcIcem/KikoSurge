@@ -10,8 +10,8 @@ using UnityEngine.InputSystem;
 /// </summary>
 public enum GameState
 {
-    SaveSelect,  // 存档选择
-    Lobby,       // 大厅
+    MainMenu,    // 主菜单
+    Lobby,       // 大厅（准备阶段）
     Playing,     // 游戏中
     Paused,      // 暂停
     GameOver     // 游戏结束
@@ -26,35 +26,69 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     [Header("LevelController")]
     [SerializeField] private LevelController _levelControllerPrefab;
 
-    [Header("关卡种子（调试用）")]
-    [SerializeField] private long _debugSeed = 12345;
-
     /// <summary>
     /// 当前游戏状态
     /// </summary>
-    public GameState CurrentState { get; private set; } = GameState.SaveSelect;
+    public GameState CurrentState { get; private set; } = GameState.MainMenu;
 
     /// <summary>
     /// 当前关卡管理器
     /// </summary>
     public LevelController LevelController { get; private set; }
 
+    /// <summary>
+    /// 设置面板是否阻塞继续游戏（从暂停菜单打开时为 true）
+    /// 为 true 时 ESC 仅关闭设置面板，不继续游戏
+    /// </summary>
+    public bool IsSettingsPanelBlocking { get; set; } = false;
+
     protected override void Init()
     {
         Log("GameLifecycleManager initialized");
-        ChangeState(GameState.Lobby);
+        ChangeState(GameState.MainMenu);
+    }
+
+    private void Update()
+    {
+        // 游戏中按 ESC/Pause 打开暂停菜单
+        if (CurrentState == GameState.Playing)
+        {
+            var pauseAction = ManagerHub.Input.Actions["Pause"];
+            if (pauseAction != null && pauseAction.WasPressedThisFrame())
+            {
+                PauseGame();
+            }
+        }
+        // 暂停时按 ESC/Resume 继续游戏
+        else if (CurrentState == GameState.Paused)
+        {
+            // SettingsPanel 阻塞继续，ESC 只关闭设置面板，不继续游戏
+            if (IsSettingsPanelBlocking)
+                return;
+
+            var resumeAction = ManagerHub.Input.Actions["Resume"];
+            if (resumeAction != null && resumeAction.WasPressedThisFrame())
+            {
+                ResumeGame();
+            }
+        }
     }
 
     /// <summary>
-    /// 开始新游戏
+    /// 当前游戏种子（供 EnterPlaying 使用）
+    /// </summary>
+    private long _currentSessionSeed;
+
+    /// <summary>
+    /// 开始新游戏（从主菜单进入大厅）
     /// </summary>
     /// <param name="saveSlot">存档槽位</param>
     /// <param name="seed">游戏种子（默认使用时间戳）</param>
     public void StartNewGame(int saveSlot, long? seed = null)
     {
-        long sessionSeed = seed ?? Environment.TickCount;
+        _currentSessionSeed = seed ?? Environment.TickCount;
 
-        Log($"StartNewGame: slot={saveSlot}, seed={sessionSeed}");
+        Log($"StartNewGame: slot={saveSlot}, seed={_currentSessionSeed}");
 
         // TODO: SaveLoadManager.CreateNewSave(saveSlot, sessionSeed);
         // TODO: GameDataManager.StartNewSession(sessionSeed);
@@ -63,16 +97,32 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         if (_levelControllerPrefab != null)
         {
             LevelController = Instantiate(_levelControllerPrefab);
-            LevelController.Initialize(sessionSeed);
-            LevelController.EnterFirstLayer();
+            LevelController.Initialize(_currentSessionSeed);
         }
         else
         {
             LogError("LevelController Prefab is not assigned!");
         }
 
+        // 先进入 Lobby 状态（大厅/准备阶段）
+        ChangeState(GameState.Lobby);
+    }
+
+    /// <summary>
+    /// 从大厅进入游戏（正式开玩）
+    /// </summary>
+    public void EnterPlaying()
+    {
+        if (LevelController == null)
+        {
+            LogError("EnterPlaying: LevelController is null!");
+            return;
+        }
+
+        Log("EnterPlaying: Starting gameplay");
+        LevelController.EnterFirstLayer();
         ChangeState(GameState.Playing);
-        EventCenter.Instance.Publish(GameEventID.OnSessionStart, sessionSeed);
+        EventCenter.Instance.Publish(GameEventID.OnSessionStart, _currentSessionSeed);
     }
 
     /// <summary>
@@ -93,8 +143,19 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             // _levelManager.RestoreFromSession(currentSession);
         }
 
-        ChangeState(GameState.Playing);
+        // 先进入 Lobby 状态
+        ChangeState(GameState.Lobby);
         EventCenter.Instance.Publish(GameEventID.OnSessionContinue);
+    }
+
+    /// <summary>
+    /// 主菜单点击开始游戏（跳过 Lobby 直接进入游戏）
+    /// </summary>
+    /// <param name="saveSlot">存档槽位</param>
+    public void StartGameFromMenu(int saveSlot)
+    {
+        StartNewGame(saveSlot);
+        EnterPlaying();
     }
 
     /// <summary>
@@ -117,6 +178,28 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     }
 
     /// <summary>
+    /// 返回主菜单
+    /// </summary>
+    public void ReturnToMainMenu()
+    {
+        Log("ReturnToMainMenu");
+
+        // 销毁关卡
+        if (LevelController != null)
+        {
+            Destroy(LevelController.gameObject);
+            LevelController = null;
+        }
+
+        // 隐藏游戏Hub
+        ManagerHub.UI.HidePanel<HubPanel>();
+
+        // TODO: 保存当前进度
+
+        ChangeState(GameState.MainMenu);
+    }
+
+    /// <summary>
     /// 退出游戏
     /// </summary>
     public void QuitGame()
@@ -133,6 +216,12 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         GameState oldState = CurrentState;
         CurrentState = newState;
         Log($"GameState changed: {oldState} -> {newState}");
+
+        // 自动切换 Action Map（确保 ManagerHub.Input 已初始化）
+        if (ManagerHub.Input != null)
+        {
+            ManagerHub.Input.SwitchActionMapByGameState(newState);
+        }
     }
 
     /// <summary>
@@ -143,7 +232,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         if (CurrentState == GameState.Playing)
         {
             ChangeState(GameState.Paused);
-            // TODO: 显示暂停菜单
+            // 显示暂停菜单
+            ManagerHub.UI.ShowPanel<PausePanel>();
         }
     }
 
@@ -155,7 +245,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         if (CurrentState == GameState.Paused)
         {
             ChangeState(GameState.Playing);
-            // TODO: 隐藏暂停菜单
+            // 隐藏暂停菜单
+            ManagerHub.UI.HidePanel<PausePanel>();
         }
     }
 
@@ -177,7 +268,9 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     public void DebugStartNewGame(InputAction.CallbackContext ctx)
     {
         if (ctx.performed)
-            StartNewGame(0, _debugSeed);
+        {
+            StartGameFromMenu(0);
+        }
     }
 
     /// <summary>

@@ -46,11 +46,20 @@ public class MiniMap : MonoBehaviour
     private int _currentRoomId = -1;
     private Coroutine _blinkCoroutine;
 
+    // 事件回调委托（存储引用以便正确取消订阅）
+    private System.Action<RoomEnterParams> _onRoomEnterHandler;
+    private System.Action<int> _onRoomClearedHandler;
+    private System.Action<int> _onLayerEnterHandler;
+
     void Start()
     {
-        EventCenter.Instance.Subscribe<RoomEnterParams>(GameEventID.OnRoomEnter, p => OnRoomEnter(p));
-        EventCenter.Instance.Subscribe<int>(GameEventID.OnRoomCleared, roomId => OnRoomCleared(roomId));
-        EventCenter.Instance.Subscribe<int>(GameEventID.OnLayerEnter, layerIndex => OnLayerEnter(layerIndex));
+        _onRoomEnterHandler = p => OnRoomEnter(p);
+        _onRoomClearedHandler = roomId => OnRoomCleared(roomId);
+        _onLayerEnterHandler = layerIndex => OnLayerEnter(layerIndex);
+
+        EventCenter.Instance.Subscribe(GameEventID.OnRoomEnter, _onRoomEnterHandler);
+        EventCenter.Instance.Subscribe(GameEventID.OnRoomCleared, _onRoomClearedHandler);
+        EventCenter.Instance.Subscribe(GameEventID.OnLayerEnter, _onLayerEnterHandler);
 
         // 订阅完成后主动构建一次（处理首次进入时事件已发布的情况）
         var levelCtrl = GameLifecycleManager.Instance.LevelController;
@@ -66,9 +75,9 @@ public class MiniMap : MonoBehaviour
         {
             StopCoroutine(_blinkCoroutine);
         }
-        EventCenter.Instance.Unsubscribe<RoomEnterParams>(GameEventID.OnRoomEnter, p => OnRoomEnter(p));
-        EventCenter.Instance.Unsubscribe<int>(GameEventID.OnRoomCleared, roomId => OnRoomCleared(roomId));
-        EventCenter.Instance.Unsubscribe<int>(GameEventID.OnLayerEnter, layerIndex => OnLayerEnter(layerIndex));
+        EventCenter.Instance.Unsubscribe(GameEventID.OnRoomEnter, _onRoomEnterHandler);
+        EventCenter.Instance.Unsubscribe(GameEventID.OnRoomCleared, _onRoomClearedHandler);
+        EventCenter.Instance.Unsubscribe(GameEventID.OnLayerEnter, _onLayerEnterHandler);
     }
 
     private void OnLayerEnter(int layerIndex)

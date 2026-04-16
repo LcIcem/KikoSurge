@@ -7,72 +7,9 @@
             "id": "857b3163-1cb2-468e-8923-25e0e28f0078",
             "actions": [
                 {
-                    "name": "Restart",
+                    "name": "Resume",
                     "type": "Button",
-                    "id": "90f06b96-5113-4e5d-a6e9-20c5df2b6a58",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Move",
-                    "type": "Value",
-                    "id": "b7bf890a-f22f-4d2d-8119-b20efca6595c",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
-                    "name": "Shoot",
-                    "type": "Button",
-                    "id": "e7d6754f-e2b5-4478-be08-0d65973fd090",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Switch",
-                    "type": "Button",
-                    "id": "2733fbc2-c98d-4042-9ec5-e9b8ced62f15",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Dash",
-                    "type": "Button",
-                    "id": "77a8a445-d518-45d8-91cf-dbd419faa142",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Hurt",
-                    "type": "Button",
-                    "id": "add9865a-078f-435c-a250-7ccf690a0ce9",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Dead",
-                    "type": "Button",
-                    "id": "b6928e56-258a-41ed-bc10-fb39cacfda5c",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "StartNew",
-                    "type": "Button",
-                    "id": "adaa679e-504e-4167-9e3b-a9547e3ab583",
+                    "id": "02c0f669-28d4-495f-916c-d6762814e659",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -82,18 +19,290 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "0d211bcd-a28e-40c7-96e3-704afae704d6",
-                    "path": "<Keyboard>/r",
+                    "id": "7588dcb2-080a-454d-bb26-ca3885c3823f",
+                    "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Restart",
+                    "action": "Resume",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "MainMenu",
+            "id": "a1b2c3d4-1111-2222-3333-444455556666",
+            "actions": [
+                {
+                    "name": "Navigate",
+                    "type": "Value",
+                    "id": "f1a2b3c4-1111-2222-3333-444455550001",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Submit",
+                    "type": "Button",
+                    "id": "f1a2b3c4-1111-2222-3333-444455550002",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Cancel",
+                    "type": "Button",
+                    "id": "f1a2b3c4-1111-2222-3333-444455550003",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectSlot1",
+                    "type": "Button",
+                    "id": "f1a2b3c4-1111-2222-3333-444455550004",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectSlot2",
+                    "type": "Button",
+                    "id": "f1a2b3c4-1111-2222-3333-444455550005",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectSlot3",
+                    "type": "Button",
+                    "id": "f1a2b3c4-1111-2222-3333-444455550006",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "StartGame",
+                    "type": "Button",
+                    "id": "f1a2b3c4-1111-2222-3333-444455550007",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "2D Vector",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551001",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551002",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551003",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551004",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551005",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551006",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Submit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
+                    "name": "",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551007",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Cancel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551008",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectSlot1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551009",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectSlot2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551010",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectSlot3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f2a2b3c4-1111-2222-3333-444455551011",
+                    "path": "<Keyboard>/z",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "StartGame",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Player",
+            "id": "b2c3d4e5-2222-3333-4444-555566667777",
+            "actions": [
+                {
+                    "name": "Move",
+                    "type": "Value",
+                    "id": "c3d4e5f6-3333-4444-5555-666677770001",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Look",
+                    "type": "Value",
+                    "id": "c3d4e5f6-3333-4444-5555-666677770002",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Shoot",
+                    "type": "Button",
+                    "id": "c3d4e5f6-3333-4444-5555-666677770003",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Dash",
+                    "type": "Button",
+                    "id": "c3d4e5f6-3333-4444-5555-666677770004",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SwitchWeapon",
+                    "type": "Button",
+                    "id": "c3d4e5f6-3333-4444-5555-666677770005",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "c3d4e5f6-3333-4444-5555-666677770006",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hurt",
+                    "type": "Button",
+                    "id": "c3d4e5f6-3333-4444-5555-666677770007",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Dead",
+                    "type": "Button",
+                    "id": "c3d4e5f6-3333-4444-5555-666677770008",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
                     "name": "2D Vector",
-                    "id": "8f027bc2-53a5-4190-8c69-3fcd17da2e5b",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771001",
                     "path": "2DVector",
                     "interactions": "",
                     "processors": "",
@@ -104,7 +313,7 @@
                 },
                 {
                     "name": "up",
-                    "id": "0d01e319-4c6b-44f9-a91a-c543b4604d05",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771002",
                     "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
@@ -115,7 +324,7 @@
                 },
                 {
                     "name": "down",
-                    "id": "5b98beb9-99c7-4cd7-984e-9540d3171950",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771003",
                     "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
@@ -126,7 +335,7 @@
                 },
                 {
                     "name": "left",
-                    "id": "3a550a87-262a-43f7-ba89-c4f085033bf4",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771004",
                     "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
@@ -137,7 +346,7 @@
                 },
                 {
                     "name": "right",
-                    "id": "2bbcbf5d-2439-43ff-99fc-58b87f7fa18b",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771005",
                     "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
@@ -148,7 +357,18 @@
                 },
                 {
                     "name": "",
-                    "id": "0297b507-cb29-4a8c-9492-b8cc1299392d",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771006",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771007",
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
@@ -159,18 +379,7 @@
                 },
                 {
                     "name": "",
-                    "id": "a1d5b39c-40c6-403e-a3f9-1859d9de9ea8",
-                    "path": "<Keyboard>/q",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Switch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "6f33bbfd-ab32-4f07-96cd-50bbd0c1559f",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771008",
                     "path": "<Keyboard>/leftShift",
                     "interactions": "",
                     "processors": "",
@@ -181,7 +390,29 @@
                 },
                 {
                     "name": "",
-                    "id": "7db06cdb-933e-4a3f-84d1-fcacf23dd3ac",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771009",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SwitchWeapon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771010",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771011",
                     "path": "<Keyboard>/1",
                     "interactions": "",
                     "processors": "",
@@ -192,23 +423,12 @@
                 },
                 {
                     "name": "",
-                    "id": "6dde6cea-0d42-41cd-a7e6-9e7802cc56e5",
+                    "id": "d4e5f6a7-3333-4444-5555-666677771012",
                     "path": "<Keyboard>/2",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Dead",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "a3da5fe7-c00a-42ba-9424-55b8452896ef",
-                    "path": "<Keyboard>/z",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "StartNew",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

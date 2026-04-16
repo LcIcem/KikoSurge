@@ -8,7 +8,7 @@ public class WeaponRotation : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer _sprite;
     [SerializeField] private float _offset;
-    public bool isActive = false;
+    public bool isActive => Time.timeScale != 0;
     
     private Vector3 _mousePos;      // 鼠标世界坐标
     private Transform _weaponPivot; // 武器要挂到的锚点的Transform

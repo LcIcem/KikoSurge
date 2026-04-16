@@ -9,23 +9,25 @@ using UnityEngine.UI;
 /// </summary>
 public class KeysSettingsPage : ISettingsPage
 {
-    // Action 名称常量
+    // 设置页面编辑的目标 Map
+    private const string TargetMapName = "Player";
+
+    // Action 名称常量（Player Map 中的 Actions）
     private static readonly string[] ActionNames = new[]
     {
-        "Move", "Shoot", "Dash", "Switch", "Hurt", "Dead", "Restart", "StartNew"
+        "Move", "Look", "Shoot", "Dash", "SwitchWeapon", "Hurt", "Dead"
     };
 
     // Action 显示名称映射
     private static readonly Dictionary<string, string> ActionDisplayNames = new Dictionary<string, string>
     {
         { "Move", "移动" },
+        { "Look", "视角" },
         { "Shoot", "射击" },
         { "Dash", "闪避" },
-        { "Switch", "切换武器" },
+        { "SwitchWeapon", "切换武器" },
         { "Hurt", "受伤" },
-        { "Dead", "死亡" },
-        { "Restart", "重新开始" },
-        { "StartNew", "开始新游戏" }
+        { "Dead", "死亡" }
     };
 
     // 拖拽配置（由 SettingsPanel 传入）
@@ -62,6 +64,7 @@ public class KeysSettingsPage : ISettingsPage
 
     public void OnExit()
     {
+        GameDataManager.Instance.SaveKeybindings(TargetMapName);
         ClearKeybindingList();
     }
 
@@ -107,7 +110,7 @@ public class KeysSettingsPage : ISettingsPage
     /// </summary>
     private void EnumerateActionBindings(string actionName)
     {
-        var action = ManagerHub.Input.GetInputAction(actionName);
+        var action = ManagerHub.Input.GetInputActionFromMap(TargetMapName, actionName);
         if (action == null)
             return;
 
@@ -175,7 +178,7 @@ public class KeysSettingsPage : ISettingsPage
 
         if (bindingText != null)
         {
-            bindingText.text = ManagerHub.Input.GetBindingDisplayName(actionName, bindingIndex);
+            bindingText.text = ManagerHub.Input.GetBindingDisplayNameFromMap(TargetMapName, actionName, bindingIndex);
             _bindingLabels[itemKey] = bindingText;
         }
 
@@ -215,7 +218,7 @@ public class KeysSettingsPage : ISettingsPage
                 actionName = parts[0];
                 int.TryParse(parts[1], out bindingIndex);
             }
-            kvp.Value.text = ManagerHub.Input.GetBindingDisplayName(actionName, bindingIndex);
+            kvp.Value.text = ManagerHub.Input.GetBindingDisplayNameFromMap(TargetMapName, actionName, bindingIndex);
         }
     }
 
@@ -240,7 +243,7 @@ public class KeysSettingsPage : ISettingsPage
             btn.interactable = false;
         }
 
-        ManagerHub.Input.RebindAction(actionName, bindingIndex,
+        ManagerHub.Input.RebindActionFromMap(TargetMapName, actionName, bindingIndex,
             () => OnRebindComplete(itemKey, actionName, bindingIndex),
             () => OnRebindCancel(itemKey, actionName, bindingIndex));
     }
@@ -249,7 +252,7 @@ public class KeysSettingsPage : ISettingsPage
     {
         if (_bindingLabels.TryGetValue(itemKey, out var label))
         {
-            label.text = ManagerHub.Input.GetBindingDisplayName(actionName, bindingIndex);
+            label.text = ManagerHub.Input.GetBindingDisplayNameFromMap(TargetMapName, actionName, bindingIndex);
             label.color = Color.yellow;
         }
         if (_rebindButtons.TryGetValue(itemKey, out var btn))
@@ -262,7 +265,7 @@ public class KeysSettingsPage : ISettingsPage
     {
         if (_bindingLabels.TryGetValue(itemKey, out var label))
         {
-            label.text = ManagerHub.Input.GetBindingDisplayName(actionName, bindingIndex);
+            label.text = ManagerHub.Input.GetBindingDisplayNameFromMap(TargetMapName, actionName, bindingIndex);
             label.color = Color.yellow;
         }
         if (_rebindButtons.TryGetValue(itemKey, out var btn))

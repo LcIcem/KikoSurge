@@ -59,6 +59,12 @@ public class PlayerHandler
         ManagerHub.UI.ShowPanel<HubPanel>(UILayerType.Middle, (panel) =>
         {
             EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, playerData);
+            // 主动发布当前武器信息（事件可能在 HubPanel 订阅之前就发布了）
+            var player = _playerInstance.GetComponent<Player>();
+            if (player != null && player.weaponHandler.CurrentWeapon != null)
+            {
+                EventCenter.Instance.Publish(GameEventID.OnCurrentWeaponChanged, player.weaponHandler.CurrentWeapon);
+            }
         });
     }
 

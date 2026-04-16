@@ -43,7 +43,8 @@ public class AudioManager : SingletonMono<AudioManager>
     {
         ManagerHub.Addressables.LoadAsync<AudioClip>(audioId, (clip) =>
         {
-            if (clip == null) return;
+            if (clip == null)
+                return;
             _bgmSource.clip = clip;
             _bgmSource.volume = _bgmVolume;
             _bgmSource.Play();
