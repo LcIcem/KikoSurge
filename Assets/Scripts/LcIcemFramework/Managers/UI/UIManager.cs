@@ -231,8 +231,9 @@ public class UIManager : Singleton<UIManager>
     /// 仅对通过 ShowPanel 加载的面板有效。
     /// </summary>
     /// <param name="panelName">面板名称。</param>
-    public void HidePanel(string panelName)
+    public void HidePanel<T>()
     {
+        string panelName = typeof(T).Name;
         if (_panelDic.ContainsKey(panelName))
         {
             // 调用面板的 Hide 逻辑（如退场动画），然后销毁 GameObject
@@ -249,8 +250,9 @@ public class UIManager : Singleton<UIManager>
     /// <typeparam name="T">面板类型。</typeparam>
     /// <param name="panelName">面板名称。</param>
     /// <returns>面板实例，未加载返回 null。</returns>
-    public T GetPanel<T>(string panelName) where T : BasePanel
+    public T GetPanel<T>() where T : BasePanel
     {
+        string panelName = typeof(T).Name;
         if (_panelDic.ContainsKey(panelName))
             return _panelDic[panelName] as T;
         return null;

@@ -40,11 +40,30 @@ namespace ProcGen.Runtime
         /// <summary>地牢是否已构建完毕（Tilemap 填充完毕后为 true）</summary>
         public bool IsBuildCompleted { get; private set; }
 
+        /// <summary>获取地面层 Tilemap</summary>
+        public Tilemap FloorTilemap => _floorTilemap;
+
         /// <summary>获取墙壁层 Tilemap（供 RoomController 关门/开门使用）</summary>
         public Tilemap WallTilemap => _wallTilemap;
 
         /// <summary>获取瓦片信息配置</summary>
         public TileInfo_SO TileInfo => _tileInfo;
+
+        // ==================== 运行时注入方法 ====================
+
+        /// <summary>运行时设置 Tilemap 引用（用于 Prefab 模式）</summary>
+        public void SetTilemapReferences(Tilemap floor, Tilemap wall, Tilemap door)
+        {
+            _floorTilemap = floor;
+            _wallTilemap = wall;
+            _doorTilemap = door;
+        }
+
+        /// <summary>运行时设置 TileInfo（用于 Prefab 模式）</summary>
+        public void SetTileInfo(TileInfo_SO tileInfo)
+        {
+            _tileInfo = tileInfo;
+        }
 
         // ==================== Unity 生命周期 ====================
 

@@ -24,7 +24,7 @@ public enum GameState
 public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
 {
     [Header("LevelController")]
-    [SerializeField] private LevelController _levelController;
+    [SerializeField] private LevelController _levelControllerPrefab;
 
     [Header("关卡种子（调试用）")]
     [SerializeField] private long _debugSeed = 12345;
@@ -37,7 +37,7 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// <summary>
     /// 当前关卡管理器
     /// </summary>
-    public LevelController LevelController => _levelController;
+    public LevelController LevelController { get; private set; }
 
     protected override void Init()
     {
@@ -59,11 +59,16 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         // TODO: SaveLoadManager.CreateNewSave(saveSlot, sessionSeed);
         // TODO: GameDataManager.StartNewSession(sessionSeed);
 
-        // 初始化 LevelController
-        if (_levelController != null)
+        // 实例化 LevelController
+        if (_levelControllerPrefab != null)
         {
-            _levelController.Initialize(sessionSeed);
-            _levelController.EnterFirstLayer();
+            LevelController = Instantiate(_levelControllerPrefab);
+            LevelController.Initialize(sessionSeed);
+            LevelController.EnterFirstLayer();
+        }
+        else
+        {
+            LogError("LevelController Prefab is not assigned!");
         }
 
         ChangeState(GameState.Playing);
@@ -82,7 +87,7 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         // TODO: GameDataManager.RestoreSession(saveData);
 
         // 从存档恢复 LevelController 状态
-        if (_levelController != null)
+        if (LevelController != null)
         {
             // TODO: 从 SessionData 恢复当前层信息
             // _levelManager.RestoreFromSession(currentSession);
@@ -98,6 +103,13 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     public void ReturnToLobby()
     {
         Log("ReturnToLobby");
+
+        // 销毁关卡
+        if (LevelController != null)
+        {
+            Destroy(LevelController.gameObject);
+            LevelController = null;
+        }
 
         // TODO: 保存当前进度
 
@@ -173,11 +185,12 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// </summary>
     public void DebugEnterNextLayer(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed && _levelController != null && CurrentState == GameState.Playing)
+        if (ctx.performed && LevelController != null && CurrentState == GameState.Playing)
         {
-            _levelController.EnterNextLayer();
+            LevelController.EnterNextLayer();
         }
     }
 
     private void Log(string msg) => Debug.Log($"[GameLifecycleManager] {msg}");
+    private void LogError(string msg) => Debug.LogError($"[GameLifecycleManager] {msg}");
 }

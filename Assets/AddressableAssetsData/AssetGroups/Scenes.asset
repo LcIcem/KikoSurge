@@ -10,28 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Prefabs-UI
+  m_Name: Scenes
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
-  m_GroupName: Prefabs-UI
-  m_GUID: 8249f4b528f2f6344a2371a8822ba267
+  m_GroupName: Scenes
+  m_GUID: f5c51419bea3ff14bb855833c6b3177f
   m_SerializeEntries:
-  - m_GUID: 2cdb87a545785484dbdb99e09a485383
-    m_Address: EventSystem
+  - m_GUID: 4c4adbb35ac69a34c9663b453000b6a9
+    m_Address: Game_Scene
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2eb2ccb92ad39fb4d8bce620e4bded39
-    m_Address: LoginPanel
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b00c9fe6741258f4797a0f2cd3a4b4ad
-    m_Address: Canvas
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bb430dffb776307439244963cc46a2ef
-    m_Address: HubPanel
+  - m_GUID: d28a2cd206a02194594be630c5c395f6
+    m_Address: MainMenu_Scene
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -39,5 +29,5 @@ MonoBehaviour:
   m_Settings: {fileID: 11400000, guid: fc31030671b1eb2468e260f0796f7d65, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: c0963fa3bced1384395a66779ad027e1, type: 2}
-    - {fileID: 11400000, guid: 7099b17a68971f547a34040e7bd38366, type: 2}
+    - {fileID: 11400000, guid: 93a6ad0d7b53743459028e7731d00944, type: 2}
+    - {fileID: 11400000, guid: 93b8176f5ccdc4443a17c38fdb998447, type: 2}

@@ -9,22 +9,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1ff9adcbda6bd5409fcf3d50e3e8186, type: 3}
+  m_Script: {fileID: 11500000, guid: 8cf9c66b902826a4bbc41c569ea5bf9b, type: 3}
   m_Name: RoomBehaviourTable_SO
   m_EditorClassIdentifier: Assembly-CSharp::RoomBehaviourTable_SO
   normalRoomEntries:
-  - rid: 6093166113566228718
-  - rid: 6093166113566228722
+  - rid: 6093166143041437795
   eliteRoomEntries:
-  - rid: 6093166113566228719
+  - rid: 6093166143041437796
   bossRoomEntries:
-  - rid: 6093166113566228720
+  - rid: 6093166143041437797
   references:
     version: 2
     RefIds:
-    - rid: 6093166113566228718
+    - rid: 6093166143041437795
       type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
       data:
+        behaviourName: "\u654C\u4EBA\u751F\u6210"
         minWaves: 1
         maxWaves: 3
         waveDelay: 1
@@ -32,39 +32,34 @@ MonoBehaviour:
         enemyChoices:
         - enemyDef: {fileID: 11400000, guid: 15a534ecfba6cc04ba7077673ec737f4, type: 2}
           weight: 1
-        minCount: 1
+        minCount: 2
         maxCount: 3
-        minSpawnDist: 3
-    - rid: 6093166113566228719
+        minSpawnDist: 6
+    - rid: 6093166143041437796
       type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
       data:
+        behaviourName: "\u7CBE\u82F1\u751F\u6210"
         minWaves: 1
         maxWaves: 3
         waveDelay: 1
-        spawnMode: 0
-        enemyChoices: []
-        minCount: 1
+        spawnMode: 1
+        enemyChoices:
+        - enemyDef: {fileID: 11400000, guid: 15a534ecfba6cc04ba7077673ec737f4, type: 2}
+          weight: 1
+        minCount: 2
         maxCount: 3
         minSpawnDist: 3
-    - rid: 6093166113566228720
+    - rid: 6093166143041437797
       type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
       data:
+        behaviourName: "Boss\u623F\u95F4"
         minWaves: 1
-        maxWaves: 3
-        waveDelay: 1
-        spawnMode: 0
-        enemyChoices: []
-        minCount: 1
-        maxCount: 3
-        minSpawnDist: 3
-    - rid: 6093166113566228722
-      type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
-      data:
-        minWaves: 3
-        maxWaves: 3
+        maxWaves: 1
         waveDelay: 2
         spawnMode: 0
-        enemyChoices: []
+        enemyChoices:
+        - enemyDef: {fileID: 11400000, guid: 15a534ecfba6cc04ba7077673ec737f4, type: 2}
+          weight: 1
         minCount: 1
-        maxCount: 3
-        minSpawnDist: 3
+        maxCount: 1
+        minSpawnDist: 10

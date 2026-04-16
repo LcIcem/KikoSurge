@@ -39,7 +39,7 @@ MonoBehaviour:
     tile: {fileID: 0}
   - type: 20
     tile: {fileID: 11400000, guid: 0c1bb5d636007e442be2e519f72ba528, type: 2}
-  - type: 21
-    tile: {fileID: 0}
   - type: 10
+    tile: {fileID: 11400000, guid: c6ad18b9d6e9c42469f8a7f669d66fad, type: 2}
+  - type: 21
     tile: {fileID: 11400000, guid: c6ad18b9d6e9c42469f8a7f669d66fad, type: 2}

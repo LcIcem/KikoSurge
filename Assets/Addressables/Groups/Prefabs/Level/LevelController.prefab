@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3090727012284240355
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8220686640814159699}
+  - component: {fileID: 5932781381440642459}
+  - component: {fileID: 7885766689441157527}
+  m_Layer: 0
+  m_Name: LevelController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8220686640814159699
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3090727012284240355}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -17.83677, y: 0.68482, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5932781381440642459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3090727012284240355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0bbdfbb085f6f644953d82014426845, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProcGen.Runtime.DungeonBuilder
+  _floorTilemap: {fileID: 0}
+  _wallTilemap: {fileID: 0}
+  _doorTilemap: {fileID: 0}
+  _tileInfo: {fileID: 11400000, guid: 4ad6cd1c1d4fa0f4682cb4fb0fb9a845, type: 2}
+--- !u!114 &7885766689441157527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3090727012284240355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c671ffb580838b442821316f9de250fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelController
+  _dungeonModels:
+  - {fileID: 11400000, guid: 5cf029b7d503ffa4699240e59bd8c353, type: 2}
+  - {fileID: 11400000, guid: 5cf029b7d503ffa4699240e59bd8c353, type: 2}
+  - {fileID: 11400000, guid: 1890941cf1c30ab449c6a37d58bfd831, type: 2}
+  _roomBehaviourTable: {fileID: 11400000, guid: 81931ea53afc2bb49b3ba6baa4b33769, type: 2}
+  _checkpointPrefab: {fileID: 140860234070293769, guid: 73f6790a547bcac4b81076e4cf17e59f, type: 3}

@@ -20,9 +20,6 @@ public class LevelController : MonoBehaviour
     [Header("地牢配置（每层对应一个配置）")]
     [SerializeField] private List<DungeonModel_SO> _dungeonModels;
 
-    [Header("Tilemap 引用")]
-    [SerializeField] private Tilemap _floorTilemap;
-
     [Header("房间行为配置")]
     [SerializeField] private RoomBehaviourTable_SO _roomBehaviourTable;
 
@@ -50,6 +47,18 @@ public class LevelController : MonoBehaviour
         _builder = GetComponent<DungeonBuilder>();
         if (_builder == null)
             _builder = gameObject.AddComponent<DungeonBuilder>();
+
+        // 从场景锚点获取 Tilemap 引用
+        var anchor = SceneLevelAnchor.Instance;
+        if (anchor != null)
+        {
+            _builder.SetTilemapReferences(anchor.FloorTilemap, anchor.WallTilemap, anchor.DoorTilemap);
+            _builder.SetTileInfo(anchor.TileInfo);
+        }
+        else
+        {
+            Debug.LogWarning("[LevelController] SceneLevelAnchor not found in scene.");
+        }
 
         _roomController = new RoomController();
         _playerHandler = new PlayerHandler();
@@ -211,15 +220,16 @@ public class LevelController : MonoBehaviour
     private Vector3 GetStartRoomWorldPos()
     {
         var graph = CurrentGraph;
-        if (graph == null || _floorTilemap == null)
+        var floorTilemap = _builder?.FloorTilemap;
+        if (graph == null || floorTilemap == null)
         {
-            Debug.LogWarning("[LevelController] Graph or Tilemap is null");
+            Debug.LogWarning("[LevelController] Graph or FloorTilemap is null");
             return Vector3.zero;
         }
 
         Room startRoom = graph.GetRoom(graph.startRoomId);
         Vector2Int center = startRoom.Center;
-        return _floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
+        return floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
     }
 
     /// <summary>
@@ -228,15 +238,16 @@ public class LevelController : MonoBehaviour
     private Vector3 GetGoalRoomWorldPos()
     {
         var graph = CurrentGraph;
-        if (graph == null || _floorTilemap == null)
+        var floorTilemap = _builder?.FloorTilemap;
+        if (graph == null || floorTilemap == null)
         {
-            Debug.LogWarning("[LevelController] Graph or Tilemap is null");
+            Debug.LogWarning("[LevelController] Graph or FloorTilemap is null");
             return Vector3.zero;
         }
 
         Room goalRoom = graph.GetRoom(graph.goalRoomId);
         Vector2Int center = goalRoom.Center;
-        return _floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
+        return floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
     }
 
     /// <summary>
