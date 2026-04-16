@@ -9,6 +9,8 @@ public class GunConfigEditor : Editor
         var config = (GunConfig)target;
 
         // 基础信息
+        EditorGUILayout.LabelField("基础信息");
+        config.Id = EditorGUILayout.IntField("Id", config.Id);
         config.gunName = EditorGUILayout.TextField("武器名称", config.gunName);
         config.gunPrefab = (GameObject)EditorGUILayout.ObjectField("武器预设体", config.gunPrefab, typeof(GameObject), false);
         config.icon = (Sprite)EditorGUILayout.ObjectField("图标", config.icon, typeof(Sprite), false);

@@ -118,36 +118,40 @@ public class LootManager : SingletonMono<LootManager>
     /// <summary>
     /// 为玩家创建武器（从掉落物拾取时调用）
     /// </summary>
-    public void CreateWeaponForPlayer(GunConfig config)
+    public void CreateWeaponForPlayer(int weaponId)
     {
         if (_player == null)
             _player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
-        if (config == null || _player == null)
+        if (_player == null)
         {
-            LogError("武器创建失败: config 或 player 为 null");
+            LogError("武器创建失败: player 为 null");
             return;
         }
 
-        if (config.gunPrefab == null)
+        WeaponFactory.Instance.CreateByPool(weaponId, _player.transform.position, (weapon) =>
         {
-            LogError($"[LootManager] 武器配置 {config.gunName} 没有指定预设体");
+            if (weapon == null)
+            {
+                LogError($"[LootManager] 武器创建失败: Id={weaponId}");
+                return;
+            }
+            weapon.gameObject.SetActive(false);
+            _player.weaponHandler.AddWeapon(weapon);
+            Log($"武器添加到玩家: Id={weaponId}");
+        });
+    }
+
+    /// <summary>
+    /// 为玩家创建武器（重载，通过配置获取Id）
+    /// </summary>
+    public void CreateWeaponForPlayer(GunConfig config)
+    {
+        if (config == null)
+        {
+            LogError("武器创建失败: config 为 null");
             return;
         }
-
-        // 实例化武器预设体
-        var weaponObj = Object.Instantiate(config.gunPrefab, _player.transform);
-        weaponObj.SetActive(false);
-
-        var weapon = weaponObj.GetComponent<WeaponBase>();
-        if (weapon == null)
-        {
-            LogError($"[LootManager] 武器预设体 {config.gunName} 上没有 WeaponBase 组件");
-            return;
-        }
-
-        weapon.Init(config);
-        _player.weaponHandler.AddWeapon(weapon);
-        Log($"武器添加到玩家: {config.gunName}");
+        CreateWeaponForPlayer(config.Id);
     }
 
     // 日志

@@ -20,9 +20,9 @@ public class GameDataManager : SingletonMono<GameDataManager>
     // 玩家数据相关
     public PlayerData PlayerData { get; set; }
 
-    // 武器配置字典：Key = WeaponName, Value = 配置SO
-    private Dictionary<string, GunConfig> _weaponConfigDict = new();
-    public Dictionary<string, GunConfig> WeaponConfigDict => _weaponConfigDict;
+    // 武器配置字典：Key = WeaponId, Value = 配置SO
+    private Dictionary<int, GunConfig> _weaponConfigDict = new();
+    public Dictionary<int, GunConfig> WeaponConfigDict => _weaponConfigDict;
 
     // 敌人配置字典：Key = EnemyId, Value = 配置SO
     private Dictionary<int, EnemyDefBase> _enemyConfigDict = new();
@@ -138,27 +138,26 @@ public class GameDataManager : SingletonMono<GameDataManager>
         {
             if (config == null) continue;
 
-            // 使用 Config 自己的 ID 或者名字做 key
-            string key = config.gunName;
-            if (_weaponConfigDict.ContainsKey(key))
+            // 使用 Id 做 key
+            if (_weaponConfigDict.ContainsKey(config.Id))
             {
-                LogWarning($"武器配置重复: {key}");
+                LogWarning($"武器配置重复: Id={config.Id}, Name={config.gunName}");
                 continue;
             }
 
-            _weaponConfigDict[key] = config;
-            Log($"武器配置加载完成: Name={config.gunName}");
+            _weaponConfigDict[config.Id] = config;
+            Log($"武器配置加载完成: Id={config.Id}, Name={config.gunName}");
         }
     }
 
     /// <summary>
-    /// 根据武器名称获取武器配置
+    /// 根据武器Id获取武器配置
     /// </summary>
-    public GunConfig GetWeaponConfig(string weaponName)
+    public GunConfig GetWeaponConfig(int id)
     {
-        if (_weaponConfigDict.TryGetValue(weaponName, out var config))
+        if (_weaponConfigDict.TryGetValue(id, out var config))
             return config;
-        LogWarning($"未找到武器配置: {weaponName}");
+        LogWarning($"未找到武器配置: Id={id}");
         return null;
     }
 

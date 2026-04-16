@@ -7,6 +7,9 @@ using UnityEngine;
 public class GunConfig : ScriptableObject
 {
     [Header("基础信息")]
+    [Tooltip("武器唯一ID")]
+    public int Id;
+    [Tooltip("武器名称（可重复，用于显示）")]
     public string gunName;
     public GameObject gunPrefab;
     public Sprite icon;

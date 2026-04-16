@@ -321,9 +321,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Player
   _hitCollider: {fileID: 4463612550433924413}
   _rigidbody: {fileID: 0}
-  _initialWeapons:
-  - {fileID: 11400000, guid: 01e0bd06ab925ec4dbf640011f17cfe0, type: 2}
-  - {fileID: 11400000, guid: db43a77544f75d54988382e04f122bab, type: 2}
+  _weaponPivot: {fileID: 7184763047501895454}
 --- !u!1 &8631728754358143496
 GameObject:
   m_ObjectHideFlags: 0

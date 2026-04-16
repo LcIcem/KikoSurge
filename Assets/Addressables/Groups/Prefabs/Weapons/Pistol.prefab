@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 7862926315998275775}
   - component: {fileID: -1534031036119120928}
   m_Layer: 0
-  m_Name: bow
+  m_Name: Pistol
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -139,7 +139,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponRotation
   _sprite: {fileID: 2338134393801098866}
   _offset: 0.3
-  isActive: 1
 --- !u!114 &-1534031036119120928
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,3 +151,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aebd78adbe1089d47b4e62dd5d9026f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponBase
+  _muzzle: {fileID: 1073980717217089775}

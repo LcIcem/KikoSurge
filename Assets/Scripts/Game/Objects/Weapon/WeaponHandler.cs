@@ -22,6 +22,29 @@ public class WeaponHandler
     }
 
     /// <summary>
+    /// 初始化武器（由 Player 调用，从 RoleInfo 配置）
+    /// </summary>
+    public void InitializeWeapons(List<int> weaponIds)
+    {
+        foreach (var weaponId in weaponIds)
+        {
+            CreateWeapon(weaponId);
+        }
+    }
+
+    /// <summary>
+    /// 根据 Id 创建武器（玩家装备，不走对象池）
+    /// </summary>
+    public void CreateWeapon(int weaponId)
+    {
+        WeaponFactory.Instance.Create(weaponId, _owner.WeaponPivot, (weapon) =>
+        {
+            if (weapon == null) return;
+            AddWeapon(weapon);
+        });
+    }
+
+    /// <summary>
     /// 添加武器到列表
     /// </summary>
     public void AddWeapon(WeaponBase weapon)

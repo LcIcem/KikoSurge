@@ -25,6 +25,12 @@ public class RoleInfo
     [Tooltip(tooltip: "基础移动速度")]
     public float moveSpeed = 4; // 基础移动速度
 
+    [Header("武器配置")]
+    [Tooltip("初始武器Id列表")]
+    public List<int> initialWeaponIds = new();
+    [Tooltip("最大可装备武器数量")]
+    public int maxWeaponSlots = 2;
+
     public PlayerData ConvertToPlayerData()
     {
         var data = new PlayerData

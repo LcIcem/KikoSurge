@@ -24,8 +24,14 @@ public class Player : MonoBehaviour
     private PlayerFSM _fsm;
     public WeaponHandler weaponHandler;
 
-    [Header("初始武器配置")]
-    [SerializeField] private GunConfig[] _initialWeapons;
+    [Header("武器挂点")]
+    [Tooltip("武器挂点，所有武器将创建在此 Transform 下")]
+    [SerializeField] private Transform _weaponPivot;
+
+    /// <summary>
+    /// 武器挂点
+    /// </summary>
+    public Transform WeaponPivot => _weaponPivot;
 
     // 输入状态
     private Vector2 _moveInput;
@@ -55,20 +61,9 @@ public class Player : MonoBehaviour
     {
         _fsm.Start();
 
-        // 从配置加载初始武器
-        if (_initialWeapons != null)
-        {
-            foreach (var config in _initialWeapons)
-            {
-                if (config == null) continue;
-                CreateWeaponFromConfig(config);
-            }
-
-            if (_initialWeapons.Length > 0)
-            {
-                weaponHandler.EquipWeapon(0);
-            }
-        }
+        // 从 RoleInfo 配置初始化武器
+        var roleInfo = GameDataManager.Instance.GetRoleDataByCurSel();
+        weaponHandler.InitializeWeapons(roleInfo.initialWeaponIds);
 
         // 订阅事件
         EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloading, OnReloading);
@@ -76,32 +71,6 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Subscribe(GameEventID.Combat_CancelReload, OnCancelReload);
         EventCenter.Instance.Subscribe<EnemyAttackDamageParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyAttackDamage);
         EventCenter.Instance.Subscribe<EnemyCollisionDamageParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyCollisionDamage);
-    }
-
-    /// <summary>
-    /// 根据配置创建武器
-    /// </summary>
-    private void CreateWeaponFromConfig(GunConfig config)
-    {
-        if (config.gunPrefab == null)
-        {
-            Debug.LogError($"[Player] 武器配置 {config.gunName} 没有指定预设体");
-            return;
-        }
-
-        // 实例化武器预设体（预设体上挂载 WeaponBase 组件）
-        var weaponObj = Instantiate(config.gunPrefab, transform);
-        weaponObj.SetActive(false);
-
-        var weapon = weaponObj.GetComponent<WeaponBase>();
-        if (weapon == null)
-        {
-            Debug.LogError($"[Player] 武器预设体 {config.gunName} 上没有 WeaponBase 组件");
-            return;
-        }
-
-        weapon.Init(config);
-        weaponHandler.AddWeapon(weapon);
     }
 
     void OnDestroy()
