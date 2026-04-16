@@ -49,6 +49,26 @@ public class EnemyAttackParams
 }
 
 /// <summary>
+/// 敌人攻击命中玩家参数（子弹/范围检测等攻击伤害）
+/// </summary>
+public class EnemyAttackDamageParams
+{
+    public EnemyBase enemy;
+    public Transform target;
+    public float damage;
+}
+
+/// <summary>
+/// 敌人碰撞伤害玩家参数
+/// </summary>
+public class EnemyCollisionDamageParams
+{
+    public EnemyBase enemy;
+    public Transform target;
+    public float damage;
+}
+
+/// <summary>
 /// 波次开始事件参数
 /// </summary>
 public class WaveStartParams

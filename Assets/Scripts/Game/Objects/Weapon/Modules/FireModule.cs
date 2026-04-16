@@ -51,7 +51,7 @@ public static class FireModule
     {
         // 消耗弹药并发射
         gun.ConsumeAmmo();
-        BulletModule.Spawn(gun, 0, config.randomSpreadAngle);
+        BulletModule.Spawn(gun, 0, config.randomSpreadAngle, gun.transform.root.tag);
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ public static class FireModule
         {
             float angle = startAngle + step * i;
             // 霰弹的每颗子弹都有随机散布
-            BulletModule.Spawn(gun, angle, randomSpread);
+            BulletModule.Spawn(gun, angle, randomSpread, gun.transform.root.tag);
         }
     }
 
@@ -101,7 +101,7 @@ public static class FireModule
         if (gun.CurrentAmmo > 0)
         {
             gun.ConsumeAmmo();
-            BulletModule.Spawn(gun, 0, randomSpread);
+            BulletModule.Spawn(gun, 0, randomSpread, gun.transform.root.tag);
         }
 
         // 后续子弹带延迟，最后一发射出后设置冷却并解除连发状态
@@ -117,7 +117,7 @@ public static class FireModule
                     return;
                 }
                 gun.ConsumeAmmo();
-                BulletModule.Spawn(gun, 0, randomSpread);
+                BulletModule.Spawn(gun, 0, randomSpread, gun.transform.root.tag);
 
                 if (isLastShot)
                 {

@@ -19,6 +19,10 @@ public abstract class EnemyDefBase : ScriptableObject
     public float MaxHP;
     public float MoveSpeed;
     public float Attack;
+    public float AttackInterval = 1f;   // 攻击间隔（秒）
+    public float AttackDuration = 0.5f;  // 攻击动画持续时间（秒）
+    public float AttackHitTime = 0.2f;   // 攻击生效时间点（秒，从动画开始计时）
+    public float CollisionDamage = 10f;  // 碰撞伤害
     public float DetectRange;
     public float AttackRange;
     public float LoseRange;

@@ -13,6 +13,9 @@ public class Bullet : MonoBehaviour, IPoolable
     [Tooltip("HUD显示用的子弹图标")]
     public Sprite Icon;
 
+    // 子弹归属标签（由发射者在Spawn时设置）
+    private string _ownerTag = "Enemy";
+
     // 飞行参数
     public int Damage { get; private set; }
     public Vector3 Direction { get; private set; }
@@ -112,11 +115,23 @@ public class Bullet : MonoBehaviour, IPoolable
         transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
+    /// <summary>
+    /// 设置子弹归属标签（由发射者在Spawn时调用）
+    /// </summary>
+    public void SetOwnerTag(string tag)
+    {
+        _ownerTag = tag;
+    }
+
     // 碰撞检测
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Enemy"))
+        // 过滤己方子弹：如果碰撞对象的 tag 与 ownerTag 相同，跳过
+        if (other.CompareTag(_ownerTag)) return;
+
+        if (other.CompareTag("Enemy") && _ownerTag == "Player")
         {
+            // 己方子弹击中敌人
             var enemy = other.GetComponent<EnemyBase>();
             if (enemy != null)
             {
@@ -141,6 +156,13 @@ public class Bullet : MonoBehaviour, IPoolable
             {
                 ManagerHub.Pool.Release(gameObject);
             }
+        }
+        else if (other.CompareTag("Player") && _ownerTag == "Enemy")
+        {
+            // 敌方子弹击中玩家 → 发布命中事件
+            EventCenter.Instance.Publish(GameEventID.Combat_EnemyHitPlayer,
+                new EnemyAttackDamageParams { enemy = null, target = other.transform, damage = Damage });
+            ManagerHub.Pool.Release(gameObject);
         }
         else if (other.CompareTag("Solid"))
         {

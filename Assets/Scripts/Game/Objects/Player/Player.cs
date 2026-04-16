@@ -1,6 +1,7 @@
 using UnityEngine;
 using LcIcemFramework.Core;
 using UnityEngine.Rendering.Universal;
+using System.Collections;
 using System.Collections.Generic;
 using LcIcemFramework;
 using Game.Event;
@@ -34,6 +35,10 @@ public class Player : MonoBehaviour
 
     // 当前瞄准方向（供 FSM/其他系统读取）
     public Vector2 AimDir { get; private set; }
+
+    // 无敌帧
+    private float _invincibleTimer = 0f;
+    private bool _isInvincible = false;
 
     private void Awake()
     {
@@ -69,6 +74,8 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloaded, OnReloaded);
         EventCenter.Instance.Subscribe(GameEventID.Combat_CancelReload, OnCancelReload);
+        EventCenter.Instance.Subscribe<EnemyAttackDamageParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyAttackDamage);
+        EventCenter.Instance.Subscribe<EnemyCollisionDamageParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyCollisionDamage);
     }
 
     /// <summary>
@@ -105,6 +112,8 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Unsubscribe<WeaponBase>(GameEventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Unsubscribe<WeaponBase>(GameEventID.Combat_Reloaded, OnReloaded);
         EventCenter.Instance.Unsubscribe(GameEventID.Combat_CancelReload, OnCancelReload);
+        EventCenter.Instance.Unsubscribe<EnemyAttackDamageParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyAttackDamage);
+        EventCenter.Instance.Unsubscribe<EnemyCollisionDamageParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyCollisionDamage);
     }
 
     private float _curSpeed = 0f;
@@ -129,6 +138,16 @@ public class Player : MonoBehaviour
 
         // 瞄准方向
         AimDir = InputManager.Instance.GetAimDirection(transform.position);
+
+        // 无敌帧更新
+        if (_isInvincible)
+        {
+            _invincibleTimer -= Time.deltaTime;
+            if (_invincibleTimer <= 0f)
+            {
+                _isInvincible = false;
+            }
+        }
 
         // FSM 驱动
         _fsm.Update();
@@ -166,10 +185,6 @@ public class Player : MonoBehaviour
         {
             _fsm.SetBool("isDead", true);
         }
-        if (InputManager.Instance.Actions["Hurt"].WasPressedThisFrame())
-        {
-            _fsm.SetTrigger("hurt");
-        }
         if (InputManager.Instance.Actions["SwitchWeapon"].WasPressedThisFrame())
         {
             weaponHandler.SwitchToNextWeapon();
@@ -179,24 +194,67 @@ public class Player : MonoBehaviour
         }
     }
 
-    // 伤害处理 
+    // 伤害处理
     public void TakeDamage(float damage)
     {
+        // 无敌帧期间忽略伤害
+        if (_isInvincible) return;
+
         float hp = GameDataManager.Instance.PlayerData.Health;
         if (hp <= 0) return;
 
         hp -= damage;
-        _fsm.SetTrigger("hurt");
 
-        EventCenter.Instance.Publish(GameEventID.Combat_PlayerDamaged,
+        // 启动无敌帧
+        _invincibleTimer = GameDataManager.Instance.PlayerData.invincibleDuration;
+        _isInvincible = true;
+
+        // 触发受伤动画
+        _animator.SetTrigger("hurt");
+
+        // 启动闪烁协程
+        StartCoroutine(HurtFlashCoroutine());
+
+        EventCenter.Instance.Publish(GameEventID.OnPlayerDamaged,
             new DamageParams { damage = damage, from = transform.position });
 
         if (hp <= 0f)
         {
-            _fsm.SetTrigger("dead");
+            _fsm.SetBool("isDead", true);
         }
 
         GameDataManager.Instance.PlayerData.Health = hp;
+        EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, GameDataManager.Instance.PlayerData);
+    }
+
+    // 闪烁协程
+    private IEnumerator HurtFlashCoroutine()
+    {
+        float elapsed = 0f;
+        float flashInterval = 0.05f;  // 闪烁频率
+        bool visible = true;
+
+        while (elapsed < _invincibleTimer)
+        {
+            visible = !visible;
+            _sprite.enabled = visible;
+            yield return new WaitForSeconds(flashInterval);
+            elapsed += flashInterval;
+        }
+
+        _sprite.enabled = true;  // 确保结束时可见
+    }
+
+    // 敌人攻击伤害处理（子弹/范围检测）
+    private void OnEnemyAttackDamage(EnemyAttackDamageParams p)
+    {
+        TakeDamage(p.damage);
+    }
+
+    // 敌人碰撞伤害处理
+    private void OnEnemyCollisionDamage(EnemyCollisionDamageParams p)
+    {
+        TakeDamage(p.damage);
     }
 
     private void OnReloading(WeaponBase weapon)

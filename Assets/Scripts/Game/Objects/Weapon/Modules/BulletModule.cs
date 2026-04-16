@@ -10,7 +10,7 @@ public static class BulletModule
     /// <summary>
     /// 创建子弹（统一入口，内部判断弹道类型）
     /// </summary>
-    public static void Spawn(WeaponBase gun, float angleOffset, float randomSpread)
+    public static void Spawn(WeaponBase gun, float angleOffset, float randomSpread, string ownerTag)
     {
         BulletConfig config = gun.Config.bulletConfig;
         if (config == null) return;
@@ -29,6 +29,9 @@ public static class BulletModule
 
         Bullet bullet = bulletObj.GetComponent<Bullet>();
         if (bullet == null) return;
+
+        // 设置子弹归属
+        bullet.SetOwnerTag(ownerTag);
 
         bullet.Init(config, dir);
     }

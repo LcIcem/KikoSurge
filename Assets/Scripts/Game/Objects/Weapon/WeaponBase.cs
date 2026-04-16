@@ -21,7 +21,7 @@ public class WeaponBase : MonoBehaviour
     /// <summary>
     /// 枪口位置（子弹生成点）
     /// </summary>
-    public Transform Muzzle { get; private set; }
+    [SerializeField] private Transform _muzzle;
 
     // 运行时状态
     public int CurrentAmmo { get; private set; }
@@ -44,12 +44,12 @@ public class WeaponBase : MonoBehaviour
     {
         Config = config;
         CurrentAmmo = config.magazineSize;
-
-        // 自动查找枪口点
-        Muzzle = transform.Find("Muzzle");
-        if (Muzzle == null)
-            Muzzle = transform;
     }
+
+    /// <summary>
+    /// 枪口位置（子弹生成点）
+    /// </summary>
+    public Transform Muzzle => _muzzle != null ? _muzzle : transform;
 
     private void Update()
     {

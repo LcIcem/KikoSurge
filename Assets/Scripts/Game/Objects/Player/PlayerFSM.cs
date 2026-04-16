@@ -82,13 +82,6 @@ public class PlayerFSM : FSM
         AddTransition(Reload, Idle, () => !GetBool("isReload"));
         AddTransition(Reload, Dash, () => CheckTrigger("dash") && GetFloat("dashGapTimer") <= 0f);
 
-        // Any → Hurt（任意状态可受击）
-        AddAnyTransition(Hurt, () => CheckTrigger("hurt") && !GetBool("isDead"));
-
-        // Hurt → Idle（无敌帧结束）
-        AddTransition(Hurt, Idle, () =>
-            GetFloat("hurtTimer") >= GameDataManager.Instance.PlayerData.invincibleDuration);
-
         // Any → Dead（任意状态可死亡）
         AddAnyTransition(Dead, () => GetBool("isDead"));
     }

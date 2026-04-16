@@ -67,6 +67,7 @@ namespace Game.Event
         public static readonly EventID Combat_EnemyDamaged = (EventID)8003;      // 敌人受伤
         public static readonly EventID Combat_EnemyKilled = (EventID)8004;       // 敌人死亡
         public static readonly EventID Combat_EnemyAttack = (EventID)8005;       // 敌人攻击
+        public static readonly EventID Combat_EnemyHitPlayer = (EventID)8013;     // 敌人命中玩家
         public static readonly EventID Combat_EnemySpawned = (EventID)8006;      // 敌人生成
         public static readonly EventID Combat_WaveStart = (EventID)8007;         // 波次开始（战斗）
         public static readonly EventID Combat_WaveComplete = (EventID)8008;      // 波次完成（战斗）
