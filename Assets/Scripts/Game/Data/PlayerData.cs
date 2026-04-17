@@ -16,6 +16,7 @@ public class PlayerData
     public float dashDuration = 0.1f; // 冲刺持续时间
     public float dashGap = 0.2f;    // 冲刺间隔时间
     public float invincibleDuration = 1.0f; // 无敌时间
+    public float hurtDuration = 0.3f;        // 受伤动画持续时间（独立于无敌时间）
 
 
     // 注意： 每当有生命值和最大生命值同时变化时，要先变化最大生命值。否则会因为 最大生命值 没来得及更新导致 生命值 出现错误

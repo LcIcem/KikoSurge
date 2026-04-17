@@ -87,6 +87,14 @@ public class PlayerFSM : FSM
 
         // Any → Hurt（任意状态可受伤）
         AddAnyTransition(Hurt, () => CheckTrigger("hurt"));
+
+        // Hurt → Move / Hurt → Idle（受伤动画播完后根据当前移动状态回归）
+        // isMoving/isIdle 在整个 Hurt 期间保持进入前的值（Hurt 出口时由当前值决定去向）
+        AddTransition(Hurt, Move, () => GetFloat("hurtTimer") >= GameDataManager.Instance.PlayerData.hurtDuration && GetBool("isMoving"));
+        AddTransition(Hurt, Idle, () => GetFloat("hurtTimer") >= GameDataManager.Instance.PlayerData.hurtDuration && !GetBool("isMoving"));
+
+        // Shoot → Move（Shoot 是瞬时状态，需要能切回 Move 以便移动）
+        AddTransition(Shoot, Move, () => GetBool("isMoving"));
     }
 
     /// 驱动 Animator Bool 参数
@@ -115,5 +123,8 @@ public class PlayerFSM : FSM
         base.Update();
 
         SetFloat("dashGapTimer", GetFloat("dashGapTimer") - Time.deltaTime);
+
+        // 同步 hurtTimer 到 Animator Controller（Hurt 状态专用）
+        SetAnimatorFloat("hurtTimer", GetFloat("hurtTimer"));
     }
 }

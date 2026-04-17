@@ -322,8 +322,9 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             Debug.Log("[RestartGame] LevelController is null, skipping destroy");
         }
 
-        // 隐藏 GameOver 面板
+        // 隐藏 GameOver 面板和 Hub 面板（Hub 在新游戏开始时会重新 Show）
         ManagerHub.UI.HidePanel<GameOverPanel>();
+        ManagerHub.UI.HidePanel<HubPanel>();
 
         // 恢复时间（以防从暂停状态重启）
         Time.timeScale = 1f;
