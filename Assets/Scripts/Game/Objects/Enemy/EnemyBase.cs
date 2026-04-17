@@ -24,15 +24,37 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public float LoseRange { get; protected set; }
     public bool IsAlive => HP > 0f;
     public EnemyType Type { get; protected set; }
+    public int EnemyId { get; private set; }
     public int RoomId { get; set; } = -1;
+
+    // ========== 调试开关 ==========
+    // EditorPrefs key 与 DebugMenu.cs 保持一致，Editor assembly 写入，runtime 读取
+    private const string KEY_DEBUG_MODE = "KikoSurge.Debug.EnemyDebug";
+
+    private static bool IsDebugMode
+    {
+        get
+        {
+            #if UNITY_EDITOR
+            return UnityEditor.EditorPrefs.GetBool(KEY_DEBUG_MODE, false);
+            #else
+            return false;
+            #endif
+        }
+    }
+
+    private const float DEBUG_SHOCKWAVE_DURATION = 0.3f;  // 冲击波特效持续时间
 
     // 攻击状态计时器
     private float _attackTimer = 0f;
     private float _cooldownTimer = 0f;
     private bool _attackHitTriggered = false;  // 攻击是否已触发
+    private bool _shouldExitAfterAttack = false;  // 攻击动画完成后是否需要退出（冷却期间离开攻击范围时设置）
+    private bool _attackHitConnected = false;  // 攻击是否实际命中了玩家（用于调试特效）
+    private float _shockwaveTimer = 0f;  // 冲击波特效计时器
 
     // 保存的配置引用（用于池化后重置）
-    private EnemyDefBase _config;
+    private EnemyConfig _config;
 
     // 防止重复释放的标记
     private bool _isReleased;
@@ -93,13 +115,20 @@ public class EnemyBase : MonoBehaviour, IPoolable
             _cooldownTimer -= Time.deltaTime;
         }
 
+        // 冲击波特效计时器递减
+        if (_shockwaveTimer > 0f)
+        {
+            _shockwaveTimer -= Time.deltaTime;
+        }
+
         _fsm.Update();
     }
 
     // 初始化（从对象池取出时调用）
-    public void Init(EnemyDefBase config)
+    public void Init(EnemyConfig config)
     {
         _config = config;
+        EnemyId = config.EnemyId;
         Type = config.Type;
         MaxHP = config.MaxHP;
         HP = MaxHP;
@@ -143,6 +172,10 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         // 重置 Player 引用
         _player = GameObject.FindGameObjectWithTag("Player")?.transform;
+
+        // 重置调试标记
+        _attackHitConnected = false;
+        _shockwaveTimer = 0f;
 
         // 重启 FSM
         _fsm.Start();
@@ -249,13 +282,18 @@ public class EnemyBase : MonoBehaviour, IPoolable
         }
     }
 
-    // 攻击
-    public virtual void AttackTarget()
-    {
-        if (_player == null) return;
+    /// <summary>
+    /// 攻击阶段是否已完成（动画播放完毕）
+    /// </summary>
+    public bool IsAttackCompleted => _attackTimer >= AttackDuration;
 
-        EventCenter.Instance.Publish(GameEventID.Combat_EnemyAttack,
-            new EnemyAttackParams { enemy = this, target = _player, damage = Attack });
+    /// <summary>
+    /// 标记攻击动画完成后需要退出（冷却期间离开攻击范围时由 EnemyAttackState 设置）
+    /// </summary>
+    public bool ShouldExitAfterAttack
+    {
+        get => _shouldExitAfterAttack;
+        set => _shouldExitAfterAttack = value;
     }
 
     /// <summary>
@@ -300,6 +338,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _attackTimer = 0f;
         _cooldownTimer = 0f;
         _attackHitTriggered = false;
+        _shouldExitAfterAttack = false;
+        _attackHitConnected = false;
+        _shockwaveTimer = 0f;
     }
 
     /// <summary>
@@ -309,6 +350,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
     {
         _attackTimer = 0f;
         _attackHitTriggered = false;
+        _shouldExitAfterAttack = false;
+        _attackHitConnected = false;
+        _shockwaveTimer = 0f;
     }
 
     /// <summary>
@@ -318,9 +362,44 @@ public class EnemyBase : MonoBehaviour, IPoolable
     {
         if (_attackHitTriggered) return;
         _attackHitTriggered = true;
-        AttackTarget();
 
         Debug.Log($"[EnemyAttack] {gameObject.name} 攻击命中! 攻击计时: {_attackTimer:F3}s / {AttackDuration}s, 生效时刻: {AttackHitTime}s");
+
+        // 启动冲击波特效
+        _shockwaveTimer = DEBUG_SHOCKWAVE_DURATION;
+
+        // 调用攻击命中处理（可被子类覆盖实现自定义命中逻辑）
+        HandleAttackHit();
+    }
+
+    /// <summary>
+    /// 攻击命中检测（可被子类覆盖）
+    /// <para>基类：检测玩家是否在攻击范围内，在范围内才视为命中</para>
+    /// <returns>是否命中</returns>
+    /// </summary>
+    protected virtual bool CheckAttackHit()
+    {
+        if (_player == null) return false;
+        return IsInAttackRange();
+    }
+
+    /// <summary>
+    /// 攻击命中处理（通过 CheckAttackHit() 检测，命中则发布事件）
+    /// </summary>
+    private void HandleAttackHit()
+    {
+        if (!CheckAttackHit())
+        {
+            Debug.Log($"[EnemyAttack] {gameObject.name} 攻击已生效但检测未命中，攻击落空");
+            return;
+        }
+
+        // 标记为实际命中（用于调试特效）
+        _attackHitConnected = true;
+
+        // 发布命中事件（与碰撞、子弹命中使用统一的 hit 事件）
+        EventCenter.Instance.Publish(GameEventID.Combat_EnemyHitPlayer,
+            new EnemyHitPlayerParams { enemy = this, target = _player, damage = Attack, damageType = EnemyDamageType.Attack });
     }
 
     /// <summary>
@@ -357,21 +436,47 @@ public class EnemyBase : MonoBehaviour, IPoolable
     protected void PublishCollisionDamage(Transform target)
     {
         EventCenter.Instance.Publish(GameEventID.Combat_EnemyHitPlayer,
-            new EnemyCollisionDamageParams { enemy = this, target = target, damage = CollisionDamage });
+            new EnemyHitPlayerParams { enemy = this, target = target, damage = CollisionDamage, damageType = EnemyDamageType.Collision });
     }
 
     private void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.CompareTag("Player"))
         {
+            Debug.Log($"[Enemy] OnCollisionEnter2D with Player! CollisionDamage={CollisionDamage}");
             PublishCollisionDamage(col.transform);
         }
+    }
+
+    // 敌人的触发器碰撞体（CircleCollider2D isTrigger=true）与玩家的触发器_hitCollider重叠时触发
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            Debug.Log($"[Enemy] OnTriggerEnter2D with Player! CollisionDamage={CollisionDamage}");
+            PublishCollisionDamage(other.transform);
+        }
+    }
+
+    // ========== 调试特效 ==========
+    /// <summary>
+    /// 调试：获取攻击生效时的冲击波半径（0→1→0 循环）
+    /// </summary>
+    private float GetShockwaveRadius(float progress)
+    {
+        // 0→0.5: 从 0 扩大到 AttackRange，0.5→1: 从 AttackRange 缩小到 0
+        float t = progress * 2f;
+        if (t <= 1f)
+            return Mathf.Lerp(0f, AttackRange, t);
+        else
+            return Mathf.Lerp(AttackRange, 0f, t - 1f);
     }
 
     // 调试
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying) return;
+        if (!IsDebugMode) return;  // 调试开关关闭时不绘制
 
         // 检测范围 - 绿色
         Gizmos.color = Color.green;
@@ -410,18 +515,32 @@ public class EnemyBase : MonoBehaviour, IPoolable
             Gizmos.DrawWireSphere(headPos, 0.15f);
         }
 
-        // 攻击生效时：从敌人到玩家的橙色连线（持续一小段时间）
-        if (_attackHitTriggered && _attackTimer < AttackDuration + 0.2f && _player != null)
+        // 冲击波特效：从敌人位置向外扩散的圆环（TriggerAttackHit 时启动）
+        if (_shockwaveTimer > 0f)
         {
-            Gizmos.color = new Color(1f, 0.5f, 0f, 1f); // 橙色
+            float totalDuration = DEBUG_SHOCKWAVE_DURATION;
+            float progress = 1f - (_shockwaveTimer / totalDuration); // 0→1
+            float radius = GetShockwaveRadius(progress);
+            float alpha = 1f - progress; // 渐隐
+
+            Gizmos.color = new Color(1f, 0.8f, 0f, alpha); // 金色冲击波
+            Gizmos.DrawWireSphere(transform.position, radius);
+        }
+
+        // 命中调试特效：仅当攻击实际命中玩家时，从敌人到玩家绘制连线 + 玩家位置冲击波
+        if (_attackHitConnected && _player != null)
+        {
+            // 从敌人到玩家的橙色连线
+            Gizmos.color = new Color(1f, 0.5f, 0f, 1f);
             Gizmos.DrawLine(transform.position, _player.position);
 
-            // 绘制冲击效果
+            // 玩家位置：命中冲击波（向外扩散的圆环）
             float hitProgress = (_attackTimer - AttackHitTime) / 0.2f; // 0~1
-            if (hitProgress >= 0 && hitProgress <= 1)
+            if (hitProgress >= 0f && hitProgress <= 1f)
             {
                 float radius = Mathf.Lerp(0.1f, AttackRange, hitProgress);
-                Gizmos.color = new Color(1f, 0.3f, 0f, 1f - hitProgress);
+                float alpha = 1f - hitProgress;
+                Gizmos.color = new Color(1f, 0.2f, 0f, alpha); // 红色冲击波
                 Gizmos.DrawWireSphere(_player.position, radius);
             }
         }

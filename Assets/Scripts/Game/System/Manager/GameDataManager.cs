@@ -6,7 +6,6 @@ using LcIcemFramework.Core;
 using LcIcemFramework.Data;
 using LcIcemFramework;
 using LcIcemFramework.Util.Data;
-using Unity.VisualScripting;
 
 /// <summary>
 /// 游戏数据管理器
@@ -14,7 +13,7 @@ using Unity.VisualScripting;
 public class GameDataManager : SingletonMono<GameDataManager>
 {
     // 角色信息相关
-    private RoleInfo_SO _roleInfo_SO;
+    private RoleInfoConfig _roleInfo_SO;
     public bool IsRoleInfoLoaded { get; private set; } // 角色信息是否加载成功
     public int CurSelRoleIndex { get; set; } = 0;   // 当前选择的角色索引
     // 玩家数据相关
@@ -25,12 +24,12 @@ public class GameDataManager : SingletonMono<GameDataManager>
     public Dictionary<int, GunConfig> WeaponConfigDict => _weaponConfigDict;
 
     // 敌人配置字典：Key = EnemyId, Value = 配置SO
-    private Dictionary<int, EnemyDefBase> _enemyConfigDict = new();
-    public Dictionary<int, EnemyDefBase> EnemyConfigDict => _enemyConfigDict;
+    private Dictionary<int, EnemyConfig> _enemyConfigDict = new();
+    public Dictionary<int, EnemyConfig> EnemyConfigDict => _enemyConfigDict;
 
-    // 掉落表字典：Key = EnemyType, Value = LootTable_SO
-    private Dictionary<EnemyType, LootTable_SO> _lootTableDict = new();
-    public Dictionary<EnemyType, LootTable_SO> LootTableDict => _lootTableDict;
+    // 掉落表字典：Key = EnemyId, Value = LootTableConfig
+    private Dictionary<int, LootTableConfig> _lootTableDict = new();
+    public Dictionary<int, LootTableConfig> LootTableDict => _lootTableDict;
 
     // 设置数据
     private SettingsData _settingsData;
@@ -41,16 +40,16 @@ public class GameDataManager : SingletonMono<GameDataManager>
     protected override void Init()
     {
         // 加载角色信息
-        ManagerHub.Addressables.LoadAsync<RoleInfo_SO>("RoleInfo_SO", OnRoleInfoLoaded);
+        ManagerHub.Addressables.LoadAsync<RoleInfoConfig>("RoleInfo_Config", OnRoleInfoLoaded);
 
         // 加载武器配置（统一SO）
-        ManagerHub.Addressables.LoadAsync<AllWeaponDefs_SO>("AllWeaponDefs_SO", OnAllWeaponDefsLoaded);
+        ManagerHub.Addressables.LoadAsync<WeaponConfigRegistry>("Weapon_Config_Registry", OnAllWeaponDefsLoaded);
 
         // 加载敌人配置（统一SO）
-        ManagerHub.Addressables.LoadAsync<AllEnemyDefs_SO>("AllEnemyDefs_SO", OnAllEnemyDefsLoaded);
+        ManagerHub.Addressables.LoadAsync<EnemyConfigRegistry>("Enemy_Config_Registry", OnAllEnemyDefsLoaded);
 
         // 加载掉落表配置（统一SO）
-        ManagerHub.Addressables.LoadAsync<AllLootTables_SO>("AllLootTables_SO", OnAllLootTablesLoaded);
+        ManagerHub.Addressables.LoadAsync<LootTableRegistry>("LootTable_Registry", OnAllLootTablesLoaded);
     }
 
     private void Start() {
@@ -69,7 +68,7 @@ public class GameDataManager : SingletonMono<GameDataManager>
 
     #region RoleInfo数据相关
     // 角色信息数据 加载完毕 回调
-    private void OnRoleInfoLoaded(RoleInfo_SO so)
+    private void OnRoleInfoLoaded(RoleInfoConfig so)
     {
         if (so != null)
         {
@@ -84,7 +83,7 @@ public class GameDataManager : SingletonMono<GameDataManager>
     }
 
     // 获取角色信息
-    public RoleInfo_SO GetRoleInfo()
+    public RoleInfoConfig GetRoleInfo()
     {
         if (!IsRoleInfoLoaded)
             LogWarning("RoleInfo 尚未加载完成");
@@ -126,7 +125,7 @@ public class GameDataManager : SingletonMono<GameDataManager>
     /// <summary>
     /// 所有武器配置加载完毕回调
     /// </summary>
-    private void OnAllWeaponDefsLoaded(AllWeaponDefs_SO so)
+    private void OnAllWeaponDefsLoaded(WeaponConfigRegistry so)
     {
         if (so == null || so.weaponConfigs == null)
         {
@@ -168,15 +167,15 @@ public class GameDataManager : SingletonMono<GameDataManager>
     /// <summary>
     /// 所有敌人配置加载完毕回调
     /// </summary>
-    private void OnAllEnemyDefsLoaded(AllEnemyDefs_SO so)
+    private void OnAllEnemyDefsLoaded(EnemyConfigRegistry so)
     {
-        if (so == null || so.enemyDefs == null)
+        if (so == null || so.enemyConfigs == null)
         {
             LogError("敌人配置加载失败");
             return;
         }
 
-        foreach (var enemyDef in so.enemyDefs)
+        foreach (var enemyDef in so.enemyConfigs)
         {
             if (enemyDef == null) continue;
 
@@ -194,7 +193,7 @@ public class GameDataManager : SingletonMono<GameDataManager>
     /// <summary>
     /// 根据敌人ID获取敌人配置（O(1) 查找）
     /// </summary>
-    public EnemyDefBase GetEnemyConfig(int enemyId)
+    public EnemyConfig GetEnemyConfig(int enemyId)
     {
         if (_enemyConfigDict.TryGetValue(enemyId, out var config))
             return config;
@@ -209,7 +208,7 @@ public class GameDataManager : SingletonMono<GameDataManager>
     /// <summary>
     /// 所有掉落表配置加载完毕回调
     /// </summary>
-    private void OnAllLootTablesLoaded(AllLootTables_SO so)
+    private void OnAllLootTablesLoaded(LootTableRegistry so)
     {
         if (so == null || so.lootTables == null)
         {
@@ -221,23 +220,23 @@ public class GameDataManager : SingletonMono<GameDataManager>
         {
             if (table == null) continue;
 
-            if (_lootTableDict.ContainsKey(table.EnemyType))
+            if (_lootTableDict.ContainsKey(table.EnemyId))
             {
-                LogWarning($"掉落表重复: {table.EnemyType}");
+                LogWarning($"掉落表重复: EnemyId={table.EnemyId}");
                 continue;
             }
 
-            _lootTableDict[table.EnemyType] = table;
-            Log($"掉落表加载完成: EnemyType={table.EnemyType}, Entries={table.Entries.Count}");
+            _lootTableDict[table.EnemyId] = table;
+            Log($"掉落表加载完成: EnemyId={table.EnemyId}, Entries={table.Entries.Count}");
         }
     }
 
     /// <summary>
-    /// 根据敌人类型获取掉落表
+    /// 根据敌人ID获取掉落表
     /// </summary>
-    public LootTable_SO GetLootTable(EnemyType enemyType)
+    public LootTableConfig GetLootTable(int enemyId)
     {
-        if (_lootTableDict.TryGetValue(enemyType, out var table))
+        if (_lootTableDict.TryGetValue(enemyId, out var table))
             return table;
         return null;
     }

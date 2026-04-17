@@ -13,7 +13,7 @@ using LcIcemFramework.Core;
 [Serializable]
 public class EnemyChoice
 {
-    public EnemyDefBase enemyDef;
+    public EnemyConfig enemyConfig;
     public int weight = 1;
 }
 
@@ -84,7 +84,7 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
             _validTiles.AddRange(_floorTiles);
     }
 
-    private EnemyDefBase SelectEnemyByWeight()
+    private EnemyConfig SelectEnemyByWeight()
     {
         if (enemyChoices == null || enemyChoices.Count == 0)
             return null;
@@ -93,7 +93,7 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
         int totalWeight = 0;
         foreach (var choice in enemyChoices)
         {
-            if (choice.enemyDef != null)
+            if (choice.enemyConfig != null)
                 totalWeight += choice.weight;
         }
 
@@ -106,15 +106,15 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
 
         foreach (var choice in enemyChoices)
         {
-            if (choice.enemyDef == null)
+            if (choice.enemyConfig == null)
                 continue;
             cumulative += choice.weight;
             if (roll < cumulative)
-                return choice.enemyDef;
+                return choice.enemyConfig;
         }
 
         // 兜底返回最后一个
-        return enemyChoices[enemyChoices.Count - 1].enemyDef;
+        return enemyChoices[enemyChoices.Count - 1].enemyConfig;
     }
 
     private void SpawnCurrentWave()
@@ -141,7 +141,7 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
             var tilePos = _validTiles[_rng.Range(0, _validTiles.Count)];
             Vector3 worldPos = new Vector3(tilePos.x, tilePos.y, 0);
 
-            EnemyDefBase selectedEnemy = SelectEnemyByWeight();
+            EnemyConfig selectedEnemy = SelectEnemyByWeight();
             if (selectedEnemy == null)
                 continue;
 

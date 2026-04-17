@@ -112,4 +112,18 @@ public class WeaponHandler
     {
         CurrentWeapon?.Fire(direction);
     }
+
+    /// <summary>
+    /// 清理所有武器（切换层或游戏结束时调用）
+    /// </summary>
+    public void ClearAllWeapons()
+    {
+        foreach (var weapon in _weapons)
+        {
+            if (weapon == null) continue;
+            WeaponFactory.Instance.Release(weapon);
+        }
+        _weapons.Clear();
+        _currentWeaponIndex = -1;
+    }
 }

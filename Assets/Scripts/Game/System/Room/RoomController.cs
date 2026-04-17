@@ -33,7 +33,7 @@ public class RoomBehaviourState
 public class RoomController
 {
     private DungeonTileData _tileData;
-    private RoomBehaviourTable_SO _behaviourTable;
+    private RoomBehaviourTableConfig _behaviourTable;
     private GameRandom _rng;
     private int _currentRoomId = -1;
     private readonly Dictionary<int, RoomState> _roomStates = new();
@@ -51,7 +51,7 @@ public class RoomController
     /// <summary>
     /// 初始化
     /// </summary>
-    public void Initialize(DungeonTileData tileData, RoomBehaviourTable_SO behaviourTable, GameRandom rng,
+    public void Initialize(DungeonTileData tileData, RoomBehaviourTableConfig behaviourTable, GameRandom rng,
         Tilemap wallTilemap, TileInfo_SO tileInfo)
     {
         _tileData = tileData;

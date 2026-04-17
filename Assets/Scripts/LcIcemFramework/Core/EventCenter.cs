@@ -98,6 +98,15 @@ public class EventCenter : Singleton<EventCenter>
         {
             _listeners[eventId] = new ParamsCallback<T>();
         }
+        else
+        {
+            // 类型安全检查：防止同一 eventId 用不同 T 重复订阅（会导致 as cast 失败）
+            if (_listeners[eventId] is not ParamsCallback<T>)
+            {
+                Debug.LogError($"[EventCenter] Subscribe 类型不匹配：eventId={eventId}，已存在类型与当前类型不同。");
+                return;
+            }
+        }
         // 添加事件监听回调
         (_listeners[eventId] as ParamsCallback<T>).callbacks.Add(callback);
     }

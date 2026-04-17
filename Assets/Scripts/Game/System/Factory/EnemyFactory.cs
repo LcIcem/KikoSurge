@@ -8,7 +8,7 @@ using Game.Event;
 /// <summary>
 /// 敌人工厂：根据配置创建敌人实例，支持 Addressables 预设体加载。
 /// </summary>
-public class EnemyFactory : SingletonMono<EnemyFactory>
+public class EnemyFactory : Singleton<EnemyFactory>
 {
     // 对象池（通过 PoolManager 管理，这里只做统计）
     private readonly Dictionary<EnemyType, int> _spawnedCounts = new();
@@ -27,7 +27,7 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
     /// <param name="config">敌人配置 SO</param>
     /// <param name="position">生成位置</param>
     /// <param name="onCreated">创建完成回调</param>
-    public void Create(EnemyDefBase config, Vector3 position, UnityAction<EnemyBase> onCreated)
+    public void Create(EnemyConfig config, Vector3 position, UnityAction<EnemyBase> onCreated)
     {
         if (config == null)
         {
@@ -75,7 +75,7 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
         _activeEnemies.Remove(enemy);
 
         // 统计
-        EnemyDefBase config = GetEnemyConfigByEnemy(enemy);
+        EnemyConfig config = GetEnemyConfigByEnemy(enemy);
         if (config != null && _spawnedCounts.ContainsKey(config.Type))
         {
             _spawnedCounts[config.Type]--;
@@ -103,7 +103,7 @@ public class EnemyFactory : SingletonMono<EnemyFactory>
     /// <summary>
     /// 通过敌人实例反查其配置（临时方案，后续优化）
     /// </summary>
-    private EnemyDefBase GetEnemyConfigByEnemy(EnemyBase enemy)
+    private EnemyConfig GetEnemyConfigByEnemy(EnemyBase enemy)
     {
         // 简单实现：根据 HP 等属性匹配（后续可优化为直接存储引用）
         return null;

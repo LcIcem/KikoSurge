@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// 武器配置 - 定义武器的开火方式和引用子弹配置
 /// </summary>
-[CreateAssetMenu(fileName = "GunConfig", menuName = "KikoSurge/武器/武器配置")]
+[CreateAssetMenu(fileName = "Weapon_Gun", menuName = "KikoSurge/武器/武器配置")]
 public class GunConfig : ScriptableObject
 {
     [Header("基础信息")]

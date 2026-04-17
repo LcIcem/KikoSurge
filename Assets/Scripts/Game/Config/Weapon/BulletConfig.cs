@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// 子弹配置 - 定义子弹的行为和属性
 /// </summary>
-[CreateAssetMenu(fileName = "BulletConfig", menuName = "KikoSurge/武器/子弹配置")]
+[CreateAssetMenu(fileName = "Weapon_Bullet", menuName = "KikoSurge/武器/子弹配置")]
 public class BulletConfig : ScriptableObject
 {
     [Header("弹道设置")]

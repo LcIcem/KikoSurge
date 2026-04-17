@@ -74,7 +74,11 @@ public class PlayerHandler
     public void DeactivatePlayer()
     {
         if (_playerInstance != null)
+        {
+            var player = _playerInstance.GetComponent<Player>();
+            player?.weaponHandler.ClearAllWeapons();
             _playerInstance.SetActive(false);
+        }
     }
 
     /// <summary>

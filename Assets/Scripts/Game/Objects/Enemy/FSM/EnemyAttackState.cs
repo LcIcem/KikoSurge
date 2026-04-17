@@ -73,8 +73,8 @@ public class EnemyAttackState : StateBase
             // 冷却期间检查是否离开攻击范围
             if (!enemy.IsInAttackRange())
             {
-                // 离开攻击范围，不重置CD，直接退出（让FSM转换到Chase）
-                // 下次进入攻击状态时会继续当前的CD进度
+                // 离开攻击范围，标记攻击完成后退出（不重置CD，下次进入攻击状态会继续当前CD进度）
+                enemy.ShouldExitAfterAttack = true;
                 return;
             }
 

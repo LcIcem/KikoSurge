@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(RoomBehaviourTable_SO))]
+[CustomEditor(typeof(RoomBehaviourTableConfig))]
 public class RoomBehaviourTableEditor : Editor
 {
     private SerializedProperty GetListProperty(string fieldName)

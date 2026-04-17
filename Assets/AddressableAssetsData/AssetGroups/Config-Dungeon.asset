@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Config-Dungeon
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Config-Dungeon
+  m_GUID: 5577138974496e945bdcf374fe08c189
+  m_SerializeEntries:
+  - m_GUID: 0a08277930e02d941913ed410033089b
+    m_Address: RoomTemplateConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1890941cf1c30ab449c6a37d58bfd831
+    m_Address: DungeonModel_BossLayer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4ad6cd1c1d4fa0f4682cb4fb0fb9a845
+    m_Address: TileInfo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5cf029b7d503ffa4699240e59bd8c353
+    m_Address: DungeonModel_NormalLayer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: fc31030671b1eb2468e260f0796f7d65, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: a6b6536b70f7b744bbbe04df1d7cd572, type: 2}
+    - {fileID: 11400000, guid: c610fc8db9767f4439babdfbfcf6ef33, type: 2}

@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Game.Event;
+using LcIcemFramework;
 using LcIcemFramework.Core;
 using ProcGen.Config;
 using ProcGen.Core;
 using ProcGen.Runtime;
 using ProcGen.Seed;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
 
 /// <summary>
@@ -21,7 +21,7 @@ public class LevelController : MonoBehaviour
     [SerializeField] private List<DungeonModel_SO> _dungeonModels;
 
     [Header("房间行为配置")]
-    [SerializeField] private RoomBehaviourTable_SO _roomBehaviourTable;
+    [SerializeField] private RoomBehaviourTableConfig _roomBehaviourTable;
 
     [Header("终点检查点预设体")]
     [SerializeField] private GameObject _checkpointPrefab;
@@ -39,7 +39,7 @@ public class LevelController : MonoBehaviour
     private GameRandom _rng;
     private int _currentLayerIndex;
     private long _sessionSeed;
-    private GameObject _currentCheckpoint;  // 当前检查点
+    private GameObject _currentCheckpoint;
 
     public DungeonGraph CurrentGraph => _builder?.GetGraph();
     public DungeonTileData GetTileData() => _builder?.GetTileData();
@@ -129,28 +129,13 @@ public class LevelController : MonoBehaviour
         {
             _roomController.CheckAndSpawnInRoom(_playerHandler.PlayerInstance.transform.position);
         }
-
-        // 检查 E 键按下（检查点交互）
-        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
-        {
-            TryInteractCheckpoint();
-        }
     }
 
     /// <summary>
-    /// 尝试与检查点交互
+    /// 检查点激活回调
     /// </summary>
-    private void TryInteractCheckpoint()
+    private void OnCheckpointActivated()
     {
-        if (_currentCheckpoint == null)
-            return;
-
-        Checkpoint checkpoint = _currentCheckpoint.GetComponent<Checkpoint>();
-        if (checkpoint == null || !checkpoint.CanInteract)
-            return;
-
-        checkpoint.Interact();
-
         if (IsLastLayer)
         {
             Debug.Log("[LevelController] 最后一层，关卡完成");
@@ -316,6 +301,16 @@ public class LevelController : MonoBehaviour
 
         Vector3 goalPos = GetGoalRoomWorldPos();
         _currentCheckpoint = Instantiate(_checkpointPrefab, goalPos, Quaternion.identity);
+
+        // 订阅检查点激活事件
+        if (_currentCheckpoint != null)
+        {
+            var checkpoint = _currentCheckpoint.GetComponent<Checkpoint>();
+            if (checkpoint != null)
+            {
+                checkpoint.OnCheckpointActivated += OnCheckpointActivated;
+            }
+        }
     }
 
     /// <summary>
@@ -328,8 +323,20 @@ public class LevelController : MonoBehaviour
 
     private void OnDestroy()
     {
-        EnemyFactory.Instance.ReleaseAll();
-        LootManager.Instance.ClearAll();
+        try { EnemyFactory.Instance?.ReleaseAll(); } catch (System.Exception e) { Debug.LogException(e); }
+        try { LootManager.Instance?.ClearAll(); } catch (System.Exception e) { Debug.LogException(e); }
+        try { ManagerHub.Pool?.ClearAll(); } catch (System.Exception e) { Debug.LogException(e); }
+
+        // 取消订阅检查点事件
+        if (_currentCheckpoint != null)
+        {
+            var checkpoint = _currentCheckpoint.GetComponent<Checkpoint>();
+            if (checkpoint != null)
+            {
+                checkpoint.OnCheckpointActivated -= OnCheckpointActivated;
+            }
+        }
+
         _roomController?.Dispose();
     }
 }

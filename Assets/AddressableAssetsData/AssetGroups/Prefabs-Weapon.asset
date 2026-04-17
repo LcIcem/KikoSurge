@@ -16,7 +16,7 @@ MonoBehaviour:
   m_GUID: a0d84bfa0caf1c549b5e7b0cd68a30d2
   m_SerializeEntries:
   - m_GUID: 36a5ff7bcec73dd4fae1b7b623ca943b
-    m_Address: Bow
+    m_Address: Pistol
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

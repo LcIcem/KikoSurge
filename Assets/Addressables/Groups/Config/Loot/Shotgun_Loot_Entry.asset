@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43c6e8b9364bf384cbaf97422060b404, type: 3}
+  m_Name: Shotgun_Loot_Entry
+  m_EditorClassIdentifier: Assembly-CSharp::LootEntryConfig
+  lootItemPrefab: {fileID: 4373964662515866112, guid: d86705153f4c96f4abf28e9638d742ef, type: 3}
+  itemConfig: {fileID: 11400000, guid: e8122c7ae9ab0ee478b77734cd87991e, type: 2}
+  dropChance: 0.1
+  minQuantity: 1
+  maxQuantity: 1

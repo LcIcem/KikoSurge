@@ -1,6 +1,5 @@
 using UnityEngine;
 using LcIcemFramework.Core;
-using UnityEngine.Rendering.Universal;
 using System.Collections;
 using System.Collections.Generic;
 using LcIcemFramework;
@@ -69,20 +68,21 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloaded, OnReloaded);
         EventCenter.Instance.Subscribe(GameEventID.Combat_CancelReload, OnCancelReload);
-        EventCenter.Instance.Subscribe<EnemyAttackDamageParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyAttackDamage);
-        EventCenter.Instance.Subscribe<EnemyCollisionDamageParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyCollisionDamage);
+        EventCenter.Instance.Subscribe<EnemyHitPlayerParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyHitPlayer);
     }
 
     void OnDestroy()
     {
         _fsm.Stop();
 
+        // 清理所有武器（交还对象池）
+        weaponHandler.ClearAllWeapons();
+
         // 退订事件
         EventCenter.Instance.Unsubscribe<WeaponBase>(GameEventID.Combat_Reloading, OnReloading);
         EventCenter.Instance.Unsubscribe<WeaponBase>(GameEventID.Combat_Reloaded, OnReloaded);
         EventCenter.Instance.Unsubscribe(GameEventID.Combat_CancelReload, OnCancelReload);
-        EventCenter.Instance.Unsubscribe<EnemyAttackDamageParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyAttackDamage);
-        EventCenter.Instance.Unsubscribe<EnemyCollisionDamageParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyCollisionDamage);
+        EventCenter.Instance.Unsubscribe<EnemyHitPlayerParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyHitPlayer);
     }
 
     private float _curSpeed = 0f;
@@ -167,19 +167,28 @@ public class Player : MonoBehaviour
     public void TakeDamage(float damage)
     {
         // 无敌帧期间忽略伤害
-        if (_isInvincible) return;
+        if (_isInvincible)
+        {
+            Debug.Log($"[Player] 无敌帧中，伤害 {damage} 被忽略");
+            return;
+        }
 
         float hp = GameDataManager.Instance.PlayerData.Health;
-        if (hp <= 0) return;
+        if (hp <= 0)
+        {
+            Debug.Log($"[Player] HP 为 0，伤害 {damage} 被忽略");
+            return;
+        }
 
         hp -= damage;
+        Debug.Log($"[Player] 受伤！伤害: {damage}, 剩余HP: {hp}");
 
         // 启动无敌帧
         _invincibleTimer = GameDataManager.Instance.PlayerData.invincibleDuration;
         _isInvincible = true;
 
-        // 触发受伤动画
-        _animator.SetTrigger("hurt");
+        // 触发受伤动画（同时通知 FSM 和 Animator）
+        _fsm.SetTrigger("hurt");
 
         // 启动闪烁协程
         StartCoroutine(HurtFlashCoroutine());
@@ -199,8 +208,15 @@ public class Player : MonoBehaviour
     // 闪烁协程
     private IEnumerator HurtFlashCoroutine()
     {
+        if (_sprite == null)
+        {
+            Debug.LogError("[Player] HurtFlashCoroutine: _sprite is null!");
+            yield break;
+        }
+
+        Debug.Log($"[Player] 受伤闪烁开始，无敌时间: {_invincibleTimer}s");
         float elapsed = 0f;
-        float flashInterval = 0.05f;  // 闪烁频率
+        float flashInterval = 0.1f;  // 闪烁间隔（0.1秒更明显）
         bool visible = true;
 
         while (elapsed < _invincibleTimer)
@@ -212,18 +228,24 @@ public class Player : MonoBehaviour
         }
 
         _sprite.enabled = true;  // 确保结束时可见
+        Debug.Log("[Player] 受伤闪烁结束");
     }
 
-    // 敌人攻击伤害处理（子弹/范围检测）
-    private void OnEnemyAttackDamage(EnemyAttackDamageParams p)
+    // 敌人伤害处理（碰撞/子弹/攻击）
+    private void OnEnemyHitPlayer(EnemyHitPlayerParams p)
     {
-        TakeDamage(p.damage);
-    }
-
-    // 敌人碰撞伤害处理
-    private void OnEnemyCollisionDamage(EnemyCollisionDamageParams p)
-    {
-        TakeDamage(p.damage);
+        Debug.Log($"[Player] OnEnemyHitPlayer: damageType={p.damageType}, damage={p.damage}");
+        switch (p.damageType)
+        {
+            case EnemyDamageType.Collision:
+                // 碰撞伤害：后续可扩展击退等逻辑
+                TakeDamage(p.damage);
+                break;
+            case EnemyDamageType.Attack:
+            default:
+                TakeDamage(p.damage);
+                break;
+        }
     }
 
     private void OnReloading(WeaponBase weapon)

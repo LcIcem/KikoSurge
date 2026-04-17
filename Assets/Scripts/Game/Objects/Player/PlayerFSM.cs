@@ -82,7 +82,10 @@ public class PlayerFSM : FSM
         AddTransition(Reload, Idle, () => !GetBool("isReload"));
         AddTransition(Reload, Dash, () => CheckTrigger("dash") && GetFloat("dashGapTimer") <= 0f);
 
-        // Any → Dead（任意状态可死亡）
+        // Any → Hurt（任意状态可受伤）
+        AddAnyTransition(Hurt, () => CheckTrigger("hurt"));
+
+        // Any → Dead（任意状态可死亡，优先级最高）
         AddAnyTransition(Dead, () => GetBool("isDead"));
     }
 

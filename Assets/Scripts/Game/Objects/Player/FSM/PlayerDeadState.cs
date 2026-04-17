@@ -9,8 +9,8 @@ public class PlayerDeadState : StateBase
     public override void Enter()
     {
         PlayerFSM playerFSM = _fsm as PlayerFSM;
-        playerFSM.SetAnimatorTrigger("dead");
         playerFSM.SetAnimatorBool("isMoving", false);
+        playerFSM.SetAnimatorBool("isDead", true);
     }
 
     public override void Exec()

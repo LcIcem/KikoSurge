@@ -6,7 +6,7 @@ using LcIcemFramework;
 /// <summary>
 /// 武器工厂：根据武器Id创建武器实例
 /// </summary>
-public class WeaponFactory : SingletonMono<WeaponFactory>
+public class WeaponFactory : Singleton<WeaponFactory>
 {
     protected override void Init()
     {
@@ -24,6 +24,23 @@ public class WeaponFactory : SingletonMono<WeaponFactory>
         GunConfig config = GetWeaponConfig(weaponId);
         if (config == null)
         {
+            onCreated?.Invoke(null);
+            return;
+        }
+        Create(config, parent, onCreated);
+    }
+
+    /// <summary>
+    /// 创建武器（不走对象池，用于玩家装备，直接传入配置）
+    /// </summary>
+    /// <param name="config">武器配置</param>
+    /// <param name="parent">父对象Transform</param>
+    /// <param name="onCreated">创建完成回调</param>
+    public void Create(GunConfig config, Transform parent, UnityAction<WeaponBase> onCreated)
+    {
+        if (config == null)
+        {
+            Debug.LogError($"[WeaponFactory] 武器配置为 null");
             onCreated?.Invoke(null);
             return;
         }
@@ -51,16 +68,17 @@ public class WeaponFactory : SingletonMono<WeaponFactory>
     }
 
     /// <summary>
-    /// 创建武器（走对象池，用于掉落物）
+    /// 创建武器（走对象池，用于 LootItem 视觉掉落物）
+    /// 注意：玩家武器不走池，用 Create() 方法
     /// </summary>
-    /// <param name="weaponId">武器Id</param>
+    /// <param name="config">武器配置</param>
     /// <param name="position">生成位置</param>
     /// <param name="onCreated">创建完成回调</param>
-    public void CreateByPool(int weaponId, Vector3 position, UnityAction<WeaponBase> onCreated)
+    public void CreateAsLoot(GunConfig config, Vector3 position, UnityAction<WeaponBase> onCreated)
     {
-        GunConfig config = GetWeaponConfig(weaponId);
         if (config == null)
         {
+            Debug.LogError($"[WeaponFactory] 武器配置为 null");
             onCreated?.Invoke(null);
             return;
         }

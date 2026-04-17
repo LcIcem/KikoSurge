@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9f7d951e3c3fcb4e9a3e65a43513ff1, type: 3}
+  m_Name: Room_Behaviour
+  m_EditorClassIdentifier: Assembly-CSharp::RoomBehaviourTableConfig
+  normalRoomEntries:
+  - rid: 6093166162187649282
+  eliteRoomEntries:
+  - rid: 6093166162187649283
+  bossRoomEntries:
+  - rid: 6093166162187649284
+  references:
+    version: 2
+    RefIds:
+    - rid: 6093166162187649282
+      type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
+      data:
+        behaviourName: "\u654C\u4EBA\u751F\u6210"
+        minWaves: 1
+        maxWaves: 3
+        waveDelay: 1
+        spawnMode: 0
+        enemyChoices:
+        - enemyConfig: {fileID: 11400000, guid: 2cae9b46f9f435f45861522001fd2e75, type: 2}
+          weight: 1
+        minCount: 2
+        maxCount: 3
+        minSpawnDist: 3
+    - rid: 6093166162187649283
+      type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
+      data:
+        behaviourName: "\u7CBE\u82F1\u751F\u6210"
+        minWaves: 2
+        maxWaves: 3
+        waveDelay: 1
+        spawnMode: 1
+        enemyChoices:
+        - enemyConfig: {fileID: 11400000, guid: 2cae9b46f9f435f45861522001fd2e75, type: 2}
+          weight: 1
+        minCount: 2
+        maxCount: 3
+        minSpawnDist: 5
+    - rid: 6093166162187649284
+      type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
+      data:
+        behaviourName: "Boss\u751F\u6210"
+        minWaves: 1
+        maxWaves: 1
+        waveDelay: 2
+        spawnMode: 0
+        enemyChoices:
+        - enemyConfig: {fileID: 11400000, guid: 2cae9b46f9f435f45861522001fd2e75, type: 2}
+          weight: 1
+        minCount: 1
+        maxCount: 1
+        minSpawnDist: 8

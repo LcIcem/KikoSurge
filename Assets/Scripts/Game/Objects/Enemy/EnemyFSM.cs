@@ -50,8 +50,8 @@ public class EnemyFSM : FSM
         // Chase → Idle
         AddTransition(Chase, Idle, () => enemy.DistanceToPlayer > enemy.LoseRange);
 
-        // Attack → Chase（脱离攻击范围）
-        AddTransition(Attack, Chase, () => enemy.DistanceToPlayer >= enemy.AttackRange);
+        // Attack → Chase（脱离攻击范围，且攻击动画已执行完毕；或冷却期间离开攻击范围时等待攻击完成后退出）
+        AddTransition(Attack, Chase, () => enemy.DistanceToPlayer >= enemy.AttackRange && (enemy.IsAttackCompleted || enemy.ShouldExitAfterAttack));
 
         // Any → Dead（任意状态可死亡）
         AddAnyTransition(Dead, () => CheckTrigger("dead"));

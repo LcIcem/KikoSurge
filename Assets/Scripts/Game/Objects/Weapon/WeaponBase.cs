@@ -1,3 +1,4 @@
+using LcIcemFramework;
 using LcIcemFramework.Core;
 using UnityEngine;
 using Game.Event;
@@ -5,8 +6,9 @@ using Game.Event;
 /// <summary>
 /// 武器基类 - 配置驱动架构
 /// 所有武器共用此类，通过 GunConfig 配置不同行为
+/// 实现 IPoolable 支持对象池
 /// </summary>
-public class WeaponBase : MonoBehaviour
+public class WeaponBase : MonoBehaviour, IPoolable
 {
     /// <summary>
     /// 武器配置（核心）
@@ -135,5 +137,32 @@ public class WeaponBase : MonoBehaviour
         IsReloading = false;
         _reloadTimer = 0f;
         EventCenter.Instance.Publish(GameEventID.Combat_CancelReload);
+    }
+
+    // ========== IPoolable 实现 ==========
+
+    /// <summary>
+    /// 对象池取出时重置运行时状态（由 PoolManager actionOnGet 调用）
+    /// </summary>
+    public void OnSpawn()
+    {
+        // 重置所有运行时状态，防止池化残留状态干扰
+        _fireCooldown = 0f;
+        _reloadTimer = 0f;
+        _isBursting = false;
+        IsReloading = false;
+        // CurrentAmmo 和 Config 由 WeaponFactory.CreateByPool 的 Init() 设置，此处不覆盖
+    }
+
+    /// <summary>
+    /// 对象池归还时清理（由 PoolManager actionOnRelease 调用）
+    /// </summary>
+    public void OnDespawn()
+    {
+        // 归还池时取消所有运行时状态
+        _fireCooldown = 0f;
+        _reloadTimer = 0f;
+        _isBursting = false;
+        IsReloading = false;
     }
 }

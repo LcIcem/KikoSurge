@@ -49,23 +49,23 @@ public class EnemyAttackParams
 }
 
 /// <summary>
-/// 敌人攻击命中玩家参数（子弹/范围检测等攻击伤害）
+/// 敌人伤害类型（区分碰撞和攻击）
 /// </summary>
-public class EnemyAttackDamageParams
+public enum EnemyDamageType
 {
-    public EnemyBase enemy;
-    public Transform target;
-    public float damage;
+    Attack,    // 子弹/范围攻击
+    Collision  // 接触伤害
 }
 
 /// <summary>
-/// 敌人碰撞伤害玩家参数
+/// 敌人伤害玩家参数（碰撞/子弹/范围检测，统一类型）
 /// </summary>
-public class EnemyCollisionDamageParams
+public class EnemyHitPlayerParams
 {
     public EnemyBase enemy;
     public Transform target;
     public float damage;
+    public EnemyDamageType damageType;
 }
 
 /// <summary>

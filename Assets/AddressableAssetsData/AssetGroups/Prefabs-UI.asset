@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Prefabs-UI
   m_GUID: 8249f4b528f2f6344a2371a8822ba267
   m_SerializeEntries:
+  - m_GUID: 11bf9ae7dceb6944d9bb192cc4d3c1ce
+    m_Address: heartPrefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1f9ec03a6840a92468fa5e59fdfdbedb
     m_Address: SettingsPanel
     m_ReadOnly: 0
@@ -27,6 +32,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2eb2ccb92ad39fb4d8bce620e4bded39
     m_Address: LoginPanel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3312081b17f70c540b0be5477daabe1b
+    m_Address: keysItemTemplate
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

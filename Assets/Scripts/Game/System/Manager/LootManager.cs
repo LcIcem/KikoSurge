@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using LcIcemFramework.Core;
 using LcIcemFramework;
-using Game.Util.Const;
 using Game.Event;
 
 /// <summary>
@@ -10,9 +9,6 @@ using Game.Event;
 /// </summary>
 public class LootManager : SingletonMono<LootManager>
 {
-    // LootItem 预设体的 Addressables 地址（需要预先创建 LootItem 预设体并注册）
-    private const string LOOT_ITEM_PREFAB_ADDRESS = GameConstants.LOOT_ITEM_PREFAB_ADDRESS;
-
     // 玩家引用（用于武器拾取）
     private Player _player;
 
@@ -21,7 +17,7 @@ public class LootManager : SingletonMono<LootManager>
 
     protected override void Init()
     {
-        // 不在此处初始化，等待 Start() 确保所有 Manager 已完成 Awake
+        // 懒初始化
     }
 
     private void Start()
@@ -31,13 +27,6 @@ public class LootManager : SingletonMono<LootManager>
 
         // 订阅敌人死亡事件
         EventCenter.Instance.Subscribe<EnemyKilledParams>(GameEventID.Combat_EnemyKilled, OnEnemyKilled);
-    }
-
-    protected override void OnDestroy()
-    {
-        base.OnDestroy();
-        // 退订事件
-        EventCenter.Instance.Unsubscribe<EnemyKilledParams>(GameEventID.Combat_EnemyKilled, OnEnemyKilled);
     }
 
     /// <summary>
@@ -56,50 +45,29 @@ public class LootManager : SingletonMono<LootManager>
         if (enemy == null) return;
 
         // 从 GameDataManager 获取掉落表
-        var lootTable = GameDataManager.Instance.GetLootTable(enemy.Type);
+        var lootTable = GameDataManager.Instance.GetLootTable(enemy.EnemyId);
         if (lootTable == null)
         {
-            Log($"无掉落表配置: EnemyType={enemy.Type}");
+            Log($"无掉落表配置: EnemyId={enemy.EnemyId}");
             return;
         }
 
         // 遍历掉落条目
         foreach (var entry in lootTable.Entries)
         {
-            if (entry.ItemDef == null) continue;
+            if (entry == null || entry.lootItemPrefab == null) continue;
 
-            // 概率抽取
-            if (Random.value <= entry.DropChance)
+            // 计算散落位置
+            Vector2 spawnPos = deathPosition + Random.insideUnitCircle * lootTable.DropSpreadRadius;
+
+            // 生成掉落物（内部处理概率抽取和数量计算）
+            var lootItem = ItemFactory.Instance.CreateLootItem(entry, spawnPos);
+            if (lootItem != null)
             {
-                // 计算掉落数量
-                int quantity = Random.Range(entry.MinQuantity, entry.MaxQuantity + 1);
-
-                // 散落位置
-                Vector2 spawnPos = deathPosition + Random.insideUnitCircle * lootTable.DropSpreadRadius;
-
-                // 生成掉落物
-                SpawnLootItem(entry.ItemDef, quantity, spawnPos);
+                _activeLootItems.Add(lootItem);
+                Log($"掉落物品: {lootItem.ItemDef?.ItemName ?? "Unknown"} x{lootItem.Quantity} at {spawnPos}");
             }
         }
-    }
-
-    /// <summary>
-    /// 生成掉落物
-    /// </summary>
-    private void SpawnLootItem(LootItemDefBase itemDef, int quantity, Vector2 position)
-    {
-        // 从对象池获取 LootItem
-        var lootItem = ManagerHub.Pool.Get<LootItem>(LOOT_ITEM_PREFAB_ADDRESS, position, Quaternion.identity);
-
-        if (lootItem == null)
-        {
-            LogError($"LootItem 获取失败，请确认预设体已注册: {LOOT_ITEM_PREFAB_ADDRESS}");
-            return;
-        }
-
-        lootItem.Initialize(itemDef, quantity);
-        _activeLootItems.Add(lootItem);
-        Log($"掉落物品: {itemDef.ItemName} x{quantity} at {position}");
     }
 
     /// <summary>
@@ -117,8 +85,9 @@ public class LootManager : SingletonMono<LootManager>
 
     /// <summary>
     /// 为玩家创建武器（从掉落物拾取时调用）
+    /// 玩家武器不走对象池，直接 Instantiate
     /// </summary>
-    public void CreateWeaponForPlayer(int weaponId)
+    public void CreateWeaponForPlayer(GunConfig config)
     {
         if (_player == null)
             _player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
@@ -128,30 +97,17 @@ public class LootManager : SingletonMono<LootManager>
             return;
         }
 
-        WeaponFactory.Instance.CreateByPool(weaponId, _player.transform.position, (weapon) =>
+        WeaponFactory.Instance.Create(config, _player.WeaponPivot, (weapon) =>
         {
             if (weapon == null)
             {
-                LogError($"[LootManager] 武器创建失败: Id={weaponId}");
+                LogError($"[LootManager] 武器创建失败: {config?.gunName ?? "null"}");
                 return;
             }
-            weapon.gameObject.SetActive(false);
+            // Create() 已将预设体设为 false，此处不重复设置
             _player.weaponHandler.AddWeapon(weapon);
-            Log($"武器添加到玩家: Id={weaponId}");
+            Log($"武器添加到玩家: {config.gunName}");
         });
-    }
-
-    /// <summary>
-    /// 为玩家创建武器（重载，通过配置获取Id）
-    /// </summary>
-    public void CreateWeaponForPlayer(GunConfig config)
-    {
-        if (config == null)
-        {
-            LogError("武器创建失败: config 为 null");
-            return;
-        }
-        CreateWeaponForPlayer(config.Id);
     }
 
     // 日志

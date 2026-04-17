@@ -40,14 +40,14 @@ public class LootItem : MonoBehaviour, IPoolable
     private Coroutine _floatCoroutine;
     private Vector3 _basePosition;
 
-    // 物品定义（配置）
-    public LootItemDefBase ItemDef { get; private set; }
+    // 物品定义（运行时传入）
+    public ItemConfig ItemDef { get; private set; }
 
     // 数量
     public int Quantity { get; private set; }
 
     // 保存的初始化参数（用于池化后重置）
-    private LootItemDefBase _savedItemDef;
+    private ItemConfig _savedItemDef;
     private int _savedQuantity;
 
     // 视觉组件
@@ -64,7 +64,7 @@ public class LootItem : MonoBehaviour, IPoolable
     /// <summary>
     /// 初始化掉落物
     /// </summary>
-    public void Initialize(LootItemDefBase itemDef, int quantity)
+    public void Initialize(ItemConfig itemDef, int quantity)
     {
         _savedItemDef = itemDef;
         _savedQuantity = quantity;
@@ -76,7 +76,7 @@ public class LootItem : MonoBehaviour, IPoolable
         _basePosition = transform.position;
 
         // 设置视觉
-        if (_spriteRenderer != null && itemDef.Icon != null)
+        if (_spriteRenderer != null && itemDef != null && itemDef.Icon != null)
         {
             _spriteRenderer.sprite = itemDef.Icon;
 
@@ -116,12 +116,10 @@ public class LootItem : MonoBehaviour, IPoolable
 
     private IEnumerator FloatEffect()
     {
-        // 防零保护
         if (_floatSpeed <= 0f) yield break;
 
         while (true)
         {
-            // 向上
             float t = 0f;
             float period = 1f / _floatSpeed;
             while (t < period * 0.5f)
@@ -132,7 +130,6 @@ public class LootItem : MonoBehaviour, IPoolable
                 yield return null;
             }
 
-            // 向下
             t = 0f;
             while (t < period * 0.5f)
             {
@@ -146,10 +143,8 @@ public class LootItem : MonoBehaviour, IPoolable
 
     private IEnumerator BlinkEffect()
     {
-        // 防零保护
         if (_blinkSpeed <= 0f) yield break;
 
-        // 使用配置的正常色（如果为白色则使用精灵原本颜色）
         Color baseColor = _normalColor == Color.white ? _spriteRenderer.color : _normalColor;
         float period = 1f / _blinkSpeed;
         float elapsed = 0f;
@@ -157,9 +152,7 @@ public class LootItem : MonoBehaviour, IPoolable
         while (true)
         {
             elapsed += Time.deltaTime;
-            // 使用 PingPong 实现平滑的颜色插值（0 -> 1 -> 0 -> 1 ...）
             float t = Mathf.PingPong(elapsed / period, 1f);
-            // 在 baseColor 和 highlightColor 之间平滑插值
             _spriteRenderer.color = Color.Lerp(baseColor, _highlightColor, t * _highlightBlend);
             yield return null;
         }
@@ -168,7 +161,6 @@ public class LootItem : MonoBehaviour, IPoolable
     // IPoolable: 对象从池中取出时调用
     public void OnSpawn()
     {
-        // 重新初始化（使用保存的参数）
         if (_savedItemDef != null)
         {
             Initialize(_savedItemDef, _savedQuantity);
@@ -179,10 +171,8 @@ public class LootItem : MonoBehaviour, IPoolable
         _blinkCoroutine = null;
         _floatCoroutine = null;
 
-        // 重置位置
         transform.position = _basePosition;
 
-        // 重置颜色
         if (_spriteRenderer != null)
         {
             _spriteRenderer.color = Color.white;
@@ -202,7 +192,6 @@ public class LootItem : MonoBehaviour, IPoolable
             StopCoroutine(_floatCoroutine);
             _floatCoroutine = null;
         }
-        // 重置位置
         transform.position = _basePosition;
         ItemDef = null;
         Quantity = 0;
@@ -223,51 +212,41 @@ public class LootItem : MonoBehaviour, IPoolable
         }
     }
 
-    /// <summary>
-    /// 拾取掉落物
-    /// </summary>
     private void Pickup()
     {
         if (ItemDef == null) return;
 
-        // 处理不同类型物品的拾取逻辑
         switch (ItemDef.ItemType)
         {
-            case LootItemType.Weapon:
+            case ItemType.Weapon:
                 HandleWeaponPickup();
                 break;
-
-            case LootItemType.Prop:
+            case ItemType.Prop:
                 HandlePropPickup();
                 break;
-
-            case LootItemType.Gold:
+            case ItemType.Gold:
                 HandleGoldPickup();
                 break;
         }
 
-        // 归还对象池
         ManagerHub.Pool.Release(gameObject);
     }
 
     private void HandleWeaponPickup()
     {
-        if (ItemDef is WeaponLootItemDef_SO weaponLoot && weaponLoot.gunConfig != null)
+        if (ItemDef is WeaponItemConfig weaponItem && weaponItem.gunConfig != null)
         {
-            // 通过 LootManager 创建武器并添加给玩家
-            LootManager.Instance?.CreateWeaponForPlayer(weaponLoot.gunConfig);
+            LootManager.Instance?.CreateWeaponForPlayer(weaponItem.gunConfig);
         }
     }
 
     private void HandlePropPickup()
     {
-        // TODO: 道具系统实现后扩展
         Debug.Log($"[LootItem] 拾取道具: {ItemDef.ItemName} x{Quantity}");
     }
 
     private void HandleGoldPickup()
     {
-        // TODO: 金币系统实现后扩展
         Debug.Log($"[LootItem] 拾取金币: {Quantity}");
     }
 }
