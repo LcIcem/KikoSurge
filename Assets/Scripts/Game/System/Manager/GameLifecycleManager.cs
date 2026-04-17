@@ -46,6 +46,14 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     {
         Log("GameLifecycleManager initialized");
         ChangeState(GameState.MainMenu);
+
+        // 订阅死亡动画结束事件
+        EventCenter.Instance.Subscribe(GameEventID.OnDeathAnimationEnd, OnDeathAnimationEnd);
+    }
+
+    private void OnDeathAnimationEnd()
+    {
+        GameOver();
     }
 
     private void Update()
@@ -80,13 +88,20 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     private long _currentSessionSeed;
 
     /// <summary>
+    /// 当前存档槽位（供 RestartGame 使用）
+    /// </summary>
+    private int _currentSessionSaveSlot;
+
+    /// <summary>
     /// 开始新游戏（从主菜单进入大厅）
     /// </summary>
     /// <param name="saveSlot">存档槽位</param>
     /// <param name="seed">游戏种子（默认使用时间戳）</param>
     public void StartNewGame(int saveSlot, long? seed = null)
     {
+        Debug.Log($"[StartNewGame] saveSlot={saveSlot}, seed={seed}");
         _currentSessionSeed = seed ?? Environment.TickCount;
+        _currentSessionSaveSlot = saveSlot;
 
         Log($"StartNewGame: slot={saveSlot}, seed={_currentSessionSeed}");
 
@@ -251,13 +266,73 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     }
 
     /// <summary>
-    /// 游戏结束
+    /// 游戏结束（显示失败面板）
     /// </summary>
     public void GameOver()
     {
         Log("GameOver");
         ChangeState(GameState.GameOver);
         EventCenter.Instance.Publish(GameEventID.OnSessionEnd);
+        ManagerHub.UI.ShowPanel<GameOverPanel>(UILayerType.Top, panel =>
+        {
+            panel.ShowAsGameOver();
+        });
+    }
+
+    /// <summary>
+    /// 游戏通关（显示成功面板）
+    /// </summary>
+    public void GameClear()
+    {
+        Log("GameClear");
+        ChangeState(GameState.GameOver);
+        ManagerHub.UI.ShowPanel<GameOverPanel>(UILayerType.Top, panel =>
+        {
+            panel.ShowAsClear();
+        });
+    }
+
+    /// <summary>
+    /// 重新开始游戏
+    /// </summary>
+    public void RestartGame()
+    {
+        Log("RestartGame");
+
+        Debug.Log($"[RestartGame] LevelController = {LevelController?.name ?? "null"}");
+        Debug.Log($"[RestartGame] CurrentState = {CurrentState}");
+
+        // 清理敌人和掉落物
+        try { EnemyFactory.Instance?.ReleaseAll(); } catch (System.Exception e) { Debug.LogException(e); }
+        try { LootManager.Instance?.ClearAll(); } catch (System.Exception e) { Debug.LogException(e); }
+
+        // 通过 PlayerHandler 清理玩家
+        Debug.Log($"[RestartGame] Calling DestroyPlayer...");
+        LevelController?.DestroyPlayer();
+
+        // 销毁关卡
+        if (LevelController != null)
+        {
+            Debug.Log($"[RestartGame] Destroying LevelController: {LevelController.name}");
+            Destroy(LevelController.gameObject);
+            LevelController = null;
+        }
+        else
+        {
+            Debug.Log("[RestartGame] LevelController is null, skipping destroy");
+        }
+
+        // 隐藏 GameOver 面板
+        ManagerHub.UI.HidePanel<GameOverPanel>();
+
+        // 恢复时间（以防从暂停状态重启）
+        Time.timeScale = 1f;
+
+        Debug.Log("[RestartGame] Calling StartNewGame...");
+        StartNewGame(_currentSessionSaveSlot);
+        Debug.Log("[RestartGame] StartNewGame done. Calling EnterPlaying...");
+        EnterPlaying();
+        Debug.Log("[RestartGame] EnterPlaying done.");
     }
 
     // 调试方法

@@ -18,20 +18,12 @@ public class FlipController : MonoBehaviour
 
     void Update()
     {
-        CheckSwitchInput();
+        if (GameLifecycleManager.Instance.CurrentState == GameState.Paused || GameLifecycleManager.Instance.CurrentState == GameState.GameOver)
+            _useMouseForFlipping = false;
         if (_useMouseForFlipping)
             FlipBaseOnMosue();
         else
             FlipBaseOnInput();
-    }
-
-    private void CheckSwitchInput()
-    {
-        // InputAction switchAction = InputManager.Instance.UIActions["Switch"];
-        // if (switchAction.WasPerformedThisFrame())
-        // {
-        //     _useMouseForFlipping = !_useMouseForFlipping;
-        // }
     }
 
     // 根据鼠标位置判断是否旋转

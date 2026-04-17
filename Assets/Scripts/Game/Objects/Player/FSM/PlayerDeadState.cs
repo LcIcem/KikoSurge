@@ -17,4 +17,11 @@ public class PlayerDeadState : StateBase
     {
         // 死亡后不做任何事
     }
+
+    public override void Exit()
+    {
+        PlayerFSM playerFSM = _fsm as PlayerFSM;
+        playerFSM.SetAnimatorBool("isDead",false);
+    }
+
 }

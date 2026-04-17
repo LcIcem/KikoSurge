@@ -141,3 +141,10 @@ public class CorridorEnterParams
 {
     public int corridorId;
 }
+
+/// <summary>
+/// 死亡动画播放结束事件参数
+/// </summary>
+public class DeathAnimationEndParams
+{
+}

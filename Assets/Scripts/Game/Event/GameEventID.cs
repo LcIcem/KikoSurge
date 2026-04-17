@@ -80,5 +80,6 @@ namespace Game.Event
         public static readonly EventID UpdateHeartDisplay = (EventID)9000; // 更新血量显示
         public static readonly EventID PlayerIsDead = (EventID)9001;       // 玩家死亡（UI响应）
         public static readonly EventID RestartGame = (EventID)9002;         // 重新开始游戏
+        public static readonly EventID OnDeathAnimationEnd = (EventID)9003; // 死亡动画播放结束
     }
 }

@@ -99,4 +99,22 @@ public class PlayerHandler
         // 重新设置摄像机跟随
         CameraManager.Instance.Follow(_playerInstance.transform);
     }
+
+    /// <summary>
+    /// 销毁玩家（由外部调用，如 RestartGame）
+    /// </summary>
+    public void DestroyPlayer()
+    {
+        Debug.Log($"[PlayerHandler] DestroyPlayer called. _playerInstance = {_playerInstance?.name ?? "null"}");
+        if (_playerInstance != null)
+        {
+            Debug.Log($"[PlayerHandler] Destroying player: {_playerInstance.name}");
+            Object.Destroy(_playerInstance);
+            _playerInstance = null;
+        }
+        else
+        {
+            Debug.Log("[PlayerHandler] _playerInstance is null, nothing to destroy");
+        }
+    }
 }

@@ -45,6 +45,9 @@ public class Player : MonoBehaviour
     private float _invincibleTimer = 0f;
     private bool _isInvincible = false;
 
+    // 死亡标记（用于防止死亡后继续处理输入）
+    private bool _isDead = false;
+
     private void Awake()
     {
         _animator = GetComponent<Animator>();
@@ -125,6 +128,10 @@ public class Player : MonoBehaviour
     // 处理玩家输入
     private void HandleInput()
     {
+        // Guard: 死亡后不处理任何输入
+        if (_isDead)
+            return;
+
         // Guard: Only process input when Player action map is active
         if (!InputManager.Instance.Actions.ContainsKey("Move"))
             return;
@@ -152,7 +159,7 @@ public class Player : MonoBehaviour
         // 调试用
         if (InputManager.Instance.Actions["Dead"].WasPressedThisFrame())
         {
-            _fsm.SetBool("isDead", true);
+            TriggerDeath();
         }
         if (InputManager.Instance.Actions["SwitchWeapon"].WasPressedThisFrame())
         {
@@ -187,22 +194,78 @@ public class Player : MonoBehaviour
         _invincibleTimer = GameDataManager.Instance.PlayerData.invincibleDuration;
         _isInvincible = true;
 
-        // 触发受伤动画（同时通知 FSM 和 Animator）
-        _fsm.SetTrigger("hurt");
-
-        // 启动闪烁协程
-        StartCoroutine(HurtFlashCoroutine());
+        // 非致命伤害才触发受伤动画（致命伤害直接走死亡流程）
+        if (hp > 0f)
+        {
+            _fsm.SetTrigger("hurt");
+            StartCoroutine(HurtFlashCoroutine());
+        }
 
         EventCenter.Instance.Publish(GameEventID.OnPlayerDamaged,
             new DamageParams { damage = damage, from = transform.position });
 
-        if (hp <= 0f)
-        {
-            _fsm.SetBool("isDead", true);
-        }
-
         GameDataManager.Instance.PlayerData.Health = hp;
         EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, GameDataManager.Instance.PlayerData);
+
+        if (hp <= 0f)
+        {
+            TriggerDeath();
+        }
+
+    }
+
+    /// <summary>
+    /// 触发死亡（被攻击死亡和调试按键死亡共用）
+    /// </summary>
+    public void TriggerDeath()
+    {
+        Debug.Log($"[Player] TriggerDeath called. HP before death: {GameDataManager.Instance.PlayerData.Health}");
+
+        // 停止武器跟随鼠标（立即停止，避免死亡动画播放期间武器还在转）
+        var weaponRotations = GetComponentsInChildren<WeaponRotation>();
+        foreach (var wr in weaponRotations)
+        {
+            wr.SetDead(true);
+        }
+
+        // 设置死亡标记，防止死亡后继续处理输入
+        _isDead = true;
+
+        // 设置死亡标志，FSM 会在下一帧 UpdateTransition 处理到 DeadState
+        _fsm.SetBool("isDead", true);
+
+        // 通知外部玩家已死亡（订阅者会等死亡动画结束后才显示 GameOver）
+        EventCenter.Instance.Publish(GameEventID.OnPlayerDeath);
+
+        // 启动协程：等死亡动画播放完毕后触发 GameOver
+        StartCoroutine(WaitDeathAnimationAndGameOver());
+    }
+
+    /// <summary>
+    /// 等待死亡动画播放完毕后触发 GameOver
+    /// </summary>
+    private IEnumerator WaitDeathAnimationAndGameOver()
+    {
+        if (_animator == null)
+        {
+            EventCenter.Instance.Publish(GameEventID.OnDeathAnimationEnd);
+            yield break;
+        }
+
+        // 记录死亡动画开始前的状态
+        var preHash = _animator.GetCurrentAnimatorStateInfo(0).shortNameHash;
+        var preNormTime = _animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+
+        // 等待动画状态切换（说明死亡动画开始播放）
+        yield return new WaitUntil(() =>
+        {
+            var info = _animator.GetCurrentAnimatorStateInfo(0);
+            return info.shortNameHash != preHash || info.normalizedTime < preNormTime;
+        });
+
+        // 等待死亡动画播放完毕
+        yield return new WaitUntil(() => _animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f);
+        EventCenter.Instance.Publish(GameEventID.OnDeathAnimationEnd);
     }
 
     // 闪烁协程

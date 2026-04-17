@@ -501,12 +501,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
         }
         else if (_attackTimer > 0)
         {
-            // 攻击中 - 红色菱形
+            // 攻击中 - 红色圆圈
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(headPos + Vector3.up * 0.2f, headPos + Vector3.right * 0.2f);
-            Gizmos.DrawLine(headPos + Vector3.right * 0.2f, headPos + Vector3.down * 0.2f);
-            Gizmos.DrawLine(headPos + Vector3.down * 0.2f, headPos + Vector3.left * 0.2f);
-            Gizmos.DrawLine(headPos + Vector3.left * 0.2f, headPos + Vector3.up * 0.2f);
+            Gizmos.DrawWireSphere(headPos, 0.2f);
         }
         else
         {
@@ -525,24 +522,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
             Gizmos.color = new Color(1f, 0.8f, 0f, alpha); // 金色冲击波
             Gizmos.DrawWireSphere(transform.position, radius);
-        }
-
-        // 命中调试特效：仅当攻击实际命中玩家时，从敌人到玩家绘制连线 + 玩家位置冲击波
-        if (_attackHitConnected && _player != null)
-        {
-            // 从敌人到玩家的橙色连线
-            Gizmos.color = new Color(1f, 0.5f, 0f, 1f);
-            Gizmos.DrawLine(transform.position, _player.position);
-
-            // 玩家位置：命中冲击波（向外扩散的圆环）
-            float hitProgress = (_attackTimer - AttackHitTime) / 0.2f; // 0~1
-            if (hitProgress >= 0f && hitProgress <= 1f)
-            {
-                float radius = Mathf.Lerp(0.1f, AttackRange, hitProgress);
-                float alpha = 1f - hitProgress;
-                Gizmos.color = new Color(1f, 0.2f, 0f, alpha); // 红色冲击波
-                Gizmos.DrawWireSphere(_player.position, radius);
-            }
         }
 
         // 显示状态文字

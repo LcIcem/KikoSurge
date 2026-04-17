@@ -74,8 +74,9 @@ public class LevelController : MonoBehaviour
             return;
         }
 
-        // 实例化预设体
+        // 实例化预设体（作为 LevelController 的子物体，销毁时一起清理）
         var instantiated = Instantiate(_tilemapPrefab, Vector3.zero, Quaternion.identity);
+        instantiated.transform.SetParent(transform);
         instantiated.name = "TilemapGrid";
 
         // 从实例化后的子对象中找 Tilemap
@@ -140,6 +141,7 @@ public class LevelController : MonoBehaviour
         {
             Debug.Log("[LevelController] 最后一层，关卡完成");
             EventCenter.Instance.Publish(GameEventID.OnLayerComplete, _currentLayerIndex);
+            GameLifecycleManager.Instance.GameClear();
         }
         else
         {
@@ -152,6 +154,7 @@ public class LevelController : MonoBehaviour
     /// </summary>
     public void Initialize(long sessionSeed)
     {
+        Debug.Log($"[LevelController] Initialize called with seed={sessionSeed}");
         _sessionSeed = sessionSeed;
         _currentLayerIndex = -1;
     }
@@ -319,6 +322,15 @@ public class LevelController : MonoBehaviour
     private long DeriveLayerSeed(long sessionSeed, int layerIndex)
     {
         return sessionSeed + layerIndex * 100;
+    }
+
+    /// <summary>
+    /// 销毁玩家（由外部如 RestartGame 调用）
+    /// </summary>
+    public void DestroyPlayer()
+    {
+        Debug.Log($"[LevelController] DestroyPlayer called. _playerHandler = {_playerHandler?.GetType().Name ?? "null"}");
+        _playerHandler?.DestroyPlayer();
     }
 
     private void OnDestroy()
