@@ -17,6 +17,9 @@ public class PausePanel : BasePanel
         base.Show();
         Time.timeScale = 0f;
 
+        // 暂停时禁止玩家瞄准输入
+        AimInput.Enabled = false;
+
         bool isFromLobby = GameLifecycleManager.Instance.WasInLobbyBeforePause;
 
         // 大厅暂停(3按钮): 返回大厅、游戏设置、返回主菜单

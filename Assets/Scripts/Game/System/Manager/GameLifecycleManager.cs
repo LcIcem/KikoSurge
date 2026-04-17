@@ -339,6 +339,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         {
             ChangeState(_wasInLobbyBeforePause ? GameState.Lobby : GameState.Playing);
             ManagerHub.UI.HidePanel<PausePanel>();
+            // 恢复玩家瞄准输入
+            AimInput.Enabled = true;
         }
     }
 

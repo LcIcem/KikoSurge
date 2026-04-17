@@ -20,7 +20,7 @@ public class FlipController : MonoBehaviour
     {
         if (!AimInput.Enabled)
             return;
-        
+
         if (_useMouseForFlipping)
             FlipBaseOnMosue();
         else
