@@ -37,10 +37,29 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     public LevelController LevelController { get; private set; }
 
     /// <summary>
-    /// 设置面板是否阻塞继续游戏（从暂停菜单打开时为 true）
-    /// 为 true 时 ESC 仅关闭设置面板，不继续游戏
+    /// 暂停前是否来自大厅（用于 PausePanel 显示按钮判断）
     /// </summary>
-    public bool IsSettingsPanelBlocking { get; set; } = false;
+    public bool WasInLobbyBeforePause => _wasInLobbyBeforePause;
+
+    /// <summary>
+    /// 是否有子面板打开（Pause 的子面板如 SettingsPanel）
+    /// </summary>
+    public bool HasChildPanelOpen { get; set; }
+
+    /// <summary>
+    /// 大厅玩家处理器（持有全局玩家数据）
+    /// </summary>
+    private PlayerHandler _lobbyPlayerHandler;
+
+    /// <summary>
+    /// 是否正在加载场景（加载期间禁用 Pause 检查）
+    /// </summary>
+    private bool _isSceneLoading;
+
+    /// <summary>
+    /// 暂停前是否来自大厅（用于 PausePanel 显示按钮判断）
+    /// </summary>
+    private bool _wasInLobbyBeforePause;
 
     protected override void Init()
     {
@@ -58,28 +77,28 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
 
     private void Update()
     {
-        // 游戏中按 ESC/Pause 打开暂停菜单
-        if (CurrentState == GameState.Playing)
+        // 场景加载期间不处理 Pause
+        if (_isSceneLoading)
+            return;
+
+        // 游戏中或大厅按 ESC/Pause 打开暂停菜单
+        if (CurrentState == GameState.Playing || CurrentState == GameState.Lobby)
         {
-            var pauseAction = ManagerHub.Input.Actions["Pause"];
-            if (pauseAction != null && pauseAction.WasPressedThisFrame())
+            // 使用 TryGetValue 安全访问（UI ActionMap 中没有 Pause action）
+            if (ManagerHub.Input.Actions.TryGetValue("Pause", out var pauseAction) &&
+                pauseAction.WasPressedThisFrame())
             {
                 PauseGame();
             }
         }
-        // 暂停时按 ESC/Resume 继续游戏
-        else if (CurrentState == GameState.Paused)
-        {
-            // SettingsPanel 阻塞继续，ESC 只关闭设置面板，不继续游戏
-            if (IsSettingsPanelBlocking)
-                return;
+    }
 
-            var resumeAction = ManagerHub.Input.Actions["Resume"];
-            if (resumeAction != null && resumeAction.WasPressedThisFrame())
-            {
-                ResumeGame();
-            }
-        }
+    /// <summary>
+    /// 设置场景加载状态（外部调用）
+    /// </summary>
+    public void SetSceneLoading(bool loading)
+    {
+        _isSceneLoading = loading;
     }
 
     /// <summary>
@@ -108,19 +127,46 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         // TODO: SaveLoadManager.CreateNewSave(saveSlot, sessionSeed);
         // TODO: GameDataManager.StartNewSession(sessionSeed);
 
-        // 实例化 LevelController
-        if (_levelControllerPrefab != null)
-        {
-            LevelController = Instantiate(_levelControllerPrefab);
-            LevelController.Initialize(_currentSessionSeed);
-        }
-        else
-        {
-            LogError("LevelController Prefab is not assigned!");
-        }
-
         // 先进入 Lobby 状态（大厅/准备阶段）
         ChangeState(GameState.Lobby);
+    }
+
+    /// <summary>
+    /// 创建大厅玩家（持有全局玩家数据）
+    /// <para>由 LobbySceneInstaller 在 Lobby 场景加载后调用</para>
+    /// </summary>
+    /// <param name="spawnPos">出生点位置</param>
+    public void CreateLobbyPlayer(Vector3 spawnPos)
+    {
+        Log($"CreateLobbyPlayer at {spawnPos}");
+
+        // 获取全局玩家数据（MetaData 系统未实现前，使用默认角色配置）
+        // TODO: 后续接入 MetaDataManager 获取存档级玩家强化数据
+        PlayerData globalPlayerData = GetOrCreateGlobalPlayerData();
+
+        // 创建大厅玩家处理器
+        _lobbyPlayerHandler = new PlayerHandler();
+        // isLobbyPlayer=true 表示大厅玩家，不显示 HubPanel，但保持武器跟随鼠标
+        _lobbyPlayerHandler.CreatePlayer(spawnPos, globalPlayerData, isLobbyPlayer: true);
+    }
+
+    /// <summary>
+    /// 获取或创建全局玩家数据
+    /// </summary>
+    private PlayerData GetOrCreateGlobalPlayerData()
+    {
+        // 如果已有全局数据，直接返回
+        if (GameDataManager.Instance.PlayerData != null)
+            return GameDataManager.Instance.PlayerData;
+
+        // 否则从默认角色配置创建（首次进入游戏）
+        // TODO: 后续接入存档系统，从存档加载 MetaData
+        if (!GameDataManager.Instance.IsRoleInfoLoaded)
+        {
+            LogWarning("RoleInfo not loaded yet, using default data");
+            return null;
+        }
+        return GameDataManager.Instance.GetRoleDataByCurSel().ConvertToPlayerData();
     }
 
     /// <summary>
@@ -128,16 +174,38 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// </summary>
     public void EnterPlaying()
     {
-        if (LevelController == null)
-        {
-            LogError("EnterPlaying: LevelController is null!");
-            return;
-        }
-
         Log("EnterPlaying: Starting gameplay");
-        LevelController.EnterFirstLayer();
-        ChangeState(GameState.Playing);
-        EventCenter.Instance.Publish(GameEventID.OnSessionStart, _currentSessionSeed);
+
+        // 加载 Game_Scene（包含 A* 和地牢生成器），完成后实例化 LevelController
+        _isSceneLoading = true;
+        ManagerHub.Scene.LoadSceneAsync("Game_Scene", null, () =>
+        {
+            // 实例化 LevelController
+            if (_levelControllerPrefab != null)
+            {
+                LevelController = Instantiate(_levelControllerPrefab);
+                LevelController.Initialize(_currentSessionSeed);
+            }
+            else
+            {
+                LogError("LevelController Prefab is not assigned!");
+                return;
+            }
+
+            LevelController.EnterFirstLayer();
+            ChangeState(GameState.Playing);
+            EventCenter.Instance.Publish(GameEventID.OnSessionStart, _currentSessionSeed);
+            _isSceneLoading = false;
+        });
+    }
+
+    /// <summary>
+    /// 更新当前会话种子（在进入地牢前可修改）
+    /// </summary>
+    public void UpdateSessionSeed(long seed)
+    {
+        _currentSessionSeed = seed;
+        Debug.Log($"[UpdateSessionSeed] seed updated to: {seed}");
     }
 
     /// <summary>
@@ -187,6 +255,12 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             LevelController = null;
         }
 
+        // 隐藏游戏Hub
+        ManagerHub.UI.HidePanel<HubPanel>();
+
+        // 大厅玩家由 LobbySceneInstaller 在 Lobby 场景加载时创建
+        // 无需在此处管理
+
         // TODO: 保存当前进度
 
         ChangeState(GameState.Lobby);
@@ -205,6 +279,9 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             Destroy(LevelController.gameObject);
             LevelController = null;
         }
+
+        // 大厅玩家由 LobbySceneInstaller 在 Lobby 场景销毁时自动清理
+        // 无需在此处管理
 
         // 隐藏游戏Hub
         ManagerHub.UI.HidePanel<HubPanel>();
@@ -244,8 +321,9 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// </summary>
     public void PauseGame()
     {
-        if (CurrentState == GameState.Playing)
+        if (CurrentState == GameState.Playing || CurrentState == GameState.Lobby)
         {
+            _wasInLobbyBeforePause = (CurrentState == GameState.Lobby);
             ChangeState(GameState.Paused);
             // 显示暂停菜单
             ManagerHub.UI.ShowPanel<PausePanel>();
@@ -259,8 +337,7 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     {
         if (CurrentState == GameState.Paused)
         {
-            ChangeState(GameState.Playing);
-            // 隐藏暂停菜单
+            ChangeState(_wasInLobbyBeforePause ? GameState.Lobby : GameState.Playing);
             ManagerHub.UI.HidePanel<PausePanel>();
         }
     }
@@ -361,5 +438,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     }
 
     private void Log(string msg) => Debug.Log($"[GameLifecycleManager] {msg}");
+    private void LogWarning(string msg) => Debug.LogWarning($"[GameLifecycleManager] {msg}");
     private void LogError(string msg) => Debug.LogError($"[GameLifecycleManager] {msg}");
 }
