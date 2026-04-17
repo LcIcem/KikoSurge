@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c955f7308cc897e4b888f075132d60a1, type: 3}
   m_Name: ShotgunConfig
   m_EditorClassIdentifier: Assembly-CSharp::GunConfig
+  Id: 1002
   gunName: "\u9730\u5F39\u67AA"
   gunPrefab: {fileID: 1645332420106596854, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
   icon: {fileID: -9095717837082945937, guid: 51e95766f1053e544acc76d6f0799c42, type: 3}

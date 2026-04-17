@@ -67,7 +67,11 @@ public class GameOverPanel : BasePanel
             case BTN_BACK_TO_MAINMENU:
                 ManagerHub.UI.HidePanel<GameOverPanel>();
                 GameLifecycleManager.Instance.ReturnToMainMenu();
-                ManagerHub.Scene.LoadSceneAsync("MainMenu_Scene");
+                GameLifecycleManager.Instance.SetSceneLoading(true);
+                ManagerHub.Scene.LoadSceneAsync("MainMenu_Scene", null, () =>
+                {
+                    GameLifecycleManager.Instance.SetSceneLoading(false);
+                });
                 break;
         }
     }

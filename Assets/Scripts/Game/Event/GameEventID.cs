@@ -81,5 +81,9 @@ namespace Game.Event
         public static readonly EventID PlayerIsDead = (EventID)9001;       // 玩家死亡（UI响应）
         public static readonly EventID RestartGame = (EventID)9002;         // 重新开始游戏
         public static readonly EventID OnDeathAnimationEnd = (EventID)9003; // 死亡动画播放结束
+
+        // 100-199: 大厅系统
+        public static readonly EventID OnDungeonEntryConfirmed = (EventID)1010; // 确认进入地牢
+        public static readonly EventID OnDungeonPanelClosed = (EventID)1011;   // 地牢面板关闭
     }
 }

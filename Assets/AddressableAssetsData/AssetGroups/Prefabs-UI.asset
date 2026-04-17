@@ -40,6 +40,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7d74525b79ba72c408d8e9225a70e8a4
+    m_Address: EnterDungeonPanel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 86da36cbd3454ed4bad710f80f2712f7
     m_Address: GameOverPanel
     m_ReadOnly: 0

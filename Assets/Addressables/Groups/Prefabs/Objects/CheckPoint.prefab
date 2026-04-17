@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: -783835602979243711}
   - component: {fileID: 4140718670188420783}
   - component: {fileID: 2118496215259794679}
+  - component: {fileID: -8791088250180441343}
   m_Layer: 0
   m_Name: CheckPoint
   m_TagString: Untagged
@@ -152,6 +153,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b33309d16d62e054988ba52dcecd39c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
+  _interactable: {fileID: -8791088250180441343}
+--- !u!114 &-8791088250180441343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 140860234070293769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9e747dcbc9d9c246b4ddcbcb1346d0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Interactable
   _promptUI: {fileID: 2836859367587208812}
 --- !u!1 &2836859367587208812
 GameObject:
@@ -164,7 +178,7 @@ GameObject:
   - component: {fileID: 3164410803181246704}
   - component: {fileID: 3264993279863210951}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: PromptUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

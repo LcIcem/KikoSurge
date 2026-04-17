@@ -50,7 +50,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
     private float _cooldownTimer = 0f;
     private bool _attackHitTriggered = false;  // 攻击是否已触发
     private bool _shouldExitAfterAttack = false;  // 攻击动画完成后是否需要退出（冷却期间离开攻击范围时设置）
-    private bool _attackHitConnected = false;  // 攻击是否实际命中了玩家（用于调试特效）
     private float _shockwaveTimer = 0f;  // 冲击波特效计时器
 
     // 保存的配置引用（用于池化后重置）
@@ -173,8 +172,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
         // 重置 Player 引用
         _player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
-        // 重置调试标记
-        _attackHitConnected = false;
         _shockwaveTimer = 0f;
 
         // 重启 FSM
@@ -339,7 +336,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _cooldownTimer = 0f;
         _attackHitTriggered = false;
         _shouldExitAfterAttack = false;
-        _attackHitConnected = false;
         _shockwaveTimer = 0f;
     }
 
@@ -351,7 +347,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _attackTimer = 0f;
         _attackHitTriggered = false;
         _shouldExitAfterAttack = false;
-        _attackHitConnected = false;
         _shockwaveTimer = 0f;
     }
 
@@ -393,9 +388,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
             Debug.Log($"[EnemyAttack] {gameObject.name} 攻击已生效但检测未命中，攻击落空");
             return;
         }
-
-        // 标记为实际命中（用于调试特效）
-        _attackHitConnected = true;
 
         // 发布命中事件（与碰撞、子弹命中使用统一的 hit 事件）
         EventCenter.Instance.Publish(GameEventID.Combat_EnemyHitPlayer,
