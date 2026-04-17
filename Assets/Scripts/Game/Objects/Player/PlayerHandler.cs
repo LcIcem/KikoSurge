@@ -29,13 +29,14 @@ public class PlayerHandler
     /// 创建玩家并放置到指定位置（异步等待 RoleInfo 加载）
     /// </summary>
     /// <param name="worldPos">世界坐标位置</param>
-    public void CreatePlayer(Vector3 worldPos)
+    /// <param name="existingData">已有玩家数据（大厅玩家用全局数据，游戏玩家传 null）</param>
+    /// <param name="isLobbyPlayer">是否为大厅玩家（大厅玩家不设置相机跟随和 HubPanel）</param>
+    public void CreatePlayer(Vector3 worldPos, PlayerData existingData = null, bool isLobbyPlayer = false)
     {
-        // 使用 MonoManager 启动协程，等待 RoleInfo 加载完成后创建玩家
-        MonoManager.Instance.StartCoroutine(CreatePlayerAfterDataLoaded(worldPos));
+        MonoManager.Instance.StartCoroutine(CreatePlayerAfterDataLoaded(worldPos, existingData, isLobbyPlayer));
     }
 
-    private IEnumerator CreatePlayerAfterDataLoaded(Vector3 worldPos)
+    private IEnumerator CreatePlayerAfterDataLoaded(Vector3 worldPos, PlayerData existingData, bool isLobbyPlayer)
     {
         // 等待 RoleInfo 加载完成
         while (!GameDataManager.Instance.IsRoleInfoLoaded)
@@ -48,24 +49,44 @@ public class PlayerHandler
 
         _playerPrefabs = GameDataManager.Instance.GetRoleDataByCurSel().prefabs;
 
-        // 从 RoleInfo 初始化 PlayerData（写入 GameDataManager）
-        PlayerData playerData = GameDataManager.Instance.GetRoleDataByCurSel().ConvertToPlayerData();
+        // 从 RoleInfo 初始化 PlayerData
+        PlayerData playerData;
+        if (existingData != null)
+        {
+            // 大厅玩家：复用已有数据（全局玩家数据）
+            playerData = existingData;
+        }
+        else
+        {
+            // 游戏玩家：从角色配置创建新数据
+            playerData = GameDataManager.Instance.GetRoleDataByCurSel().ConvertToPlayerData();
+        }
         GameDataManager.Instance.PlayerData = playerData;
 
         _playerInstance = Object.Instantiate(_playerPrefabs, worldPos, Quaternion.identity);
 
+        // 相机跟随（大厅和游戏玩家都需要）
         CameraManager.Instance.Follow(_playerInstance.transform);
 
-        ManagerHub.UI.ShowPanel<HubPanel>(UILayerType.Middle, (panel) =>
+        if (isLobbyPlayer)
         {
-            EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, playerData);
-            // 主动发布当前武器信息（事件可能在 HubPanel 订阅之前就发布了）
-            var player = _playerInstance.GetComponent<Player>();
-            if (player != null && player.weaponHandler.CurrentWeapon != null)
+            // 大厅玩家：不显示 HubPanel
+            Debug.Log("[PlayerHandler] Lobby player created (no UI setup)");
+        }
+        else
+        {
+            // 游戏玩家：显示 HubPanel
+            ManagerHub.UI.ShowPanel<HubPanel>(UILayerType.Middle, (panel) =>
             {
-                EventCenter.Instance.Publish(GameEventID.OnCurrentWeaponChanged, player.weaponHandler.CurrentWeapon);
-            }
-        });
+                EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, playerData);
+                // 主动发布当前武器信息（事件可能在 HubPanel 订阅之前就发布了）
+                var player = _playerInstance.GetComponent<Player>();
+                if (player != null && player.weaponHandler.CurrentWeapon != null)
+                {
+                    EventCenter.Instance.Publish(GameEventID.OnCurrentWeaponChanged, player.weaponHandler.CurrentWeapon);
+                }
+            });
+        }
     }
 
     /// <summary>

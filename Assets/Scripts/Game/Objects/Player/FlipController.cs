@@ -18,8 +18,9 @@ public class FlipController : MonoBehaviour
 
     void Update()
     {
-        if (GameLifecycleManager.Instance.CurrentState == GameState.Paused || GameLifecycleManager.Instance.CurrentState == GameState.GameOver)
-            _useMouseForFlipping = false;
+        if (!AimInput.Enabled)
+            return;
+        
         if (_useMouseForFlipping)
             FlipBaseOnMosue();
         else

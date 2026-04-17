@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using LcIcemFramework;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 /// <summary>
@@ -23,6 +24,7 @@ public class SettingsPanel : BasePanel
     private readonly ISettingsPage _keysPage = new KeysSettingsPage();
 
     private ISettingsPage _curPage;
+    private InputAction _resumeAction;
 
     #region 生命周期
 
@@ -35,17 +37,39 @@ public class SettingsPanel : BasePanel
     public override void Show()
     {
         base.Show();
-        GameLifecycleManager.Instance.IsSettingsPanelBlocking = true;
         ShowSettings(_audioPage.PageKey);
+
+        // 标记有子面板打开
+        GameLifecycleManager.Instance.HasChildPanelOpen = true;
+
+        // 订阅 Resume 动作
+        _resumeAction = ManagerHub.Input?.GetInputActionFromMap("UI", "Resume");
+        if (_resumeAction != null)
+            _resumeAction.performed += OnResumePerformed;
     }
 
     public override void Hide()
     {
+        // 取消订阅 Resume 动作
+        if (_resumeAction != null)
+        {
+            _resumeAction.performed -= OnResumePerformed;
+            _resumeAction = null;
+        }
+
+        // 标记没有子面板了
+        GameLifecycleManager.Instance.HasChildPanelOpen = false;
+
         _curPage?.OnExit();
-        GameLifecycleManager.Instance.IsSettingsPanelBlocking = false;
         base.Hide();
     }
 
+    private void OnResumePerformed(InputAction.CallbackContext ctx)
+    {
+        ManagerHub.UI.HidePanel<SettingsPanel>();
+        // 重新显示 PausePanel
+        ManagerHub.UI.ShowPanel<PausePanel>();
+    }
 
     #endregion
 

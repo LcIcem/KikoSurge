@@ -29,7 +29,7 @@ public class InputManager : SingletonMono<InputManager>
     private static readonly Dictionary<GameState, string> StateToActionMap = new()
     {
         { GameState.MainMenu, "MainMenu" },
-        { GameState.Lobby, "MainMenu" },
+        { GameState.Lobby, "Player" },
         { GameState.Playing, "Player" },
         { GameState.Paused, "UI" },
         { GameState.GameOver, "UI" }

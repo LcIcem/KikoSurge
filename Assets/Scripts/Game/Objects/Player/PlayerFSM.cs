@@ -123,8 +123,5 @@ public class PlayerFSM : FSM
         base.Update();
 
         SetFloat("dashGapTimer", GetFloat("dashGapTimer") - Time.deltaTime);
-
-        // 同步 hurtTimer 到 Animator Controller（Hurt 状态专用）
-        SetAnimatorFloat("hurtTimer", GetFloat("hurtTimer"));
     }
 }

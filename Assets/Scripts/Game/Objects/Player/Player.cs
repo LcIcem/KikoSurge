@@ -225,7 +225,7 @@ public class Player : MonoBehaviour
         var weaponRotations = GetComponentsInChildren<WeaponRotation>();
         foreach (var wr in weaponRotations)
         {
-            wr.SetDead(true);
+            AimInput.Enabled = false;
         }
 
         // 设置死亡标记，防止死亡后继续处理输入

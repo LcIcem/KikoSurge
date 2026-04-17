@@ -8,9 +8,8 @@ public class WeaponRotation : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer _sprite;
     [SerializeField] private float _offset;
-    public bool IsActive => !_isDead && Time.timeScale != 0;
+    public bool IsActive => AimInput.Enabled;
 
-    private bool _isDead;
     private Vector3 _mousePos;      // 鼠标世界坐标
     private Transform _weaponPivot; // 武器要挂到的锚点的Transform
 
@@ -28,14 +27,6 @@ public class WeaponRotation : MonoBehaviour
     {
         if (IsActive)
             HandleRotation();
-    }
-
-    /// <summary>
-    /// 设置死亡状态（由 Player 死亡时调用）
-    /// </summary>
-    public void SetDead(bool dead)
-    {
-        _isDead = dead;
     }
 
     // 处理武器旋转
