@@ -226,11 +226,11 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
     public override bool IsComplete()
     {
         // Sequential 模式：所有波次完成且当前波次敌人都死亡
-        // Async 模式：所有波次生成完毕即可
+        // Async 模式：所有波次生成完毕且所有敌人都死亡
         if (spawnMode == WaveSpawnMode.Sequential)
         {
             return _currentWave >= _totalWaves && _enemiesAliveInCurrentWave <= 0;
         }
-        return _currentWave >= _totalWaves;
+        return _currentWave >= _totalWaves && _totalEnemiesAlive <= 0;
     }
 }
