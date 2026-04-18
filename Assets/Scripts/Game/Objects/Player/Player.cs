@@ -23,6 +23,14 @@ public class Player : MonoBehaviour
     private PlayerFSM _fsm;
     public WeaponHandler weaponHandler;
 
+    // 玩家运行时数据
+    private PlayerRuntimeData _playerData;
+
+    /// <summary>
+    /// 运行时数据（供 FSM 内部访问）
+    /// </summary>
+    internal PlayerRuntimeData RuntimeData => _playerData;
+
     [Header("武器挂点")]
     [Tooltip("武器挂点，所有武器将创建在此 Transform 下")]
     [SerializeField] private Transform _weaponPivot;
@@ -59,13 +67,18 @@ public class Player : MonoBehaviour
         _moveInput = Vector2.zero;
     }
 
+    /// <summary>
+    /// 初始化玩家数据（由 PlayerHandler 调用）
+    /// </summary>
+    public void Initialize(PlayerRuntimeData data, List<int> weaponIds)
+    {
+        _playerData = data;
+        weaponHandler.InitializeWeapons(weaponIds);
+    }
+
     private void Start()
     {
         _fsm.Start();
-
-        // 从 RoleInfo 配置初始化武器
-        var roleInfo = GameDataManager.Instance.GetRoleDataByCurSel();
-        weaponHandler.InitializeWeapons(roleInfo.initialWeaponIds);
 
         // 订阅事件
         EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloading, OnReloading);
@@ -93,10 +106,10 @@ public class Player : MonoBehaviour
     {
         _curSpeed = _fsm.CurrentState switch
         {
-            PlayerMoveState => GameDataManager.Instance.PlayerData.moveSpeed,
-            PlayerShootState => GameDataManager.Instance.PlayerData.moveSpeed * 0.5f,
-            PlayerReloadState => GameDataManager.Instance.PlayerData.moveSpeed * 0.7f,
-            PlayerHurtState => GameDataManager.Instance.PlayerData.moveSpeed * 0.9f,
+            PlayerMoveState => _playerData.moveSpeed,
+            PlayerShootState => _playerData.moveSpeed * 0.5f,
+            PlayerReloadState => _playerData.moveSpeed * 0.7f,
+            PlayerHurtState => _playerData.moveSpeed * 0.9f,
             _ => 0f
         };
 
@@ -180,7 +193,7 @@ public class Player : MonoBehaviour
             return;
         }
 
-        float hp = GameDataManager.Instance.PlayerData.Health;
+        float hp = _playerData.Health;
         if (hp <= 0)
         {
             Debug.Log($"[Player] HP 为 0，伤害 {damage} 被忽略");
@@ -191,7 +204,7 @@ public class Player : MonoBehaviour
         Debug.Log($"[Player] 受伤！伤害: {damage}, 剩余HP: {hp}");
 
         // 启动无敌帧
-        _invincibleTimer = GameDataManager.Instance.PlayerData.invincibleDuration;
+        _invincibleTimer = _playerData.invincibleDuration;
         _isInvincible = true;
 
         // 非致命伤害才触发受伤动画（致命伤害直接走死亡流程）
@@ -204,8 +217,11 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Publish(GameEventID.OnPlayerDamaged,
             new DamageParams { damage = damage, from = transform.position });
 
-        GameDataManager.Instance.PlayerData.Health = hp;
-        EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, GameDataManager.Instance.PlayerData);
+        _playerData.Health = hp;
+        EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, _playerData);
+
+        // 同步生命值到 SessionManager（用于检查点保存）
+        SessionManager.Instance?.SetPlayerHealth(hp);
 
         if (hp <= 0f)
         {
@@ -219,7 +235,7 @@ public class Player : MonoBehaviour
     /// </summary>
     public void TriggerDeath()
     {
-        Debug.Log($"[Player] TriggerDeath called. HP before death: {GameDataManager.Instance.PlayerData.Health}");
+        Debug.Log($"[Player] TriggerDeath called. HP before death: {_playerData.Health}");
 
         // 停止武器跟随鼠标（立即停止，避免死亡动画播放期间武器还在转）
         var weaponRotations = GetComponentsInChildren<WeaponRotation>();

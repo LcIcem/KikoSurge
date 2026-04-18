@@ -37,13 +37,14 @@ public class PlayerDashState : StateBase
         var totalDir = (player.MoveDir * FACTOR + _dir).normalized;
         // 根据总方向、冲刺速度来决定冲刺位置
         player._rigidbody.MovePosition(
-            player._rigidbody.position + totalDir * GameDataManager.Instance.PlayerData.DashSpeed * Time.fixedDeltaTime);
+            player._rigidbody.position + totalDir * player.RuntimeData.dashSpeed * Time.fixedDeltaTime);
     }
 
     public override void Exit()
     {
+        var player = Owner<Player>();
         // 冲刺状态结束时 重置冲刺计时器和冲刺cd计时器
         _fsm.SetFloat("dashTimer", 0f);
-        _fsm.SetFloat("dashGapTimer", GameDataManager.Instance.PlayerData.dashGap);
+        _fsm.SetFloat("dashGapTimer", player.RuntimeData.dashGap);
     }
 }

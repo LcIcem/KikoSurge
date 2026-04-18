@@ -5,13 +5,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 进入地牢面板 - 种子输入
-/// <para>在大厅显示，允许玩家输入自定义种子（留空则使用随机种子）</para>
+/// 进入地牢面板 - 大厅交互面板
+/// <para>在大厅显示，提供继续游戏和开始新游戏选项</para>
 /// </summary>
 public class EnterDungeonPanel : BasePanel
 {
     // 控件名称常量
-    private const string BTN_ENTER = "btn_enter";
+    private const string BTN_CONTINUE = "btn_continue";
+    private const string BTN_NEW_GAME = "btn_newGame";
     private const string BTN_BACK = "btn_back";
     private const string INPUT_SEED = "input_seed";
 
@@ -23,6 +24,7 @@ public class EnterDungeonPanel : BasePanel
     {
         base.Show();
         gameObject.SetActive(true);
+        RefreshButtonStates();
     }
 
     public override void Hide()
@@ -31,12 +33,29 @@ public class EnterDungeonPanel : BasePanel
         gameObject.SetActive(false);
     }
 
+    private void RefreshButtonStates()
+    {
+        bool hasActiveSession = SaveLoadManager.Instance.HasActiveSession;
+        Debug.Log($"[EnterDungeonPanel] RefreshButtonStates: HasActiveSession={hasActiveSession}, CurrentSlotId={SaveLoadManager.Instance.CurrentSlotId}");
+
+        var continueBtn = GetControl<Button>(BTN_CONTINUE);
+        if (continueBtn != null)
+            continueBtn.interactable = hasActiveSession;
+
+        var newGameBtn = GetControl<Button>(BTN_NEW_GAME);
+        if (newGameBtn != null)
+            newGameBtn.interactable = true;
+    }
+
     protected override void OnClick(string btnName)
     {
         switch (btnName)
         {
-            case BTN_ENTER:
-                OnEnterClicked();
+            case BTN_CONTINUE:
+                OnContinueClicked();
+                break;
+            case BTN_NEW_GAME:
+                OnNewGameClicked();
                 break;
             case BTN_BACK:
                 OnBackClicked();
@@ -44,9 +63,22 @@ public class EnterDungeonPanel : BasePanel
         }
     }
 
-    private void OnEnterClicked()
+    private void OnContinueClicked()
     {
-        long seed = Environment.TickCount; // 默认随机种子
+        if (!SaveLoadManager.Instance.HasActiveSession)
+        {
+            Debug.LogWarning("[EnterDungeonPanel] 没有进行中的游戏，无法继续");
+            return;
+        }
+
+        Debug.Log("[EnterDungeonPanel] 继续游戏");
+        Hide();
+        OnEnterDungeon?.Invoke(0); // seed = 0 表示继续，用存档中的 seed
+    }
+
+    private void OnNewGameClicked()
+    {
+        long seed = Environment.TickCount;
 
         var input = GetControl<InputField>(INPUT_SEED);
         if (input != null && !string.IsNullOrWhiteSpace(input.text))
@@ -61,9 +93,7 @@ public class EnterDungeonPanel : BasePanel
             }
         }
 
-        Debug.Log($"[EnterDungeonPanel] 进入地牢，种子: {seed}");
-
-        // 先隐藏面板，再触发事件（事件会触发场景加载）
+        Debug.Log($"[EnterDungeonPanel] 开始新游戏，种子: {seed}");
         Hide();
         OnEnterDungeon?.Invoke(seed);
     }

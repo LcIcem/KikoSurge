@@ -12,12 +12,10 @@ using LcIcemFramework.Util.Data;
 /// </summary>
 public class GameDataManager : SingletonMono<GameDataManager>
 {
-    // 角色信息相关
-    private RoleInfoConfig _roleInfo_SO;
-    public bool IsRoleInfoLoaded { get; private set; } // 角色信息是否加载成功
+    // 角色静态数据配置
+    private RoleStaticDataConfig _roleStaticDataConfig_SO;
+    public bool IsRoleStaticDataLoaded { get; private set; }
     public int CurSelRoleIndex { get; set; } = 0;   // 当前选择的角色索引
-    // 玩家数据相关
-    public PlayerData PlayerData { get; set; }
 
     // 武器配置字典：Key = WeaponId, Value = 配置SO
     private Dictionary<int, GunConfig> _weaponConfigDict = new();
@@ -39,8 +37,8 @@ public class GameDataManager : SingletonMono<GameDataManager>
 
     protected override void Init()
     {
-        // 加载角色信息
-        ManagerHub.Addressables.LoadAsync<RoleInfoConfig>("RoleInfo_Config", OnRoleInfoLoaded);
+        // 加载角色静态数据配置
+        ManagerHub.Addressables.LoadAsync<RoleStaticDataConfig>("RoleStaticData_Config", OnRoleStaticDataLoaded);
 
         // 加载武器配置（统一SO）
         ManagerHub.Addressables.LoadAsync<WeaponConfigRegistry>("Weapon_Config_Registry", OnAllWeaponDefsLoaded);
@@ -66,56 +64,53 @@ public class GameDataManager : SingletonMono<GameDataManager>
 
     #endregion
 
-    #region RoleInfo数据相关
-    // 角色信息数据 加载完毕 回调
-    private void OnRoleInfoLoaded(RoleInfoConfig so)
+    #region RoleStaticData数据相关
+    // 角色静态数据 加载完毕 回调
+    private void OnRoleStaticDataLoaded(RoleStaticDataConfig so)
     {
         if (so != null)
         {
-            _roleInfo_SO = so;
-            IsRoleInfoLoaded = true;
-            Log("RoleInfo 加载完成");
+            _roleStaticDataConfig_SO = so;
+            IsRoleStaticDataLoaded = true;
+            Log("RoleStaticData 加载完成");
         }
         else
         {
-            LogError("RoleInfo 加载失败");
+            LogError("RoleStaticData 加载失败");
         }
     }
 
-    // 获取角色信息
-    public RoleInfoConfig GetRoleInfo()
+    // 获取当前选择角色静态数据
+    public RoleStaticData GetRoleStaticDataByCurSel()
     {
-        if (!IsRoleInfoLoaded)
-            LogWarning("RoleInfo 尚未加载完成");
-        return _roleInfo_SO;
+        if (!IsRoleStaticDataLoaded)
+        {
+            LogWarning("RoleStaticData 尚未加载完成");
+            return null;
+        }
+        return _roleStaticDataConfig_SO.roleStaticDataList[CurSelRoleIndex];
     }
 
-    // 获取当前选择角色信息
-    public RoleInfo GetRoleDataByCurSel()
+    // 获取角色静态数据
+    public RoleStaticData GetRoleStaticData(int roleId)
     {
-        if (!IsRoleInfoLoaded)
-            LogWarning("RoleInfo 尚未加载完成");
-        return _roleInfo_SO.roleInfos[CurSelRoleIndex];
-    }
-    #endregion
-
-    #region PlayerData数据相关
-    // 设置玩家数据
-    public bool SetPlayerData(PlayerData p)
-    {
-        if (p == null)
-            return false;
-
-        PlayerData = p;
-        return true;
+        if (!IsRoleStaticDataLoaded)
+        {
+            LogWarning("RoleStaticData 尚未加载完成");
+            return null;
+        }
+        return _roleStaticDataConfig_SO.GetRoleStaticData(roleId);
     }
 
-    // 获取玩家数据
-    public PlayerData GetPlayerData()
+    // 获取默认角色静态数据
+    public RoleStaticData GetDefaultRoleStaticData()
     {
-        if (PlayerData == null)
-            return default;
-        return PlayerData;
+        if (!IsRoleStaticDataLoaded)
+        {
+            LogWarning("RoleStaticData 尚未加载完成");
+            return null;
+        }
+        return _roleStaticDataConfig_SO.GetDefaultRole();
     }
 
     #endregion

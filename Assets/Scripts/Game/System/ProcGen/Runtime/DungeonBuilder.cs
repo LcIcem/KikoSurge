@@ -301,7 +301,7 @@ namespace ProcGen.Runtime
                 RoomType.Boss => TileType.WallBossTile,
                 RoomType.Shop => TileType.WallShopTile,
                 RoomType.Event => TileType.WallEventTile,
-                RoomType.Rest => TileType.WallEventTile,
+                RoomType.Rest => TileType.WallRestTile,
                 _ => TileType.WallNormalTile,
             };
         }
@@ -319,7 +319,7 @@ namespace ProcGen.Runtime
                 RoomType.Boss => TileType.FloorBossTile,
                 RoomType.Shop => TileType.FloorShopTile,
                 RoomType.Event => TileType.FloorEventTile,
-                RoomType.Rest => TileType.FloorEventTile,
+                RoomType.Rest => TileType.FloorRestTile,
                 _ => TileType.FloorNormalTile,
             };
         }

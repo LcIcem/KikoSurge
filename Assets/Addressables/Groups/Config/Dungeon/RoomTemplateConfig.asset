@@ -55,3 +55,9 @@ MonoBehaviour:
     maxSize: {x: 10, y: 10}
     minDistFromStart: 0
     maxDistFromStart: -1
+  - displayName: "\u4F11\u606F\u623F\u95F4"
+    roomType: 6
+    minSize: {x: 5, y: 5}
+    maxSize: {x: 5, y: 5}
+    minDistFromStart: 0
+    maxDistFromStart: 10

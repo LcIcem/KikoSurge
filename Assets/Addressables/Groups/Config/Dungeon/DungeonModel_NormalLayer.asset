@@ -27,7 +27,7 @@ MonoBehaviour:
   treasureExtraChance: 0
   shopRoomCount: 1
   shopExtraChance: 0
-  restRoomCount: 1
+  restRoomCount: 3
   restExtraChance: 0
   eventRoomCount: 1
   eventExtraChance: 0

@@ -3,9 +3,10 @@ using LcIcemFramework;
 using UnityEngine;
 
 /// <summary>
-/// 检查点交互脚本
-/// <para>挂载在与 Interactable 组件相同的 GameObject 上</para>
-/// </summary>
+/// 终点检查点交互脚本
+/// <para>挂载在终点房间的检查点上，与 Interactable 组件配合使用</para>
+/// <para>功能：交互后保存 checkpoint，然后进入下一层（或通关）</para>
+/// <para>注意：此checkpoint仅用于「中途退出后继续」，死亡后session结束，不会从checkpoint复活</para>
 public class Checkpoint : MonoBehaviour
 {
     [SerializeField] private Interactable _interactable;

@@ -15,8 +15,8 @@ MonoBehaviour:
   m_GroupName: Config-RoleInfo
   m_GUID: cf3e849358e0b21488ab9f5b0acea556
   m_SerializeEntries:
-  - m_GUID: 16b9a30fe5f62b148ad6f54d9e68821c
-    m_Address: RoleInfo_Config
+  - m_GUID: 5b3ee050d0bf3b2408b32f214d080e20
+    m_Address: RoleStaticData_Config
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

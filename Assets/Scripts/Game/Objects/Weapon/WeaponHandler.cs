@@ -22,7 +22,7 @@ public class WeaponHandler
     }
 
     /// <summary>
-    /// 初始化武器（由 Player 调用，从 RoleInfo 配置）
+    /// 初始化武器（由 Player 调用，从 RoleStaticData 配置）
     /// </summary>
     public void InitializeWeapons(List<int> weaponIds)
     {

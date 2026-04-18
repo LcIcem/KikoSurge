@@ -7,55 +7,55 @@ using UnityEngine.UI;
 /// </summary>
 public class LoginPanel : BasePanel
 {
-    private const string BTN_NEW_GAME = "btn_newGame";
-    private const string BTN_CONTINUE = "btn_continue";
+    private const string BTN_START = "btn_start";
+    private const string BTN_SAVE_SLOT = "btn_saveSlot";
     private const string BTN_SETTINGS = "btn_settings";
     private const string BTN_QUIT = "btn_quit";
 
     public override void Show()
     {
         base.Show();
-        RefreshContinueButton();
-    }
-
-    private void RefreshContinueButton()
-    {
-        bool hasSave = ManagerHub.Save.Exists(0);
-        var btn = GetControl<Button>(BTN_CONTINUE);
-        if (btn != null)
-            btn.interactable = hasSave;
     }
 
     protected override void OnClick(string btnName)
     {
         switch (btnName)
         {
-            case BTN_NEW_GAME:
-                GameLifecycleManager.Instance.SetSceneLoading(true);
-                ManagerHub.Scene.LoadSceneAsync("Lobby_Scene", null, () =>
-                {
-                    GameLifecycleManager.Instance.StartNewGame(0);
-                    GameLifecycleManager.Instance.SetSceneLoading(false);
-                });
-                ManagerHub.UI.HidePanel<LoginPanel>();
+            case BTN_START:
+                OnStartClicked();
                 break;
-            case BTN_CONTINUE:
-                if (ManagerHub.Save.Exists(0))
-                {
-                    GameLifecycleManager.Instance.SetSceneLoading(true);
-                    ManagerHub.Scene.LoadSceneAsync("Game_Scene", null, () =>
-                    {
-                        GameLifecycleManager.Instance.ContinueGame(0);
-                        GameLifecycleManager.Instance.SetSceneLoading(false);
-                    });
-                }
+
+            case BTN_SAVE_SLOT:
+                ManagerHub.UI.ShowPanel<SaveSlotPanel>();
                 break;
+
             case BTN_SETTINGS:
                 ManagerHub.UI.ShowPanel<SettingsPanel>();
                 break;
+
             case BTN_QUIT:
                 GameLifecycleManager.Instance.QuitGame();
                 break;
         }
+    }
+
+    private void OnStartClicked()
+    {
+        int currentSlot = SaveLoadManager.Instance.CurrentSlotId;
+
+        // 检测当前槽位是否有存档
+        if (!SaveLoadManager.Instance.HasSaveData(currentSlot))
+        {
+            // 没有存档，创建新存档到当前槽位
+            Debug.Log($"[LoginPanel] 槽位 {currentSlot} 无存档，创建新存档");
+            SaveLoadManager.Instance.CreateNewSave(currentSlot);
+        }
+
+        // 进入大厅
+        ManagerHub.UI.HidePanel<LoginPanel>();
+        ManagerHub.Scene.LoadSceneAsync("Lobby_Scene", null, () =>
+        {
+            GameLifecycleManager.Instance.EnterLobby(currentSlot);
+        });
     }
 }

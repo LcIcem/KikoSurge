@@ -495,7 +495,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameLifecycleManager
   _levelControllerPrefab: {fileID: 7885766689441157527, guid: 7b8df3a8d672bff48864fd6468b2288a, type: 3}
-  _debugSeed: 12345
 --- !u!4 &2018529841
 Transform:
   m_ObjectHideFlags: 0

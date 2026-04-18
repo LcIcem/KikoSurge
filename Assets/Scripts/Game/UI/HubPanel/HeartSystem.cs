@@ -27,17 +27,17 @@ public class HeartSystem : MonoBehaviour
     void Start()
     {
         // 订阅更新血量显示事件
-        EventCenter.Instance.Subscribe<PlayerData>(GameEventID.UpdateHeartDisplay, UpdateHeartDisplay);
+        EventCenter.Instance.Subscribe<PlayerRuntimeData>(GameEventID.UpdateHeartDisplay, UpdateHeartDisplay);
     }
 
     void OnDestroy()
     {
         // 退订更新血量显示事件
-        EventCenter.Instance.Unsubscribe<PlayerData>(GameEventID.UpdateHeartDisplay, UpdateHeartDisplay);
+        EventCenter.Instance.Unsubscribe<PlayerRuntimeData>(GameEventID.UpdateHeartDisplay, UpdateHeartDisplay);
     }
 
     // 更新生命值的显示
-    private void UpdateHeartDisplay(PlayerData playerData)
+    private void UpdateHeartDisplay(PlayerRuntimeData playerData)
     {
         // 检查最大血量是否改变
         CheckModify(playerData);
@@ -74,7 +74,7 @@ public class HeartSystem : MonoBehaviour
         }
     }
 
-    private void CheckModify(PlayerData playerData)
+    private void CheckModify(PlayerRuntimeData playerData)
     {
         // 如果最大生命值发生改变 更新血量UI
         if (_lastMaxHealth != playerData.maxHealth)

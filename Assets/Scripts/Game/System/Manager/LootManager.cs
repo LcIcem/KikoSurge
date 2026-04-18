@@ -85,7 +85,7 @@ public class LootManager : SingletonMono<LootManager>
 
     /// <summary>
     /// 为玩家创建武器（从掉落物拾取时调用）
-    /// 玩家武器不走对象池，直接 Instantiate
+    /// 判断装备栏是否已满，未满则装备，已满则放入背包
     /// </summary>
     public void CreateWeaponForPlayer(GunConfig config)
     {
@@ -104,9 +104,29 @@ public class LootManager : SingletonMono<LootManager>
                 LogError($"[LootManager] 武器创建失败: {config?.gunName ?? "null"}");
                 return;
             }
-            // Create() 已将预设体设为 false，此处不重复设置
-            _player.weaponHandler.AddWeapon(weapon);
-            Log($"武器添加到玩家: {config.gunName}");
+
+            // 获取当前已装备武器列表和最大数量
+            var equippedWeaponIds = SessionManager.Instance.GetEquippedWeaponIds();
+            var roleData = GameDataManager.Instance?.GetRoleStaticData(SessionManager.Instance.CurrentSession?.selectedRoleId ?? 0);
+            int maxSlots = roleData?.maxWeaponSlots ?? 2;
+
+            if (equippedWeaponIds.Count < maxSlots)
+            {
+                // 装备栏未满，装备武器
+                _player.weaponHandler.AddWeapon(weapon);
+                equippedWeaponIds.Add(config.Id);
+                SessionManager.Instance.SetEquippedWeaponIds(equippedWeaponIds);
+                Log($"武器装备到玩家: {config.gunName} (已装备 {equippedWeaponIds.Count}/{maxSlots})");
+            }
+            else
+            {
+                // 装备栏已满，放入背包
+                var inventoryWeaponIds = SessionManager.Instance.GetInventoryWeaponIds();
+                inventoryWeaponIds.Add(config.Id);
+                SessionManager.Instance.SetInventoryWeaponIds(inventoryWeaponIds);
+                WeaponFactory.Instance.Release(weapon);
+                Log($"武器放入背包: {config.gunName} (背包 {inventoryWeaponIds.Count} 把)");
+            }
         });
     }
 

@@ -67,6 +67,14 @@ public class SaveManager : SingletonMono<SaveManager>
     }
 
     /// <summary>
+    /// 保存数据到指定槽位（泛型版本，支持派生类）。
+    /// </summary>
+    public void Save<T>(int slot, T data) where T : SaveData
+    {
+        Save(slot, (SaveData)data);
+    }
+
+    /// <summary>
     /// 从指定槽位加载数据（AES解密 + Json反序列化）。
     /// <para> 槽位索引从 0 开始算，有效范围 0~MAX_SLOT-1 </para>
     /// </summary>
@@ -95,6 +103,35 @@ public class SaveManager : SingletonMono<SaveManager>
             string json = EncryptUtil.AESDecrypt(encrypted, Constants.SAVE_ENCRYPTION_KEY);
             // 将 Json字符串 反序列化为 存档对象 然后返回
             return JsonUtil.FromJson<SaveData>(json);
+        }
+        catch (Exception e)
+        {
+            LogError($"加载失败（文件损坏?）: {e.Message}");
+            return default;
+        }
+    }
+
+    /// <summary>
+    /// 从指定槽位加载数据（泛型版本，支持派生类）。
+    /// </summary>
+    public T Load<T>(int slot) where T : SaveData
+    {
+        if (slot < 0 || slot >= MAX_SLOT)
+        {
+            LogError($"无效存档槽位: {slot}");
+            return default;
+        }
+        try
+        {
+            string path = GetSlotPath(slot);
+            if (!File.Exists(path))
+            {
+                Log($"槽位 {slot} 无存档");
+                return default;
+            }
+            string encrypted = File.ReadAllText(path);
+            string json = EncryptUtil.AESDecrypt(encrypted, Constants.SAVE_ENCRYPTION_KEY);
+            return JsonUtil.FromJson<T>(json);
         }
         catch (Exception e)
         {

@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Prefabs-UI
   m_GUID: 8249f4b528f2f6344a2371a8822ba267
   m_SerializeEntries:
+  - m_GUID: 0b3f158a0c14e5a4882858bad84d3580
+    m_Address: SaveSlotPanel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 11bf9ae7dceb6944d9bb192cc4d3c1ce
     m_Address: heartPrefab
     m_ReadOnly: 0
@@ -50,6 +55,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8c395a3e366b6e744b32837c76b2faf1
+    m_Address: NewSaveConfirmPanel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b00c9fe6741258f4797a0f2cd3a4b4ad
     m_Address: Canvas
     m_ReadOnly: 0
@@ -57,6 +67,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bb430dffb776307439244963cc46a2ef
     m_Address: HubPanel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c360b73d83221594087726dc1b46f35f
+    m_Address: SaveConfirmPanel
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

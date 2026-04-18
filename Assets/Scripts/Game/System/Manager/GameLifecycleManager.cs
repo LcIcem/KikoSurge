@@ -75,21 +75,44 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         GameOver();
     }
 
+    private float _playTimeAccumulator;
+    private const float PLAY_TIME_SAVE_INTERVAL = 60f; // 每60秒保存一次
+
     private void Update()
     {
         // 场景加载期间不处理 Pause
         if (_isSceneLoading)
             return;
 
-        // 游戏中或大厅按 ESC/Pause 打开暂停菜单
+        // 累计游玩时长（在大厅或游戏中）
         if (CurrentState == GameState.Playing || CurrentState == GameState.Lobby)
         {
+            _playTimeAccumulator += Time.deltaTime;
+            if (_playTimeAccumulator >= PLAY_TIME_SAVE_INTERVAL)
+            {
+                SavePlayTime();
+                _playTimeAccumulator = 0f;
+            }
+
             // 使用 TryGetValue 安全访问（UI ActionMap 中没有 Pause action）
             if (ManagerHub.Input.Actions.TryGetValue("Pause", out var pauseAction) &&
                 pauseAction.WasPressedThisFrame())
             {
                 PauseGame();
             }
+        }
+    }
+
+    /// <summary>
+    /// 保存游玩时长到存档
+    /// </summary>
+    private void SavePlayTime()
+    {
+        if (_currentSessionSaveSlot >= 0 && _playTimeAccumulator > 0)
+        {
+            // 将累计的时间保存
+            SaveLoadManager.Instance.AddPlayTime((long)_playTimeAccumulator);
+            _playTimeAccumulator = 0f;
         }
     }
 
@@ -112,22 +135,24 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     private int _currentSessionSaveSlot;
 
     /// <summary>
-    /// 开始新游戏（从主菜单进入大厅）
+    /// 进入大厅的时间戳（用于计算游玩时长）
+    /// </summary>
+    private long _lobbyEnterTime;
+
+    /// <summary>
+    /// 进入大厅（仅切换状态，不创建 session）
     /// </summary>
     /// <param name="saveSlot">存档槽位</param>
-    /// <param name="seed">游戏种子（默认使用时间戳）</param>
-    public void StartNewGame(int saveSlot, long? seed = null)
+    public void EnterLobby(int saveSlot)
     {
-        Debug.Log($"[StartNewGame] saveSlot={saveSlot}, seed={seed}");
-        _currentSessionSeed = seed ?? Environment.TickCount;
+        Debug.Log($"[EnterLobby] saveSlot={saveSlot}");
         _currentSessionSaveSlot = saveSlot;
 
-        Log($"StartNewGame: slot={saveSlot}, seed={_currentSessionSeed}");
+        // 记录进入大厅的时间（用于计算游玩时长）
+        _lobbyEnterTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-        // TODO: SaveLoadManager.CreateNewSave(saveSlot, sessionSeed);
-        // TODO: GameDataManager.StartNewSession(sessionSeed);
-
-        // 先进入 Lobby 状态（大厅/准备阶段）
+        // 只进入 Lobby 状态（大厅/准备阶段）
+        // Session 创建在 EnterDungeonPanel 中通过 StartSession 完成
         ChangeState(GameState.Lobby);
     }
 
@@ -140,63 +165,10 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     {
         Log($"CreateLobbyPlayer at {spawnPos}");
 
-        // 获取全局玩家数据（MetaData 系统未实现前，使用默认角色配置）
-        // TODO: 后续接入 MetaDataManager 获取存档级玩家强化数据
-        PlayerData globalPlayerData = GetOrCreateGlobalPlayerData();
-
-        // 创建大厅玩家处理器
+        // 创建大厅玩家处理器（PlayerHandler 会自动创建基础数据）
         _lobbyPlayerHandler = new PlayerHandler();
         // isLobbyPlayer=true 表示大厅玩家，不显示 HubPanel，但保持武器跟随鼠标
-        _lobbyPlayerHandler.CreatePlayer(spawnPos, globalPlayerData, isLobbyPlayer: true);
-    }
-
-    /// <summary>
-    /// 获取或创建全局玩家数据
-    /// </summary>
-    private PlayerData GetOrCreateGlobalPlayerData()
-    {
-        // 如果已有全局数据，直接返回
-        if (GameDataManager.Instance.PlayerData != null)
-            return GameDataManager.Instance.PlayerData;
-
-        // 否则从默认角色配置创建（首次进入游戏）
-        // TODO: 后续接入存档系统，从存档加载 MetaData
-        if (!GameDataManager.Instance.IsRoleInfoLoaded)
-        {
-            LogWarning("RoleInfo not loaded yet, using default data");
-            return null;
-        }
-        return GameDataManager.Instance.GetRoleDataByCurSel().ConvertToPlayerData();
-    }
-
-    /// <summary>
-    /// 从大厅进入游戏（正式开玩）
-    /// </summary>
-    public void EnterPlaying()
-    {
-        Log("EnterPlaying: Starting gameplay");
-
-        // 加载 Game_Scene（包含 A* 和地牢生成器），完成后实例化 LevelController
-        _isSceneLoading = true;
-        ManagerHub.Scene.LoadSceneAsync("Game_Scene", null, () =>
-        {
-            // 实例化 LevelController
-            if (_levelControllerPrefab != null)
-            {
-                LevelController = Instantiate(_levelControllerPrefab);
-                LevelController.Initialize(_currentSessionSeed);
-            }
-            else
-            {
-                LogError("LevelController Prefab is not assigned!");
-                return;
-            }
-
-            LevelController.EnterFirstLayer();
-            ChangeState(GameState.Playing);
-            EventCenter.Instance.Publish(GameEventID.OnSessionStart, _currentSessionSeed);
-            _isSceneLoading = false;
-        });
+        _lobbyPlayerHandler.CreatePlayer(spawnPos, existingData: null, isLobbyPlayer: true);
     }
 
     /// <summary>
@@ -216,19 +188,77 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     {
         Log($"ContinueGame: slot={saveSlot}");
 
-        // TODO: SaveLoadManager.LoadSave(saveSlot);
-        // TODO: GameDataManager.RestoreSession(saveData);
+        // 确保选择正确的槽位
+        SaveLoadManager.Instance.SelectSlot(saveSlot);
 
-        // 从存档恢复 LevelController 状态
-        if (LevelController != null)
+        // 从 sessionData 获取 seed 并加载到 SessionManager
+        var sessionData = SaveLoadManager.Instance.CurrentSaveData?.sessionData;
+        if (sessionData != null)
         {
-            // TODO: 从 SessionData 恢复当前层信息
-            // _levelManager.RestoreFromSession(currentSession);
+            _currentSessionSeed = sessionData.seed;
+            _currentSessionSaveSlot = saveSlot;
+            Debug.Log($"[ContinueGame] sessionData: roleId={sessionData.selectedRoleId}, roleName={sessionData.selectedRoleName}, seed={sessionData.seed}, floor={sessionData.currentFloor}, currentCheckpoint={sessionData.currentCheckpoint != null}");
+            // 加载 session 到 SessionManager
+            SessionManager.Instance.LoadSession(sessionData);
+            Log($"继续游戏: seed={_currentSessionSeed}, floor={sessionData.currentFloor}");
+        }
+        else
+        {
+            Debug.LogError("[ContinueGame] sessionData is null - no active session to continue!");
+            return;
         }
 
-        // 先进入 Lobby 状态
-        ChangeState(GameState.Lobby);
+        // 进入游戏（会加载 Game_Scene 并恢复 session）
+        EnterPlaying();
         EventCenter.Instance.Publish(GameEventID.OnSessionContinue);
+    }
+
+    /// <summary>
+    /// 进入游戏
+    /// <para>如果是继续游戏，根据 checkpoint 恢复对应层；如果是新游戏，从第0层开始</para>
+    /// </summary>
+    public void EnterPlaying()
+    {
+        // 防止重复进入
+        if (_isSceneLoading)
+        {
+            Log("EnterPlaying skipped: already loading");
+            return;
+        }
+
+        Log($"EnterPlaying: Starting gameplay. CurrentState={CurrentState}");
+
+        // 获取要进入的层索引（继续游戏时从 checkpoint 恢复）
+        int targetFloor = 0;
+        var checkpoint = SessionManager.Instance.GetCurrentCheckpoint();
+        if (checkpoint != null)
+        {
+            targetFloor = checkpoint.floorIndex;
+        }
+
+        // 加载 Game_Scene（包含 A* 和地牢生成器），完成后实例化 LevelController
+        _isSceneLoading = true;
+        ManagerHub.Scene.LoadSceneAsync("Game_Scene", null, () =>
+        {
+            Debug.Log("[EnterPlaying] Scene loaded callback executing...");
+            // 实例化 LevelController
+            if (_levelControllerPrefab != null)
+            {
+                LevelController = Instantiate(_levelControllerPrefab);
+                LevelController.Initialize(_currentSessionSeed);
+                LevelController.EnterLayer(targetFloor);
+            }
+            else
+            {
+                LogError("LevelController Prefab is not assigned!");
+                return;
+            }
+
+            ChangeState(GameState.Playing);
+            EventCenter.Instance.Publish(targetFloor == 0 ? GameEventID.OnSessionStart : GameEventID.OnSessionContinue);
+            _isSceneLoading = false;
+            Debug.Log("[EnterPlaying] Scene loaded callback completed");
+        });
     }
 
     /// <summary>
@@ -237,7 +267,7 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// <param name="saveSlot">存档槽位</param>
     public void StartGameFromMenu(int saveSlot)
     {
-        StartNewGame(saveSlot);
+        EnterLobby(saveSlot);
         EnterPlaying();
     }
 
@@ -273,6 +303,13 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     {
         Log("ReturnToMainMenu");
 
+        // 保存剩余的游玩时长
+        if (_playTimeAccumulator > 0)
+        {
+            SaveLoadManager.Instance.AddPlayTime((long)_playTimeAccumulator);
+            _playTimeAccumulator = 0f;
+        }
+
         // 销毁关卡
         if (LevelController != null)
         {
@@ -285,8 +322,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
 
         // 隐藏游戏Hub
         ManagerHub.UI.HidePanel<HubPanel>();
-
-        // TODO: 保存当前进度
 
         ChangeState(GameState.MainMenu);
     }
@@ -345,7 +380,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     }
 
     /// <summary>
-    /// 游戏结束（显示失败面板）
+    /// 游戏结束（死亡）
+    /// <para>调用 EndSession(false) 清空 session，session 结束后 checkpoint 不会被使用</para>
     /// </summary>
     public void GameOver()
     {
@@ -360,6 +396,7 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
 
     /// <summary>
     /// 游戏通关（显示成功面板）
+    /// <para>调用 EndSession(true) 更新 metaData 并清空 session</para>
     /// </summary>
     public void GameClear()
     {
@@ -408,9 +445,17 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         // 恢复时间（以防从暂停状态重启）
         Time.timeScale = 1f;
 
-        Debug.Log("[RestartGame] Calling StartNewGame...");
-        StartNewGame(_currentSessionSaveSlot);
-        Debug.Log("[RestartGame] StartNewGame done. Calling EnterPlaying...");
+        // 重新生成 seed 并创建新 session（全新开始）
+        long newSeed = SaveLoadManager.Instance.GenerateSeed();
+        int roleId = SaveLoadManager.Instance.CurrentSaveData?.sessionData?.selectedRoleId ?? 0;
+
+        Debug.Log($"[RestartGame] Generating new seed={newSeed} for roleId={roleId}");
+        SessionManager.Instance.StartSession(newSeed);
+        UpdateSessionSeed(newSeed);
+
+        Debug.Log("[RestartGame] Calling EnterLobby...");
+        EnterLobby(_currentSessionSaveSlot);
+        Debug.Log("[RestartGame] EnterLobby done. Calling EnterPlaying...");
         EnterPlaying();
         Debug.Log("[RestartGame] EnterPlaying done.");
     }

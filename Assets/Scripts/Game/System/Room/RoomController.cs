@@ -329,9 +329,39 @@ public class RoomController
     }
 
     /// <summary>
+    /// 获取所有房间状态（用于存档）
+    /// </summary>
+    public Dictionary<int, RoomState> GetAllRoomStates()
+    {
+        return new Dictionary<int, RoomState>(_roomStates);
+    }
+
+    /// <summary>
+    /// 批量恢复房间状态（用于读档）
+    /// </summary>
+    public void RestoreRoomStates(Dictionary<int, RoomState> states)
+    {
+        if (states == null)
+            return;
+
+        foreach (var kvp in states)
+        {
+            _roomStates[kvp.Key] = kvp.Value;
+        }
+    }
+
+    /// <summary>
     /// 获取玩家当前所在房间ID
     /// </summary>
     public int GetCurrentRoomId() => _currentRoomId;
+
+    /// <summary>
+    /// 设置玩家当前所在房间ID（用于从检查点恢复）
+    /// </summary>
+    public void SetCurrentRoomId(int roomId)
+    {
+        _currentRoomId = roomId;
+    }
 
     /// <summary>
     /// 释放资源

@@ -73,7 +73,7 @@ public class PlayerFSM : FSM
 
         // Dash
         AddTransition(Move, Dash, () => CheckTrigger("dash") && GetFloat("dashGapTimer") <= 0f);
-        AddTransition(Dash, Move, () => GetFloat("dashTimer") >= GameDataManager.Instance.PlayerData.dashDuration);
+        AddTransition(Dash, Move, () => GetFloat("dashTimer") >= ((Owner as Player)?.RuntimeData?.dashDuration ?? 0.1f));
 
         // Reload
         AddTransition(Idle, Reload, () => GetBool("isReload"));
@@ -90,8 +90,8 @@ public class PlayerFSM : FSM
 
         // Hurt → Move / Hurt → Idle（受伤动画播完后根据当前移动状态回归）
         // isMoving/isIdle 在整个 Hurt 期间保持进入前的值（Hurt 出口时由当前值决定去向）
-        AddTransition(Hurt, Move, () => GetFloat("hurtTimer") >= GameDataManager.Instance.PlayerData.hurtDuration && GetBool("isMoving"));
-        AddTransition(Hurt, Idle, () => GetFloat("hurtTimer") >= GameDataManager.Instance.PlayerData.hurtDuration && !GetBool("isMoving"));
+        AddTransition(Hurt, Move, () => GetFloat("hurtTimer") >= ((Owner as Player)?.RuntimeData?.hurtDuration ?? 0.3f) && GetBool("isMoving"));
+        AddTransition(Hurt, Idle, () => GetFloat("hurtTimer") >= ((Owner as Player)?.RuntimeData?.hurtDuration ?? 0.3f) && !GetBool("isMoving"));
 
         // Shoot → Move（Shoot 是瞬时状态，需要能切回 Move 以便移动）
         AddTransition(Shoot, Move, () => GetBool("isMoving"));

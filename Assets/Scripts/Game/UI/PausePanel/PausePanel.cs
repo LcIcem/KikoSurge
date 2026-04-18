@@ -34,6 +34,18 @@ public class PausePanel : BasePanel
         if (titleText != null)
             titleText.gameObject.SetActive(!isFromLobby);
 
+        // 大厅暂停时隐藏"返回大厅"按钮（已在大厅中无需再返回）
+        var lobbyBtn = GetControl<UnityEngine.UI.Button>(BTN_BACK_TO_LOBBY);
+        if (lobbyBtn != null)
+        {
+            if (isFromLobby)
+            {
+                // 大厅暂停：将"返回大厅"按钮移到最上面（sibling index 0）
+                lobbyBtn.transform.SetSiblingIndex(0);
+            }
+            lobbyBtn.gameObject.SetActive(!isFromLobby);
+        }
+
         // 订阅 Resume 动作（ESC）
         _resumeAction = ManagerHub.Input?.GetInputActionFromMap("UI", "Resume");
         if (_resumeAction != null)
@@ -50,6 +62,9 @@ public class PausePanel : BasePanel
 
         Time.timeScale = 1f;
 
+        // 隐藏时恢复玩家瞄准输入
+        AimInput.Enabled = true;
+
         // 隐藏时重置所有按钮和标题为显示状态
         var resumeBtn = GetControl<UnityEngine.UI.Button>(BTN_RESUME);
         var lobbyBtn = GetControl<UnityEngine.UI.Button>(BTN_BACK_TO_LOBBY);
@@ -57,7 +72,12 @@ public class PausePanel : BasePanel
         var mainMenuBtn = GetControl<UnityEngine.UI.Button>(BTN_BACK_TO_MAINMENU);
         var titleText = GetControl<UnityEngine.UI.Text>(TXT_TITLE);
         if (resumeBtn != null) resumeBtn.gameObject.SetActive(true);
-        if (lobbyBtn != null) lobbyBtn.gameObject.SetActive(true);
+        if (lobbyBtn != null)
+        {
+            lobbyBtn.gameObject.SetActive(true);
+            // 恢复按钮原始顺序：resume(0), settings(1), lobby(2), mainMenu(3)
+            lobbyBtn.transform.SetSiblingIndex(2);
+        }
         if (settingsBtn != null) settingsBtn.gameObject.SetActive(true);
         if (mainMenuBtn != null) mainMenuBtn.gameObject.SetActive(true);
         if (titleText != null) titleText.gameObject.SetActive(true);

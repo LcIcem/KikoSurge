@@ -151,7 +151,7 @@ GameObject:
   - component: {fileID: 1296335566443699056}
   - component: {fileID: 3395796690660600407}
   m_Layer: 5
-  m_Name: btn_newGame
+  m_Name: btn_start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -658,7 +658,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u7EE7\u7EED\u6E38\u620F"
+  m_Text: "\u9009\u62E9\u5B58\u6863"
 --- !u!1 &5284800067242126504
 GameObject:
   m_ObjectHideFlags: 0
@@ -830,7 +830,7 @@ GameObject:
   - component: {fileID: 4128077022463043708}
   - component: {fileID: 4938775951680590962}
   m_Layer: 5
-  m_Name: btn_continue
+  m_Name: btn_saveSlot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
