@@ -7089,9 +7089,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Interactable
   _interactionHintUI: {fileID: 3350436328151153701}
   _hintText: {fileID: 1032568589332067011}
-  _infoCardRoot: {fileID: 5405286057741042134}
-  _infoCardTitle: {fileID: 6092995521766941529}
-  _infoCardDescription: {fileID: 8831929326426844765}
+  _infoCardRoot: {fileID: 0}
+  _infoCardTitle: {fileID: 0}
+  _infoCardDescription: {fileID: 0}
 --- !u!114 &4200462741264733241
 MonoBehaviour:
   m_ObjectHideFlags: 0
