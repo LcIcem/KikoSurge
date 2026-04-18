@@ -3,12 +3,11 @@
 /// </summary>
 public enum ItemType
 {
-    None,
-    Weapon,      // 武器
-    Ammo,        // 弹药
-    Potion,      // 药水/消耗品
-    Armor,       // 护甲
-    Relic,       // 配饰
-    Currency,    // 货币
-    Misc         // 杂项
+    Weapon = 0,   // 武器
+    Ammo = 1,     // 弹药
+    Potion = 2,   // 药水/消耗品
+    Armor = 3,    // 护甲
+    Relic = 4,    // 配饰
+    Currency = 5,  // 货币
+    Misc = 6      // 杂项
 }

@@ -25,5 +25,5 @@ MonoBehaviour:
     dashGap: 1
     invincibleDuration: 0.5
     hurtDuration: 0.3
-    initialWeaponIds: e9030000ea030000
+    initialWeaponIds: 0100000002000000
     maxWeaponSlots: 2
