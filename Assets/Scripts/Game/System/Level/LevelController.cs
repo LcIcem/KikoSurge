@@ -540,7 +540,12 @@ public class LevelController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[LevelController] Invalid currentRoomId={savedRoomId} (max={maxRoomId}), ignoring");
+            // 降级处理：使用起始房间
+            Debug.LogWarning($"[LevelController] Invalid currentRoomId={savedRoomId} (max={maxRoomId}), falling back to startRoomId={snapshot.startRoomId}");
+            if (snapshot.startRoomId >= 0 && snapshot.startRoomId <= maxRoomId)
+            {
+                _roomController.SetCurrentRoomId(snapshot.startRoomId);
+            }
         }
 
         // 恢复玩家位置

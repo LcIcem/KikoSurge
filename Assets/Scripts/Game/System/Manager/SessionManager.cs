@@ -39,6 +39,16 @@ public class SessionManager : SingletonMono<SessionManager>
         _currentSession = SessionData.CreateNew(roleId, seed);
         var roleData = GameDataManager.Instance?.GetRoleStaticData(roleId);
         Debug.Log($"[SessionManager] Session started: role={roleData?.roleName ?? roleId.ToString()}, seed={seed}, maxWeaponSlots={roleData?.maxWeaponSlots ?? 2}, equipped=[{string.Join(", ", _currentSession.equippedWeaponIds)}], inventory=[{string.Join(", ", _currentSession.inventoryWeaponIds)}]");
+
+        // 将 runtime session 与存档关联（共享同一个 SessionData 引用）
+        // 这样 SaveSession() 才能正确地将数据写回存档
+        if (SaveLoadManager.Instance?.CurrentSaveData != null)
+        {
+            SaveLoadManager.Instance.CurrentSaveData.sessionData = _currentSession;
+        }
+
+        // 立即保存 session 关键数据（seed、roleId）到存档
+        SaveLoadManager.Instance?.SaveSession();
     }
 
     /// <summary>

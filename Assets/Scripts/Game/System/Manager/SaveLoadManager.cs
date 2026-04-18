@@ -217,15 +217,24 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
         var session = _currentSaveData.sessionData;
         var current = SessionManager.Instance.CurrentSession;
 
-        session.gold = current.gold;
+        // 保存所有 session 关键数据
+        session.seed = current.seed;
         session.currentFloor = current.currentFloor;
         session.SetPlayerPos(current.GetPlayerPos());
+        session.gold = current.gold;
         session.inventoryWeaponIds = current.inventoryWeaponIds;
         session.inventoryRelicIds = current.inventoryRelicIds;
+        session.equippedWeaponIds = current.equippedWeaponIds;
         session.currentHealth = current.currentHealth;
+        session.currentCheckpoint = current.currentCheckpoint;
+
+        // 保存 modifiers 列表（创建副本避免引用问题）
+        session.modifiers = current.modifiers != null
+            ? new List<ModifierData>(current.modifiers)
+            : new List<ModifierData>();
 
         SaveCurrentSlot();
-        Debug.Log($"[SaveLoadManager] Session saved: floor={current.currentFloor}, health={current.currentHealth}, gold={current.gold}");
+        Debug.Log($"[SaveLoadManager] Session saved: floor={current.currentFloor}, health={current.currentHealth}, gold={current.gold}, checkpoint={current.currentCheckpoint != null}, modifiers={session.modifiers.Count}");
     }
 
     /// <summary>
