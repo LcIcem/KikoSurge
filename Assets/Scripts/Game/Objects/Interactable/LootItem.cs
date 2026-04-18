@@ -1,6 +1,7 @@
 using UnityEngine;
 using LcIcemFramework;
 using System.Collections;
+using System.Text;
 
 /// <summary>
 /// 运行时掉落物实体：挂在到场景中的掉落物品
@@ -53,40 +54,13 @@ public class LootItem : MonoBehaviour, IPoolable
     // 视觉组件
     private SpriteRenderer _spriteRenderer;
     private BoxCollider2D _collider;
-    private Transform _visualRoot;
+    [SerializeField] private Transform _visualRoot;
     private bool _canPickup;
 
     private void Awake()
     {
         _collider = GetComponent<BoxCollider2D>();
-
-        // 创建视觉子对象
-        CreateVisualRoot();
-    }
-
-    private void CreateVisualRoot()
-    {
-        // 查找已有的视觉子对象
-        Transform existing = transform.Find("Visuals");
-        if (existing != null)
-        {
-            _visualRoot = existing;
-            _spriteRenderer = _visualRoot.GetComponent<SpriteRenderer>();
-            if (_spriteRenderer == null)
-                _spriteRenderer = _visualRoot.gameObject.AddComponent<SpriteRenderer>();
-            return;
-        }
-
-        // 创建新的视觉子对象
-        GameObject visualObj = new GameObject("Visuals");
-        visualObj.transform.SetParent(transform);
-        visualObj.transform.localPosition = Vector3.zero;
-        visualObj.transform.localRotation = Quaternion.identity;
-        visualObj.transform.localScale = Vector3.one;
-        _visualRoot = visualObj.transform;
-
-        // 添加 SpriteRenderer
-        _spriteRenderer = visualObj.AddComponent<SpriteRenderer>();
+        _spriteRenderer = _visualRoot?.GetComponent<SpriteRenderer>();
     }
 
     /// <summary>
@@ -319,11 +293,73 @@ public class LootItem : MonoBehaviour, IPoolable
         if (_interactable == null)
             _interactable = gameObject.AddComponent<Interactable>();
 
-        // 设置交互提示文本（英文临时）
-        _interactable.SetHintText($"Pick up {ItemDef?.Name}");
+        // 设置交互提示文本（{0} 会被替换为实际按键）
+        _interactable.SetHintText($"按[{{0}}]拾取");
 
-        // 订阅交互事件
+        // 设置物品信息卡片内容（显示由 Interactable.OnTriggerEnter 控制）
+        string title = $"<B>{ItemDef?.Name ?? "Unknown"}</B>";
+        string description = BuildItemDescription();
+        _interactable.SetInfoCardContent(title, description);
+
+        // 订阅交互事件（交互后卡片会自动隐藏）
         _interactable.OnInteract += OnInteractTriggered;
+    }
+
+    /// <summary>
+    /// 构建物品描述信息
+    /// </summary>
+    private string BuildItemDescription()
+    {
+        if (ItemDef == null)
+            return "No description available.";
+
+        switch (ItemDef.Type)
+        {
+            case ItemType.Weapon:
+                var weaponConfig = GameDataManager.Instance?.GetWeaponConfig(ItemDef.Id);
+                if (weaponConfig != null)
+                {
+                    return BuildWeaponDescription(weaponConfig);
+                }
+                return ItemDef.Description;
+
+            default:
+                return ItemDef.Description;
+        }
+    }
+
+    /// <summary>
+    /// 构建武器描述信息
+    /// </summary>
+    private string BuildWeaponDescription(WeaponConfig weaponConfig)
+    {
+        var sb = new StringBuilder();
+
+        // 显示武器属性
+        sb.AppendLine($"射速: {1f / weaponConfig.fireRate:F1}/秒");
+        sb.AppendLine($"弹夹: {weaponConfig.magazineSize} 发");
+
+        // 霰弹模式显示弹丸数量
+        if (weaponConfig.fireMode == FireMode.Spread && weaponConfig.bulletCount > 1)
+            sb.AppendLine($"弹丸: {weaponConfig.bulletCount}");
+
+        // 连发模式显示连发数量
+        if (weaponConfig.fireMode == FireMode.Burst)
+            sb.AppendLine($"连发: {weaponConfig.burstCount} 发");
+
+        // 显示散布角度
+        if (weaponConfig.randomSpreadAngle > 0)
+            sb.AppendLine($"散布: {weaponConfig.randomSpreadAngle}°");
+
+        sb.AppendLine($"换弹: {weaponConfig.reloadTime:F1}秒");
+
+        sb.AppendLine();
+        if (!string.IsNullOrEmpty(ItemDef.Description))
+        {
+            sb.AppendLine(ItemDef.Description);
+        }
+
+        return sb.ToString();
     }
 
     /// <summary>
@@ -339,6 +375,8 @@ public class LootItem : MonoBehaviour, IPoolable
     /// </summary>
     private void OnInteractTriggered()
     {
+        // 结束交互状态
+        Player.EndInteraction();
         Pickup();
     }
 

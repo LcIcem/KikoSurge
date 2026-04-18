@@ -35,6 +35,7 @@ public class Interactable : MonoBehaviour
     private bool _isPlayerInRange;
     private bool _interactionEnabled = true;
     private InputAction _interactAction;
+    private string _hintTemplate = "";
 
     /// <summary>
     /// 设置交互是否启用
@@ -57,6 +58,23 @@ public class Interactable : MonoBehaviour
 
         if (_infoCardRoot != null)
             _infoCardRoot.SetActive(false);
+
+        // 如果 _hintText 有值但 _hintTemplate 为空，用 _hintText 的内容初始化 _hintTemplate
+        if (_hintText != null && string.IsNullOrEmpty(_hintTemplate))
+        {
+            string existingText = _hintText.text;
+            if (!string.IsNullOrEmpty(existingText))
+            {
+                _hintTemplate = existingText;
+            }
+        }
+    }
+
+    protected virtual void Start()
+    {
+        // 初始化按键文本显示
+        if (!string.IsNullOrEmpty(_hintTemplate))
+            UpdateHintTextWithKey();
     }
 
     protected virtual void OnEnable()
@@ -78,7 +96,16 @@ public class Interactable : MonoBehaviour
             return;
 
         _isPlayerInRange = true;
+
+        // 如果玩家正在交互中，不显示交互提示
+        if (Player.IsInteracting)
+            return;
+
+        // 标记玩家开始交互，防止其他重叠物品显示UI
+        Player.StartInteraction();
+
         ShowInteractionHint(true);
+        ShowInfoCard(true);
     }
 
     protected virtual void OnTriggerExit2D(Collider2D other)
@@ -89,6 +116,10 @@ public class Interactable : MonoBehaviour
         _isPlayerInRange = false;
         ShowInteractionHint(false);
         ShowInfoCard(false);
+
+        // 玩家离开交互范围时，结束交互状态
+        if (Player.IsInteracting)
+            Player.EndInteraction();
     }
 
     private void OnInteractPerformed(InputAction.CallbackContext ctx)
@@ -106,6 +137,7 @@ public class Interactable : MonoBehaviour
             return;
 
         ShowInteractionHint(false);
+        ShowInfoCard(false);
         OnInteract?.Invoke();
     }
 
@@ -115,7 +147,9 @@ public class Interactable : MonoBehaviour
     public virtual void ResumePrompt()
     {
         if (_isPlayerInRange)
+        {
             ShowInteractionHint(true);
+        }
     }
 
     /// <summary>
@@ -125,15 +159,84 @@ public class Interactable : MonoBehaviour
     {
         if (_interactionHintUI != null)
             _interactionHintUI.SetActive(show);
+
+        if (show && !string.IsNullOrEmpty(_hintTemplate))
+            UpdateHintTextWithKey();
     }
 
     /// <summary>
-    /// 设置提示文本
+    /// 设置提示文本（支持 {0} 作为按键占位符）
     /// </summary>
     public void SetHintText(string text)
     {
-        if (_hintText != null)
-            _hintText.text = text;
+        _hintTemplate = text;
+        UpdateHintTextWithKey();
+    }
+
+    /// <summary>
+    /// 更新提示文本，将 {0} 替换为实际的交互按键
+    /// </summary>
+    private void UpdateHintTextWithKey()
+    {
+        if (_hintText == null)
+            return;
+
+        string keyName = GetInteractKeyName();
+        string displayText = string.Format(_hintTemplate, keyName);
+        _hintText.text = displayText;
+    }
+
+    /// <summary>
+    /// 获取交互按键的显示名称
+    /// </summary>
+    private string GetInteractKeyName()
+    {
+        // 每次都重新获取，确保获取最新的键位配置
+        var interactAction = ManagerHub.Input?.GetInputActionFromMap("Player", "Interact");
+        if (interactAction != null && interactAction.bindings.Count > 0)
+        {
+            // 遍历找到第一个非 composite 的有效绑定
+            for (int i = 0; i < interactAction.bindings.Count; i++)
+            {
+                var binding = interactAction.bindings[i];
+                // 跳过 composite 父级和 partOfComposite
+                if (binding.isComposite || binding.isPartOfComposite)
+                    continue;
+
+                if (!string.IsNullOrEmpty(binding.overridePath))
+                {
+                    return GetDisplayNameFromPath(binding.overridePath);
+                }
+                return InputActionRebindingExtensions.GetBindingDisplayString(interactAction, i, default);
+            }
+        }
+        return "E";
+    }
+
+    /// <summary>
+    /// 从路径获取按键显示名称
+    /// </summary>
+    private string GetDisplayNameFromPath(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return "None";
+
+        int slashIndex = path.LastIndexOf('/');
+        if (slashIndex >= 0 && slashIndex < path.Length - 1)
+        {
+            string key = path.Substring(slashIndex + 1);
+
+            if (key == "leftButton") return "LMB";
+            if (key == "rightButton") return "RMB";
+            if (key == "middleButton") return "MMB";
+            if (key == "shift") return "Shift";
+            if (key == "ctrl") return "Ctrl";
+            if (key == "alt") return "Alt";
+
+            if (key.Length == 1)
+                return key.ToUpper();
+            return char.ToUpper(key[0]) + key.Substring(1).ToLower();
+        }
+        return path;
     }
 
     /// <summary>

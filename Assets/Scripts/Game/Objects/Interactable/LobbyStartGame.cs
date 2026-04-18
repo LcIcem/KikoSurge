@@ -1,6 +1,7 @@
 using UnityEngine;
 using LcIcemFramework;
 using LcIcemFramework.Core;
+using Game.Util;
 
 /// <summary>
 /// 大厅"开始游戏"交互行为
@@ -12,11 +13,25 @@ public class LobbyStartGame : MonoBehaviour
 
     private void Start()
     {
+        _interactable.SetHintText("按[{0}]开始游戏");
         _interactable.OnInteract += OnInteractTriggered;
     }
 
     private void OnInteractTriggered()
     {
+        // 隐藏 InfoCard
+        _interactable.ShowInfoCard(false);
+
+        // 标记玩家正在交互
+        Player.StartInteraction();
+
+        // 停止玩家移动，防止滑行
+        var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
+        player?.LockMovement();
+
+        // 禁用武器旋转跟随鼠标
+        AimInput.Enabled = false;
+
         // 切换到 UI ActionMap（玩家输入被 UI 接管）
         ManagerHub.Input.SwitchActionMap("UI");
 
@@ -30,6 +45,12 @@ public class LobbyStartGame : MonoBehaviour
 
     private void OnEnterDungeon(long seed)
     {
+        // 结束交互状态
+        Player.EndInteraction();
+
+        // 进入地牢后恢复武器旋转跟随鼠标
+        AimInput.Enabled = true;
+
         if (seed == 0)
         {
             // seed = 0 表示继续游戏
@@ -55,8 +76,18 @@ public class LobbyStartGame : MonoBehaviour
 
     private void OnPanelClosed()
     {
+        // 结束交互状态
+        Player.EndInteraction();
+
         // 返回大厅，切换回 Player ActionMap
         ManagerHub.Input.SwitchActionMap("Player");
+
+        // 解锁玩家移动
+        var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
+        player?.UnlockMovement();
+
+        // 恢复武器旋转跟随鼠标
+        AimInput.Enabled = true;
 
         // 重新显示交互提示
         _interactable.ResumePrompt();

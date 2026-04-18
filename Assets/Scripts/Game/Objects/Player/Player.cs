@@ -56,6 +56,14 @@ public class Player : MonoBehaviour
     // 死亡标记（用于防止死亡后继续处理输入）
     private bool _isDead = false;
 
+    // 移动锁定标记（交互时锁定移动，防止滑行）
+    private bool _movementLocked = false;
+
+    /// <summary>
+    /// 玩家是否正在交互中（用于防止多个交互UI重叠显示）
+    /// </summary>
+    public static bool IsInteracting { get; private set; } = false;
+
     private void Awake()
     {
         _animator = GetComponent<Animator>();
@@ -145,6 +153,14 @@ public class Player : MonoBehaviour
         if (_isDead)
             return;
 
+        // Guard: 移动被锁定时不处理移动输入
+        if (_movementLocked)
+        {
+            MoveDir = Vector2.zero;
+            _moveInput = Vector2.zero;
+            return;
+        }
+
         // Guard: Only process input when Player action map is active
         if (!InputManager.Instance.Actions.ContainsKey("Move"))
             return;
@@ -169,11 +185,7 @@ public class Player : MonoBehaviour
             _fsm.SetTrigger("dash");
         }
 
-        // 调试用
-        if (InputManager.Instance.Actions["Dead"].WasPressedThisFrame())
-        {
-            TriggerDeath();
-        }
+        // 切换到下一把武器
         if (InputManager.Instance.Actions["SwitchWeapon"].WasPressedThisFrame())
         {
             weaponHandler.SwitchToNextWeapon();
@@ -222,6 +234,42 @@ public class Player : MonoBehaviour
             TriggerDeath();
         }
 
+    }
+
+    /// <summary>
+    /// 锁定移动（交互时调用，防止滑行）
+    /// </summary>
+    public void LockMovement()
+    {
+        _movementLocked = true;
+        MoveDir = Vector2.zero;
+        _moveInput = Vector2.zero;
+        _fsm.SetBool("isMoving", false);
+        _fsm.SetBool("isIdle", true);
+    }
+
+    /// <summary>
+    /// 解锁移动
+    /// </summary>
+    public void UnlockMovement()
+    {
+        _movementLocked = false;
+    }
+
+    /// <summary>
+    /// 开始交互（显示交互UI时调用，防止多个交互UI重叠）
+    /// </summary>
+    public static void StartInteraction()
+    {
+        IsInteracting = true;
+    }
+
+    /// <summary>
+    /// 结束交互（关闭交互UI时调用）
+    /// </summary>
+    public static void EndInteraction()
+    {
+        IsInteracting = false;
     }
 
     /// <summary>

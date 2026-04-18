@@ -25,6 +25,7 @@ public class Checkpoint : MonoBehaviour
 
     private void Start()
     {
+        _interactable.SetHintText("按[{0}]激活检查点");
         _interactable.OnInteract += OnInteractTriggered;
     }
 
@@ -35,6 +36,7 @@ public class Checkpoint : MonoBehaviour
 
         _isActivated = true;
         _interactable.SetInteractionEnabled(false);
+        _interactable.ShowInfoCard(false);
 
         OnCheckpointActivated?.Invoke();
     }

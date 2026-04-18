@@ -15,7 +15,7 @@ public class KeysSettingsPage : ISettingsPage
     // Action 名称常量（Player Map 中的 Actions）
     private static readonly string[] ActionNames = new[]
     {
-        "Move", "Look", "Shoot", "Dash", "SwitchWeapon", "Hurt", "Dead"
+        "Move", "Look", "Interact", "Shoot", "Dash", "SwitchWeapon"
     };
 
     // Action 显示名称映射
@@ -23,11 +23,10 @@ public class KeysSettingsPage : ISettingsPage
     {
         { "Move", "移动" },
         { "Look", "视角" },
+        { "Interact", "交互"},
         { "Shoot", "射击" },
         { "Dash", "闪避" },
-        { "SwitchWeapon", "切换武器" },
-        { "Hurt", "受伤" },
-        { "Dead", "死亡" }
+        { "SwitchWeapon", "切换武器" }
     };
 
     // 拖拽配置（由 SettingsPanel 传入）

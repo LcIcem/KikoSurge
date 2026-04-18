@@ -216,16 +216,12 @@ MonoBehaviour:
     m_ActionName: 'Player/Pause[/Keyboard/escape]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: c3d4e5f6-3333-4444-5555-666677770007
-    m_ActionName: 'Player/Hurt[/Keyboard/1]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: c3d4e5f6-3333-4444-5555-666677770008
-    m_ActionName: 'Player/Dead[/Keyboard/2]'
-  - m_PersistentCalls:
-      m_Calls: []
     m_ActionId: 02c0f669-28d4-495f-916c-d6762814e659
     m_ActionName: 'UI/Continue[/Keyboard/escape]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 6d3b7c55-fe8d-4a4d-99b5-42d120ede09e
+    m_ActionName: 'Player/Interact[/Keyboard/r]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: UI

@@ -24,12 +24,16 @@ public class RestPointInteractable : MonoBehaviour
 
         if (_interactable != null)
         {
+            _interactable.SetHintText("按[{0}]休息");
             _interactable.OnInteract += OnInteract;
         }
     }
 
     private void OnInteract()
     {
+        // 隐藏 InfoCard
+        _interactable.ShowInfoCard(false);
+
         // 回血
         HealPlayer();
 

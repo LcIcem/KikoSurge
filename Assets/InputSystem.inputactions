@@ -245,6 +245,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Interact",
+                    "type": "Button",
+                    "id": "6d3b7c55-fe8d-4a4d-99b5-42d120ede09e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Shoot",
                     "type": "Button",
                     "id": "c3d4e5f6-3333-4444-5555-666677770003",
@@ -275,33 +284,6 @@
                     "name": "Pause",
                     "type": "Button",
                     "id": "c3d4e5f6-3333-4444-5555-666677770006",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Hurt",
-                    "type": "Button",
-                    "id": "c3d4e5f6-3333-4444-5555-666677770007",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Dead",
-                    "type": "Button",
-                    "id": "c3d4e5f6-3333-4444-5555-666677770008",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Interact",
-                    "type": "Button",
-                    "id": "6d3b7c55-fe8d-4a4d-99b5-42d120ede09e",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -416,28 +398,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Pause",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d4e5f6a7-3333-4444-5555-666677771011",
-                    "path": "<Keyboard>/1",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Hurt",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d4e5f6a7-3333-4444-5555-666677771012",
-                    "path": "<Keyboard>/2",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Dead",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
