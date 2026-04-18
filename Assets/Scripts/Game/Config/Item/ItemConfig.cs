@@ -28,4 +28,7 @@ public class ItemConfig : ScriptableObject
 
     [Tooltip("描述")]
     public string Description;
+
+    [Tooltip("拾取音效")]
+    public AudioClip PickupSFX;
 }

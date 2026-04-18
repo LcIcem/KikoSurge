@@ -236,6 +236,9 @@ public class LootItem : MonoBehaviour, IPoolable
     {
         if (ItemDef == null) return;
 
+        // 播放拾取音效
+        PlayPickupSFX();
+
         switch (ItemDef.Type)
         {
             case ItemType.Weapon:
@@ -251,6 +254,17 @@ public class LootItem : MonoBehaviour, IPoolable
         }
 
         ManagerHub.Pool.Release(gameObject);
+    }
+
+    /// <summary>
+    /// 播放拾取音效
+    /// </summary>
+    private void PlayPickupSFX()
+    {
+        if (ItemDef?.PickupSFX != null)
+        {
+            ManagerHub.Audio.PlaySFX(ItemDef.PickupSFX);
+        }
     }
 
     private Interactable _interactable;

@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4811528543089687043}
   - component: {fileID: -3315430177226026965}
-  - component: {fileID: 4373964662515866112}
   - component: {fileID: 6741462220567976628}
+  - component: {fileID: 4373964662515866112}
   m_Layer: 0
   m_Name: LootItem
   m_TagString: Untagged
@@ -83,6 +83,23 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.0037279, y: 0.99476725}
   m_EdgeRadius: 0
+--- !u!114 &6741462220567976628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 140860234070293769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9e747dcbc9d9c246b4ddcbcb1346d0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Interactable
+  _interactionHintUI: {fileID: 5457871806826263224}
+  _hintText: {fileID: 3788674575014967750}
+  _infoCardRoot: {fileID: 7488045183838833022}
+  _infoCardTitle: {fileID: 1476502940710352510}
+  _infoCardDescription: {fileID: 2151482226900473598}
 --- !u!114 &4373964662515866112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -103,23 +120,6 @@ MonoBehaviour:
   _floatSpeed: 1
   _floatAmplitude: 0.1
   _visualRoot: {fileID: 7982301955657250138}
---- !u!114 &6741462220567976628
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 140860234070293769}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9e747dcbc9d9c246b4ddcbcb1346d0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Interactable
-  _interactionHintUI: {fileID: 5457871806826263224}
-  _hintText: {fileID: 3788674575014967750}
-  _infoCardRoot: {fileID: 7488045183838833022}
-  _infoCardTitle: {fileID: 1476502940710352510}
-  _infoCardDescription: {fileID: 2151482226900473598}
 --- !u!1 &2374533679691399487
 GameObject:
   m_ObjectHideFlags: 0

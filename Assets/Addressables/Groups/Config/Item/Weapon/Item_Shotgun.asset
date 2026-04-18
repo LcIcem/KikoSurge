@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1263a87267f5e3d4c8681647be3b50bf, type: 3}
   m_Name: Item_Shotgun
   m_EditorClassIdentifier: Assembly-CSharp::ItemConfig
-  Id: 1002
+  Id: 2
   Name: "\u9730\u5F39\u67AA"
-  Type: 1
+  Type: 0
   MaxStack: 1
   Value: 0
   Icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}

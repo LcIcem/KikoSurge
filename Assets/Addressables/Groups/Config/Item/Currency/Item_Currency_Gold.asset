@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b43bf62c51d6cc419e360242e121cd3, type: 3}
   m_Name: Item_Currency_Gold
   m_EditorClassIdentifier: Assembly-CSharp::CurrencyConfig
-  Id: 0
+  Id: 5001
   Name: "\u91D1\u5E01"
-  Type: 6
+  Type: 5
   MaxStack: 9999
   Value: 0
-  Icon: {fileID: 0}
-  Description: 
+  Icon: {fileID: 1808860862, guid: 5e4c858791d5ddc42a43411bfae7ed18, type: 3}
+  Description: "\u91D1\u707F\u707F"
   coinValue: 1

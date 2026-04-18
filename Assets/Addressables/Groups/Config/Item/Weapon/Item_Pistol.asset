@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1263a87267f5e3d4c8681647be3b50bf, type: 3}
   m_Name: Item_Pistol
   m_EditorClassIdentifier: Assembly-CSharp::ItemConfig
-  Id: 1001
+  Id: 1
   Name: "\u5355\u53D1\u624B\u67AA"
-  Type: 1
+  Type: 0
   MaxStack: 1
   Value: 0
   Icon: {fileID: 3404276450375173017, guid: 0a6cc4db7a41d5549a80f5ab9d1b1c80, type: 3}

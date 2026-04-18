@@ -15,8 +15,8 @@ MonoBehaviour:
   m_GroupName: Config-Loot
   m_GUID: 6e4ddce9b72367646be9a64b7b84a80e
   m_SerializeEntries:
-  - m_GUID: 824f17909ba212f4993154a5168ccb5f
-    m_Address: Grunt_LootTable
+  - m_GUID: e1996294394bdef4cab54d8fc62db7cf
+    m_Address: LootTable_Grunt
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

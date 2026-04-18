@@ -10,18 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6ee85a3eb9878d4c99cf6b3d76585f4, type: 3}
-  m_Name: Grunt_LootTable
+  m_Name: LootTable_Grunt
   m_EditorClassIdentifier: Assembly-CSharp::LootTableConfig
   groups:
-  - groupName: "\u6B66\u5668"
+  - groupName: "\u6B66\u5668\u6389\u843D"
     entries:
     - itemConfig: {fileID: 11400000, guid: f273b95930b4f8044a4d25f83312e731, type: 2}
-      dropChance: 1
+      dropChance: 0.5
       minQuantity: 1
       maxQuantity: 1
     - itemConfig: {fileID: 11400000, guid: 41133e477919bc24ca1a751fde8b4981, type: 2}
-      dropChance: 1
+      dropChance: 0.3
       minQuantity: 1
       maxQuantity: 1
     maxPick: 1
+  - groupName: "\u91D1\u5E01\u6389\u843D"
+    entries:
+    - itemConfig: {fileID: 11400000, guid: 628452d0397e8004e8e0b0a49d9141e0, type: 2}
+      dropChance: 1
+      minQuantity: 1
+      maxQuantity: 3
+    maxPick: 3
   DropSpreadRadius: 1

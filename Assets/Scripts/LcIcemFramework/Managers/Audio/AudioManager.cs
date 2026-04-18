@@ -75,6 +75,16 @@ public class AudioManager : SingletonMono<AudioManager>
         });
     }
 
+    public void PlaySFX(AudioClip clip)
+    {
+        if (clip == null) return;
+        var src = _sfxSources.Find(s => !s.isPlaying);
+        if (src == null) src = _sfxSources[0];
+        src.clip = clip;
+        src.volume = _sfxVolume;
+        src.Play();
+    }
+
     public void StopSFX()  { foreach (var s in _sfxSources) s.Stop(); }
     public void PauseSFX() { foreach (var s in _sfxSources) s.Pause(); }
     public void ResumeSFX() { foreach (var s in _sfxSources) s.UnPause(); }
