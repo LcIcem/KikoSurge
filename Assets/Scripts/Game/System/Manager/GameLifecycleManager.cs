@@ -332,6 +332,14 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     public void QuitGame()
     {
         Log("QuitGame");
+
+        // 保存剩余的游玩时长
+        if (_playTimeAccumulator > 0)
+        {
+            SaveLoadManager.Instance.AddPlayTime((long)_playTimeAccumulator);
+            _playTimeAccumulator = 0f;
+        }
+
         Application.Quit();
     }
 
@@ -487,4 +495,16 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     private void Log(string msg) => Debug.Log($"[GameLifecycleManager] {msg}");
     private void LogWarning(string msg) => Debug.LogWarning($"[GameLifecycleManager] {msg}");
     private void LogError(string msg) => Debug.LogError($"[GameLifecycleManager] {msg}");
+
+    /// <summary>
+    /// 应用退出时保存游玩时间（捕获强制退出、崩溃等情况）
+    /// </summary>
+    private void OnApplicationQuit()
+    {
+        if (_playTimeAccumulator > 0)
+        {
+            SaveLoadManager.Instance?.AddPlayTime((long)_playTimeAccumulator);
+            _playTimeAccumulator = 0f;
+        }
+    }
 }
