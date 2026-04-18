@@ -26,6 +26,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public EnemyType Type { get; protected set; }
     public int EnemyId { get; private set; }
     public int RoomId { get; set; } = -1;
+    public EnemyConfig EnemyConfig => _config;
 
     // ========== 调试开关 ==========
     // EditorPrefs key 与 DebugMenu.cs 保持一致，Editor assembly 写入，runtime 读取

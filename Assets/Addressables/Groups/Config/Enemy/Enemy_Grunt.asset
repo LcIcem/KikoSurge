@@ -15,7 +15,7 @@ MonoBehaviour:
   EnemyId: 1001
   EnemyName: "\u6742\u51751\u53F7"
   Type: 0
-  MaxHP: 100
+  MaxHP: 20
   MoveSpeed: 2
   Attack: 2
   AttackInterval: 2
@@ -26,4 +26,5 @@ MonoBehaviour:
   AttackRange: 1
   LoseRange: 6
   PrefabAddress: Enemy
+  lootTable: {fileID: 11400000, guid: 824f17909ba212f4993154a5168ccb5f, type: 2}
   PatrolSpeed: 1

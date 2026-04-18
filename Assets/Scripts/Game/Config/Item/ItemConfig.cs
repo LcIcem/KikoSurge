@@ -1,31 +1,31 @@
 using UnityEngine;
 
 /// <summary>
-/// 物品类型枚举
-/// </summary>
-public enum ItemType
-{
-    Weapon,
-    Prop,
-    Gold
-}
-
-/// <summary>
-/// Item 配置基类（静态配置）
+/// 物品配置基类（抽象）
 /// 所有可掉落/可使用物品的共同属性定义
 /// </summary>
-public abstract class ItemConfig : ScriptableObject
+[CreateAssetMenu(fileName = "Item_XXX", menuName = "KikoSurge/物品/物品定义")]
+public class ItemConfig : ScriptableObject
 {
     [Header("标识")]
-    [Tooltip("唯一ID，用于字典查找")]
-    public string ItemId;
+    [Tooltip("全局唯一ID，所有物品共享此ID系统")]
+    public int Id;
 
     [Tooltip("物品名称")]
-    public string ItemName;
+    public string Name;
 
     [Tooltip("物品类型")]
-    public ItemType ItemType;
+    public ItemType Type;
 
-    [Tooltip("图标（用于掉落物显示）")]
+    [Tooltip("最大堆叠数")]
+    public int MaxStack = 1;
+
+    [Tooltip("卖价")]
+    public int Value;
+
+    [Tooltip("图标")]
     public Sprite Icon;
+
+    [Tooltip("描述")]
+    public string Description;
 }

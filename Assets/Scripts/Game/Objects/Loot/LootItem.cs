@@ -6,7 +6,7 @@ using System.Collections;
 /// 运行时掉落物实体：挂在到场景中的掉落物品
 /// 实现 IPoolable 支持对象池
 /// </summary>
-[RequireComponent(typeof(SpriteRenderer), typeof(BoxCollider2D))]
+[RequireComponent(typeof(BoxCollider2D))]
 public class LootItem : MonoBehaviour, IPoolable
 {
     [SerializeField] private SortingLayer _sortingLayer;
@@ -53,12 +53,40 @@ public class LootItem : MonoBehaviour, IPoolable
     // 视觉组件
     private SpriteRenderer _spriteRenderer;
     private BoxCollider2D _collider;
+    private Transform _visualRoot;
     private bool _canPickup;
 
     private void Awake()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
         _collider = GetComponent<BoxCollider2D>();
+
+        // 创建视觉子对象
+        CreateVisualRoot();
+    }
+
+    private void CreateVisualRoot()
+    {
+        // 查找已有的视觉子对象
+        Transform existing = transform.Find("Visuals");
+        if (existing != null)
+        {
+            _visualRoot = existing;
+            _spriteRenderer = _visualRoot.GetComponent<SpriteRenderer>();
+            if (_spriteRenderer == null)
+                _spriteRenderer = _visualRoot.gameObject.AddComponent<SpriteRenderer>();
+            return;
+        }
+
+        // 创建新的视觉子对象
+        GameObject visualObj = new GameObject("Visuals");
+        visualObj.transform.SetParent(transform);
+        visualObj.transform.localPosition = Vector3.zero;
+        visualObj.transform.localRotation = Quaternion.identity;
+        visualObj.transform.localScale = Vector3.one;
+        _visualRoot = visualObj.transform;
+
+        // 添加 SpriteRenderer
+        _spriteRenderer = visualObj.AddComponent<SpriteRenderer>();
     }
 
     /// <summary>
@@ -95,6 +123,9 @@ public class LootItem : MonoBehaviour, IPoolable
             _collider.enabled = false;
         }
 
+        // 根据物品类型设置交互模式
+        SetupInteractionMode();
+
         // 延迟启用拾取
         StartCoroutine(EnablePickupAfterDelay());
     }
@@ -116,7 +147,7 @@ public class LootItem : MonoBehaviour, IPoolable
 
     private IEnumerator FloatEffect()
     {
-        if (_floatSpeed <= 0f) yield break;
+        if (_floatSpeed <= 0f || _visualRoot == null) yield break;
 
         while (true)
         {
@@ -125,7 +156,7 @@ public class LootItem : MonoBehaviour, IPoolable
             while (t < period * 0.5f)
             {
                 float offset = Mathf.Lerp(0f, _floatAmplitude, t / (period * 0.5f));
-                transform.position = _basePosition + Vector3.up * offset;
+                _visualRoot.localPosition = Vector3.up * offset;
                 t += Time.deltaTime;
                 yield return null;
             }
@@ -134,7 +165,7 @@ public class LootItem : MonoBehaviour, IPoolable
             while (t < period * 0.5f)
             {
                 float offset = Mathf.Lerp(_floatAmplitude, 0f, t / (period * 0.5f));
-                transform.position = _basePosition + Vector3.up * offset;
+                _visualRoot.localPosition = Vector3.up * offset;
                 t += Time.deltaTime;
                 yield return null;
             }
@@ -173,6 +204,9 @@ public class LootItem : MonoBehaviour, IPoolable
 
         transform.position = _basePosition;
 
+        if (_visualRoot != null)
+            _visualRoot.localPosition = Vector3.zero;
+
         if (_spriteRenderer != null)
         {
             _spriteRenderer.color = Color.white;
@@ -182,6 +216,12 @@ public class LootItem : MonoBehaviour, IPoolable
     // IPoolable: 对象归还池时调用
     public void OnDespawn()
     {
+        // 取消订阅交互事件
+        if (_interactable != null)
+        {
+            _interactable.OnInteract -= OnInteractTriggered;
+        }
+
         if (_blinkCoroutine != null)
         {
             StopCoroutine(_blinkCoroutine);
@@ -193,6 +233,10 @@ public class LootItem : MonoBehaviour, IPoolable
             _floatCoroutine = null;
         }
         transform.position = _basePosition;
+
+        if (_visualRoot != null)
+            _visualRoot.localPosition = Vector3.zero;
+
         ItemDef = null;
         Quantity = 0;
         _canPickup = false;
@@ -206,45 +250,141 @@ public class LootItem : MonoBehaviour, IPoolable
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!_canPickup) return;
-        if (other.CompareTag("Player"))
-        {
-            Pickup();
-        }
+        if (!other.CompareTag("Player")) return;
+
+        // 武器类型需要按E交互，不自动拾取
+        if (ItemDef?.Type == ItemType.Weapon) return;
+
+        Pickup();
     }
 
     private void Pickup()
     {
         if (ItemDef == null) return;
 
-        switch (ItemDef.ItemType)
+        switch (ItemDef.Type)
         {
             case ItemType.Weapon:
                 HandleWeaponPickup();
                 break;
-            case ItemType.Prop:
-                HandlePropPickup();
+            case ItemType.Currency:
+                HandleCurrencyPickup();
                 break;
-            case ItemType.Gold:
-                HandleGoldPickup();
+            case ItemType.Potion:
+            case ItemType.Ammo:
+                HandleConsumablePickup();
                 break;
         }
 
         ManagerHub.Pool.Release(gameObject);
     }
 
-    private void HandleWeaponPickup()
+    private Interactable _interactable;
+
+    /// <summary>
+    /// 根据物品类型设置交互模式
+    /// </summary>
+    private void SetupInteractionMode()
     {
-        if (ItemDef is WeaponItemConfig weaponItem && weaponItem.gunConfig != null)
+        // 移除已有的 Interactable
+        if (_interactable != null)
         {
-            LootManager.Instance?.CreateWeaponForPlayer(weaponItem.gunConfig);
+            Destroy(_interactable);
+            _interactable = null;
+        }
+
+        switch (ItemDef?.Type)
+        {
+            case ItemType.Weapon:
+                // 武器类型需要按E交互
+                SetupAsInteractable();
+                break;
+            case ItemType.Currency:
+                // 货币自动拾取
+                SetupAsAutoPickup();
+                break;
+            default:
+                // 其他类型自动拾取
+                SetupAsAutoPickup();
+                break;
         }
     }
 
-    private void HandlePropPickup()
+    /// <summary>
+    /// 设置为可交互模式（需要按E拾取）
+    /// </summary>
+    private void SetupAsInteractable()
     {
+        _interactable = gameObject.GetComponent<Interactable>();
+        if (_interactable == null)
+            _interactable = gameObject.AddComponent<Interactable>();
+
+        // 设置交互提示文本（英文临时）
+        _interactable.SetHintText($"Pick up {ItemDef?.Name}");
+
+        // 订阅交互事件
+        _interactable.OnInteract += OnInteractTriggered;
     }
 
-    private void HandleGoldPickup()
+    /// <summary>
+    /// 设置为自动拾取模式
+    /// </summary>
+    private void SetupAsAutoPickup()
     {
+        // 保持碰撞体自动拾取逻辑（在 OnTriggerEnter2D 中处理）
+    }
+
+    /// <summary>
+    /// 交互触发时调用
+    /// </summary>
+    private void OnInteractTriggered()
+    {
+        Pickup();
+    }
+
+    private void HandleWeaponPickup()
+    {
+        var weaponConfig = GameDataManager.Instance?.GetWeaponConfig(ItemDef.Id);
+        if (weaponConfig == null) return;
+
+        // 获取玩家
+        var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
+        if (player == null) return;
+
+        WeaponFactory.Instance.Create(weaponConfig, player.WeaponPivot, (weapon) =>
+        {
+            if (weapon == null) return;
+
+            // 获取当前已装备武器列表和最大数量
+            var equippedWeaponIds = SessionManager.Instance.GetEquippedWeaponIds();
+            var roleData = GameDataManager.Instance?.GetRoleStaticData(SessionManager.Instance.CurrentSession?.selectedRoleId ?? 0);
+            int maxSlots = roleData?.maxWeaponSlots ?? 2;
+
+            if (equippedWeaponIds.Count < maxSlots)
+            {
+                // 装备栏未满，装备武器
+                player.weaponHandler.AddWeapon(weapon);
+                equippedWeaponIds.Add(weaponConfig.itemConfig.Id);
+                SessionManager.Instance.SetEquippedWeaponIds(equippedWeaponIds);
+            }
+            else
+            {
+                // 装备栏已满，放入背包
+                var inventoryWeaponIds = SessionManager.Instance.GetInventoryWeaponIds();
+                inventoryWeaponIds.Add(weaponConfig.itemConfig.Id);
+                SessionManager.Instance.SetInventoryWeaponIds(inventoryWeaponIds);
+                WeaponFactory.Instance.Release(weapon);
+            }
+        });
+    }
+
+    private void HandleCurrencyPickup()
+    {
+        SessionManager.Instance?.AddCurrency(Quantity);
+    }
+
+    private void HandleConsumablePickup()
+    {
+        // 消耗品拾取逻辑（待实现）
     }
 }

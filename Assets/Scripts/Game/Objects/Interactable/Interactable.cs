@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using TMPro;
 using UnityEngine.InputSystem;
 using LcIcemFramework;
 using LcIcemFramework.Core;
@@ -12,10 +13,14 @@ using LcIcemFramework.Core;
 [RequireComponent(typeof(Collider2D))]
 public class Interactable : MonoBehaviour
 {
-    /// <summary>
-    /// 交互提示 UI（World Space Canvas 子对象）
-    /// </summary>
-    [SerializeField] protected GameObject _promptUI;
+    [Header("交互提示（World Space Canvas 子对象）")]
+    [SerializeField] private GameObject _interactionHintUI;
+    [SerializeField] private TMP_Text _hintText;
+
+    [Header("物品信息面板（World Space Canvas 子对象）")]
+    [SerializeField] private GameObject _infoCardRoot;
+    [SerializeField] private TMP_Text _infoCardTitle;
+    [SerializeField] private TMP_Text _infoCardDescription;
 
     /// <summary>
     /// 交互触发时调用
@@ -38,7 +43,7 @@ public class Interactable : MonoBehaviour
     {
         _interactionEnabled = enabled;
         if (!enabled)
-            ShowPrompt(false);
+            ShowInteractionHint(false);
     }
 
     protected virtual void Awake()
@@ -47,8 +52,11 @@ public class Interactable : MonoBehaviour
         if (col != null && !col.isTrigger)
             col.isTrigger = true;
 
-        if (_promptUI != null)
-            _promptUI.SetActive(false);
+        if (_interactionHintUI != null)
+            _interactionHintUI.SetActive(false);
+
+        if (_infoCardRoot != null)
+            _infoCardRoot.SetActive(false);
     }
 
     protected virtual void OnEnable()
@@ -70,7 +78,7 @@ public class Interactable : MonoBehaviour
             return;
 
         _isPlayerInRange = true;
-        ShowPrompt(true);
+        ShowInteractionHint(true);
     }
 
     protected virtual void OnTriggerExit2D(Collider2D other)
@@ -79,7 +87,8 @@ public class Interactable : MonoBehaviour
             return;
 
         _isPlayerInRange = false;
-        ShowPrompt(false);
+        ShowInteractionHint(false);
+        ShowInfoCard(false);
     }
 
     private void OnInteractPerformed(InputAction.CallbackContext ctx)
@@ -96,7 +105,7 @@ public class Interactable : MonoBehaviour
         if (!CanInteract)
             return;
 
-        ShowPrompt(false);
+        ShowInteractionHint(false);
         OnInteract?.Invoke();
     }
 
@@ -106,16 +115,45 @@ public class Interactable : MonoBehaviour
     public virtual void ResumePrompt()
     {
         if (_isPlayerInRange)
-            ShowPrompt(true);
+            ShowInteractionHint(true);
     }
 
     /// <summary>
-    /// 显示/隐藏提示
+    /// 显示/隐藏交互提示
     /// </summary>
-    protected virtual void ShowPrompt(bool show)
+    protected virtual void ShowInteractionHint(bool show)
     {
-        if (_promptUI != null)
-            _promptUI.SetActive(show);
+        if (_interactionHintUI != null)
+            _interactionHintUI.SetActive(show);
+    }
+
+    /// <summary>
+    /// 设置提示文本
+    /// </summary>
+    public void SetHintText(string text)
+    {
+        if (_hintText != null)
+            _hintText.text = text;
+    }
+
+    /// <summary>
+    /// 设置物品信息内容
+    /// </summary>
+    public void SetInfoCardContent(string title, string description)
+    {
+        if (_infoCardTitle != null)
+            _infoCardTitle.text = title;
+        if (_infoCardDescription != null)
+            _infoCardDescription.text = description;
+    }
+
+    /// <summary>
+    /// 显示/隐藏物品信息面板
+    /// </summary>
+    public void ShowInfoCard(bool show)
+    {
+        if (_infoCardRoot != null)
+            _infoCardRoot.SetActive(show);
     }
 
     protected virtual void OnDestroy()

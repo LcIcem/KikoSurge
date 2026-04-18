@@ -5,7 +5,7 @@ using Game.Event;
 
 /// <summary>
 /// 武器基类 - 配置驱动架构
-/// 所有武器共用此类，通过 GunConfig 配置不同行为
+/// 所有武器共用此类，通过 WeaponConfig 配置不同行为
 /// 实现 IPoolable 支持对象池
 /// </summary>
 public class WeaponBase : MonoBehaviour, IPoolable
@@ -13,7 +13,7 @@ public class WeaponBase : MonoBehaviour, IPoolable
     /// <summary>
     /// 武器配置（核心）
     /// </summary>
-    public GunConfig Config { get; private set; }
+    public WeaponConfig Config { get; private set; }
 
     /// <summary>
     /// 武器所有者
@@ -42,7 +42,7 @@ public class WeaponBase : MonoBehaviour, IPoolable
     /// <summary>
     /// 从配置初始化武器
     /// </summary>
-    public void Init(GunConfig config)
+    public void Init(WeaponConfig config)
     {
         Config = config;
         CurrentAmmo = config.magazineSize;

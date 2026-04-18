@@ -17,17 +17,17 @@ public class GameDataManager : SingletonMono<GameDataManager>
     public bool IsRoleStaticDataLoaded { get; private set; }
     public int CurSelRoleIndex { get; set; } = 0;   // 当前选择的角色索引
 
-    // 武器配置字典：Key = WeaponId, Value = 配置SO
-    private Dictionary<int, GunConfig> _weaponConfigDict = new();
-    public Dictionary<int, GunConfig> WeaponConfigDict => _weaponConfigDict;
+    // 武器配置字典：Key = itemConfig.Id, Value = WeaponConfig
+    private Dictionary<int, WeaponConfig> _weaponConfigDict = new();
+    public Dictionary<int, WeaponConfig> WeaponConfigDict => _weaponConfigDict;
+
+    // 物品配置字典：Key = ItemConfig.Id, Value = ItemConfig
+    private Dictionary<int, ItemConfig> _itemConfigs = new();
+    public Dictionary<int, ItemConfig> ItemConfigDict => _itemConfigs;
 
     // 敌人配置字典：Key = EnemyId, Value = 配置SO
     private Dictionary<int, EnemyConfig> _enemyConfigDict = new();
     public Dictionary<int, EnemyConfig> EnemyConfigDict => _enemyConfigDict;
-
-    // 掉落表字典：Key = EnemyId, Value = LootTableConfig
-    private Dictionary<int, LootTableConfig> _lootTableDict = new();
-    public Dictionary<int, LootTableConfig> LootTableDict => _lootTableDict;
 
     // 设置数据
     private SettingsData _settingsData;
@@ -40,14 +40,14 @@ public class GameDataManager : SingletonMono<GameDataManager>
         // 加载角色静态数据配置
         ManagerHub.Addressables.LoadAsync<RoleStaticDataConfig>("RoleStaticData_Config", OnRoleStaticDataLoaded);
 
-        // 加载武器配置（统一SO）
-        ManagerHub.Addressables.LoadAsync<WeaponConfigRegistry>("Weapon_Config_Registry", OnAllWeaponDefsLoaded);
+        // 加载所有武器配置（按标签批量加载）
+        ManagerHub.Addressables.LoadByLabelAsync<WeaponConfig>("WeaponConfigs", OnAllWeaponConfigsLoaded);
+
+        // 加载所有物品配置（按标签批量加载）
+        ManagerHub.Addressables.LoadByLabelAsync<ItemConfig>("ItemConfigs", OnAllItemConfigsLoaded);
 
         // 加载敌人配置（统一SO）
         ManagerHub.Addressables.LoadAsync<EnemyConfigRegistry>("Enemy_Config_Registry", OnAllEnemyDefsLoaded);
-
-        // 加载掉落表配置（统一SO）
-        ManagerHub.Addressables.LoadAsync<LootTableRegistry>("LootTable_Registry", OnAllLootTablesLoaded);
     }
 
     private void Start() {
@@ -120,38 +120,79 @@ public class GameDataManager : SingletonMono<GameDataManager>
     /// <summary>
     /// 所有武器配置加载完毕回调
     /// </summary>
-    private void OnAllWeaponDefsLoaded(WeaponConfigRegistry so)
+    private void OnAllWeaponConfigsLoaded(IList<WeaponConfig> configs)
     {
-        if (so == null || so.weaponConfigs == null)
+        if (configs == null || configs.Count == 0)
         {
-            LogError("武器配置加载失败");
+            LogWarning("武器配置加载失败或为空");
             return;
         }
 
-        foreach (var config in so.weaponConfigs)
+        foreach (var config in configs)
         {
-            if (config == null) continue;
+            if (config == null || config.itemConfig == null) continue;
 
-            // 使用 Id 做 key
-            if (_weaponConfigDict.ContainsKey(config.Id))
+            int id = config.itemConfig.Id;
+            if (_weaponConfigDict.ContainsKey(id))
             {
-                LogWarning($"武器配置重复: Id={config.Id}, Name={config.gunName}");
+                LogWarning($"武器配置重复: Id={id}, Name={config.itemConfig?.Name}");
                 continue;
             }
 
-            _weaponConfigDict[config.Id] = config;
-            Log($"武器配置加载完成: Id={config.Id}, Name={config.gunName}");
+            _weaponConfigDict[id] = config;
         }
+        Log($"武器配置加载完成: {_weaponConfigDict.Count} 个");
     }
 
     /// <summary>
     /// 根据武器Id获取武器配置
     /// </summary>
-    public GunConfig GetWeaponConfig(int id)
+    public WeaponConfig GetWeaponConfig(int id)
     {
         if (_weaponConfigDict.TryGetValue(id, out var config))
             return config;
         LogWarning($"未找到武器配置: Id={id}");
+        return null;
+    }
+
+    #endregion
+
+    #region ItemData物品配置相关
+
+    /// <summary>
+    /// 所有物品配置加载完毕回调
+    /// </summary>
+    private void OnAllItemConfigsLoaded(IList<ItemConfig> configs)
+    {
+        if (configs == null || configs.Count == 0)
+        {
+            LogWarning("物品配置加载失败或为空");
+            return;
+        }
+
+        foreach (var config in configs)
+        {
+            if (config == null) continue;
+
+            if (_itemConfigs.ContainsKey(config.Id))
+            {
+                LogWarning($"物品配置重复: Id={config.Id}, Name={config.Name}");
+                continue;
+            }
+
+            _itemConfigs[config.Id] = config;
+        }
+        Log($"物品配置加载完成: {_itemConfigs.Count} 个");
+    }
+
+    /// <summary>
+    /// 根据物品Id获取物品配置
+    /// </summary>
+    public ItemConfig GetItemConfig(int id)
+    {
+        if (_itemConfigs.TryGetValue(id, out var config))
+            return config;
+        LogWarning($"未找到物品配置: Id={id}");
         return null;
     }
 
@@ -193,46 +234,6 @@ public class GameDataManager : SingletonMono<GameDataManager>
         if (_enemyConfigDict.TryGetValue(enemyId, out var config))
             return config;
         LogWarning($"未找到敌人配置: ID={enemyId}");
-        return null;
-    }
-
-    #endregion
-
-    #region LootData掉落表配置相关
-
-    /// <summary>
-    /// 所有掉落表配置加载完毕回调
-    /// </summary>
-    private void OnAllLootTablesLoaded(LootTableRegistry so)
-    {
-        if (so == null || so.lootTables == null)
-        {
-            LogError("掉落表配置加载失败");
-            return;
-        }
-
-        foreach (var table in so.lootTables)
-        {
-            if (table == null) continue;
-
-            if (_lootTableDict.ContainsKey(table.EnemyId))
-            {
-                LogWarning($"掉落表重复: EnemyId={table.EnemyId}");
-                continue;
-            }
-
-            _lootTableDict[table.EnemyId] = table;
-            Log($"掉落表加载完成: EnemyId={table.EnemyId}, Entries={table.Entries.Count}");
-        }
-    }
-
-    /// <summary>
-    /// 根据敌人ID获取掉落表
-    /// </summary>
-    public LootTableConfig GetLootTable(int enemyId)
-    {
-        if (_lootTableDict.TryGetValue(enemyId, out var table))
-            return table;
         return null;
     }
 

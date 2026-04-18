@@ -13,39 +13,30 @@ public class ItemFactory : Singleton<ItemFactory>
     }
 
     /// <summary>
-    /// 创建场景掉落物（通过 LootEntryConfig 配置）
-    /// 内部处理概率抽取和数量计算
+    /// 创建场景掉落物
     /// </summary>
-    /// <param name="entry">掉落条目配置</param>
+    /// <param name="itemConfig">物品配置</param>
+    /// <param name="quantity">数量</param>
     /// <param name="position">生成位置</param>
-    /// <returns>生成的 LootItem 实例，如果概率未通过则返回 null</returns>
-    public LootItem CreateLootItem(LootEntryConfig entry, Vector2 position)
+    /// <returns>生成的 LootItem 实例</returns>
+    public LootItem CreateLootItem(ItemConfig itemConfig, int quantity, Vector2 position)
     {
-        if (entry == null || entry.lootItemPrefab == null || entry.itemConfig == null)
+        if (itemConfig == null)
         {
-            LogError($"LootEntryConfig 配置不完整");
+            LogError($"ItemConfig 为 null");
             return null;
         }
 
-        // 概率抽取
-        if (Random.value > entry.dropChance)
-            return null;
-
-        // 计算掉落数量
-        int quantity = Random.Range(entry.minQuantity, entry.maxQuantity + 1);
-
-        // 从对象池获取
-        var lootItem = ManagerHub.Pool.Get<LootItem>(
-            entry.lootItemPrefab.name, position, Quaternion.identity);
+        // 从对象池获取（假设 LootItem prefab 名称为 "LootItem"）
+        var lootItem = ManagerHub.Pool.Get<LootItem>("LootItem", position, Quaternion.identity);
 
         if (lootItem == null)
         {
-            LogError($"LootItem 获取失败: {entry.lootItemPrefab.name}");
+            LogError($"LootItem 获取失败");
             return null;
         }
 
-        // 初始化（传入 ItemConfig）
-        lootItem.Initialize(entry.itemConfig, quantity);
+        lootItem.Initialize(itemConfig, quantity);
         return lootItem;
     }
 

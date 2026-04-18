@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using LcIcemFramework.Core;
 using LcIcemFramework;
@@ -9,9 +10,6 @@ using Game.Event;
 /// </summary>
 public class LootManager : SingletonMono<LootManager>
 {
-    // 玩家引用（用于武器拾取）
-    private Player _player;
-
     // 追踪所有活跃掉落物（用于切换层时清理）
     private readonly HashSet<LootItem> _activeLootItems = new();
 
@@ -22,9 +20,6 @@ public class LootManager : SingletonMono<LootManager>
 
     private void Start()
     {
-        // 获取玩家引用
-        _player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
-
         // 订阅敌人死亡事件
         EventCenter.Instance.Subscribe<EnemyKilledParams>(GameEventID.Combat_EnemyKilled, OnEnemyKilled);
     }
@@ -38,34 +33,79 @@ public class LootManager : SingletonMono<LootManager>
     }
 
     /// <summary>
-    /// 处理掉落逻辑
+    /// 处理掉落逻辑（分组掉落）
     /// </summary>
     private void ProcessLootDrop(EnemyBase enemy, Vector2 deathPosition)
     {
         if (enemy == null) return;
 
-        // 从 GameDataManager 获取掉落表
-        var lootTable = GameDataManager.Instance.GetLootTable(enemy.EnemyId);
+        // 直接从 EnemyConfig 获取掉落表
+        var lootTable = enemy.EnemyConfig?.lootTable;
         if (lootTable == null)
         {
-            Log($"无掉落表配置: EnemyId={enemy.EnemyId}");
+            LogWarning($"无掉落表配置: EnemyId={enemy.EnemyId}, EnemyConfig={enemy.EnemyConfig}");
             return;
         }
 
-        // 遍历掉落条目
-        foreach (var entry in lootTable.Entries)
+        if (lootTable.groups == null || lootTable.groups.Count == 0)
         {
-            if (entry == null || entry.lootItemPrefab == null) continue;
+            LogWarning($"掉落表 groups 为空: EnemyId={enemy.EnemyId}");
+            return;
+        }
 
-            // 计算散落位置
-            Vector2 spawnPos = deathPosition + Random.insideUnitCircle * lootTable.DropSpreadRadius;
-
-            // 生成掉落物（内部处理概率抽取和数量计算）
-            var lootItem = ItemFactory.Instance.CreateLootItem(entry, spawnPos);
-            if (lootItem != null)
+        // 遍历每个分组
+        foreach (var group in lootTable.groups)
+        {
+            if (group == null || group.entries == null || group.entries.Count == 0)
             {
-                _activeLootItems.Add(lootItem);
-                Log($"掉落物品: {lootItem.ItemDef?.ItemName ?? "Unknown"} x{lootItem.Quantity} at {spawnPos}");
+                LogWarning($"掉落组为空或无效: groupName={group?.groupName}");
+                continue;
+            }
+
+            // 独立判定每个条目的概率，记录命中的条目
+            var candidates = new List<LootTableConfig.LootEntry>();
+            foreach (var entry in group.entries)
+            {
+                if (entry == null || entry.itemConfig == null) continue;
+
+                // 独立判定每个条目的概率
+                if (Random.value <= entry.dropChance)
+                {
+                    candidates.Add(entry);
+                }
+            }
+
+            // 限制最大掉落数量
+            int pickCount = Mathf.Min(candidates.Count, group.maxPick);
+            Log($"分组 '{group.groupName}' 判定掉落 {pickCount}/{group.maxPick} 个（命中 {candidates.Count} 个）");
+
+            if (pickCount == 0) continue;
+
+            // 打乱候选列表并取前 maxPick 个
+            candidates = candidates.OrderBy(_ => Random.value).ToList();
+
+            for (int i = 0; i < pickCount; i++)
+            {
+                var entry = candidates[i];
+
+                // 计算数量
+                int quantity = Random.Range(entry.minQuantity, entry.maxQuantity + 1);
+
+                // 计算散落位置
+                Vector2 spawnPos = deathPosition + Random.insideUnitCircle * lootTable.DropSpreadRadius;
+
+                // 生成掉落物
+                Log($"生成掉落物: {entry.itemConfig.Name} x{quantity} at {spawnPos}");
+                var lootItem = ItemFactory.Instance.CreateLootItem(entry.itemConfig, quantity, spawnPos);
+                if (lootItem != null)
+                {
+                    _activeLootItems.Add(lootItem);
+                    Log($"掉落成功: {lootItem.ItemDef?.Name ?? "Unknown"} x{lootItem.Quantity}");
+                }
+                else
+                {
+                    LogWarning($"掉落失败: ItemFactory.CreateLootItem 返回 null");
+                }
             }
         }
     }
@@ -83,55 +123,7 @@ public class LootManager : SingletonMono<LootManager>
         _activeLootItems.Clear();
     }
 
-    /// <summary>
-    /// 为玩家创建武器（从掉落物拾取时调用）
-    /// 判断装备栏是否已满，未满则装备，已满则放入背包
-    /// </summary>
-    public void CreateWeaponForPlayer(GunConfig config)
-    {
-        if (_player == null)
-            _player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
-        if (_player == null)
-        {
-            LogError("武器创建失败: player 为 null");
-            return;
-        }
-
-        WeaponFactory.Instance.Create(config, _player.WeaponPivot, (weapon) =>
-        {
-            if (weapon == null)
-            {
-                LogError($"[LootManager] 武器创建失败: {config?.gunName ?? "null"}");
-                return;
-            }
-
-            // 获取当前已装备武器列表和最大数量
-            var equippedWeaponIds = SessionManager.Instance.GetEquippedWeaponIds();
-            var roleData = GameDataManager.Instance?.GetRoleStaticData(SessionManager.Instance.CurrentSession?.selectedRoleId ?? 0);
-            int maxSlots = roleData?.maxWeaponSlots ?? 2;
-
-            if (equippedWeaponIds.Count < maxSlots)
-            {
-                // 装备栏未满，装备武器
-                _player.weaponHandler.AddWeapon(weapon);
-                equippedWeaponIds.Add(config.Id);
-                SessionManager.Instance.SetEquippedWeaponIds(equippedWeaponIds);
-                Log($"武器装备到玩家: {config.gunName} (已装备 {equippedWeaponIds.Count}/{maxSlots})");
-            }
-            else
-            {
-                // 装备栏已满，放入背包
-                var inventoryWeaponIds = SessionManager.Instance.GetInventoryWeaponIds();
-                inventoryWeaponIds.Add(config.Id);
-                SessionManager.Instance.SetInventoryWeaponIds(inventoryWeaponIds);
-                WeaponFactory.Instance.Release(weapon);
-                Log($"武器放入背包: {config.gunName} (背包 {inventoryWeaponIds.Count} 把)");
-            }
-        });
-    }
-
     // 日志
     private void Log(string msg) => Debug.Log($"[LootManager] {msg}");
     private void LogWarning(string msg) => Debug.LogWarning($"[LootManager] {msg}");
-    private void LogError(string msg) => Debug.LogError($"[LootManager] {msg}");
 }

@@ -97,11 +97,11 @@ public class HubPanel : BasePanel
         var ammoImg = GetControl<Image>(IMG_AMMO);
         var ammoText = GetControl<Text>(TXT_AMMO);
 
-        if (weaponImg != null && weapon != null && weapon.Config.icon != null)
-            weaponImg.sprite = weapon.Config.icon;
+        if (weaponImg != null && weapon != null && weapon.Config.itemConfig?.Icon != null)
+            weaponImg.sprite = weapon.Config.itemConfig.Icon;
 
         if (weaponText != null && weapon != null)
-            weaponText.text = weapon.Config.gunName;
+            weaponText.text = weapon.Config.itemConfig?.Name ?? "未知武器";
 
         UpdateAmmoDisplay(weapon, ammoImg, ammoText);
     }

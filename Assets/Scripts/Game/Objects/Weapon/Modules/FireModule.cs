@@ -13,7 +13,7 @@ public static class FireModule
     /// </summary>
     public static void Fire(WeaponBase gun)
     {
-        GunConfig config = gun.Config;
+        WeaponConfig config = gun.Config;
 
         switch (config.fireMode)
         {
@@ -47,7 +47,7 @@ public static class FireModule
     /// <summary>
     /// 单发
     /// </summary>
-    private static void FireSingle(WeaponBase gun, GunConfig config)
+    private static void FireSingle(WeaponBase gun, WeaponConfig config)
     {
         // 消耗弹药并发射
         gun.ConsumeAmmo();
@@ -57,7 +57,7 @@ public static class FireModule
     /// <summary>
     /// 散射（霰弹）
     /// </summary>
-    private static void FireSpread(WeaponBase gun, GunConfig config)
+    private static void FireSpread(WeaponBase gun, WeaponConfig config)
     {
         int bulletCount = config.bulletCount;
         float shotgunAngle = config.shotgunSpreadAngle;
@@ -88,7 +88,7 @@ public static class FireModule
     /// 连发（三连发等）- 带延迟，每颗子弹检查并消耗弹药
     /// 冷却在最后一发射出后才开始计算
     /// </summary>
-    private static void FireBurst(WeaponBase gun, GunConfig config)
+    private static void FireBurst(WeaponBase gun, WeaponConfig config)
     {
         float burstSpeed = config.burstSpeed;
         float randomSpread = config.randomSpreadAngle;

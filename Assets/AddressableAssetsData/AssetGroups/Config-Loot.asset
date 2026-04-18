@@ -20,21 +20,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 961a84e59e9cdc5449f589c0b8f44ecc
-    m_Address: Pistol_Loot_Entry
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: baf9db4cfa5f8284cad0944853656b9f
-    m_Address: Shotgun_Loot_Entry
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: efae3ab6d7815d84c9a781f5c6bcd4ce
-    m_Address: LootTable_Registry
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: fc31030671b1eb2468e260f0796f7d65, type: 2}
   m_SchemaSet:

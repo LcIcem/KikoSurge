@@ -15,25 +15,17 @@ MonoBehaviour:
   m_GroupName: Config-Weapon
   m_GUID: 625f739fdacada747b100f5f6cc3a204
   m_SerializeEntries:
-  - m_GUID: 01e0bd06ab925ec4dbf640011f17cfe0
-    m_Address: PistolConfig
+  - m_GUID: 2ca5bb2a9a5079747bf87eeba482e4ca
+    m_Address: Weapon_Config_Shotgun
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - WeaponConfigs
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cbbc750219b38df46a094b1f1113f4eb
-    m_Address: Weapon_Pool
+  - m_GUID: 3b585f4ed0ac34645b2dbd6630a90e73
+    m_Address: Weapon_Config_Pistol
     m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d896064a09bc3a84a9262f392941f172
-    m_Address: Weapon_Config_Registry
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: db43a77544f75d54988382e04f122bab
-    m_Address: ShotgunConfig
-    m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - WeaponConfigs
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: fc31030671b1eb2468e260f0796f7d65, type: 2}

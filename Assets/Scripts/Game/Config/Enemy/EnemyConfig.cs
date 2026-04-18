@@ -30,4 +30,8 @@ public abstract class EnemyConfig : ScriptableObject
     [Header("预设体")]
     [Tooltip("敌人预设体的 Addressables 地址")]
     public string PrefabAddress;
+
+    [Header("掉落")]
+    [Tooltip("掉落表（直接配置，无需 EnemyId 查找）")]
+    public LootTableConfig lootTable;
 }

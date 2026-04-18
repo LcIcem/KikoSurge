@@ -21,7 +21,7 @@ public class WeaponFactory : Singleton<WeaponFactory>
     /// <param name="onCreated">创建完成回调</param>
     public void Create(int weaponId, Transform parent, UnityAction<WeaponBase> onCreated)
     {
-        GunConfig config = GetWeaponConfig(weaponId);
+        WeaponConfig config = GetWeaponConfig(weaponId);
         if (config == null)
         {
             onCreated?.Invoke(null);
@@ -36,7 +36,7 @@ public class WeaponFactory : Singleton<WeaponFactory>
     /// <param name="config">武器配置</param>
     /// <param name="parent">父对象Transform</param>
     /// <param name="onCreated">创建完成回调</param>
-    public void Create(GunConfig config, Transform parent, UnityAction<WeaponBase> onCreated)
+    public void Create(WeaponConfig config, Transform parent, UnityAction<WeaponBase> onCreated)
     {
         if (config == null)
         {
@@ -45,20 +45,20 @@ public class WeaponFactory : Singleton<WeaponFactory>
             return;
         }
 
-        if (config.gunPrefab == null)
+        if (config.prefab == null)
         {
-            Debug.LogError($"[WeaponFactory] 武器配置 {config.gunName} 没有指定预设体");
+            Debug.LogError($"[WeaponFactory] 武器配置 {config.itemConfig?.Name} 没有指定预设体");
             onCreated?.Invoke(null);
             return;
         }
 
-        var weaponObj = Object.Instantiate(config.gunPrefab, parent);
+        var weaponObj = Object.Instantiate(config.prefab, parent);
         weaponObj.SetActive(false);
 
         var weapon = weaponObj.GetComponent<WeaponBase>();
         if (weapon == null)
         {
-            Debug.LogError($"[WeaponFactory] 武器预设体 {config.gunName} 上没有 WeaponBase 组件");
+            Debug.LogError($"[WeaponFactory] 武器预设体 {config.itemConfig?.Name} 上没有 WeaponBase 组件");
             onCreated?.Invoke(null);
             return;
         }
@@ -74,7 +74,7 @@ public class WeaponFactory : Singleton<WeaponFactory>
     /// <param name="config">武器配置</param>
     /// <param name="position">生成位置</param>
     /// <param name="onCreated">创建完成回调</param>
-    public void CreateAsLoot(GunConfig config, Vector3 position, UnityAction<WeaponBase> onCreated)
+    public void CreateAsLoot(WeaponConfig config, Vector3 position, UnityAction<WeaponBase> onCreated)
     {
         if (config == null)
         {
@@ -83,19 +83,19 @@ public class WeaponFactory : Singleton<WeaponFactory>
             return;
         }
 
-        if (config.gunPrefab == null)
+        if (config.prefab == null)
         {
-            Debug.LogError($"[WeaponFactory] 武器配置 {config.gunName} 没有指定预设体");
+            Debug.LogError($"[WeaponFactory] 武器配置 {config.itemConfig?.Name} 没有指定预设体");
             onCreated?.Invoke(null);
             return;
         }
 
         WeaponBase weapon = ManagerHub.Pool.Get<WeaponBase>(
-            config.gunPrefab, position, Quaternion.identity);
+            config.prefab, position, Quaternion.identity);
 
         if (weapon == null)
         {
-            Debug.LogError($"[WeaponFactory] 从池获取武器失败: {config.gunName}");
+            Debug.LogError($"[WeaponFactory] 从池获取武器失败: {config.itemConfig?.Name}");
             onCreated?.Invoke(null);
             return;
         }
@@ -113,9 +113,9 @@ public class WeaponFactory : Singleton<WeaponFactory>
         ManagerHub.Pool.Release(weapon.gameObject);
     }
 
-    private GunConfig GetWeaponConfig(int weaponId)
+    private WeaponConfig GetWeaponConfig(int weaponId)
     {
-        GunConfig config = GameDataManager.Instance.GetWeaponConfig(weaponId);
+        WeaponConfig config = GameDataManager.Instance.GetWeaponConfig(weaponId);
         if (config == null)
         {
             Debug.LogError($"[WeaponFactory] 未找到武器配置: Id={weaponId}");

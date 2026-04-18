@@ -166,7 +166,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e747dcbc9d9c246b4ddcbcb1346d0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Interactable
-  _promptUI: {fileID: 2836859367587208812}
+  _interactionHintUI: {fileID: 2836859367587208812}
 --- !u!1 &2836859367587208812
 GameObject:
   m_ObjectHideFlags: 0

@@ -231,28 +231,28 @@ public class SessionManager : SingletonMono<SessionManager>
     }
 
     /// <summary>
-    /// 获取金币
+    /// 获取货币
     /// </summary>
-    public int GetGold()
+    public int GetCurrency()
     {
         return _currentSession?.gold ?? 0;
     }
 
     /// <summary>
-    /// 设置金币
+    /// 设置货币
     /// </summary>
-    public void SetGold(int gold)
+    public void SetCurrency(int amount)
     {
         if (_currentSession != null)
         {
-            _currentSession.gold = gold;
+            _currentSession.gold = amount;
         }
     }
 
     /// <summary>
-    /// 添加金币
+    /// 添加货币
     /// </summary>
-    public void AddGold(int amount)
+    public void AddCurrency(int amount)
     {
         if (_currentSession != null)
         {
@@ -261,9 +261,9 @@ public class SessionManager : SingletonMono<SessionManager>
     }
 
     /// <summary>
-    /// 花费金币
+    /// 花费货币
     /// </summary>
-    public bool SpendGold(int amount)
+    public bool SpendCurrency(int amount)
     {
         if (_currentSession != null && _currentSession.gold >= amount)
         {
