@@ -177,9 +177,6 @@ public class Player : MonoBehaviour
         if (InputManager.Instance.Actions["SwitchWeapon"].WasPressedThisFrame())
         {
             weaponHandler.SwitchToNextWeapon();
-            var weapon = weaponHandler.CurrentWeapon;
-            if (weapon != null)
-                Debug.Log("当前武器为" + weapon.Config.gunName + ", 武器当前容量：" + weapon.CurrentAmmo);
         }
     }
 
@@ -189,19 +186,16 @@ public class Player : MonoBehaviour
         // 无敌帧期间忽略伤害
         if (_isInvincible)
         {
-            Debug.Log($"[Player] 无敌帧中，伤害 {damage} 被忽略");
             return;
         }
 
         float hp = _playerData.Health;
         if (hp <= 0)
         {
-            Debug.Log($"[Player] HP 为 0，伤害 {damage} 被忽略");
             return;
         }
 
         hp -= damage;
-        Debug.Log($"[Player] 受伤！伤害: {damage}, 剩余HP: {hp}");
 
         // 启动无敌帧
         _invincibleTimer = _playerData.invincibleDuration;
@@ -235,8 +229,6 @@ public class Player : MonoBehaviour
     /// </summary>
     public void TriggerDeath()
     {
-        Debug.Log($"[Player] TriggerDeath called. HP before death: {_playerData.Health}");
-
         // 停止武器跟随鼠标（立即停止，避免死亡动画播放期间武器还在转）
         var weaponRotations = GetComponentsInChildren<WeaponRotation>();
         foreach (var wr in weaponRotations)
@@ -289,11 +281,9 @@ public class Player : MonoBehaviour
     {
         if (_sprite == null)
         {
-            Debug.LogError("[Player] HurtFlashCoroutine: _sprite is null!");
             yield break;
         }
 
-        Debug.Log($"[Player] 受伤闪烁开始，无敌时间: {_invincibleTimer}s");
         float elapsed = 0f;
         float flashInterval = 0.1f;  // 闪烁间隔（0.1秒更明显）
         bool visible = true;
@@ -307,13 +297,11 @@ public class Player : MonoBehaviour
         }
 
         _sprite.enabled = true;  // 确保结束时可见
-        Debug.Log("[Player] 受伤闪烁结束");
     }
 
     // 敌人伤害处理（碰撞/子弹/攻击）
     private void OnEnemyHitPlayer(EnemyHitPlayerParams p)
     {
-        Debug.Log($"[Player] OnEnemyHitPlayer: damageType={p.damageType}, damage={p.damage}");
         switch (p.damageType)
         {
             case EnemyDamageType.Collision:

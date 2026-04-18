@@ -77,8 +77,6 @@ public class SettingsPanel : BasePanel
 
     private void SetupPages()
     {
-        Debug.Log($"[SettingsPanel] SetupPages. keysContainer={_keysContentContainer}, template={_keysItemTemplate}");
-
         _audioPage.Init(this);
 
         _keysPage.Init(this);
@@ -125,8 +123,6 @@ public class SettingsPanel : BasePanel
 
     private void ShowSettings(string pageName)
     {
-        Debug.Log($"[SettingsPanel] ShowSettings: {pageName}");
-
         var panelAudio = transform.Find("RightPanel/panel_audio")?.gameObject;
         var panelKeys = transform.Find("RightPanel/panel_keys")?.gameObject;
         if (panelAudio != null) panelAudio.SetActive(pageName == _audioPage.PageKey);

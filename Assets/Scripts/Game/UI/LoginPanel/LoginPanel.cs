@@ -47,7 +47,6 @@ public class LoginPanel : BasePanel
         if (!SaveLoadManager.Instance.HasSaveData(currentSlot))
         {
             // 没有存档，创建新存档到当前槽位
-            Debug.Log($"[LoginPanel] 槽位 {currentSlot} 无存档，创建新存档");
             SaveLoadManager.Instance.CreateNewSave(currentSlot);
         }
 

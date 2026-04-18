@@ -96,7 +96,6 @@ public class Interactable : MonoBehaviour
         if (!CanInteract)
             return;
 
-        Debug.Log($"[Interactable] 触发交互: {gameObject.name}");
         ShowPrompt(false);
         OnInteract?.Invoke();
     }

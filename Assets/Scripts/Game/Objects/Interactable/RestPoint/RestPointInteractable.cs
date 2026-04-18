@@ -35,8 +35,6 @@ public class RestPointInteractable : MonoBehaviour
 
         // 保存 checkpoint
         SaveCheckpoint();
-
-        Debug.Log($"[RestPoint] Healed {_healAmount} HP and saved checkpoint at {gameObject.name}");
     }
 
     private void HealPlayer()

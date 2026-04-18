@@ -242,11 +242,9 @@ public class LootItem : MonoBehaviour, IPoolable
 
     private void HandlePropPickup()
     {
-        Debug.Log($"[LootItem] 拾取道具: {ItemDef.ItemName} x{Quantity}");
     }
 
     private void HandleGoldPickup()
     {
-        Debug.Log($"[LootItem] 拾取金币: {Quantity}");
     }
 }

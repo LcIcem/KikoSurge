@@ -36,8 +36,6 @@ public class Checkpoint : MonoBehaviour
         _isActivated = true;
         _interactable.SetInteractionEnabled(false);
 
-        Debug.Log($"[Checkpoint] 激活检查点: {gameObject.name}");
-
         OnCheckpointActivated?.Invoke();
     }
 

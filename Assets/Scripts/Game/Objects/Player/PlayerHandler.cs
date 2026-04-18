@@ -52,7 +52,6 @@ public class PlayerHandler
             // 继续游戏：使用存档中的 roleId
             int savedRoleId = SessionManager.Instance.CurrentSession.selectedRoleId;
             roleData = GameDataManager.Instance.GetRoleStaticData(savedRoleId);
-            Debug.Log($"[PlayerHandler] Continue game: using saved roleId={savedRoleId}");
         }
         else
         {
@@ -62,7 +61,7 @@ public class PlayerHandler
 
         if (roleData == null)
         {
-            Debug.LogError($"[PlayerHandler] Role data not found! Using default.");
+            Debug.LogError("[PlayerHandler] Role data not found! Using default.");
             roleData = GameDataManager.Instance.GetDefaultRoleStaticData();
         }
 
@@ -161,16 +160,10 @@ public class PlayerHandler
     /// </summary>
     public void DestroyPlayer()
     {
-        Debug.Log($"[PlayerHandler] DestroyPlayer called. _playerInstance = {_playerInstance?.name ?? "null"}");
         if (_playerInstance != null)
         {
-            Debug.Log($"[PlayerHandler] Destroying player: {_playerInstance.name}");
             UnityEngine.Object.Destroy(_playerInstance);
             _playerInstance = null;
-        }
-        else
-        {
-            Debug.Log("[PlayerHandler] _playerInstance is null, nothing to destroy");
         }
     }
 }

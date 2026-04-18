@@ -36,7 +36,6 @@ public class EnterDungeonPanel : BasePanel
     private void RefreshButtonStates()
     {
         bool hasActiveSession = SaveLoadManager.Instance.HasActiveSession;
-        Debug.Log($"[EnterDungeonPanel] RefreshButtonStates: HasActiveSession={hasActiveSession}, CurrentSlotId={SaveLoadManager.Instance.CurrentSlotId}");
 
         var continueBtn = GetControl<Button>(BTN_CONTINUE);
         if (continueBtn != null)
@@ -71,7 +70,6 @@ public class EnterDungeonPanel : BasePanel
             return;
         }
 
-        Debug.Log("[EnterDungeonPanel] 继续游戏");
         Hide();
         OnEnterDungeon?.Invoke(0); // seed = 0 表示继续，用存档中的 seed
     }
@@ -93,14 +91,12 @@ public class EnterDungeonPanel : BasePanel
             }
         }
 
-        Debug.Log($"[EnterDungeonPanel] 开始新游戏，种子: {seed}");
         Hide();
         OnEnterDungeon?.Invoke(seed);
     }
 
     private void OnBackClicked()
     {
-        Debug.Log("[EnterDungeonPanel] 返回大厅");
         Hide();
         OnDungeonPanelClosed?.Invoke();
     }

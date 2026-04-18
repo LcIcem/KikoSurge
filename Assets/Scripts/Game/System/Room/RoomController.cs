@@ -119,8 +119,6 @@ public class RoomController
 
         int newRoomId = _tileData.GetRoomIdAt(Vector2Int.FloorToInt(playerPos));
 
-        Debug.Log($"[RoomCtrl] CheckAndSpawnInRoom: playerPos={playerPos}, newRoomId={newRoomId}, _currentRoomId={_currentRoomId}");
-
         if (newRoomId == _currentRoomId)
             return;
 
@@ -150,15 +148,11 @@ public class RoomController
 
         // 仅未访问的房间需要执行行为逻辑
         if (!IsRoomUnvisited(newRoomId))
-        {
-            Debug.Log($"[RoomCtrl] Room {newRoomId} already visited, skipping");
             return;
-        }
 
         if (room == null)
             return;
 
-        Debug.Log($"[RoomCtrl] Visiting new room {newRoomId}");
         VisitRoom(room, playerPos);
     }
 
@@ -169,27 +163,22 @@ public class RoomController
 
     private void VisitRoom(Room room, Vector2 playerPos)
     {
-        Debug.Log($"[RoomCtrl] VisitRoom: roomId={room.id}, type={room.roomType}");
-
         switch (room.roomType)
         {
             case RoomType.Start:
             case RoomType.Goal:
-                Debug.Log($"[RoomCtrl] Start/Goal room - marking cleared");
                 MarkRoomCleared(room.id);
                 break;
 
             case RoomType.Normal:
             case RoomType.Elite:
             case RoomType.Boss:
-                Debug.Log($"[RoomCtrl] Combat room - closing doors");
                 _roomStates[room.id] = RoomState.InProgress;
                 CloseDoors(room.id);  // 关门
                 ExecuteRoomBehaviours(room, playerPos);
                 break;
 
             default:
-                Debug.Log($"[RoomCtrl] Unknown room type - marking cleared");
                 MarkRoomCleared(room.id);
                 break;
         }
@@ -298,26 +287,16 @@ public class RoomController
     /// </summary>
     private void CloseDoors(int roomId)
     {
-        Debug.Log($"[RoomCtrl] CloseDoors: roomId={roomId}, wallTilemap={_wallTilemap != null}, tileInfo={_tileInfo != null}");
-
         if (_wallTilemap == null || _tileInfo == null)
-        {
-            Debug.LogWarning($"[RoomCtrl] CloseDoors failed: wallTilemap={_wallTilemap != null}, tileInfo={_tileInfo != null}");
             return;
-        }
 
         var closedDoorTile = _tileInfo.GetTile(TileType.ClosedDoorTile);
-        Debug.Log($"[RoomCtrl] ClosedDoorTile={closedDoorTile?.name ?? "null"}");
         if (closedDoorTile == null)
             return;
 
         if (!_tileData.TryGetRoomDoorTiles(roomId, out var doorTiles))
-        {
-            Debug.LogWarning($"[RoomCtrl] TryGetRoomDoorTiles failed for roomId={roomId}");
             return;
-        }
 
-        Debug.Log($"[RoomCtrl] Setting {doorTiles.Count} door tiles for roomId={roomId}");
         foreach (var pos in doorTiles)
         {
             _wallTilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), closedDoorTile);

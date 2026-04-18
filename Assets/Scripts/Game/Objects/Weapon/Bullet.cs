@@ -160,7 +160,6 @@ public class Bullet : MonoBehaviour, IPoolable
         else if (other.CompareTag("Player") && _ownerTag == "Enemy")
         {
             // 敌方子弹击中玩家 → 发布命中事件
-            Debug.Log($"[Bullet] 敌方子弹击中玩家! damage={Damage}");
             EventCenter.Instance.Publish(GameEventID.Combat_EnemyHitPlayer,
                 new EnemyHitPlayerParams { enemy = null, target = other.transform, damage = Damage, damageType = EnemyDamageType.Attack });
             ManagerHub.Pool.Release(gameObject);
