@@ -176,7 +176,6 @@ public class InventoryManager : SingletonMono<InventoryManager>
             ItemType.Armor => _sessionData.inventoryArmorIds,
             ItemType.Relic => _sessionData.inventoryRelicIds,
             ItemType.Currency => _sessionData.inventoryCurrencyIds,
-            ItemType.Misc => _sessionData.inventoryMiscIds,
             _ => null
         };
     }

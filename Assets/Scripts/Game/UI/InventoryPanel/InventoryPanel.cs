@@ -35,6 +35,9 @@ public class InventoryPanel : BasePanel
     private const string TAB_RELIC = "tog_tab_relic";
     private const string TAB_CURRENCY = "tog_tab_currency";
 
+    // 已装备武器区域（用于 Find 兜底）
+    private const string EQUIP_WEAPON_AREA = "EquipedWeapon";
+
     #endregion
 
     #region 序列化字段
@@ -42,7 +45,11 @@ public class InventoryPanel : BasePanel
     [Header("物品列表")]
     [SerializeField] private RectTransform _content;
     [SerializeField] private RectTransform _contentCurrency;
-    [SerializeField] private ItemSlotUI _slotPrefab;
+    [SerializeField] private GameObject _slotPrefab;
+
+    [Header("已装备武器")]
+    [SerializeField] private RectTransform _equipedWeaponContainer;
+    [SerializeField] private GameObject _equipSlotPrefab;
 
     #endregion
 
@@ -51,6 +58,7 @@ public class InventoryPanel : BasePanel
     private ItemType _currentTab = ItemType.Weapon;
     private bool _isCurrencyTab;
     private readonly List<ItemSlotUI> _activeSlots = new();
+    private readonly List<ItemSlotUI> _activeEquipSlots = new();
 
     #endregion
 
@@ -65,6 +73,7 @@ public class InventoryPanel : BasePanel
 
         // 刷新数据
         RefreshCharacterInfo();
+        RefreshEquipedWeapon();
         RefreshItemList();
     }
 
@@ -75,6 +84,7 @@ public class InventoryPanel : BasePanel
 
         // 回收所有 ItemSlot
         ReleaseAllSlots();
+        ReleaseAllEquipSlots();
 
         base.Hide();
     }
@@ -234,6 +244,70 @@ public class InventoryPanel : BasePanel
     }
 
     /// <summary>
+    /// 刷新已装备武器显示
+    /// </summary>
+    private void RefreshEquipedWeapon()
+    {
+        var sessionData = SessionManager.Instance?.CurrentSession;
+        var playerData = SessionManager.Instance?.GetPlayerData();
+        if (sessionData == null || playerData == null)
+            return;
+
+        // 获取容器（优先用序列化字段，否则用 Find）
+        var container = _equipedWeaponContainer;
+        if (container == null)
+        {
+            var equipWeaponArea = transform.Find(EQUIP_WEAPON_AREA);
+            container = equipWeaponArea?.Find("EquipedWeapon_container")?.GetComponent<RectTransform>();
+        }
+
+        if (container == null)
+            return;
+
+        if (_equipSlotPrefab == null)
+        {
+            LogError("EquipSlotPrefab is not assigned!");
+            return;
+        }
+
+        // 回收旧的装备槽
+        ReleaseAllEquipSlots();
+
+        // 获取最大武器栏位数
+        var roleData = GameDataManager.Instance?.GetRoleStaticData(playerData.id);
+        int maxSlots = roleData?.maxWeaponSlots ?? 2;
+        var equippedWeaponIds = sessionData.equippedWeaponIds;
+
+        // 根据 maxSlots 生成对应数量的装备槽
+        for (int i = 0; i < maxSlots; i++)
+        {
+            var slotObj = PoolManager.Instance.Get(_equipSlotPrefab, Vector3.zero, Quaternion.identity);
+            var slot = slotObj.GetComponent<ItemSlotUI>();
+
+            if (slot != null)
+            {
+                // 如果该槽位有武器，显示武器图标；否则显示默认图标（ItemSlotUI 自带）
+                if (equippedWeaponIds != null && i < equippedWeaponIds.Count && equippedWeaponIds[i] > 0)
+                {
+                    int weaponId = equippedWeaponIds[i];
+                    slot.Initialize(weaponId, 1, ItemType.Weapon);
+                }
+                else
+                {
+                    // 无武器时传 0，显示默认图标
+                    slot.Initialize(0, 0, ItemType.Weapon);
+                }
+
+                slot.transform.SetParent(container, false);
+                _activeEquipSlots.Add(slot);
+            }
+        }
+
+        // 更新已装备武器容器高度
+        UpdateContentHeightForGrid(container, maxSlots);
+    }
+
+    /// <summary>
     /// 刷新物品列表
     /// </summary>
     private void RefreshItemList()
@@ -260,12 +334,12 @@ public class InventoryPanel : BasePanel
             return;
 
         // 按 ID 分组统计堆叠
-        var grouped = itemIds.GroupBy(id => id);
+        var grouped = itemIds.GroupBy(id => id).ToList();
 
         // 生成 ItemSlot
         foreach (var group in grouped)
         {
-            var slotObj = PoolManager.Instance.Get(_slotPrefab.gameObject, Vector3.zero, Quaternion.identity);
+            var slotObj = PoolManager.Instance.Get(_slotPrefab, Vector3.zero, Quaternion.identity);
             var slot = slotObj.GetComponent<ItemSlotUI>();
 
             if (slot != null)
@@ -275,6 +349,48 @@ public class InventoryPanel : BasePanel
                 _activeSlots.Add(slot);
             }
         }
+
+        // 手动计算 Content 高度（适配 GridLayoutGroup 的 CellSize 和 Spacing）
+        UpdateContentHeightForGrid(_content, _activeSlots.Count);
+    }
+
+    /// <summary>
+    /// 根据 GridLayoutGroup 设置和 ItemSlot 数量更新 Content 高度
+    /// </summary>
+    /// <param name="content">Content 的 RectTransform</param>
+    /// <param name="itemCount">Item 数量</param>
+    private void UpdateContentHeightForGrid(RectTransform content, int itemCount)
+    {
+        if (content == null || itemCount == 0)
+            return;
+
+        var gridLayout = content.GetComponent<UnityEngine.UI.GridLayoutGroup>();
+        if (gridLayout == null)
+            return;
+
+        // 获取 GridLayoutGroup 的设置
+        Vector2 cellSize = gridLayout.cellSize;
+        Vector2 spacing = gridLayout.spacing;
+        float paddingTop = gridLayout.padding.top;
+        float paddingBottom = gridLayout.padding.bottom;
+
+        // 获取 Content 的宽度
+        float contentWidth = content.rect.width;
+
+        // 计算列数（每行能放几个）
+        float availableWidth = contentWidth - gridLayout.padding.left - gridLayout.padding.right;
+        int columns = Mathf.Max(1, Mathf.FloorToInt((availableWidth + spacing.x) / (cellSize.x + spacing.x)));
+
+        // 计算行数
+        int rows = Mathf.CeilToInt((float)itemCount / columns);
+
+        // 计算总高度
+        float totalHeight = paddingTop + paddingBottom + rows * cellSize.y + (rows - 1) * spacing.y;
+
+        // 更新 Content 高度
+        var sizeDelta = content.sizeDelta;
+        sizeDelta.y = totalHeight;
+        content.sizeDelta = sizeDelta;
     }
 
     /// <summary>
@@ -290,6 +406,21 @@ public class InventoryPanel : BasePanel
             }
         }
         _activeSlots.Clear();
+    }
+
+    /// <summary>
+    /// 回收所有已装备武器槽
+    /// </summary>
+    private void ReleaseAllEquipSlots()
+    {
+        foreach (var slot in _activeEquipSlots)
+        {
+            if (slot != null && slot.gameObject != null)
+            {
+                PoolManager.Instance.Release(slot.gameObject);
+            }
+        }
+        _activeEquipSlots.Clear();
     }
 
     #endregion

@@ -31,7 +31,6 @@ public class SessionData
     public List<int> inventoryArmorIds = new();
     public List<int> inventoryRelicIds = new();
     public List<int> inventoryCurrencyIds = new();
-    public List<int> inventoryMiscIds = new();
 
     // 已装备武器列表（最大数量由 RoleStaticData.maxWeaponSlots 决定）
     public List<int> equippedWeaponIds = new();

@@ -45,11 +45,11 @@ public class ItemSlotUI : MonoBehaviour, IPoolable
         // 获取物品配置
         var config = GameDataManager.Instance?.GetItemConfig(itemId);
 
-        // 设置图标
-        if (_imgIcon != null)
+        // 设置图标（只有当 config 存在且有有效图标时才覆盖预设体默认图标）
+        if (_imgIcon != null && config != null && config.Icon != null)
         {
-            _imgIcon.sprite = config?.Icon;
-            _imgIcon.enabled = _imgIcon.sprite != null;
+            _imgIcon.sprite = config.Icon;
+            _imgIcon.enabled = true;
         }
 
         // 设置数量文本
