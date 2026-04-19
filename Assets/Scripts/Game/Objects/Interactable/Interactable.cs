@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
@@ -45,6 +46,17 @@ public class Interactable : MonoBehaviour
         _interactionEnabled = enabled;
         if (!enabled)
             ShowInteractionHint(false);
+    }
+
+    /// <summary>
+    /// 重置交互状态（对象池复用时调用）
+    /// </summary>
+    public void ResetInteractionState()
+    {
+        _isPlayerInRange = false;
+        _interactionEnabled = true;
+        ShowInteractionHint(false);
+        ShowInfoCard(false);
     }
 
     protected virtual void Awake()
@@ -97,12 +109,12 @@ public class Interactable : MonoBehaviour
 
         _isPlayerInRange = true;
 
-        // 如果玩家正在交互中，不显示交互提示
-        if (Player.IsInteracting)
+        // 如果已有其他交互物激活，不显示交互提示
+        if (Player.CurrentInteractable != null && Player.CurrentInteractable != this)
             return;
 
-        // 标记玩家开始交互，防止其他重叠物品显示UI
-        Player.StartInteraction();
+        // 设置自己为当前交互物
+        Player.StartInteraction(this);
 
         ShowInteractionHint(true);
         ShowInfoCard(true);
@@ -117,14 +129,19 @@ public class Interactable : MonoBehaviour
         ShowInteractionHint(false);
         ShowInfoCard(false);
 
-        // 玩家离开交互范围时，结束交互状态
-        if (Player.IsInteracting)
+        // 只有自己是当前交互物时才清空，并通知其他物品
+        if (Player.CurrentInteractable == this)
+        {
             Player.EndInteraction();
+            if (gameObject.activeInHierarchy)
+                StartCoroutine(NotifyNearbyItemsCoroutine());
+        }
     }
 
     private void OnInteractPerformed(InputAction.CallbackContext ctx)
     {
-        if (CanInteract)
+        // 只有自己是当前激活的交互物时才响应按键
+        if (CanInteract && Player.CurrentInteractable == this)
             Interact();
     }
 
@@ -138,7 +155,49 @@ public class Interactable : MonoBehaviour
 
         ShowInteractionHint(false);
         ShowInfoCard(false);
+
+        // 如果自己是当前交互物，清空并通知范围内其他物品重新检查
+        if (Player.CurrentInteractable == this)
+        {
+            Player.EndInteraction();
+            if (gameObject.activeInHierarchy)
+                StartCoroutine(NotifyNearbyItemsCoroutine());
+        }
+
         OnInteract?.Invoke();
+    }
+
+    /// <summary>
+    /// 通知范围内的其他交互物重新检查状态
+    /// </summary>
+    private System.Collections.IEnumerator NotifyNearbyItemsCoroutine()
+    {
+        yield return null; // 等待一帧
+
+        // 使用物理检测查找范围内的其他Interactable
+        Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, 0.1f);
+        foreach (var col in cols)
+        {
+            var otherInteractable = col.GetComponent<Interactable>();
+            if (otherInteractable != null && otherInteractable != this)
+            {
+                // 通知其他物品玩家仍在范围内，让它重新检查是否应该显示UI
+                otherInteractable.CheckAndShowUIIfInRange();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 检查是否在范围内并显示UI（供其他物品调用）
+    /// </summary>
+    public void CheckAndShowUIIfInRange()
+    {
+        if (_isPlayerInRange && Player.CurrentInteractable == null)
+        {
+            Player.StartInteraction(this);
+            ShowInteractionHint(true);
+            ShowInfoCard(true);
+        }
     }
 
     /// <summary>

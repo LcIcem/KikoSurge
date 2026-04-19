@@ -274,13 +274,6 @@ public class LootItem : MonoBehaviour, IPoolable
     /// </summary>
     private void SetupInteractionMode()
     {
-        // 移除已有的 Interactable
-        if (_interactable != null)
-        {
-            Destroy(_interactable);
-            _interactable = null;
-        }
-
         switch (ItemDef?.Type)
         {
             case ItemType.Weapon:
@@ -303,9 +296,19 @@ public class LootItem : MonoBehaviour, IPoolable
     /// </summary>
     private void SetupAsInteractable()
     {
+        // 直接获取 Prefab 上已有的 Interactable 组件，不要销毁重建
+        // 否则会丢失 Prefab 上配置的 UI 引用（_interactionHintUI 等）
         _interactable = gameObject.GetComponent<Interactable>();
         if (_interactable == null)
+        {
             _interactable = gameObject.AddComponent<Interactable>();
+        }
+
+        // 重置交互状态（复用时需要）
+        _interactable.ResetInteractionState();
+
+        // 取消订阅，防止重复订阅
+        _interactable.OnInteract -= OnInteractTriggered;
 
         // 设置交互提示文本（{0} 会被替换为实际按键）
         _interactable.SetHintText($"按[{{0}}]拾取");

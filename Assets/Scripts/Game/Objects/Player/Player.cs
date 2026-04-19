@@ -60,9 +60,9 @@ public class Player : MonoBehaviour
     private bool _movementLocked = false;
 
     /// <summary>
-    /// 玩家是否正在交互中（用于防止多个交互UI重叠显示）
+    /// 当前正在交互的物品（用于防止多个交互UI重叠显示）
     /// </summary>
-    public static bool IsInteracting { get; private set; } = false;
+    public static Interactable CurrentInteractable { get; private set; } = null;
 
     private void Awake()
     {
@@ -259,9 +259,9 @@ public class Player : MonoBehaviour
     /// <summary>
     /// 开始交互（显示交互UI时调用，防止多个交互UI重叠）
     /// </summary>
-    public static void StartInteraction()
+    public static void StartInteraction(Interactable interactable)
     {
-        IsInteracting = true;
+        CurrentInteractable = interactable;
     }
 
     /// <summary>
@@ -269,7 +269,7 @@ public class Player : MonoBehaviour
     /// </summary>
     public static void EndInteraction()
     {
-        IsInteracting = false;
+        CurrentInteractable = null;
     }
 
     /// <summary>

@@ -23,7 +23,7 @@ public class LobbyStartGame : MonoBehaviour
         _interactable.ShowInfoCard(false);
 
         // 标记玩家正在交互
-        Player.StartInteraction();
+        Player.StartInteraction(_interactable);
 
         // 停止玩家移动，防止滑行
         var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
