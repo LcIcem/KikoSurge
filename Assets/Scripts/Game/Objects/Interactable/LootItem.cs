@@ -435,7 +435,10 @@ public class LootItem : MonoBehaviour, IPoolable
 
     private void HandleCurrencyPickup()
     {
-        SessionManager.Instance?.AddCurrency(Quantity);
+        if (ItemDef == null) return;
+
+        // 添加到背包（触发 OnInventoryChanged 事件，UI 自动刷新）
+        InventoryManager.Instance?.AddItem(ItemType.Currency, ItemDef.Id, Quantity);
     }
 
     private void HandleConsumablePickup()

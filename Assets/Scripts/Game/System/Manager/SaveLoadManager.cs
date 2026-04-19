@@ -221,7 +221,6 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
         session.seed = current.seed;
         session.currentFloor = current.currentFloor;
         session.SetPlayerPos(current.GetPlayerPos());
-        session.gold = current.gold;
         session.inventoryWeaponIds = current.inventoryWeaponIds;
         session.inventoryRelicIds = current.inventoryRelicIds;
         session.equippedWeaponIds = current.equippedWeaponIds;
@@ -234,7 +233,7 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
             : new List<ModifierData>();
 
         SaveCurrentSlot();
-        Debug.Log($"[SaveLoadManager] Session saved: floor={current.currentFloor}, health={current.currentHealth}, gold={current.gold}, checkpoint={current.currentCheckpoint != null}, modifiers={session.modifiers.Count}");
+        Debug.Log($"[SaveLoadManager] Session saved: floor={current.currentFloor}, health={current.currentHealth}, checkpoint={current.currentCheckpoint != null}, modifiers={session.modifiers.Count}");
     }
 
     /// <summary>

@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - ItemConfigs
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 628452d0397e8004e8e0b0a49d9141e0
+    m_Address: Item_Currency_Gold
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f273b95930b4f8044a4d25f83312e731
     m_Address: Item_Pistol
     m_ReadOnly: 0

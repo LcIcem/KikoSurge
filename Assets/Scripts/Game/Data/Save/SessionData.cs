@@ -17,9 +17,6 @@ public class SessionData
     // 当前楼层
     public int currentFloor;
 
-    // 经济
-    public int gold;
-
     // 当前层的玩家位置
     public float playerPosX;
     public float playerPosY;
@@ -89,7 +86,6 @@ public class SessionData
             selectedRoleId = roleId,
             selectedRoleName = roleName,
             currentFloor = 0,
-            gold = 0,
             playerPosX = 0,
             playerPosY = 0,
             inventoryWeaponIds = inventory,

@@ -6,6 +6,7 @@ using UnityEngine.Pool;
 using LcIcemFramework.Core;
 using LcIcemFramework.Util.Const;
 using LcIcemFramework;
+using System;
 
 namespace LcIcemFramework
 {
@@ -64,6 +65,24 @@ public class PoolManager : SingletonMono<PoolManager>
     {
         if (_pools.ContainsKey(prefabName)) return;
 
+        // 检查 prefab 是否有效
+        if (prefab == null)
+        {
+            LogError($"懒注册池 '{prefabName}' 失败：prefab 为 null。");
+            return;
+        }
+
+        try
+        {
+            // 验证 prefab 是否已被销毁
+            _ = prefab.transform;
+        }
+        catch (MissingReferenceException)
+        {
+            LogError($"懒注册池 '{prefabName}' 失败：prefab 已被销毁。");
+            return;
+        }
+
         // 初始化池根
         if (_poolRoot == null)
         {
@@ -76,18 +95,43 @@ public class PoolManager : SingletonMono<PoolManager>
         _parents[prefabName].SetParent(_poolRoot);
 
         var pool = new ObjectPool<GameObject>(
-            createFunc: () => Instantiate(prefab, _parents[prefabName]),
+            createFunc: () =>
+            {
+                try
+                {
+                    GameObject newObj = Instantiate(prefab, _parents[prefabName]);
+                    if (newObj == null)
+                    {
+                        LogError($"createFunc 为池 '{prefabName}' 创建了 null 对象！");
+                    }
+                    return newObj;
+                }
+                catch (Exception ex)
+                {
+                    LogError($"createFunc 为池 '{prefabName}' 创建对象时异常：{ex.GetType().Name}: {ex.Message}");
+                    return null;
+                }
+            },
             actionOnGet: obj =>
             {
+                if (obj == null)
+                {
+                    LogError($"actionOnGet 为池 '{prefabName}' 收到 null 对象！");
+                    return;
+                }
                 try
                 {
                     obj.SetActive(true);
                 }
                 catch (MissingReferenceException)
                 {
-                    // 对象已被销毁，创建新的
+                    // 对象已被销毁，尝试重新创建
+                    LogWarning($"actionOnGet 为池 '{prefabName}' 检测到已销毁对象，尝试重新创建。");
                     obj = Instantiate(prefab, _parents[prefabName]);
-                    obj.SetActive(true);
+                    if (obj != null)
+                        obj.SetActive(true);
+                    else
+                        return;
                 }
                 lock (_lock)
                 {
@@ -97,12 +141,20 @@ public class PoolManager : SingletonMono<PoolManager>
                         _activeCounts[prefabName] = 1;
                     _objToPoolName[obj] = prefabName;
                 }
-                if (obj.TryGetComponent<IPoolable>(out var poolable))
+                if (obj != null && obj.TryGetComponent<IPoolable>(out var poolable))
                     poolable.OnSpawn();
             },
             actionOnRelease: obj =>
             {
-                obj.SetActive(false);
+                if (obj == null) return;
+                try
+                {
+                    obj.SetActive(false);
+                }
+                catch (MissingReferenceException)
+                {
+                    // 对象已销毁，忽略
+                }
                 lock (_lock)
                 {
                     if (_activeCounts.ContainsKey(prefabName))
@@ -133,7 +185,7 @@ public class PoolManager : SingletonMono<PoolManager>
 
         // 销毁父对象（子对象全部销毁）
         if (_parents.TryGetValue(poolName, out var parent))
-            Object.Destroy(parent.gameObject);
+            UnityEngine.Object.Destroy(parent.gameObject);
 
         // 释放池内存
         pool.Dispose();
@@ -242,7 +294,15 @@ public class PoolManager : SingletonMono<PoolManager>
         if (!_pools.TryGetValue(prefabName, out var pool))
         {
             EnsurePoolRegistered(prefabName, prefab);
-            pool = _pools[prefabName];
+            if (!_pools.TryGetValue(prefabName, out pool))
+            {
+                // EnsurePoolRegistered 失败，prefab 无效，直接实例化
+                LogError($"池 '{prefabName}' 注册失败，直接实例化对象。");
+                GameObject fallbackObj = Instantiate(prefab, position, rotation);
+                if (fallbackObj.TryGetComponent<IPoolable>(out var poolable))
+                    poolable.OnSpawn();
+                return fallbackObj;
+            }
         }
 
         GameObject obj = pool.Get();
@@ -251,8 +311,7 @@ public class PoolManager : SingletonMono<PoolManager>
         bool isValid = false;
         try
         {
-            _ = obj.transform;
-            isValid = true;
+            isValid = obj != null && obj.transform != null;
         }
         catch (MissingReferenceException)
         {
@@ -283,8 +342,8 @@ public class PoolManager : SingletonMono<PoolManager>
                 _objToPoolName[obj] = prefabName;
             }
 
-            // 调用 OnSpawn
-            if (obj.TryGetComponent<IPoolable>(out var poolable))
+            // 调用 OnSpawn 确保对象正确激活
+            if (obj != null && obj.TryGetComponent<IPoolable>(out var poolable))
                 poolable.OnSpawn();
         }
 
@@ -336,7 +395,17 @@ public class PoolManager : SingletonMono<PoolManager>
                 return null;
             }
             EnsurePoolRegistered(prefabName, prefab);
-            pool = _pools[prefabName];
+            if (!_pools.TryGetValue(prefabName, out pool))
+            {
+                // EnsurePoolRegistered 失败，prefab 无效，直接实例化
+                LogError($"池 '{prefabName}' 注册失败，直接实例化对象。");
+                GameObject fallbackObj = Instantiate(prefab, position, rotation);
+                if (fallbackObj.TryGetComponent<IPoolable>(out var poolable))
+                    poolable.OnSpawn();
+                if (typeof(T).Name == "GameObject")
+                    return fallbackObj as T;
+                return fallbackObj.GetComponent<T>();
+            }
         }
 
         GameObject obj = pool.Get();
@@ -345,9 +414,7 @@ public class PoolManager : SingletonMono<PoolManager>
         bool isValid = false;
         try
         {
-            // 尝试访问 transform 来验证对象是否有效
-            _ = obj.transform;
-            isValid = true;
+            isValid = obj != null && obj.transform != null;
         }
         catch (MissingReferenceException)
         {
@@ -366,6 +433,11 @@ public class PoolManager : SingletonMono<PoolManager>
                 // 忽略释放失败
             }
             GameObject prefab = AddressablesManager.Instance.Load<GameObject>(prefabName);
+            if (prefab == null)
+            {
+                LogError($"无法重新加载 '{prefabName}' 的 prefab！");
+                return null;
+            }
             obj = Instantiate(prefab, _parents[prefabName]);
 
             // 手动注册到池的追踪系统
@@ -379,7 +451,7 @@ public class PoolManager : SingletonMono<PoolManager>
             }
 
             // 调用 OnSpawn
-            if (obj.TryGetComponent<IPoolable>(out var poolable))
+            if (obj != null && obj.TryGetComponent<IPoolable>(out var poolable))
                 poolable.OnSpawn();
         }
 
@@ -414,7 +486,7 @@ public class PoolManager : SingletonMono<PoolManager>
         }
 
         // 不在任何池中，直接销毁（兜底）
-        Object.Destroy(obj);
+        UnityEngine.Object.Destroy(obj);
     }
 
     /// <summary>

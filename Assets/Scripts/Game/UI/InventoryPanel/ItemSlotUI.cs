@@ -65,16 +65,28 @@ public class ItemSlotUI : MonoBehaviour, IPoolable
 
     public void OnSpawn()
     {
-        gameObject.SetActive(true);
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+        transform.localScale = Vector3.one;
+
+        var rt = transform as RectTransform;
+        if (rt != null)
+        {
+            rt.anchorMin = new Vector2(0, 0);
+            rt.anchorMax = new Vector2(0, 0);
+            rt.sizeDelta = new Vector2(0, 0);
+            rt.anchoredPosition = Vector2.zero;
+        }
+
+        if (_imgIcon != null)
+            _imgIcon.enabled = true;
+
+        if (_imgHighlight != null)
+            _imgHighlight.enabled = false;
     }
 
     public void OnDespawn()
     {
-        gameObject.SetActive(false);
-        _itemId = 0;
-        _quantity = 0;
-        _itemType = ItemType.Weapon;
-
         if (_imgIcon != null)
         {
             _imgIcon.sprite = null;
@@ -82,14 +94,10 @@ public class ItemSlotUI : MonoBehaviour, IPoolable
         }
 
         if (_txtCount != null)
-        {
             _txtCount.text = "";
-        }
 
         if (_imgHighlight != null)
-        {
             _imgHighlight.enabled = false;
-        }
     }
 
     #endregion

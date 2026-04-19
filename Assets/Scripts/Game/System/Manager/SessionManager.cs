@@ -47,6 +47,9 @@ public class SessionManager : SingletonMono<SessionManager>
             SaveLoadManager.Instance.CurrentSaveData.sessionData = _currentSession;
         }
 
+        // 绑定 SessionData 到 InventoryManager
+        InventoryManager.Instance?.BindSessionData(_currentSession);
+
         // 立即保存 session 关键数据（seed、roleId）到存档
         SaveLoadManager.Instance?.SaveSession();
     }
@@ -228,49 +231,6 @@ public class SessionManager : SingletonMono<SessionManager>
         {
             _currentSession.inventoryRelicIds = relicIds ?? new List<int>();
         }
-    }
-
-    /// <summary>
-    /// 获取货币
-    /// </summary>
-    public int GetCurrency()
-    {
-        return _currentSession?.gold ?? 0;
-    }
-
-    /// <summary>
-    /// 设置货币
-    /// </summary>
-    public void SetCurrency(int amount)
-    {
-        if (_currentSession != null)
-        {
-            _currentSession.gold = amount;
-        }
-    }
-
-    /// <summary>
-    /// 添加货币
-    /// </summary>
-    public void AddCurrency(int amount)
-    {
-        if (_currentSession != null)
-        {
-            _currentSession.gold += amount;
-        }
-    }
-
-    /// <summary>
-    /// 花费货币
-    /// </summary>
-    public bool SpendCurrency(int amount)
-    {
-        if (_currentSession != null && _currentSession.gold >= amount)
-        {
-            _currentSession.gold -= amount;
-            return true;
-        }
-        return false;
     }
 
     /// <summary>

@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using TMPro;
 using LcIcemFramework;
 using LcIcemFramework.Core;
 using Game.Event;
@@ -33,7 +34,6 @@ public class InventoryPanel : BasePanel
     private const string TAB_POTION = "tog_tab_potion";
     private const string TAB_ARMOR = "tog_tab_armor";
     private const string TAB_RELIC = "tog_tab_relic";
-    private const string TAB_CURRENCY = "tog_tab_currency";
 
     // 已装备武器区域（用于 Find 兜底）
     private const string EQUIP_WEAPON_AREA = "EquipedWeapon";
@@ -56,9 +56,9 @@ public class InventoryPanel : BasePanel
     #region 字段
 
     private ItemType _currentTab = ItemType.Weapon;
-    private bool _isCurrencyTab;
     private readonly List<ItemSlotUI> _activeSlots = new();
     private readonly List<ItemSlotUI> _activeEquipSlots = new();
+    private readonly List<ItemSlotUI> _activeCurrencySlots = new();
 
     #endregion
 
@@ -74,6 +74,7 @@ public class InventoryPanel : BasePanel
         // 刷新数据
         RefreshCharacterInfo();
         RefreshEquipedWeapon();
+        RefreshCurrencyContent(); // 货币始终刷新
         RefreshItemList();
     }
 
@@ -85,6 +86,7 @@ public class InventoryPanel : BasePanel
         // 回收所有 ItemSlot
         ReleaseAllSlots();
         ReleaseAllEquipSlots();
+        ReleaseAllCurrencySlots();
 
         base.Hide();
     }
@@ -105,6 +107,10 @@ public class InventoryPanel : BasePanel
         if (p.itemType == _currentTab)
         {
             RefreshItemList();
+        }
+        if (p.itemType == ItemType.Currency)
+        {
+            RefreshCurrencyContent();
         }
     }
 
@@ -147,7 +153,6 @@ public class InventoryPanel : BasePanel
             TAB_POTION => ItemType.Potion,
             TAB_ARMOR => ItemType.Armor,
             TAB_RELIC => ItemType.Relic,
-            TAB_CURRENCY => ItemType.Currency,
             _ => null
         };
     }
@@ -158,100 +163,137 @@ public class InventoryPanel : BasePanel
     private void SwitchTab(ItemType type)
     {
         _currentTab = type;
-        _isCurrencyTab = (type == ItemType.Currency);
-        RefreshContentVisibility();
         RefreshItemList();
     }
 
     /// <summary>
-    /// 刷新 Content 区域显示状态
-    /// </summary>
-    private void RefreshContentVisibility()
-    {
-        if (_content != null)
-            _content.gameObject.SetActive(!_isCurrencyTab);
-        if (_contentCurrency != null)
-            _contentCurrency.gameObject.SetActive(_isCurrencyTab);
-    }
-
-    /// <summary>
     /// 刷新角色信息显示
+    /// <para>有活跃 Session：使用运行时数据（SessionManager）</para>
+    /// <para>无活跃 Session：使用静态数据（RoleStaticData）</para>
     /// </summary>
     private void RefreshCharacterInfo()
     {
-        var playerData = SessionManager.Instance?.GetPlayerData();
-        if (playerData == null)
+        PlayerRuntimeData playerData;
+        RoleStaticData roleData;
+        bool hasActiveSession = SessionManager.Instance?.HasActiveSession == true;
+
+        if (hasActiveSession)
+        {
+            // 有 Session：从 SessionManager 获取运行时数据
+            playerData = SessionManager.Instance?.GetPlayerData();
+            roleData = playerData != null
+                ? GameDataManager.Instance?.GetRoleStaticData(playerData.id)
+                : null;
+        }
+        else
+        {
+            // 无 Session：使用静态数据（LastSelectedRoleId）
+            int roleId = SaveLoadManager.Instance?.LastSelectedRoleId ?? 0;
+            roleData = GameDataManager.Instance?.GetRoleStaticData(roleId);
+            playerData = roleData != null ? PlayerRuntimeData.CreateBasic(roleData) : null;
+        }
+
+        if (playerData == null || roleData == null)
+        {
+            Debug.LogWarning($"[InventoryPanel] RefreshCharacterInfo failed: playerData={playerData == null}, roleData={roleData == null}");
             return;
+        }
 
         // 角色头像
         var iconImg = GetControl<Image>(IMG_ROLE_ICON);
         if (iconImg != null)
         {
-            var roleData = GameDataManager.Instance?.GetRoleStaticData(playerData.id);
             iconImg.sprite = roleData?.roleIcon;
             iconImg.enabled = iconImg.sprite != null;
         }
 
         // 角色名
-        var nameText = GetControl<Text>(TXT_ROLE_NAME);
+        var nameText = GetControl<TMP_Text>(TXT_ROLE_NAME);
         if (nameText != null)
-            nameText.text = playerData.name;
+            nameText.text = string.IsNullOrEmpty(playerData.name) ? roleData?.roleName : playerData.name;
 
         // 生命
-        var healthText = GetControl<Text>(TXT_HEALTH);
+        var healthText = GetControl<TMP_Text>(TXT_HEALTH);
         if (healthText != null)
             healthText.text = $"生命: {playerData.Health:F0}/{playerData.maxHealth:F0}";
 
         // 攻击
-        var atkText = GetControl<Text>(TXT_ATK);
+        var atkText = GetControl<TMP_Text>(TXT_ATK);
         if (atkText != null)
             atkText.text = $"攻击: {playerData.atk:F1}";
 
         // 防御
-        var defText = GetControl<Text>(TXT_DEF);
+        var defText = GetControl<TMP_Text>(TXT_DEF);
         if (defText != null)
             defText.text = $"防御: {playerData.def:F1}";
 
         // 速度
-        var speedText = GetControl<Text>(TXT_SPEED);
+        var speedText = GetControl<TMP_Text>(TXT_SPEED);
         if (speedText != null)
             speedText.text = $"速度: {playerData.moveSpeed:F1}";
 
         // 冲刺速度
-        var dashSpeedText = GetControl<Text>(TXT_DASH_SPEED);
+        var dashSpeedText = GetControl<TMP_Text>(TXT_DASH_SPEED);
         if (dashSpeedText != null)
             dashSpeedText.text = $"冲刺速度: {playerData.dashSpeed:F1}";
 
         // 冲刺持续时间
-        var dashDurationText = GetControl<Text>(TXT_DASH_DURATION);
+        var dashDurationText = GetControl<TMP_Text>(TXT_DASH_DURATION);
         if (dashDurationText != null)
             dashDurationText.text = $"冲刺持续: {playerData.dashDuration:F2}s";
 
         // 冲刺间隔
-        var dashGapText = GetControl<Text>(TXT_DASH_GAP);
+        var dashGapText = GetControl<TMP_Text>(TXT_DASH_GAP);
         if (dashGapText != null)
             dashGapText.text = $"冲刺间隔: {playerData.dashGap:F2}s";
 
         // 无敌持续时间
-        var invincibleText = GetControl<Text>(TXT_INVINCIBLE);
+        var invincibleText = GetControl<TMP_Text>(TXT_INVINCIBLE);
         if (invincibleText != null)
             invincibleText.text = $"无敌: {playerData.invincibleDuration:F2}s";
 
         // 受伤持续时间
-        var hurtDurationText = GetControl<Text>(TXT_HURT_DURATION);
+        var hurtDurationText = GetControl<TMP_Text>(TXT_HURT_DURATION);
         if (hurtDurationText != null)
             hurtDurationText.text = $"受伤持续: {playerData.hurtDuration:F2}s";
     }
 
     /// <summary>
     /// 刷新已装备武器显示
+    /// <para>Playing 状态：显示 session 中已装备的武器</para>
+    /// <para>Lobby 状态：显示角色初始武器</para>
     /// </summary>
     private void RefreshEquipedWeapon()
     {
-        var sessionData = SessionManager.Instance?.CurrentSession;
-        var playerData = SessionManager.Instance?.GetPlayerData();
-        if (sessionData == null || playerData == null)
-            return;
+        bool hasActiveSession = SessionManager.Instance?.HasActiveSession == true;
+
+        int roleId;
+        int maxSlots;
+        List<int> weaponIds;
+
+        if (hasActiveSession)
+        {
+            // 有 Session：从 SessionData 获取
+            var sessionData = SessionManager.Instance?.CurrentSession;
+            var playerData = SessionManager.Instance?.GetPlayerData();
+            if (sessionData == null || playerData == null)
+                return;
+
+            roleId = playerData.id;
+            maxSlots = GameDataManager.Instance?.GetRoleStaticData(roleId)?.maxWeaponSlots ?? 2;
+            weaponIds = sessionData.equippedWeaponIds;
+        }
+        else
+        {
+            // 无 Session：使用静态数据（初始武器）
+            roleId = SaveLoadManager.Instance?.LastSelectedRoleId ?? 0;
+            var roleData = GameDataManager.Instance?.GetRoleStaticData(roleId);
+            if (roleData == null)
+                return;
+
+            maxSlots = roleData.maxWeaponSlots;
+            weaponIds = roleData.initialWeaponIds;
+        }
 
         // 获取容器（优先用序列化字段，否则用 Find）
         var container = _equipedWeaponContainer;
@@ -273,11 +315,6 @@ public class InventoryPanel : BasePanel
         // 回收旧的装备槽
         ReleaseAllEquipSlots();
 
-        // 获取最大武器栏位数
-        var roleData = GameDataManager.Instance?.GetRoleStaticData(playerData.id);
-        int maxSlots = roleData?.maxWeaponSlots ?? 2;
-        var equippedWeaponIds = sessionData.equippedWeaponIds;
-
         // 根据 maxSlots 生成对应数量的装备槽
         for (int i = 0; i < maxSlots; i++)
         {
@@ -287,9 +324,9 @@ public class InventoryPanel : BasePanel
             if (slot != null)
             {
                 // 如果该槽位有武器，显示武器图标；否则显示默认图标（ItemSlotUI 自带）
-                if (equippedWeaponIds != null && i < equippedWeaponIds.Count && equippedWeaponIds[i] > 0)
+                if (weaponIds != null && i < weaponIds.Count && weaponIds[i] > 0)
                 {
-                    int weaponId = equippedWeaponIds[i];
+                    int weaponId = weaponIds[i];
                     slot.Initialize(weaponId, 1, ItemType.Weapon);
                 }
                 else
@@ -303,15 +340,22 @@ public class InventoryPanel : BasePanel
             }
         }
 
-        // 更新已装备武器容器高度
-        UpdateContentHeightForGrid(container, maxSlots);
+        Debug.Log($"[InventoryPanel] container pivot:{container.pivot}, anchor:{container.anchorMin}-{container.anchorMax}, sizeDelta:{container.sizeDelta}");
     }
 
     /// <summary>
     /// 刷新物品列表
+    /// <para>有活跃 Session：从 InventoryManager 获取最新数据（SessionData）</para>
+    /// <para>无活跃 Session：不显示物品背包</para>
     /// </summary>
     private void RefreshItemList()
     {
+        bool hasActiveSession = SessionManager.Instance?.HasActiveSession == true;
+
+        // 无 Session 不显示物品背包
+        if (!hasActiveSession)
+            return;
+
         if (_slotPrefab == null)
         {
             LogError("Slot prefab is not set.");
@@ -320,10 +364,6 @@ public class InventoryPanel : BasePanel
 
         // 回收当前所有 Slot
         ReleaseAllSlots();
-
-        // 货币页签不需要生成 ItemSlot
-        if (_isCurrencyTab)
-            return;
 
         // 获取当前 Tab 的物品
         var itemIds = InventoryManager.Instance?.GetInventory(_currentTab);
@@ -336,22 +376,95 @@ public class InventoryPanel : BasePanel
         // 按 ID 分组统计堆叠
         var grouped = itemIds.GroupBy(id => id).ToList();
 
-        // 生成 ItemSlot
+        // 生成 ItemSlot（根据 maxStack 决定是否分格显示）
         foreach (var group in grouped)
         {
-            var slotObj = PoolManager.Instance.Get(_slotPrefab, Vector3.zero, Quaternion.identity);
-            var slot = slotObj.GetComponent<ItemSlotUI>();
+            int itemId = group.Key;
+            int totalCount = group.Count();
+            var config = GameDataManager.Instance?.GetItemConfig(itemId);
+            int maxStack = config?.MaxStack ?? 1;
 
-            if (slot != null)
+            // 根据 maxStack 分配格子
+            int remaining = totalCount;
+            while (remaining > 0)
             {
-                slot.Initialize(group.Key, group.Count(), _currentTab);
-                slot.transform.SetParent(_content, false);
-                _activeSlots.Add(slot);
+                int stackCount = Mathf.Min(remaining, maxStack);
+                remaining -= stackCount;
+
+                var slotObj = PoolManager.Instance.Get(_slotPrefab, Vector3.zero, Quaternion.identity);
+                var slot = slotObj.GetComponent<ItemSlotUI>();
+
+                if (slot != null)
+                {
+                    slot.Initialize(itemId, stackCount, _currentTab);
+                    slot.transform.SetParent(_content, false);
+                    _activeSlots.Add(slot);
+                }
             }
         }
 
         // 手动计算 Content 高度（适配 GridLayoutGroup 的 CellSize 和 Spacing）
         UpdateContentHeightForGrid(_content, _activeSlots.Count);
+    }
+
+    /// <summary>
+    /// 刷新货币页签内容
+    /// <para>Playing 状态：显示背包中的货币物品</para>
+    /// </summary>
+    private void RefreshCurrencyContent()
+    {
+        if (_contentCurrency == null)
+        {
+            LogError("_contentCurrency is null!");
+            return;
+        }
+
+        if (_slotPrefab == null)
+        {
+            LogError("Slot prefab is not set.");
+            return;
+        }
+
+        // 回收旧的货币 Slot
+        ReleaseAllCurrencySlots();
+
+        // 获取货币物品列表
+        var currencyIds = InventoryManager.Instance?.GetInventory(ItemType.Currency);
+        if (currencyIds == null || currencyIds.Count == 0)
+            return;
+
+        // 按 ID 分组统计堆叠
+        var grouped = currencyIds.GroupBy(id => id).ToList();
+
+        // 生成货币 ItemSlot（根据 maxStack 决定是否分格显示）
+        foreach (var group in grouped)
+        {
+            int itemId = group.Key;
+            int totalCount = group.Count();
+            var config = GameDataManager.Instance?.GetItemConfig(itemId);
+            int maxStack = config?.MaxStack ?? 1;
+
+            // 根据 maxStack 分配格子
+            int remaining = totalCount;
+            while (remaining > 0)
+            {
+                int stackCount = Mathf.Min(remaining, maxStack);
+                remaining -= stackCount;
+
+                var slotObj = PoolManager.Instance.Get(_slotPrefab, Vector3.zero, Quaternion.identity);
+                var slot = slotObj.GetComponent<ItemSlotUI>();
+
+                if (slot != null)
+                {
+                    slot.Initialize(itemId, stackCount, ItemType.Currency);
+                    slot.transform.SetParent(_contentCurrency, false);
+                    _activeCurrencySlots.Add(slot);
+                }
+            }
+        }
+
+        // 更新 Content 高度
+        UpdateContentHeightForGrid(_contentCurrency, _activeCurrencySlots.Count);
     }
 
     /// <summary>
@@ -421,6 +534,21 @@ public class InventoryPanel : BasePanel
             }
         }
         _activeEquipSlots.Clear();
+    }
+
+    /// <summary>
+    /// 回收所有货币槽
+    /// </summary>
+    private void ReleaseAllCurrencySlots()
+    {
+        foreach (var slot in _activeCurrencySlots)
+        {
+            if (slot != null && slot.gameObject != null)
+            {
+                PoolManager.Instance.Release(slot.gameObject);
+            }
+        }
+        _activeCurrencySlots.Clear();
     }
 
     #endregion

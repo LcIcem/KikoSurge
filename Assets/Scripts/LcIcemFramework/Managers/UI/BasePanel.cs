@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using TMPro;
 
 namespace LcIcemFramework
 {
@@ -33,6 +34,7 @@ public class BasePanel : MonoBehaviour
         FindChildControls<Button>();
         FindChildControls<Image>();
         FindChildControls<Text>();
+        FindChildControls<TMP_Text>();
         FindChildControls<Toggle>();
         FindChildControls<Slider>();
         FindChildControls<ScrollRect>();
