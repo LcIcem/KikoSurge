@@ -30,11 +30,12 @@ MonoBehaviour:
         waveDelay: 1
         spawnMode: 0
         enemyChoices:
-        - enemyConfig: {fileID: 11400000, guid: 2cae9b46f9f435f45861522001fd2e75, type: 2}
+        - enemyConfig: {fileID: 11400000, guid: e163b7f0fbbdefe45a817ddd3a03bd83, type: 2}
           weight: 1
         minCount: 2
         maxCount: 3
         minSpawnDist: 3
+        minEdgeDist: 1
     - rid: 6093166162187649283
       type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
       data:
@@ -44,11 +45,12 @@ MonoBehaviour:
         waveDelay: 1
         spawnMode: 1
         enemyChoices:
-        - enemyConfig: {fileID: 11400000, guid: 2cae9b46f9f435f45861522001fd2e75, type: 2}
+        - enemyConfig: {fileID: 11400000, guid: e163b7f0fbbdefe45a817ddd3a03bd83, type: 2}
           weight: 1
         minCount: 2
         maxCount: 3
         minSpawnDist: 5
+        minEdgeDist: 1
     - rid: 6093166162187649284
       type: {class: EnemyBehaviourEntry, ns: , asm: Assembly-CSharp}
       data:
@@ -58,8 +60,9 @@ MonoBehaviour:
         waveDelay: 2
         spawnMode: 0
         enemyChoices:
-        - enemyConfig: {fileID: 11400000, guid: 2cae9b46f9f435f45861522001fd2e75, type: 2}
+        - enemyConfig: {fileID: 11400000, guid: e163b7f0fbbdefe45a817ddd3a03bd83, type: 2}
           weight: 1
         minCount: 1
         maxCount: 1
         minSpawnDist: 8
+        minEdgeDist: 1
