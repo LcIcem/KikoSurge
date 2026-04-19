@@ -222,6 +222,12 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         _rigidbody.linearVelocity = Vector2.zero;
         StopChaseTarget();
+
+        // 禁用碰撞体，防止死亡后继续造成碰撞伤害
+        var collider = GetComponent<Collider2D>();
+        if (collider != null)
+            collider.enabled = false;
+
         EventCenter.Instance.Publish(GameEventID.Combat_EnemyKilled,
             new EnemyKilledParams { enemy = this, position = transform.position });
 
