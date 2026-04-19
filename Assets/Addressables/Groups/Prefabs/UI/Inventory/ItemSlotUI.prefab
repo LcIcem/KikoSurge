@@ -195,7 +195,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.20784314, g: 0.24313726, b: 0.38039216, a: 1}
+  m_Color: {r: 0.20784314, g: 0.24313726, b: 0.38039216, a: 0.47058824}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -222,6 +222,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2917010052842182270}
   - component: {fileID: 990092464114328357}
+  - component: {fileID: 7999309252909901924}
   m_Layer: 5
   m_Name: ItemSlotUI
   m_TagString: Untagged
@@ -267,6 +268,19 @@ MonoBehaviour:
   _imgIcon: {fileID: 563279415967320659}
   _txtCount: {fileID: 5048899511685023718}
   _imgHighlight: {fileID: 9174045644938850477}
+--- !u!114 &7999309252909901924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6319576681369702627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventTrigger
+  m_Delegates: []
 --- !u!1 &7268003837637733802
 GameObject:
   m_ObjectHideFlags: 0

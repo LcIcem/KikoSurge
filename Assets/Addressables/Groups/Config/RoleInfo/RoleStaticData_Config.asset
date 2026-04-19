@@ -28,3 +28,5 @@ MonoBehaviour:
     hurtDuration: 0.3
     initialWeaponIds: 0100000002000000
     maxWeaponSlots: 2
+    initialEmptySlotCount: 20
+    maxInventorySlotCount: 40
