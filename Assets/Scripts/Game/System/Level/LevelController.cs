@@ -404,9 +404,22 @@ public class LevelController : MonoBehaviour
         {
             if (room.roomType == RoomType.Rest)
             {
-                Vector2Int center = room.Center;
-                Vector3 worldPos = floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
-                positions.Add(worldPos);
+                // 使用房间实际地面瓦片的中心作为世界坐标
+                if (_builder.GetTileData().TryGetRoomFloorTiles(room.id, out var floorTiles) && floorTiles.Count > 0)
+                {
+                    // 计算所有地面瓦片的中心点（网格坐标）
+                    int sumX = 0, sumY = 0;
+                    foreach (var tile in floorTiles)
+                    {
+                        sumX += tile.x;
+                        sumY += tile.y;
+                    }
+                    Vector2Int centerGrid = new Vector2Int(sumX / floorTiles.Count, sumY / floorTiles.Count);
+                    Vector3 worldPos = floorTilemap.CellToWorld(new Vector3Int(centerGrid.x, centerGrid.y, 0));
+                    // CellToWorld 返回瓦片中心，加上 0.5f 偏移到世界坐标中心
+                    worldPos += new Vector3(0.5f, 0.5f, 0);
+                    positions.Add(worldPos);
+                }
             }
         }
 

@@ -32,6 +32,7 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
 
     [Header("生成位置")]
     public int minSpawnDist = 3;  // 距离玩家最小生成距离（格）
+    public int minEdgeDist = 1;   // 距离房间边缘最小距离（格），防止贴墙生成
 
     // 内部状态
     private int _currentWave;
@@ -73,11 +74,23 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
     private void CalculateValidTiles()
     {
         _validTiles = new List<Vector2Int>();
+        RectInt bounds = _room.Bounds;
+
         foreach (var tile in _floorTiles)
         {
+            // 排除距离玩家太近的格子
             float dist = Vector2Int.Distance(tile, Vector2Int.FloorToInt(_playerPos));
-            if (dist >= minSpawnDist)
-                _validTiles.Add(tile);
+            if (dist < minSpawnDist)
+                continue;
+
+            // 排除距离房间边缘太近的格子
+            if (tile.x - bounds.x < minEdgeDist ||
+                tile.y - bounds.y < minEdgeDist ||
+                bounds.x + bounds.width - tile.x - 1 < minEdgeDist ||
+                bounds.y + bounds.height - tile.y - 1 < minEdgeDist)
+                continue;
+
+            _validTiles.Add(tile);
         }
 
         if (_validTiles.Count == 0)

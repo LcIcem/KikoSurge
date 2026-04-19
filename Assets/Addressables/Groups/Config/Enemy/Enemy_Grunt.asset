@@ -12,19 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe738402d60579a438220dce079a00ff, type: 3}
   m_Name: Enemy_Grunt
   m_EditorClassIdentifier: Assembly-CSharp::GruntEnemyConfig
-  EnemyId: 1001
+  EnemyId: 1
   EnemyName: "\u6742\u51751\u53F7"
   Type: 0
   MaxHP: 20
   MoveSpeed: 2
   Attack: 2
-  AttackInterval: 2
+  AttackInterval: 1
   AttackDuration: 1
-  AttackHitTime: 0.8
+  AttackHitTime: 0.5
   CollisionDamage: 1
   DetectRange: 4
-  AttackRange: 1
-  LoseRange: 6
+  AttackRange: 0.5
+  LoseRange: 5
   PrefabAddress: Enemy
   lootTable: {fileID: 11400000, guid: e1996294394bdef4cab54d8fc62db7cf, type: 2}
   PatrolSpeed: 1

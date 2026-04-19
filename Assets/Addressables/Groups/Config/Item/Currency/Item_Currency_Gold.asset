@@ -19,4 +19,5 @@ MonoBehaviour:
   Value: 0
   Icon: {fileID: 1808860862, guid: 5e4c858791d5ddc42a43411bfae7ed18, type: 3}
   Description: "\u91D1\u707F\u707F"
+  PickupSFX: {fileID: 8300000, guid: 4745fe727422bd546bbef72b333583a6, type: 3}
   coinValue: 1

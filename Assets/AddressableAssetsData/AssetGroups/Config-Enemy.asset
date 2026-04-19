@@ -20,7 +20,7 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2cae9b46f9f435f45861522001fd2e75
+  - m_GUID: e163b7f0fbbdefe45a817ddd3a03bd83
     m_Address: Enemy_Grunt
     m_ReadOnly: 0
     m_SerializedLabels: []
