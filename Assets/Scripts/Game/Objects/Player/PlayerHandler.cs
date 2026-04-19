@@ -75,7 +75,7 @@ public class PlayerHandler
         {
             // 已有数据：直接使用（用于游戏玩家继续游戏时从 SessionManager 获取的计算后数据）
             playerData = existingData;
-            weaponIds = SessionManager.Instance.GetEquippedWeaponIds();
+            weaponIds = SessionManager.Instance.GetEquippedWeaponSlots().ConvertAll(slot => slot.itemId);
         }
         else if (isLobbyPlayer)
         {
@@ -87,7 +87,7 @@ public class PlayerHandler
         {
             // 游戏玩家（无 existingData）：使用 SessionManager 获取完整数据
             playerData = SessionManager.Instance.GetPlayerData();
-            weaponIds = SessionManager.Instance.GetEquippedWeaponIds();
+            weaponIds = SessionManager.Instance.GetEquippedWeaponSlots().ConvertAll(slot => slot.itemId);
             if (playerData == null)
             {
                 Debug.LogWarning("[PlayerHandler] No player data from SessionManager, creating basic data");

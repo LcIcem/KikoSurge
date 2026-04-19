@@ -22,15 +22,15 @@ public class SessionData
     public float playerPosY;
 
     // 背包（按类型分组）
-    public List<int> inventoryWeaponIds = new();
-    public List<int> inventoryAmmoIds = new();
-    public List<int> inventoryPotionIds = new();
-    public List<int> inventoryArmorIds = new();
-    public List<int> inventoryRelicIds = new();
-    public List<int> inventoryCurrencyIds = new();
+    public List<ItemSlotData> inventoryWeaponSlots = new();
+    public List<ItemSlotData> inventoryAmmoSlots = new();
+    public List<ItemSlotData> inventoryPotionSlots = new();
+    public List<ItemSlotData> inventoryArmorSlots = new();
+    public List<ItemSlotData> inventoryRelicSlots = new();
+    public List<ItemSlotData> inventoryCurrencySlots = new();
 
     // 已装备武器列表（最大数量由 RoleStaticData.maxWeaponSlots 决定）
-    public List<int> equippedWeaponIds = new();
+    public List<ItemSlotData> equippedWeaponSlots = new();
 
     // 地牢状态快照
     public List<LayerSnapshot> layerSnapshots;
@@ -63,21 +63,32 @@ public class SessionData
         string roleName = roleData?.roleName ?? roleId.ToString();
         var initialWeaponIds = roleData?.initialWeaponIds;
         int maxWeaponSlots = roleData?.maxWeaponSlots ?? 2;
+        int initialEmptySlots = roleData?.initialEmptySlotCount ?? 20;
+        int maxInventorySlots = roleData?.maxInventorySlotCount ?? 0;
 
         // 根据 maxWeaponSlots 分离已装备武器和背包武器
-        var equipped = new List<int>();
-        var inventory = new List<int>();
+        var equipped = new List<ItemSlotData>();
+        var inventory = new List<ItemSlotData>();
 
         if (initialWeaponIds != null)
         {
             for (int i = 0; i < initialWeaponIds.Count; i++)
             {
+                var slot = new ItemSlotData(initialWeaponIds[i], 1);
                 if (i < maxWeaponSlots)
-                    equipped.Add(initialWeaponIds[i]);
+                    equipped.Add(slot);
                 else
-                    inventory.Add(initialWeaponIds[i]);
+                    inventory.Add(slot);
             }
         }
+
+        // 创建初始空格子
+        var emptyWeaponSlots = CreateEmptySlots(initialEmptySlots);
+        var emptyAmmoSlots = CreateEmptySlots(initialEmptySlots);
+        var emptyPotionSlots = CreateEmptySlots(initialEmptySlots);
+        var emptyArmorSlots = CreateEmptySlots(initialEmptySlots);
+        var emptyRelicSlots = CreateEmptySlots(initialEmptySlots);
+        var emptyCurrencySlots = CreateEmptySlots(initialEmptySlots);
 
         return new SessionData
         {
@@ -88,13 +99,40 @@ public class SessionData
             currentFloor = 0,
             playerPosX = 0,
             playerPosY = 0,
-            inventoryWeaponIds = inventory,
-            inventoryRelicIds = new List<int>(),
-            equippedWeaponIds = equipped,
+            inventoryWeaponSlots = MergeInventoryAndEmpty(inventory, emptyWeaponSlots),
+            inventoryAmmoSlots = emptyAmmoSlots,
+            inventoryPotionSlots = emptyPotionSlots,
+            inventoryArmorSlots = emptyArmorSlots,
+            inventoryRelicSlots = MergeInventoryAndEmpty(new List<ItemSlotData>(), emptyRelicSlots),
+            inventoryCurrencySlots = emptyCurrencySlots,
+            equippedWeaponSlots = equipped,
             layerSnapshots = new List<LayerSnapshot>(),
             modifiers = new List<ModifierData>(),
             currentHealth = 0f
         };
+    }
+
+    /// <summary>
+    /// 创建指定数量的空格子
+    /// </summary>
+    private static List<ItemSlotData> CreateEmptySlots(int count)
+    {
+        var slots = new List<ItemSlotData>();
+        for (int i = 0; i < count; i++)
+        {
+            slots.Add(new ItemSlotData()); // itemId = 0 表示空格子
+        }
+        return slots;
+    }
+
+    /// <summary>
+    /// 合并已有物品和空格子
+    /// </summary>
+    private static List<ItemSlotData> MergeInventoryAndEmpty(List<ItemSlotData> inventory, List<ItemSlotData> emptySlots)
+    {
+        var result = new List<ItemSlotData>(inventory);
+        result.AddRange(emptySlots);
+        return result;
     }
 
     /// <summary>
@@ -179,5 +217,21 @@ public class SessionData
         modifiers?.Clear();
         currentCheckpoint = null;
         currentHealth = 0f;
+    }
+
+    /// <summary>
+    /// 获取已装备武器的ID列表（用于UI显示）
+    /// </summary>
+    public List<int> equippedWeaponIds
+    {
+        get
+        {
+            var ids = new List<int>();
+            foreach (var slot in equippedWeaponSlots)
+            {
+                ids.Add(slot.itemId);
+            }
+            return ids;
+        }
     }
 }

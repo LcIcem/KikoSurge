@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 using LcIcemFramework;
 
@@ -8,7 +9,7 @@ using LcIcemFramework;
 /// 背包物品格子（支持对象池）
 /// <para>显示物品图标和堆叠数量，响应点击事件</para>
 /// </summary>
-public class ItemSlotUI : MonoBehaviour, IPoolable
+public class ItemSlotUI : MonoBehaviour, IPoolable, IPointerClickHandler
 {
     #region 序列化字段
 
@@ -18,16 +19,22 @@ public class ItemSlotUI : MonoBehaviour, IPoolable
 
     #endregion
 
+    #region 事件
+
+    /// <summary>
+    /// 格子点击事件回调（slotUI）
+    /// </summary>
+    public event Action<ItemSlotUI> OnSlotClicked;
+
+    #endregion
+
     #region 字段
 
     private int _itemId;
     private ItemType _itemType;
     private int _quantity;
-
-    /// <summary>
-    /// 格子点击事件回调（itemId, itemType）
-    /// </summary>
-    public event Action<int, ItemType> OnSlotClicked;
+    private int _currentIndex = -1;
+    private bool _isPlaceholder = false;
 
     #endregion
 
@@ -36,11 +43,16 @@ public class ItemSlotUI : MonoBehaviour, IPoolable
     /// <summary>
     /// 初始化格子数据
     /// </summary>
-    public void Initialize(int itemId, int quantity, ItemType type)
+    public void Initialize(int itemId, int quantity, ItemType type, int index = -1)
     {
         _itemId = itemId;
         _quantity = quantity;
         _itemType = type;
+        _currentIndex = index;
+
+        // 空格子不需要获取配置
+        if (itemId == 0)
+            return;
 
         // 获取物品配置
         var config = GameDataManager.Instance?.GetItemConfig(itemId);
@@ -83,6 +95,9 @@ public class ItemSlotUI : MonoBehaviour, IPoolable
 
         if (_imgHighlight != null)
             _imgHighlight.enabled = false;
+
+        // 重置状态
+        _isPlaceholder = false;
     }
 
     public void OnDespawn()
@@ -98,18 +113,22 @@ public class ItemSlotUI : MonoBehaviour, IPoolable
 
         if (_imgHighlight != null)
             _imgHighlight.enabled = false;
+
+        // 重置状态
+        _isPlaceholder = false;
     }
 
     #endregion
 
     #region 点击处理
 
-    /// <summary>
-    /// 供面板 Button 组件调用的点击处理
-    /// </summary>
-    public void HandleClick()
+    public void OnPointerClick(PointerEventData eventData)
     {
-        OnSlotClicked?.Invoke(_itemId, _itemType);
+        // 只处理左键点击
+        if (eventData.button != PointerEventData.InputButton.Left)
+            return;
+
+        OnSlotClicked?.Invoke(this);
     }
 
     /// <summary>
@@ -123,6 +142,14 @@ public class ItemSlotUI : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>
+    /// 设置为占位符（空位提示）
+    /// </summary>
+    public void SetAsPlaceholder(bool isPlaceholder)
+    {
+        _isPlaceholder = isPlaceholder;
+    }
+
     #endregion
 
     #region 属性
@@ -130,6 +157,15 @@ public class ItemSlotUI : MonoBehaviour, IPoolable
     public int ItemId => _itemId;
     public ItemType ItemType => _itemType;
     public int Quantity => _quantity;
+    public int CurrentIndex
+    {
+        get => _currentIndex;
+        set => _currentIndex = value;
+    }
+
+    public RectTransform RectTransform => transform as RectTransform;
+    public bool IsPlaceholder => _isPlaceholder;
+    public bool IsEmpty => _itemId == 0 || _quantity <= 0;
 
     #endregion
 }

@@ -55,4 +55,11 @@ public class RoleStaticData
 
     [Tooltip("最大可装备武器数量")]
     public int maxWeaponSlots = 2;
+
+    [Header("背包配置")]
+    [Tooltip("背包初始空格子数量")]
+    public int initialEmptySlotCount = 20;
+
+    [Tooltip("背包最大格子数量（0表示无限制）")]
+    public int maxInventorySlotCount = 0;
 }

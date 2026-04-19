@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
 using LcIcemFramework;
@@ -46,10 +45,20 @@ public class InventoryPanel : BasePanel
     [SerializeField] private RectTransform _content;
     [SerializeField] private RectTransform _contentCurrency;
     [SerializeField] private GameObject _slotPrefab;
+    [SerializeField] private GameObject _emptySlotPrefab;
+    [SerializeField] private GameObject _placeholderPrefab;
 
     [Header("已装备武器")]
     [SerializeField] private RectTransform _equipedWeaponContainer;
     [SerializeField] private GameObject _equipSlotPrefab;
+
+    [Header("垃圾桶")]
+    [SerializeField] private RectTransform _trashArea;
+    [SerializeField] private ItemSlotUI _trashSlot;
+
+    [Header("ScrollView")]
+    [SerializeField] private UnityEngine.UI.ScrollRect _scrollRectItem;
+    [SerializeField] private UnityEngine.UI.ScrollRect _scrollRectCurrency;
 
     #endregion
 
@@ -60,6 +69,16 @@ public class InventoryPanel : BasePanel
     private readonly List<ItemSlotUI> _activeEquipSlots = new();
     private readonly List<ItemSlotUI> _activeCurrencySlots = new();
 
+    // 拿起状态
+    private ItemSlotUI _pickedUpSlot;
+    private ItemSlotUI _pickedUpPlaceholder;
+    private int _pickedUpSourceIndex;
+    private RectTransform _pickedUpParent;
+    private ItemType _pickedUpItemType;
+
+    // 垃圾桶
+    private ItemSlotData _pendingDeleteItem;
+
     #endregion
 
     #region BasePanel override
@@ -68,50 +87,285 @@ public class InventoryPanel : BasePanel
     {
         base.Show();
 
-        // 订阅背包变化事件
         EventCenter.Instance.Subscribe<InventoryChangeParams>(GameEventID.OnInventoryChanged, OnInventoryChanged);
 
-        // 刷新数据
         RefreshCharacterInfo();
         RefreshEquipedWeapon();
-        RefreshCurrencyContent(); // 货币始终刷新
+        RefreshCurrencyContent();
         RefreshItemList();
+        UpdateTrashSlotDisplay();
     }
 
     public override void Hide()
     {
-        // 取消订阅背包变化事件
         EventCenter.Instance.Unsubscribe<InventoryChangeParams>(GameEventID.OnInventoryChanged, OnInventoryChanged);
 
-        // 回收所有 ItemSlot
         ReleaseAllSlots();
         ReleaseAllEquipSlots();
         ReleaseAllCurrencySlots();
+        CancelPickup();
 
         base.Hide();
     }
 
     #endregion
 
-    #region 初始化
+    #region 点击交互
+
+    private void Update()
+    {
+        // 让拿起的物品跟随鼠标
+        if (_pickedUpSlot != null)
+        {
+            _pickedUpSlot.RectTransform.position = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
+        }
+    }
+
+    /// <summary>
+    /// 物品格子点击事件
+    /// </summary>
+    private void OnSlotClicked(ItemSlotUI slot)
+    {
+        if (slot == null)
+            return;
+
+        // 如果有物品被拿起
+        if (_pickedUpSlot != null)
+        {
+            PlaceSlot(slot);
+            return;
+        }
+
+        // 没有物品被拿起时，只能拿起非空的物品格子
+        if (slot.IsPlaceholder || slot.IsEmpty)
+            return;
+
+        PickupSlot(slot);
+    }
+
+    /// <summary>
+    /// 拿起格子中的物品
+    /// </summary>
+    private void PickupSlot(ItemSlotUI slot)
+    {
+        _pickedUpSourceIndex = slot.CurrentIndex;
+        _pickedUpParent = slot.transform.parent as RectTransform;
+        _pickedUpItemType = slot.ItemType;
+
+        // 禁用 LayoutGroup，防止移除时重新排列
+        var layoutGroup = _pickedUpParent?.GetComponent<UnityEngine.UI.LayoutGroup>();
+        if (layoutGroup != null)
+            layoutGroup.enabled = false;
+
+        // 记录原始 worldPosition
+        Vector3 originalWorldPos = slot.RectTransform.position;
+
+        // 将格子移到 Canvas 顶层
+        slot.transform.SetParent(transform.root, false);
+
+        // 设置高亮和禁用 raycast
+        _pickedUpSlot = slot;
+        _pickedUpSlot.SetHighlight(true);
+        var canvasGroup = _pickedUpSlot.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+            canvasGroup = _pickedUpSlot.gameObject.AddComponent<CanvasGroup>();
+        canvasGroup.blocksRaycasts = false;
+
+        // 在原位置创建占位符
+        CreatePlaceholder(originalWorldPos);
+    }
+
+    /// <summary>
+    /// 在目标格子放置物品
+    /// </summary>
+    private void PlaceSlot(ItemSlotUI targetSlot)
+    {
+        if (_pickedUpSlot == null)
+            return;
+
+        // 点击的是 placeholder（源位置），取消拿起
+        if (targetSlot != null && targetSlot.IsPlaceholder && targetSlot.CurrentIndex == _pickedUpSourceIndex)
+        {
+            CancelPickup();
+            return;
+        }
+
+        // 不能放在 placeholder 上（其他位置的 placeholder）
+        if (targetSlot == null || targetSlot.IsPlaceholder)
+            return;
+
+        // 执行交换/移动
+        bool success = TrySwapOrMove(targetSlot);
+
+        if (success)
+        {
+            // 刷新 UI
+            RefreshAllViews();
+        }
+
+        // 清理拿起状态
+        ClearPickup();
+    }
+
+    /// <summary>
+    /// 尝试交换或移动物品
+    /// </summary>
+    private bool TrySwapOrMove(ItemSlotUI targetSlot)
+    {
+        int sourceIndex = _pickedUpSourceIndex;
+        int targetIndex = targetSlot.CurrentIndex;
+        ItemType sourceType = _pickedUpItemType;
+        ItemType targetType = targetSlot.ItemType;
+
+        bool sourceIsEquip = _pickedUpParent == _equipedWeaponContainer;
+        bool targetIsEquip = targetSlot.transform.parent as RectTransform == _equipedWeaponContainer;
+
+        // 装备区 < -> 装备区：交换
+        if (sourceIsEquip && targetIsEquip)
+        {
+            InventoryManager.Instance?.SwapEquippedSlots(sourceIndex, targetIndex);
+            return true;
+        }
+
+        // 背包内移动：交换数据
+        if (sourceType == targetType)
+        {
+            InventoryManager.Instance?.MoveSlot(sourceType, sourceIndex, targetIndex);
+            return true;
+        }
+
+        // 背包 -> 装备区（仅武器）
+        if (!sourceIsEquip && targetIsEquip && sourceType == ItemType.Weapon)
+        {
+            InventoryManager.Instance?.EquipFromInventory(sourceIndex, targetIndex);
+            return true;
+        }
+
+        // 装备区 -> 背包（仅武器区域）
+        if (sourceIsEquip && !targetIsEquip && targetType == ItemType.Weapon)
+        {
+            InventoryManager.Instance?.UnequipWeapon(sourceIndex, targetIndex);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 创建占位符
+    /// </summary>
+    private void CreatePlaceholder(Vector3 worldPos)
+    {
+        if (_pickedUpPlaceholder != null)
+        {
+            PoolManager.Instance.Release(_pickedUpPlaceholder.gameObject);
+        }
+
+        if (_placeholderPrefab == null)
+        {
+            LogError($"_placeholderPrefab is null! Please assign in Inspector.");
+            return;
+        }
+
+        var obj = PoolManager.Instance.Get(_placeholderPrefab, Vector3.zero, Quaternion.identity);
+        _pickedUpPlaceholder = obj.GetComponent<ItemSlotUI>();
+
+        if (_pickedUpPlaceholder != null)
+        {
+            _pickedUpPlaceholder.SetAsPlaceholder(true);
+            _pickedUpPlaceholder.transform.SetParent(_pickedUpParent, false);
+            _pickedUpPlaceholder.RectTransform.position = worldPos;
+            _pickedUpPlaceholder.CurrentIndex = _pickedUpSourceIndex;
+            _pickedUpPlaceholder.OnSlotClicked += OnSlotClicked;
+        }
+    }
+
+    /// <summary>
+    /// 取消拿起状态
+    /// </summary>
+    private void CancelPickup()
+    {
+        if (_pickedUpSlot != null)
+        {
+            _pickedUpSlot.transform.SetParent(_pickedUpParent, false);
+            _pickedUpSlot.transform.SetSiblingIndex(_pickedUpSourceIndex);
+            _pickedUpSlot.SetHighlight(false);
+
+            var canvasGroup = _pickedUpSlot.GetComponent<CanvasGroup>();
+            if (canvasGroup != null)
+                canvasGroup.blocksRaycasts = true;
+        }
+
+        if (_pickedUpPlaceholder != null)
+        {
+            _pickedUpPlaceholder.OnSlotClicked -= OnSlotClicked;
+            PoolManager.Instance.Release(_pickedUpPlaceholder.gameObject);
+            _pickedUpPlaceholder = null;
+        }
+
+        // 重新启用 LayoutGroup
+        var layoutGroup = _pickedUpParent?.GetComponent<UnityEngine.UI.LayoutGroup>();
+        if (layoutGroup != null)
+        {
+            layoutGroup.enabled = true;
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(_pickedUpParent);
+        }
+
+        _pickedUpSlot = null;
+        _pickedUpParent = null;
+    }
+
+    /// <summary>
+    /// 清理拿起状态
+    /// </summary>
+    private void ClearPickup()
+    {
+        if (_pickedUpPlaceholder != null)
+        {
+            _pickedUpPlaceholder.OnSlotClicked -= OnSlotClicked;
+            PoolManager.Instance.Release(_pickedUpPlaceholder.gameObject);
+            _pickedUpPlaceholder = null;
+        }
+
+        if (_pickedUpSlot != null)
+        {
+            var canvasGroup = _pickedUpSlot.GetComponent<CanvasGroup>();
+            if (canvasGroup != null)
+                canvasGroup.blocksRaycasts = true;
+        }
+
+        // 重新启用 LayoutGroup
+        var layoutGroup = _pickedUpParent?.GetComponent<UnityEngine.UI.LayoutGroup>();
+        if (layoutGroup != null)
+        {
+            layoutGroup.enabled = true;
+        }
+
+        _pickedUpSlot = null;
+        _pickedUpParent = null;
+    }
+
+    /// <summary>
+    /// 刷新所有视图
+    /// </summary>
+    private void RefreshAllViews()
+    {
+        RefreshItemList();
+        // 没有 session 时不刷新装备区（因为数据源是空的，会覆盖 UI 层面的交换）
+        if (SessionManager.Instance?.HasActiveSession == true)
+        {
+            RefreshEquipedWeapon();
+        }
+        RefreshCurrencyContent();
+    }
 
     #endregion
 
     #region 事件处理
 
-    /// <summary>
-    /// 背包内容变化时刷新列表
-    /// </summary>
     private void OnInventoryChanged(InventoryChangeParams p)
     {
-        if (p.itemType == _currentTab)
-        {
-            RefreshItemList();
-        }
-        if (p.itemType == ItemType.Currency)
-        {
-            RefreshCurrencyContent();
-        }
+        RefreshAllViews();
     }
 
     protected override void OnClick(string btnName)
@@ -129,11 +383,11 @@ public class InventoryPanel : BasePanel
         if (!value)
             return;
 
-        // 解析 tab 类型
         ItemType? type = ParseTabName(togName);
         if (type.HasValue)
         {
-            SwitchTab(type.Value);
+            _currentTab = type.Value;
+            RefreshItemList();
         }
     }
 
@@ -141,9 +395,6 @@ public class InventoryPanel : BasePanel
 
     #region 私有方法
 
-    /// <summary>
-    /// 解析 Tab 名称为 ItemType
-    /// </summary>
     private ItemType? ParseTabName(string name)
     {
         return name switch
@@ -157,20 +408,6 @@ public class InventoryPanel : BasePanel
         };
     }
 
-    /// <summary>
-    /// 切换当前 Tab
-    /// </summary>
-    private void SwitchTab(ItemType type)
-    {
-        _currentTab = type;
-        RefreshItemList();
-    }
-
-    /// <summary>
-    /// 刷新角色信息显示
-    /// <para>有活跃 Session：使用运行时数据（SessionManager）</para>
-    /// <para>无活跃 Session：使用静态数据（RoleStaticData）</para>
-    /// </summary>
     private void RefreshCharacterInfo()
     {
         PlayerRuntimeData playerData;
@@ -179,90 +416,48 @@ public class InventoryPanel : BasePanel
 
         if (hasActiveSession)
         {
-            // 有 Session：从 SessionManager 获取运行时数据
             playerData = SessionManager.Instance?.GetPlayerData();
-            roleData = playerData != null
-                ? GameDataManager.Instance?.GetRoleStaticData(playerData.id)
-                : null;
+            roleData = playerData != null ? GameDataManager.Instance?.GetRoleStaticData(playerData.id) : null;
         }
         else
         {
-            // 无 Session：使用静态数据（LastSelectedRoleId）
             int roleId = SaveLoadManager.Instance?.LastSelectedRoleId ?? 0;
             roleData = GameDataManager.Instance?.GetRoleStaticData(roleId);
             playerData = roleData != null ? PlayerRuntimeData.CreateBasic(roleData) : null;
         }
 
         if (playerData == null || roleData == null)
-        {
-            Debug.LogWarning($"[InventoryPanel] RefreshCharacterInfo failed: playerData={playerData == null}, roleData={roleData == null}");
             return;
-        }
 
-        // 角色头像
         var iconImg = GetControl<Image>(IMG_ROLE_ICON);
         if (iconImg != null)
         {
-            iconImg.sprite = roleData?.roleIcon;
+            iconImg.sprite = roleData.roleIcon;
             iconImg.enabled = iconImg.sprite != null;
         }
 
-        // 角色名
         var nameText = GetControl<TMP_Text>(TXT_ROLE_NAME);
         if (nameText != null)
-            nameText.text = string.IsNullOrEmpty(playerData.name) ? roleData?.roleName : playerData.name;
+            nameText.text = string.IsNullOrEmpty(playerData.name) ? roleData.roleName : playerData.name;
 
-        // 生命
-        var healthText = GetControl<TMP_Text>(TXT_HEALTH);
-        if (healthText != null)
-            healthText.text = $"生命: {playerData.Health:F0}/{playerData.maxHealth:F0}";
-
-        // 攻击
-        var atkText = GetControl<TMP_Text>(TXT_ATK);
-        if (atkText != null)
-            atkText.text = $"攻击: {playerData.atk:F1}";
-
-        // 防御
-        var defText = GetControl<TMP_Text>(TXT_DEF);
-        if (defText != null)
-            defText.text = $"防御: {playerData.def:F1}";
-
-        // 速度
-        var speedText = GetControl<TMP_Text>(TXT_SPEED);
-        if (speedText != null)
-            speedText.text = $"速度: {playerData.moveSpeed:F1}";
-
-        // 冲刺速度
-        var dashSpeedText = GetControl<TMP_Text>(TXT_DASH_SPEED);
-        if (dashSpeedText != null)
-            dashSpeedText.text = $"冲刺速度: {playerData.dashSpeed:F1}";
-
-        // 冲刺持续时间
-        var dashDurationText = GetControl<TMP_Text>(TXT_DASH_DURATION);
-        if (dashDurationText != null)
-            dashDurationText.text = $"冲刺持续: {playerData.dashDuration:F2}s";
-
-        // 冲刺间隔
-        var dashGapText = GetControl<TMP_Text>(TXT_DASH_GAP);
-        if (dashGapText != null)
-            dashGapText.text = $"冲刺间隔: {playerData.dashGap:F2}s";
-
-        // 无敌持续时间
-        var invincibleText = GetControl<TMP_Text>(TXT_INVINCIBLE);
-        if (invincibleText != null)
-            invincibleText.text = $"无敌: {playerData.invincibleDuration:F2}s";
-
-        // 受伤持续时间
-        var hurtDurationText = GetControl<TMP_Text>(TXT_HURT_DURATION);
-        if (hurtDurationText != null)
-            hurtDurationText.text = $"受伤持续: {playerData.hurtDuration:F2}s";
+        SetText(TXT_HEALTH, $"生命: {playerData.Health:F0}/{playerData.maxHealth:F0}");
+        SetText(TXT_ATK, $"攻击: {playerData.atk:F1}");
+        SetText(TXT_DEF, $"防御: {playerData.def:F1}");
+        SetText(TXT_SPEED, $"速度: {playerData.moveSpeed:F1}");
+        SetText(TXT_DASH_SPEED, $"冲刺速度: {playerData.dashSpeed:F1}");
+        SetText(TXT_DASH_DURATION, $"冲刺持续: {playerData.dashDuration:F2}s");
+        SetText(TXT_DASH_GAP, $"冲刺间隔: {playerData.dashGap:F2}s");
+        SetText(TXT_INVINCIBLE, $"无敌: {playerData.invincibleDuration:F2}s");
+        SetText(TXT_HURT_DURATION, $"受伤持续: {playerData.hurtDuration:F2}s");
     }
 
-    /// <summary>
-    /// 刷新已装备武器显示
-    /// <para>Playing 状态：显示 session 中已装备的武器</para>
-    /// <para>Lobby 状态：显示角色初始武器</para>
-    /// </summary>
+    private void SetText(string controlName, string text)
+    {
+        var txt = GetControl<TMP_Text>(controlName);
+        if (txt != null)
+            txt.text = text;
+    }
+
     private void RefreshEquipedWeapon()
     {
         bool hasActiveSession = SessionManager.Instance?.HasActiveSession == true;
@@ -273,7 +468,6 @@ public class InventoryPanel : BasePanel
 
         if (hasActiveSession)
         {
-            // 有 Session：从 SessionData 获取
             var sessionData = SessionManager.Instance?.CurrentSession;
             var playerData = SessionManager.Instance?.GetPlayerData();
             if (sessionData == null || playerData == null)
@@ -285,7 +479,6 @@ public class InventoryPanel : BasePanel
         }
         else
         {
-            // 无 Session：使用静态数据（初始武器）
             roleId = SaveLoadManager.Instance?.LastSelectedRoleId ?? 0;
             var roleData = GameDataManager.Instance?.GetRoleStaticData(roleId);
             if (roleData == null)
@@ -295,7 +488,6 @@ public class InventoryPanel : BasePanel
             weaponIds = roleData.initialWeaponIds;
         }
 
-        // 获取容器（优先用序列化字段，否则用 Find）
         var container = _equipedWeaponContainer;
         if (container == null)
         {
@@ -304,251 +496,270 @@ public class InventoryPanel : BasePanel
         }
 
         if (container == null)
+        {
+            LogError($"Equipped weapon container is null!");
             return;
-
+        }
         if (_equipSlotPrefab == null)
         {
-            LogError("EquipSlotPrefab is not assigned!");
+            LogError($"_equipSlotPrefab is null! Please assign in Inspector.");
             return;
         }
 
-        // 回收旧的装备槽
         ReleaseAllEquipSlots();
 
-        // 根据 maxSlots 生成对应数量的装备槽
+        // 禁用 LayoutGroup，防止添加时自动排列
+        var layoutGroup = container.GetComponent<UnityEngine.UI.GridLayoutGroup>();
+        bool layoutGroupWasEnabled = layoutGroup != null && layoutGroup.enabled;
+        if (layoutGroup != null)
+            layoutGroup.enabled = false;
+
         for (int i = 0; i < maxSlots; i++)
         {
-            var slotObj = PoolManager.Instance.Get(_equipSlotPrefab, Vector3.zero, Quaternion.identity);
+            bool hasWeapon = weaponIds != null && i < weaponIds.Count && weaponIds[i] > 0;
+            GameObject prefab = hasWeapon ? _equipSlotPrefab : (_emptySlotPrefab ?? _equipSlotPrefab);
+            var slotObj = PoolManager.Instance.Get(prefab, Vector3.zero, Quaternion.identity);
             var slot = slotObj.GetComponent<ItemSlotUI>();
 
             if (slot != null)
             {
-                // 如果该槽位有武器，显示武器图标；否则显示默认图标（ItemSlotUI 自带）
-                if (weaponIds != null && i < weaponIds.Count && weaponIds[i] > 0)
-                {
-                    int weaponId = weaponIds[i];
-                    slot.Initialize(weaponId, 1, ItemType.Weapon);
-                }
+                if (hasWeapon)
+                    slot.Initialize(weaponIds[i], 1, ItemType.Weapon, i);
                 else
-                {
-                    // 无武器时传 0，显示默认图标
-                    slot.Initialize(0, 0, ItemType.Weapon);
-                }
+                    slot.Initialize(0, 0, ItemType.Weapon, i);
 
                 slot.transform.SetParent(container, false);
+                slot.transform.SetSiblingIndex(i);
+                slot.OnSlotClicked += OnSlotClicked;
                 _activeEquipSlots.Add(slot);
             }
         }
 
-        Debug.Log($"[InventoryPanel] container pivot:{container.pivot}, anchor:{container.anchorMin}-{container.anchorMax}, sizeDelta:{container.sizeDelta}");
+        // 恢复 LayoutGroup 并强制重新计算
+        if (layoutGroup != null)
+        {
+            layoutGroup.enabled = layoutGroupWasEnabled;
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(container);
+        }
     }
 
-    /// <summary>
-    /// 刷新物品列表
-    /// <para>有活跃 Session：从 InventoryManager 获取最新数据（SessionData）</para>
-    /// <para>无活跃 Session：不显示物品背包</para>
-    /// </summary>
     private void RefreshItemList()
     {
-        bool hasActiveSession = SessionManager.Instance?.HasActiveSession == true;
-
-        // 无 Session 不显示物品背包
-        if (!hasActiveSession)
+        if (!SessionManager.Instance?.HasActiveSession == true)
             return;
 
         if (_slotPrefab == null)
         {
-            LogError("Slot prefab is not set.");
+            LogError($"_slotPrefab is null! Please assign in Inspector.");
             return;
         }
 
-        // 回收当前所有 Slot
         ReleaseAllSlots();
 
-        // 获取当前 Tab 的物品
-        var itemIds = InventoryManager.Instance?.GetInventory(_currentTab);
-        if (itemIds == null || itemIds.Count == 0)
-            return;
+        var itemIds = InventoryManager.Instance?.GetInventory(_currentTab) ?? new List<ItemSlotData>();
+
+        if (itemIds.Count == 0)
+        {
+            for (int i = 0; i < 20; i++)
+                itemIds.Add(new ItemSlotData());
+        }
 
         if (_content == null)
             return;
 
-        // 按 ID 分组统计堆叠
-        var grouped = itemIds.GroupBy(id => id).ToList();
-
-        // 生成 ItemSlot（根据 maxStack 决定是否分格显示）
-        foreach (var group in grouped)
+        int slotIndex = 0;
+        foreach (var slotData in itemIds)
         {
-            int itemId = group.Key;
-            int totalCount = group.Count();
-            var config = GameDataManager.Instance?.GetItemConfig(itemId);
-            int maxStack = config?.MaxStack ?? 1;
+            int itemId = slotData.itemId;
+            int quantity = slotData.quantity;
+            bool isEmpty = itemId == 0 || quantity <= 0;
 
-            // 根据 maxStack 分配格子
-            int remaining = totalCount;
+            int maxStack = 1;
+            if (!isEmpty)
+            {
+                var config = GameDataManager.Instance?.GetItemConfig(itemId);
+                maxStack = config?.MaxStack ?? 1;
+            }
+
+            int remaining = quantity;
+            if (isEmpty)
+            {
+                remaining = 1;
+                maxStack = 1;
+            }
+
             while (remaining > 0)
             {
                 int stackCount = Mathf.Min(remaining, maxStack);
                 remaining -= stackCount;
 
-                var slotObj = PoolManager.Instance.Get(_slotPrefab, Vector3.zero, Quaternion.identity);
+                GameObject prefab = isEmpty ? (_emptySlotPrefab ?? _slotPrefab) : _slotPrefab;
+                var slotObj = PoolManager.Instance.Get(prefab, Vector3.zero, Quaternion.identity);
                 var slot = slotObj.GetComponent<ItemSlotUI>();
 
                 if (slot != null)
                 {
-                    slot.Initialize(itemId, stackCount, _currentTab);
+                    slot.Initialize(itemId, isEmpty ? 0 : stackCount, _currentTab, slotIndex);
                     slot.transform.SetParent(_content, false);
+                    slot.OnSlotClicked += OnSlotClicked;
                     _activeSlots.Add(slot);
+                    slotIndex++;
                 }
             }
         }
 
-        // 手动计算 Content 高度（适配 GridLayoutGroup 的 CellSize 和 Spacing）
         UpdateContentHeightForGrid(_content, _activeSlots.Count);
     }
 
-    /// <summary>
-    /// 刷新货币页签内容
-    /// <para>Playing 状态：显示背包中的货币物品</para>
-    /// </summary>
     private void RefreshCurrencyContent()
     {
         if (_contentCurrency == null)
         {
-            LogError("_contentCurrency is null!");
+            LogError($"_contentCurrency is null! Please assign in Inspector.");
             return;
         }
-
         if (_slotPrefab == null)
         {
-            LogError("Slot prefab is not set.");
+            LogError($"_slotPrefab is null! Please assign in Inspector.");
             return;
         }
 
-        // 回收旧的货币 Slot
         ReleaseAllCurrencySlots();
 
-        // 获取货币物品列表
-        var currencyIds = InventoryManager.Instance?.GetInventory(ItemType.Currency);
-        if (currencyIds == null || currencyIds.Count == 0)
-            return;
+        var currencyIds = InventoryManager.Instance?.GetInventory(ItemType.Currency) ?? new List<ItemSlotData>();
 
-        // 按 ID 分组统计堆叠
-        var grouped = currencyIds.GroupBy(id => id).ToList();
-
-        // 生成货币 ItemSlot（根据 maxStack 决定是否分格显示）
-        foreach (var group in grouped)
+        if (currencyIds.Count == 0)
         {
-            int itemId = group.Key;
-            int totalCount = group.Count();
-            var config = GameDataManager.Instance?.GetItemConfig(itemId);
-            int maxStack = config?.MaxStack ?? 1;
+            for (int i = 0; i < 20; i++)
+                currencyIds.Add(new ItemSlotData());
+        }
 
-            // 根据 maxStack 分配格子
-            int remaining = totalCount;
+        int currencySlotIndex = 0;
+        foreach (var slotData in currencyIds)
+        {
+            int itemId = slotData.itemId;
+            int quantity = slotData.quantity;
+            bool isEmpty = itemId == 0 || quantity <= 0;
+
+            int maxStack = 1;
+            if (!isEmpty)
+            {
+                var config = GameDataManager.Instance?.GetItemConfig(itemId);
+                maxStack = config?.MaxStack ?? 1;
+            }
+
+            int remaining = quantity;
+            if (isEmpty)
+            {
+                remaining = 1;
+                maxStack = 1;
+            }
+
             while (remaining > 0)
             {
                 int stackCount = Mathf.Min(remaining, maxStack);
                 remaining -= stackCount;
 
-                var slotObj = PoolManager.Instance.Get(_slotPrefab, Vector3.zero, Quaternion.identity);
+                GameObject prefab = isEmpty ? (_emptySlotPrefab ?? _slotPrefab) : _slotPrefab;
+                var slotObj = PoolManager.Instance.Get(prefab, Vector3.zero, Quaternion.identity);
                 var slot = slotObj.GetComponent<ItemSlotUI>();
 
                 if (slot != null)
                 {
-                    slot.Initialize(itemId, stackCount, ItemType.Currency);
+                    slot.Initialize(itemId, isEmpty ? 0 : stackCount, ItemType.Currency, currencySlotIndex);
                     slot.transform.SetParent(_contentCurrency, false);
+                    slot.OnSlotClicked += OnSlotClicked;
                     _activeCurrencySlots.Add(slot);
+                    currencySlotIndex++;
                 }
             }
         }
 
-        // 更新 Content 高度
         UpdateContentHeightForGrid(_contentCurrency, _activeCurrencySlots.Count);
     }
 
-    /// <summary>
-    /// 根据 GridLayoutGroup 设置和 ItemSlot 数量更新 Content 高度
-    /// </summary>
-    /// <param name="content">Content 的 RectTransform</param>
-    /// <param name="itemCount">Item 数量</param>
     private void UpdateContentHeightForGrid(RectTransform content, int itemCount)
     {
-        if (content == null || itemCount == 0)
+        if (content == null)
             return;
 
         var gridLayout = content.GetComponent<UnityEngine.UI.GridLayoutGroup>();
         if (gridLayout == null)
             return;
 
-        // 获取 GridLayoutGroup 的设置
         Vector2 cellSize = gridLayout.cellSize;
         Vector2 spacing = gridLayout.spacing;
         float paddingTop = gridLayout.padding.top;
         float paddingBottom = gridLayout.padding.bottom;
 
-        // 获取 Content 的宽度
         float contentWidth = content.rect.width;
+        if (contentWidth <= 0 && content.parent != null)
+        {
+            var parent = content.parent as RectTransform;
+            if (parent != null)
+                contentWidth = parent.rect.width - gridLayout.padding.left - gridLayout.padding.right;
+        }
 
-        // 计算列数（每行能放几个）
         float availableWidth = contentWidth - gridLayout.padding.left - gridLayout.padding.right;
         int columns = Mathf.Max(1, Mathf.FloorToInt((availableWidth + spacing.x) / (cellSize.x + spacing.x)));
 
-        // 计算行数
         int rows = Mathf.CeilToInt((float)itemCount / columns);
+        if (rows < 1) rows = 1;
 
-        // 计算总高度
         float totalHeight = paddingTop + paddingBottom + rows * cellSize.y + (rows - 1) * spacing.y;
-
-        // 更新 Content 高度
-        var sizeDelta = content.sizeDelta;
-        sizeDelta.y = totalHeight;
-        content.sizeDelta = sizeDelta;
+        content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, totalHeight);
     }
 
-    /// <summary>
-    /// 回收所有活跃的 ItemSlot
-    /// </summary>
     private void ReleaseAllSlots()
     {
         foreach (var slot in _activeSlots)
         {
             if (slot != null && slot.gameObject != null)
             {
+                slot.OnSlotClicked -= OnSlotClicked;
                 PoolManager.Instance.Release(slot.gameObject);
             }
         }
         _activeSlots.Clear();
     }
 
-    /// <summary>
-    /// 回收所有已装备武器槽
-    /// </summary>
     private void ReleaseAllEquipSlots()
     {
         foreach (var slot in _activeEquipSlots)
         {
             if (slot != null && slot.gameObject != null)
             {
+                slot.OnSlotClicked -= OnSlotClicked;
                 PoolManager.Instance.Release(slot.gameObject);
             }
         }
         _activeEquipSlots.Clear();
     }
 
-    /// <summary>
-    /// 回收所有货币槽
-    /// </summary>
     private void ReleaseAllCurrencySlots()
     {
         foreach (var slot in _activeCurrencySlots)
         {
             if (slot != null && slot.gameObject != null)
             {
+                slot.OnSlotClicked -= OnSlotClicked;
                 PoolManager.Instance.Release(slot.gameObject);
             }
         }
         _activeCurrencySlots.Clear();
+    }
+
+    private void UpdateTrashSlotDisplay()
+    {
+        if (_trashSlot == null)
+            return;
+
+        _trashSlot.gameObject.SetActive(true);
+
+        if (_pendingDeleteItem != null && !_pendingDeleteItem.IsEmpty)
+            _trashSlot.Initialize(_pendingDeleteItem.itemId, _pendingDeleteItem.quantity, ItemType.Weapon);
+        else
+            _trashSlot.Initialize(0, 0, ItemType.Weapon);
     }
 
     #endregion

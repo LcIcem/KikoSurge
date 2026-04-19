@@ -93,6 +93,7 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Subscribe<WeaponBase>(GameEventID.Combat_Reloaded, OnReloaded);
         EventCenter.Instance.Subscribe(GameEventID.Combat_CancelReload, OnCancelReload);
         EventCenter.Instance.Subscribe<EnemyHitPlayerParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyHitPlayer);
+        EventCenter.Instance.Subscribe<InventoryChangeParams>(GameEventID.OnInventoryChanged, OnInventoryChanged);
     }
 
     void OnDestroy()
@@ -107,6 +108,7 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Unsubscribe<WeaponBase>(GameEventID.Combat_Reloaded, OnReloaded);
         EventCenter.Instance.Unsubscribe(GameEventID.Combat_CancelReload, OnCancelReload);
         EventCenter.Instance.Unsubscribe<EnemyHitPlayerParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyHitPlayer);
+        EventCenter.Instance.Unsubscribe<InventoryChangeParams>(GameEventID.OnInventoryChanged, OnInventoryChanged);
     }
 
     private float _curSpeed = 0f;
@@ -376,5 +378,22 @@ public class Player : MonoBehaviour
     private void OnCancelReload()
     {
         _fsm.SetBool("isReload", false);
+    }
+
+    /// <summary>
+    /// 背包变化时同步武器（当在背包UI中切换武器时调用）
+    /// </summary>
+    private void OnInventoryChanged(InventoryChangeParams p)
+    {
+        // 只处理武器类型的变化
+        if (p.itemType != ItemType.Weapon)
+            return;
+
+        // 从 SessionData 获取最新的已装备武器列表并同步
+        var sessionData = SessionManager.Instance?.CurrentSession;
+        if (sessionData != null)
+        {
+            weaponHandler.SyncFromSessionData(sessionData.equippedWeaponIds, _weaponPivot);
+        }
     }
 }

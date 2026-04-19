@@ -491,7 +491,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// </summary>
     public void OpenInventory()
     {
-        if (CurrentState == GameState.Playing || CurrentState == GameState.Lobby)
+        // 只在 Playing 状态允许打开背包
+        if (CurrentState == GameState.Playing)
         {
             // 保存当前状态，切换到交互状态
             _stateBeforeInteracting = CurrentState;

@@ -1,6 +1,7 @@
 using UnityEngine;
 using LcIcemFramework;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 
 /// <summary>
@@ -411,23 +412,22 @@ public class LootItem : MonoBehaviour, IPoolable
             if (weapon == null) return;
 
             // 获取当前已装备武器列表和最大数量
-            var equippedWeaponIds = SessionManager.Instance.GetEquippedWeaponIds();
+            var equippedSlots = InventoryManager.Instance?.GetEquippedWeapons() ?? new List<ItemSlotData>();
             var roleData = GameDataManager.Instance?.GetRoleStaticData(SessionManager.Instance.CurrentSession?.selectedRoleId ?? 0);
             int maxSlots = roleData?.maxWeaponSlots ?? 2;
 
-            if (equippedWeaponIds.Count < maxSlots)
+            if (equippedSlots.Count < maxSlots)
             {
                 // 装备栏未满，装备武器
                 player.weaponHandler.AddWeapon(weapon);
-                equippedWeaponIds.Add(weaponConfig.itemConfig.Id);
-                SessionManager.Instance.SetEquippedWeaponIds(equippedWeaponIds);
+                // 注意：装备武器需要特殊处理，这里暂时用 AddItem 放入背包
+                // 实际装备武器的逻辑应该在 InventoryManager.SwapWithEquipped 中处理
+                InventoryManager.Instance?.AddItem(ItemType.Weapon, weaponConfig.itemConfig.Id, 1);
             }
             else
             {
                 // 装备栏已满，放入背包
-                var inventoryWeaponIds = SessionManager.Instance.GetInventoryWeaponIds();
-                inventoryWeaponIds.Add(weaponConfig.itemConfig.Id);
-                SessionManager.Instance.SetInventoryWeaponIds(inventoryWeaponIds);
+                InventoryManager.Instance?.AddItem(ItemType.Weapon, weaponConfig.itemConfig.Id, 1);
                 WeaponFactory.Instance.Release(weapon);
             }
         });

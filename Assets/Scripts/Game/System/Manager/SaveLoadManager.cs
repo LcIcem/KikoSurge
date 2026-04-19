@@ -221,9 +221,15 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
         session.seed = current.seed;
         session.currentFloor = current.currentFloor;
         session.SetPlayerPos(current.GetPlayerPos());
-        session.inventoryWeaponIds = current.inventoryWeaponIds;
-        session.inventoryRelicIds = current.inventoryRelicIds;
-        session.equippedWeaponIds = current.equippedWeaponIds;
+        session.inventoryWeaponSlots = current.inventoryWeaponSlots != null
+            ? new List<ItemSlotData>(current.inventoryWeaponSlots)
+            : new List<ItemSlotData>();
+        session.inventoryRelicSlots = current.inventoryRelicSlots != null
+            ? new List<ItemSlotData>(current.inventoryRelicSlots)
+            : new List<ItemSlotData>();
+        session.equippedWeaponSlots = current.equippedWeaponSlots != null
+            ? new List<ItemSlotData>(current.equippedWeaponSlots)
+            : new List<ItemSlotData>();
         session.currentHealth = current.currentHealth;
         session.currentCheckpoint = current.currentCheckpoint;
 

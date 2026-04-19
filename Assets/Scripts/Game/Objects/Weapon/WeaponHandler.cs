@@ -96,13 +96,112 @@ public class WeaponHandler
     }
 
     /// <summary>
-    /// 切换到下一把武器
+    /// 切换到下一把武器（直接从 SessionData 读取并更新）
     /// </summary>
     public void SwitchToNextWeapon()
     {
-        if (_weapons.Count <= 1) return;
-        int nextIndex = (_currentWeaponIndex + 1) % _weapons.Count;
-        EquipWeapon(nextIndex);
+        var sessionData = SessionManager.Instance?.CurrentSession;
+        if (sessionData == null)
+            return;
+
+        var equippedSlots = sessionData.equippedWeaponSlots;
+        if (equippedSlots == null || equippedSlots.Count == 0)
+            return;
+
+        // 找到当前正在使用的武器索引（第一个非空槽）
+        int currentEquipIndex = -1;
+        for (int i = 0; i < equippedSlots.Count; i++)
+        {
+            if (!equippedSlots[i].IsEmpty)
+            {
+                currentEquipIndex = i;
+                break;
+            }
+        }
+
+        if (currentEquipIndex < 0)
+            return;
+
+        // 找下一个非空槽
+        int nextIndex = -1;
+        for (int i = 1; i < equippedSlots.Count; i++)
+        {
+            int checkIndex = (currentEquipIndex + i) % equippedSlots.Count;
+            if (!equippedSlots[checkIndex].IsEmpty)
+            {
+                nextIndex = checkIndex;
+                break;
+            }
+        }
+
+        if (nextIndex < 0 || nextIndex == currentEquipIndex)
+            return;
+
+        // 交换 SessionData 中的两个槽位
+        var temp = equippedSlots[currentEquipIndex];
+        equippedSlots[currentEquipIndex] = equippedSlots[nextIndex];
+        equippedSlots[nextIndex] = temp;
+
+        // 同步更新 WeaponHandler 内部的武器列表
+        SyncWeaponListFromSession(equippedSlots);
+
+        // 发布事件通知 UI 更新
+        EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
+            new InventoryChangeParams(ItemType.Weapon, 0, 0, InventoryChangeType.Swap));
+
+        Debug.Log($"[WeaponHandler] SwitchToNextWeapon: swapped slot {currentEquipIndex} with {nextIndex}");
+    }
+
+    /// <summary>
+    /// 根据 SessionData 同步内部武器列表
+    /// </summary>
+    private void SyncWeaponListFromSession(List<ItemSlotData> equippedSlots)
+    {
+        // 收集当前非空槽的 itemId 列表（按槽位顺序）
+        var currentWeaponIds = new List<int>();
+        foreach (var slot in equippedSlots)
+        {
+            if (!slot.IsEmpty)
+                currentWeaponIds.Add(slot.itemId);
+        }
+
+        // 根据 itemId 重新排序 _weapons 列表，使其与 equippedSlots 顺序一致
+        _weapons.Sort((a, b) =>
+        {
+            if (a == null && b == null) return 0;
+            if (a == null) return 1;
+            if (b == null) return -1;
+            int indexA = currentWeaponIds.IndexOf(a.Config.itemConfig.Id);
+            int indexB = currentWeaponIds.IndexOf(b.Config.itemConfig.Id);
+            return indexA.CompareTo(indexB);
+        });
+
+        // 隐藏所有武器
+        foreach (var weapon in _weapons)
+        {
+            if (weapon != null)
+                weapon.gameObject.SetActive(false);
+        }
+
+        // 激活第一个非空槽的武器
+        _currentWeaponIndex = 0;
+        for (int i = 0; i < equippedSlots.Count; i++)
+        {
+            if (!equippedSlots[i].IsEmpty && _currentWeaponIndex < _weapons.Count)
+            {
+                _weapons[_currentWeaponIndex].gameObject.SetActive(true);
+                break;
+            }
+            if (!equippedSlots[i].IsEmpty)
+                _currentWeaponIndex++;
+        }
+
+        if (_currentWeaponIndex >= 0 && _currentWeaponIndex < _weapons.Count)
+        {
+            EventCenter.Instance.Publish(GameEventID.OnCurrentWeaponChanged, _weapons[_currentWeaponIndex]);
+        }
+
+        Debug.Log($"[WeaponHandler] SyncWeaponListFromSession: {_weapons.Count} weapons synced");
     }
 
     /// <summary>
@@ -125,5 +224,27 @@ public class WeaponHandler
         }
         _weapons.Clear();
         _currentWeaponIndex = -1;
+    }
+
+    /// <summary>
+    /// 从 SessionData 同步武器列表（当背包中武器切换时调用）
+    /// </summary>
+    public void SyncFromSessionData(List<int> equippedWeaponIds, Transform weaponPivot)
+    {
+        // 清空现有武器
+        ClearAllWeapons();
+
+        // 根据 equippedWeaponIds 重新创建武器
+        foreach (var weaponId in equippedWeaponIds)
+        {
+            if (weaponId <= 0) continue;
+            WeaponFactory.Instance.Create(weaponId, weaponPivot, (weapon) =>
+            {
+                if (weapon == null) return;
+                AddWeapon(weapon);
+            });
+        }
+
+        Debug.Log($"[WeaponHandler] Synced weapons from SessionData: {equippedWeaponIds.Count} weapons");
     }
 }

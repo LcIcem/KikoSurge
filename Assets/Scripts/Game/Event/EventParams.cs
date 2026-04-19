@@ -156,7 +156,9 @@ public enum InventoryChangeType
 {
     Add,
     Remove,
-    Clear
+    Clear,
+    Move,
+    Swap
 }
 
 /// <summary>

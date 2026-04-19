@@ -38,7 +38,7 @@ public class SessionManager : SingletonMono<SessionManager>
         int roleId = SaveLoadManager.Instance.LastSelectedRoleId;
         _currentSession = SessionData.CreateNew(roleId, seed);
         var roleData = GameDataManager.Instance?.GetRoleStaticData(roleId);
-        Debug.Log($"[SessionManager] Session started: role={roleData?.roleName ?? roleId.ToString()}, seed={seed}, maxWeaponSlots={roleData?.maxWeaponSlots ?? 2}, equipped=[{string.Join(", ", _currentSession.equippedWeaponIds)}], inventory=[{string.Join(", ", _currentSession.inventoryWeaponIds)}]");
+        Debug.Log($"[SessionManager] Session started: role={roleData?.roleName ?? roleId.ToString()}, seed={seed}, maxWeaponSlots={roleData?.maxWeaponSlots ?? 2}, equipped=[{string.Join(", ", _currentSession.equippedWeaponSlots)}], inventory=[{string.Join(", ", _currentSession.inventoryWeaponSlots)}]");
 
         // 将 runtime session 与存档关联（共享同一个 SessionData 引用）
         // 这样 SaveSession() 才能正确地将数据写回存档
@@ -61,6 +61,9 @@ public class SessionManager : SingletonMono<SessionManager>
     {
         _currentSession = sessionData;
         Debug.Log($"[SessionManager] Session loaded: role={sessionData.selectedRoleName}, floor={sessionData.currentFloor}");
+
+        // 绑定 SessionData 到 InventoryManager
+        InventoryManager.Instance?.BindSessionData(_currentSession);
     }
 
     /// <summary>
@@ -177,59 +180,59 @@ public class SessionManager : SingletonMono<SessionManager>
     }
 
     /// <summary>
-    /// 获取背包武器ID列表
+    /// 获取背包武器格子列表
     /// </summary>
-    public List<int> GetInventoryWeaponIds()
+    public List<ItemSlotData> GetInventoryWeaponSlots()
     {
-        return _currentSession?.inventoryWeaponIds ?? new List<int>();
+        return _currentSession?.inventoryWeaponSlots ?? new List<ItemSlotData>();
     }
 
     /// <summary>
-    /// 设置背包武器ID列表
+    /// 设置背包武器格子列表
     /// </summary>
-    public void SetInventoryWeaponIds(List<int> weaponIds)
+    public void SetInventoryWeaponSlots(List<ItemSlotData> slots)
     {
         if (_currentSession != null)
         {
-            _currentSession.inventoryWeaponIds = weaponIds ?? new List<int>();
+            _currentSession.inventoryWeaponSlots = slots ?? new List<ItemSlotData>();
         }
     }
 
     /// <summary>
-    /// 获取已装备武器ID列表
+    /// 获取已装备武器格子列表
     /// </summary>
-    public List<int> GetEquippedWeaponIds()
+    public List<ItemSlotData> GetEquippedWeaponSlots()
     {
-        return _currentSession?.equippedWeaponIds ?? new List<int>();
+        return _currentSession?.equippedWeaponSlots ?? new List<ItemSlotData>();
     }
 
     /// <summary>
-    /// 设置已装备武器ID列表
+    /// 设置已装备武器格子列表
     /// </summary>
-    public void SetEquippedWeaponIds(List<int> weaponIds)
+    public void SetEquippedWeaponSlots(List<ItemSlotData> slots)
     {
         if (_currentSession != null)
         {
-            _currentSession.equippedWeaponIds = weaponIds ?? new List<int>();
+            _currentSession.equippedWeaponSlots = slots ?? new List<ItemSlotData>();
         }
     }
 
     /// <summary>
-    /// 获取背包遗物ID列表
+    /// 获取背包遗物格子列表
     /// </summary>
-    public List<int> GetInventoryRelicIds()
+    public List<ItemSlotData> GetInventoryRelicSlots()
     {
-        return _currentSession?.inventoryRelicIds ?? new List<int>();
+        return _currentSession?.inventoryRelicSlots ?? new List<ItemSlotData>();
     }
 
     /// <summary>
-    /// 设置背包遗物ID列表
+    /// 设置背包遗物格子列表
     /// </summary>
-    public void SetInventoryRelicIds(List<int> relicIds)
+    public void SetInventoryRelicSlots(List<ItemSlotData> slots)
     {
         if (_currentSession != null)
         {
-            _currentSession.inventoryRelicIds = relicIds ?? new List<int>();
+            _currentSession.inventoryRelicSlots = slots ?? new List<ItemSlotData>();
         }
     }
 

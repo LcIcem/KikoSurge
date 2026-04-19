@@ -7,6 +7,6 @@ public enum ItemType
     Ammo = 1,     // 弹药
     Potion = 2,   // 药水/消耗品
     Armor = 3,    // 护甲
-    Relic = 4,    // 配饰
+    Relic = 4,    // 遗物
     Currency = 5   // 货币
 }
