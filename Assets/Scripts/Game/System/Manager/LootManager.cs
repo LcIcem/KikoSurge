@@ -40,10 +40,13 @@ public class LootManager : SingletonMono<LootManager>
         if (enemy == null) return;
 
         // 直接从 EnemyConfig 获取掉落表
-        var lootTable = enemy.EnemyConfig?.lootTable;
+        var config = enemy.EnemyConfig;
+        Log($"[DEBUG] EnemyId={enemy.EnemyId}, EnemyConfig={config}, lootTable={(config != null ? config.lootTable : "N/A")}");
+
+        var lootTable = config?.lootTable;
         if (lootTable == null)
         {
-            LogWarning($"无掉落表配置: EnemyId={enemy.EnemyId}, EnemyConfig={enemy.EnemyConfig}");
+            LogWarning($"无掉落表配置: EnemyId={enemy.EnemyId}, EnemyConfig={config}");
             return;
         }
 

@@ -15,18 +15,18 @@ MonoBehaviour:
   groups:
   - groupName: "\u6B66\u5668\u6389\u843D"
     entries:
-    - itemConfig: {fileID: 11400000, guid: f273b95930b4f8044a4d25f83312e731, type: 2}
+    - _itemConfig: {fileID: 11400000, guid: f273b95930b4f8044a4d25f83312e731, type: 2}
       dropChance: 0.5
       minQuantity: 1
       maxQuantity: 1
-    - itemConfig: {fileID: 11400000, guid: 41133e477919bc24ca1a751fde8b4981, type: 2}
+    - _itemConfig: {fileID: 11400000, guid: 41133e477919bc24ca1a751fde8b4981, type: 2}
       dropChance: 0.3
       minQuantity: 1
       maxQuantity: 1
     maxPick: 1
   - groupName: "\u91D1\u5E01\u6389\u843D"
     entries:
-    - itemConfig: {fileID: 11400000, guid: 628452d0397e8004e8e0b0a49d9141e0, type: 2}
+    - _itemConfig: {fileID: 11400000, guid: 628452d0397e8004e8e0b0a49d9141e0, type: 2}
       dropChance: 1
       minQuantity: 1
       maxQuantity: 3

@@ -37,7 +37,9 @@ public class LootTableConfig : ScriptableObject
     public class LootEntry
     {
         [Tooltip("物品定义")]
-        public ItemConfig itemConfig;
+        [SerializeField] private ItemConfig _itemConfig;
+
+        public ItemConfig itemConfig => _itemConfig;
 
         [Tooltip("掉落概率 0~1")]
         [Range(0f, 1f)]
