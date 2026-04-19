@@ -15,7 +15,7 @@ public class KeysSettingsPage : ISettingsPage
     // Action 名称常量（Player Map 中的 Actions）
     private static readonly string[] ActionNames = new[]
     {
-        "Move", "Look", "Interact", "Shoot", "Dash", "SwitchWeapon"
+        "Move", "Look", "Interact", "Shoot", "Dash", "SwitchWeapon", "OpenInventory"
     };
 
     // Action 显示名称映射
@@ -26,7 +26,8 @@ public class KeysSettingsPage : ISettingsPage
         { "Interact", "交互"},
         { "Shoot", "射击" },
         { "Dash", "闪避" },
-        { "SwitchWeapon", "切换武器" }
+        { "SwitchWeapon", "切换武器" },
+        { "OpenInventory", "打开背包" },
     };
 
     // 拖拽配置（由 SettingsPanel 传入）
@@ -257,6 +258,13 @@ public class KeysSettingsPage : ISettingsPage
         if (_rebindButtons.TryGetValue(itemKey, out var btn))
         {
             btn.interactable = true;
+        }
+
+        // OpenInventory 绑定修改时，同步到 UIMap 的 CloseInventory
+        if (actionName == "OpenInventory")
+        {
+            ManagerHub.Input.SyncBindingToMap("Player", "OpenInventory", "UI", "CloseInventory", bindingIndex);
+            GameDataManager.Instance.SaveKeybindings("UI");
         }
     }
 

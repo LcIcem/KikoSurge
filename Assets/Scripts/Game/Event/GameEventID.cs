@@ -85,5 +85,10 @@ namespace Game.Event
         // 100-199: 大厅系统
         public static readonly EventID OnDungeonEntryConfirmed = (EventID)1010; // 确认进入地牢
         public static readonly EventID OnDungeonPanelClosed = (EventID)1011;   // 地牢面板关闭
+
+        // 1100-1199: 背包系统
+        public static readonly EventID OnInventoryChanged = (EventID)1100;       // 背包内容变化
+        public static readonly EventID OnInventoryItemAdded = (EventID)1101;     // 物品添加
+        public static readonly EventID OnInventoryItemRemoved = (EventID)1102;   // 物品移除
     }
 }

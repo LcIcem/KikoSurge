@@ -13,6 +13,7 @@ public enum GameState
     MainMenu,    // 主菜单
     Lobby,       // 大厅（准备阶段）
     Playing,     // 游戏中
+    Interacting, // 交互中（背包、商店等），时间不暂停
     Paused,      // 暂停
     GameOver     // 游戏结束
 }
@@ -70,6 +71,50 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         EventCenter.Instance.Subscribe(GameEventID.OnDeathAnimationEnd, OnDeathAnimationEnd);
     }
 
+    private bool _hasSubscribedPanelClosed;
+
+    private void TrySubscribePanelClosed()
+    {
+        if (_hasSubscribedPanelClosed)
+            return;
+        if (ManagerHub.UI == null)
+            return;
+        if (!ManagerHub.UI.IsReady)
+            return;
+
+        ManagerHub.UI.OnPanelClosed += OnPanelClosed;
+        _hasSubscribedPanelClosed = true;
+    }
+
+    private void OnPanelClosed(LcIcemFramework.BasePanel panel)
+    {
+        Debug.Log($"[OnPanelClosed] panel={panel?.GetType().Name}, CurrentState={CurrentState}");
+
+        if (CurrentState == GameState.Interacting)
+        {
+            // Interacting 状态关闭面板时，恢复到之前的状态
+            ChangeState(_stateBeforeInteracting);
+            // 恢复玩家旋转
+            AimInput.Enabled = true;
+            // 恢复玩家移动
+            UnlockPlayerMovement();
+        }
+        else if (CurrentState == GameState.Paused)
+        {
+            // Paused 状态下，只有关闭的是 PausePanel 时才恢复游戏
+            if (panel is PausePanel)
+            {
+                Debug.Log("[OnPanelClosed] PausePanel closed, resuming game");
+                ResumeGame();
+            }
+        }
+        else
+        {
+            // 其他状态（Lobby、Playing 等）：根据当前状态自动切换 ActionMap
+            ManagerHub.Input.SwitchActionMapByGameState(CurrentState);
+        }
+    }
+
     private void OnDeathAnimationEnd()
     {
         GameOver();
@@ -80,13 +125,17 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
 
     private void Update()
     {
-        // 场景加载期间不处理 Pause
+        // 延迟订阅 UI 面板关闭事件（等待 UIManager 初始化完成）
+        TrySubscribePanelClosed();
+
+        // 场景加载期间不处理
         if (_isSceneLoading)
             return;
 
-        // 累计游玩时长（在大厅或游戏中）
+        // ========== Playing / Lobby 状态 ==========
         if (CurrentState == GameState.Playing || CurrentState == GameState.Lobby)
         {
+            // 累计游玩时长
             _playTimeAccumulator += Time.deltaTime;
             if (_playTimeAccumulator >= PLAY_TIME_SAVE_INTERVAL)
             {
@@ -94,11 +143,56 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
                 _playTimeAccumulator = 0f;
             }
 
-            // 使用 TryGetValue 安全访问（UI ActionMap 中没有 Pause action）
+            // Pause 按键
             if (ManagerHub.Input.Actions.TryGetValue("Pause", out var pauseAction) &&
                 pauseAction.WasPressedThisFrame())
             {
                 PauseGame();
+            }
+
+            // OpenInventory 按键
+            if (ManagerHub.Input.Actions.TryGetValue("OpenInventory", out var openInventoryAction) &&
+                openInventoryAction.WasPressedThisFrame())
+            {
+                OpenInventory();
+            }
+
+            // ClosePanel 按键（无面板时无效）
+            if (ManagerHub.Input.Actions.TryGetValue("ClosePanel", out var closePanelAction) &&
+                closePanelAction.WasPressedThisFrame())
+            {
+                CloseCurrentPanel();
+            }
+        }
+
+        // ========== Paused 状态 ==========
+        if (CurrentState == GameState.Paused)
+        {
+            // ClosePanel 按键 → 先尝试关闭最上层面板，如果关闭成功则不再处理
+            if (ManagerHub.Input.Actions.TryGetValue("ClosePanel", out var closePanelAction) &&
+                closePanelAction.WasPressedThisFrame())
+            {
+                CloseCurrentPanel();
+            }
+
+            // CloseInventory 按键（暂停状态无效）
+        }
+
+        // ========== Interacting 状态 ==========
+        if (CurrentState == GameState.Interacting)
+        {
+            // ClosePanel 按键 → 退出交互
+            if (ManagerHub.Input.Actions.TryGetValue("ClosePanel", out var closePanelAction) &&
+                closePanelAction.WasPressedThisFrame())
+            {
+                CloseCurrentPanel();
+            }
+
+            // CloseInventory 按键 → 退出交互
+            if (ManagerHub.Input.Actions.TryGetValue("CloseInventory", out var closeInventoryAction) &&
+                closeInventoryAction.WasPressedThisFrame())
+            {
+                CloseCurrentPanel();
             }
         }
     }
@@ -138,6 +232,11 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// 进入大厅的时间戳（用于计算游玩时长）
     /// </summary>
     private long _lobbyEnterTime;
+
+    /// <summary>
+    /// 进入 Interacting 状态前的游戏状态（用于恢复）
+    /// </summary>
+    private GameState _stateBeforeInteracting;
 
     /// <summary>
     /// 进入大厅（仅切换状态，不创建 session）
@@ -386,6 +485,94 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             AimInput.Enabled = true;
         }
     }
+
+    /// <summary>
+    /// 打开背包
+    /// </summary>
+    public void OpenInventory()
+    {
+        if (CurrentState == GameState.Playing || CurrentState == GameState.Lobby)
+        {
+            // 保存当前状态，切换到交互状态
+            _stateBeforeInteracting = CurrentState;
+            ChangeState(GameState.Interacting);
+            // 关闭玩家旋转
+            AimInput.Enabled = false;
+            // 锁定玩家移动，防止滑行
+            LockPlayerMovement();
+            ManagerHub.UI.ShowPanel<InventoryPanel>();
+        }
+    }
+
+    /// <summary>
+    /// 锁定玩家移动（进入交互状态时调用）
+    /// </summary>
+    private void LockPlayerMovement()
+    {
+        Player player = null;
+
+        // Playing 状态：通过 LevelController 获取玩家
+        if (LevelController?.PlayerInstance != null)
+        {
+            player = LevelController.PlayerInstance.GetComponent<Player>();
+        }
+        // Lobby 状态：通过 Tag 查找玩家
+        else
+        {
+            var go = GameObject.FindGameObjectWithTag("Player");
+            player = go?.GetComponent<Player>();
+        }
+
+        player?.LockMovement();
+    }
+
+    /// <summary>
+    /// 解锁玩家移动（退出交互状态时调用）
+    /// </summary>
+    private void UnlockPlayerMovement()
+    {
+        Player player = null;
+
+        // Playing 状态：通过 LevelController 获取玩家
+        if (LevelController?.PlayerInstance != null)
+        {
+            player = LevelController.PlayerInstance.GetComponent<Player>();
+        }
+        // Lobby 状态：通过 Tag 查找玩家
+        else
+        {
+            var go = GameObject.FindGameObjectWithTag("Player");
+            player = go?.GetComponent<Player>();
+        }
+
+        player?.UnlockMovement();
+    }
+
+    /// <summary>
+    /// 关闭当前最上层的 UI 面板（仅响应可关闭的面板）
+    /// </summary>
+    public void CloseCurrentPanel()
+    {
+        // 防止递归调用
+        if (_isClosingPanel)
+            return;
+        _isClosingPanel = true;
+
+        Debug.Log($"[CloseCurrentPanel] called, CurrentState={CurrentState}");
+        // 检查最上层面板是否可以通过 ClosePanel 关闭
+        var topPanel = ManagerHub.UI.GetTopPanel();
+        Debug.Log($"[CloseCurrentPanel] topPanel={topPanel?.GetType().Name}, CanBeClosed={topPanel?.CanBeClosedByClosePanel}");
+        if (topPanel != null && !topPanel.CanBeClosedByClosePanel)
+        {
+            _isClosingPanel = false;
+            return;
+        }
+
+        ManagerHub.UI.CloseTopPanel();
+        _isClosingPanel = false;
+    }
+
+    private bool _isClosingPanel;
 
     /// <summary>
     /// 游戏结束（死亡）

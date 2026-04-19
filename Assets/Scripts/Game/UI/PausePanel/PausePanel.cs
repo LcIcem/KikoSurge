@@ -10,8 +10,6 @@ public class PausePanel : BasePanel
     private const string BTN_BACK_TO_MAINMENU = "btn_backToMainmenu";
     private const string TXT_TITLE = "txt_title";
 
-    private InputAction _resumeAction;
-
     public override void Show()
     {
         base.Show();
@@ -34,7 +32,7 @@ public class PausePanel : BasePanel
         if (titleText != null)
             titleText.gameObject.SetActive(!isFromLobby);
 
-        // 大厅暂停时隐藏"返回大厅"按钮（已在大厅中无需再返回）
+        // 大厅暂停时显示"返回大厅"按钮（需要确认返回）
         var lobbyBtn = GetControl<UnityEngine.UI.Button>(BTN_BACK_TO_LOBBY);
         if (lobbyBtn != null)
         {
@@ -43,23 +41,12 @@ public class PausePanel : BasePanel
                 // 大厅暂停：将"返回大厅"按钮移到最上面（sibling index 0）
                 lobbyBtn.transform.SetSiblingIndex(0);
             }
-            lobbyBtn.gameObject.SetActive(!isFromLobby);
+            lobbyBtn.gameObject.SetActive(true);
         }
-
-        // 订阅 Resume 动作（ESC）
-        _resumeAction = ManagerHub.Input?.GetInputActionFromMap("UI", "Resume");
-        if (_resumeAction != null)
-            _resumeAction.performed += OnResumePerformed;
     }
 
     public override void Hide()
     {
-        if (_resumeAction != null)
-        {
-            _resumeAction.performed -= OnResumePerformed;
-            _resumeAction = null;
-        }
-
         Time.timeScale = 1f;
 
         // 隐藏时恢复玩家瞄准输入
@@ -83,25 +70,6 @@ public class PausePanel : BasePanel
         if (titleText != null) titleText.gameObject.SetActive(true);
 
         base.Hide();
-    }
-
-    /// <summary>
-    /// ESC 按下：如果是唯一面板则恢复游戏，否则只隐藏自己
-    /// </summary>
-    private void OnResumePerformed(InputAction.CallbackContext ctx)
-    {
-        // 检查是否有其他面板显示在 PausePanel 之上
-        if (GameLifecycleManager.Instance.HasChildPanelOpen)
-        {
-            // 有子面板，只隐藏自己
-            ManagerHub.UI.HidePanel<PausePanel>();
-        }
-        else
-        {
-            // 没有子面板，恢复游戏
-            ManagerHub.UI.HidePanel<PausePanel>();
-            GameLifecycleManager.Instance.ResumeGame();
-        }
     }
 
     protected override void OnClick(string btnName)

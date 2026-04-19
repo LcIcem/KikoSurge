@@ -223,7 +223,7 @@ public class SaveSlotPanel : BasePanel
 
     private void OnBackClicked()
     {
-        ManagerHub.UI.HidePanel<SaveSlotPanel>();
+        GameLifecycleManager.Instance.CloseCurrentPanel();
     }
 }
 

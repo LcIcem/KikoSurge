@@ -148,3 +148,32 @@ public class CorridorEnterParams
 public class DeathAnimationEndParams
 {
 }
+
+/// <summary>
+/// 背包变化类型
+/// </summary>
+public enum InventoryChangeType
+{
+    Add,
+    Remove,
+    Clear
+}
+
+/// <summary>
+/// 背包物品变化事件参数
+/// </summary>
+public class InventoryChangeParams
+{
+    public ItemType itemType;
+    public int itemId;
+    public int quantity;
+    public InventoryChangeType changeType;
+
+    public InventoryChangeParams(ItemType type, int id, int qty, InventoryChangeType change)
+    {
+        itemType = type;
+        itemId = id;
+        quantity = qty;
+        changeType = change;
+    }
+}

@@ -16,6 +16,8 @@ public class GameOverPanel : BasePanel
     // true = 死亡（游戏结束），false = 通关
     private bool _isGameOver = true;
 
+    public override bool CanBeClosedByClosePanel => false;
+
     public override void Show()
     {
         base.Show();

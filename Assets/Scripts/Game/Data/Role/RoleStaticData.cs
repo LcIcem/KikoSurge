@@ -14,6 +14,9 @@ public class RoleStaticData
     [Tooltip("角色名称")]
     public string roleName;
 
+    [Tooltip("角色头像")]
+    public Sprite roleIcon;
+
     [Tooltip("角色预制体")]
     public GameObject prefab;
 

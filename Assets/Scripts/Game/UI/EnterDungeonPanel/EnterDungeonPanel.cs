@@ -33,6 +33,12 @@ public class EnterDungeonPanel : BasePanel
         gameObject.SetActive(false);
     }
 
+    public override void OnBeforeClose()
+    {
+        // 调用外部回调（用于清理工作）
+        OnDungeonPanelClosed?.Invoke();
+    }
+
     private void RefreshButtonStates()
     {
         bool hasActiveSession = SaveLoadManager.Instance.HasActiveSession;
@@ -97,7 +103,7 @@ public class EnterDungeonPanel : BasePanel
 
     private void OnBackClicked()
     {
-        Hide();
-        OnDungeonPanelClosed?.Invoke();
+        // CloseCurrentPanel 会触发 OnBeforeClose() -> OnDungeonPanelClosed()，不需要再次调用
+        GameLifecycleManager.Instance.CloseCurrentPanel();
     }
 }

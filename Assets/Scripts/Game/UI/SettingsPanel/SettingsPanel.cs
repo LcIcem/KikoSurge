@@ -66,8 +66,8 @@ public class SettingsPanel : BasePanel
 
     private void OnResumePerformed(InputAction.CallbackContext ctx)
     {
-        ManagerHub.UI.HidePanel<SettingsPanel>();
-        // 重新显示 PausePanel
+        // 关闭 SettingsPanel，重新显示 PausePanel
+        GameLifecycleManager.Instance.CloseCurrentPanel();
         ManagerHub.UI.ShowPanel<PausePanel>();
     }
 
@@ -93,7 +93,7 @@ public class SettingsPanel : BasePanel
         switch (btnName)
         {
             case BTN_CLOSE:
-                ManagerHub.UI.HidePanel<SettingsPanel>();
+                GameLifecycleManager.Instance.CloseCurrentPanel();
                 break;
             case BTN_CATEGORY_AUDIO:
                 ShowSettings(_audioPage.PageKey);

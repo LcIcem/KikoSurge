@@ -15,6 +15,7 @@ MonoBehaviour:
   roleStaticDataList:
   - roleId: 0
     roleName: Kiko
+    roleIcon: {fileID: 378403726, guid: 0f64e13196c80ad43a7f95f380e3e392, type: 3}
     prefab: {fileID: 1910594455587698007, guid: 41825e6f9db49494b96d1e52784e6a3f, type: 3}
     baseMaxHealth: 10
     baseAtk: 2

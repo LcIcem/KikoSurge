@@ -50,6 +50,7 @@ public class LevelController : MonoBehaviour
     public bool IsBuildCompleted => _builder?.IsBuildCompleted ?? false;
     public int CurrentLayerIndex => _currentLayerIndex;
     public int MaxLayerCount => _dungeonModels?.Count ?? 0;
+    public GameObject PlayerInstance => _playerHandler?.PlayerInstance;
     public bool IsLastLayer => _currentLayerIndex >= MaxLayerCount - 1;
 
     private void Awake()

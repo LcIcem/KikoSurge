@@ -50,6 +50,18 @@ public class BasePanel : MonoBehaviour
     public virtual void Hide() { }
 
     /// <summary>
+    /// 该面板是否能通过 ClosePanel（ESC）关闭。
+    /// 默认为 true，需要特殊处理的面板（如 LoginPanel、GameOverPanel）可重写返回 false。
+    /// </summary>
+    public virtual bool CanBeClosedByClosePanel => true;
+
+    /// <summary>
+    /// 面板关闭前回调（通过 ClosePanel 关闭时调用，通过 HidePanel 关闭不调用）。
+    /// 子类可重写以执行清理逻辑。
+    /// </summary>
+    public virtual void OnBeforeClose() { }
+
+    /// <summary>
     /// Button 点击事件的统一回调入口。子类重写以响应按钮点击。
     /// </summary>
     /// <param name="btnName">被点击按钮的 GameObject 名称。</param>

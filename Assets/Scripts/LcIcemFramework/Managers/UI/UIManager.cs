@@ -245,6 +245,50 @@ public class UIManager : Singleton<UIManager>
     }
 
     /// <summary>
+    /// 面板关闭时回调，通知 GameLifecycleManager
+    /// </summary>
+    public event UnityEngine.Events.UnityAction<BasePanel> OnPanelClosed;
+
+    /// <summary>
+    /// 关闭当前最上层的面板
+    /// </summary>
+    /// <returns>是否成功关闭了面板</returns>
+    public bool CloseTopPanel()
+    {
+        if (_panelDic.Count == 0)
+            return false;
+
+        // 找到 sibling index 最大的面板（最上层）
+        BasePanel topPanel = null;
+        int maxSiblingIndex = -1;
+
+        foreach (var kvp in _panelDic)
+        {
+            int siblingIndex = kvp.Value.transform.GetSiblingIndex();
+            if (siblingIndex > maxSiblingIndex)
+            {
+                maxSiblingIndex = siblingIndex;
+                topPanel = kvp.Value;
+            }
+        }
+
+        if (topPanel != null)
+        {
+            string panelName = topPanel.GetType().Name;
+            topPanel.OnBeforeClose(); // 关闭前回调
+            topPanel.Hide();
+            UnityEngine.Object.Destroy(topPanel.gameObject);
+            _panelDic.Remove(panelName);
+
+            // 通知面板关闭
+            OnPanelClosed?.Invoke(topPanel);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// 根据名称查询已加载的面板实例。
     /// </summary>
     /// <typeparam name="T">面板类型。</typeparam>
@@ -256,6 +300,30 @@ public class UIManager : Singleton<UIManager>
         if (_panelDic.ContainsKey(panelName))
             return _panelDic[panelName] as T;
         return null;
+    }
+
+    /// <summary>
+    /// 获取当前最上层的面板
+    /// </summary>
+    public BasePanel GetTopPanel()
+    {
+        if (_panelDic.Count == 0)
+            return null;
+
+        BasePanel topPanel = null;
+        int maxSiblingIndex = -1;
+
+        foreach (var kvp in _panelDic)
+        {
+            int siblingIndex = kvp.Value.transform.GetSiblingIndex();
+            if (siblingIndex > maxSiblingIndex)
+            {
+                maxSiblingIndex = siblingIndex;
+                topPanel = kvp.Value;
+            }
+        }
+
+        return topPanel;
     }
 
     /// <summary>

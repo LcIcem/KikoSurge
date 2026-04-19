@@ -12,6 +12,8 @@ public class LoginPanel : BasePanel
     private const string BTN_SETTINGS = "btn_settings";
     private const string BTN_QUIT = "btn_quit";
 
+    public override bool CanBeClosedByClosePanel => false;
+
     public override void Show()
     {
         base.Show();

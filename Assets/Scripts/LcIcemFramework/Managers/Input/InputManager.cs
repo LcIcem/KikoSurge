@@ -26,11 +26,13 @@ public class InputManager : SingletonMono<InputManager>
     private readonly Dictionary<string, string> _bindingOverridesByMap = new();
 
     // 游戏状态到 Action Map 的映射
+    // HubPanel属于游戏状态(PlayerMap)，其他UI属于UI(UIMap)
     private static readonly Dictionary<GameState, string> StateToActionMap = new()
     {
-        { GameState.MainMenu, "MainMenu" },
+        { GameState.MainMenu, "UI" },
         { GameState.Lobby, "Player" },
         { GameState.Playing, "Player" },
+        { GameState.Interacting, "UI" },
         { GameState.Paused, "UI" },
         { GameState.GameOver, "UI" }
     };
@@ -507,6 +509,34 @@ public class InputManager : SingletonMono<InputManager>
                 onCancel?.Invoke();
             })
             .Start();
+    }
+
+    /// <summary>
+    /// 将指定 Action 的绑定同步到另一个 Map 的指定 Action
+    /// </summary>
+    /// <param name="sourceMap">源 Map 名称</param>
+    /// <param name="sourceAction">源 Action 名称</param>
+    /// <param name="targetMap">目标 Map 名称</param>
+    /// <param name="targetAction">目标 Action 名称</param>
+    /// <param name="bindingIndex">绑定索引</param>
+    public void SyncBindingToMap(string sourceMap, string sourceAction, string targetMap, string targetAction, int bindingIndex = 0)
+    {
+        var source = GetInputActionFromMap(sourceMap, sourceAction);
+        var target = GetInputActionFromMap(targetMap, targetAction);
+        if (source == null || target == null)
+        {
+            LogError($"SyncBindingToMap: Action not found! source={sourceMap}/{sourceAction}, target={targetMap}/{targetAction}");
+            return;
+        }
+        if (bindingIndex < 0 || bindingIndex >= source.bindings.Count || bindingIndex >= target.bindings.Count)
+        {
+            LogError($"SyncBindingToMap: Invalid binding index {bindingIndex}");
+            return;
+        }
+
+        // 使用 ApplyBindingOverride 复制绑定的完整路径（包括 Interactions 和 Processors）
+        target.ApplyBindingOverride(bindingIndex, source.bindings[bindingIndex]);
+        Log($"SyncBindingToMap: {sourceMap}/{sourceAction}[{bindingIndex}] -> {targetMap}/{targetAction}[{bindingIndex}]");
     }
 
     /// <summary>
