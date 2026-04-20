@@ -316,61 +316,78 @@ public class InventoryManager : SingletonMono<InventoryManager>
     /// 卸下装备槽中的武器到背包
     /// </summary>
     /// <param name="equippedSlotIndex">装备槽索引</param>
-    /// <param name="targetInventorySlotIndex">目标背包格子索引（用于堆叠）</param>
+    /// <param name="targetInventorySlotIndex">目标背包格子索引（-1 表示不指定，自动寻找空格子）</param>
     /// <returns>是否卸下成功</returns>
     public bool UnequipWeapon(int equippedSlotIndex, int targetInventorySlotIndex = -1)
     {
+        Debug.Log($"[UnequipWeapon] called: equippedSlotIndex={equippedSlotIndex}, targetInventorySlotIndex={targetInventorySlotIndex}");
+
         var equipped = _sessionData?.equippedWeaponSlots;
         var inventory = GetSlotList(ItemType.Weapon);
 
+        Debug.Log($"[UnequipWeapon] equipped.Count={equipped?.Count ?? -1}, inventory.Count={inventory?.Count ?? -1}");
+
         if (equipped == null || inventory == null)
+        {
+            Debug.Log("[UnequipWeapon] FAIL: equipped or inventory is null");
             return false;
+        }
         if (equippedSlotIndex < 0 || equippedSlotIndex >= equipped.Count)
+        {
+            Debug.Log($"[UnequipWeapon] FAIL: equippedSlotIndex out of range");
             return false;
+        }
 
         var slot = equipped[equippedSlotIndex];
+        Debug.Log($"[UnequipWeapon] slot.itemId={slot.itemId}, slot.quantity={slot.quantity}, IsEmpty={slot.IsEmpty}");
         if (slot.IsEmpty)
+        {
+            Debug.Log("[UnequipWeapon] FAIL: slot is empty");
             return false;
+        }
 
         int itemId = slot.itemId;
         int quantity = slot.quantity;
 
-        // 优先尝试堆叠到指定背包格子
+        // 指定了目标格子
         if (targetInventorySlotIndex >= 0 && targetInventorySlotIndex < inventory.Count)
         {
             var targetSlot = inventory[targetInventorySlotIndex];
+            Debug.Log($"[UnequipWeapon] targetSlot itemId={targetSlot.itemId}, IsEmpty={targetSlot.IsEmpty}");
 
-            if (targetSlot.itemId == itemId && targetSlot.quantity < quantity)
+            // 目标格子是空的：直接移动
+            if (targetSlot.IsEmpty)
             {
-                var config = GameDataManager.Instance?.GetItemConfig(itemId);
-                int maxStack = config?.MaxStack ?? 1;
-                int totalQty = targetSlot.quantity + quantity;
-
-                if (totalQty <= maxStack)
-                {
-                    // 可以合并
-                    targetSlot.quantity = totalQty;
-                    equipped[equippedSlotIndex] = new ItemSlotData();
-                }
-                else
-                {
-                    // 目标格子满了，填满目标，剩余放回原装备槽
-                    targetSlot.quantity = maxStack;
-                    slot.quantity = totalQty - maxStack;
-                }
+                inventory[targetInventorySlotIndex] = new ItemSlotData(itemId, quantity);
+                equipped[equippedSlotIndex] = new ItemSlotData();
 
                 EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
                     new InventoryChangeParams(ItemType.Weapon, 0, 0, InventoryChangeType.Swap));
 
-                Log($"Unequipped weapon at slot {equippedSlotIndex} to inventory slot {targetInventorySlotIndex}");
+                Log($"Unequipped weapon at slot {equippedSlotIndex} to empty inventory slot {targetInventorySlotIndex}");
                 return true;
             }
+
+            // 目标格子有物品：交换（不堆叠）
+            // 武器只能交换，不能堆叠
+            inventory[targetInventorySlotIndex] = slot;
+            equipped[equippedSlotIndex] = targetSlot;
+
+            EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
+                new InventoryChangeParams(ItemType.Weapon, 0, 0, InventoryChangeType.Swap));
+
+            Log($"Unequipped weapon at slot {equippedSlotIndex} swapped with inventory slot {targetInventorySlotIndex}");
+            return true;
         }
 
-        // 回退：添加到背包（会自动堆叠或创建新格子）
+        // 未指定目标格子：自动寻找空格子添加
+        Debug.Log("[UnequipWeapon] No target specified, using AddItem");
         bool added = AddItem(ItemType.Weapon, itemId, quantity);
         if (!added)
+        {
+            Debug.Log("[UnequipWeapon] FAIL: AddItem returned false");
             return false;
+        }
 
         // 清空装备槽
         equipped[equippedSlotIndex] = new ItemSlotData();
@@ -434,27 +451,7 @@ public class InventoryManager : SingletonMono<InventoryManager>
             equipped[equippedSlotIndex] = invSlot;
             inventory[inventorySlotIndex] = new ItemSlotData();
         }
-        // 同物品 ID：尝试堆叠
-        else if (eqSlot.itemId == invSlot.itemId)
-        {
-            var config = GameDataManager.Instance?.GetItemConfig(invSlot.itemId);
-            int maxStack = config?.MaxStack ?? 1;
-            int totalQty = eqSlot.quantity + invSlot.quantity;
-
-            if (totalQty <= maxStack)
-            {
-                // 可以合并到装备槽
-                eqSlot.quantity = totalQty;
-                inventory[inventorySlotIndex] = new ItemSlotData();
-            }
-            else
-            {
-                // 装备槽填满，剩余放回背包格子
-                eqSlot.quantity = maxStack;
-                invSlot.quantity = totalQty - maxStack;
-            }
-        }
-        // 不同物品：交换
+        // 装备槽有物品：交换（武器不堆叠，直接整个交换）
         else
         {
             inventory[inventorySlotIndex] = eqSlot;

@@ -180,31 +180,47 @@ public class InventoryPanel : BasePanel
     /// </summary>
     private void PlaceSlot(ItemSlotUI targetSlot)
     {
+        Debug.Log($"[PlaceSlot] targetSlot={targetSlot?.name}, IsPlaceholder={targetSlot?.IsPlaceholder}, CurrentIndex={targetSlot?.CurrentIndex}");
+
         if (_pickedUpSlot == null)
+        {
+            Debug.Log("[PlaceSlot] FAIL: _pickedUpSlot is null");
             return;
+        }
 
         // 点击的是 placeholder（源位置），取消拿起
         if (targetSlot != null && targetSlot.IsPlaceholder && targetSlot.CurrentIndex == _pickedUpSourceIndex)
         {
+            Debug.Log("[PlaceSlot] CancelPickup: clicked placeholder at source index");
             CancelPickup();
             return;
         }
 
         // 不能放在 placeholder 上（其他位置的 placeholder）
         if (targetSlot == null || targetSlot.IsPlaceholder)
+        {
+            Debug.Log("[PlaceSlot] CancelPickup: target is null or placeholder");
+            CancelPickup();
             return;
+        }
 
-        // 执行交换/移动
+        // 执行交换/移动（TrySwapOrMove 会检查类型兼容性）
         bool success = TrySwapOrMove(targetSlot);
+        Debug.Log($"[PlaceSlot] TrySwapOrMove returned: {success}");
 
         if (success)
         {
             // 刷新 UI
             RefreshAllViews();
+            // 清理拿起状态
+            ClearPickup();
         }
-
-        // 清理拿起状态
-        ClearPickup();
+        else
+        {
+            // 无效的移动（如跨类型放置），取消拿起回到原位
+            Debug.Log("[PlaceSlot] CancelPickup: TrySwapOrMove failed");
+            CancelPickup();
+        }
     }
 
     /// <summary>
@@ -220,23 +236,20 @@ public class InventoryPanel : BasePanel
         bool sourceIsEquip = _pickedUpParent == _equipedWeaponContainer;
         bool targetIsEquip = targetSlot.transform.parent as RectTransform == _equipedWeaponContainer;
 
+        Debug.Log($"[TrySwapOrMove] sourceIsEquip={sourceIsEquip}, targetIsEquip={targetIsEquip}, sourceType={sourceType}, targetType={targetType}, sourceIndex={sourceIndex}, targetIndex={targetIndex}");
+
         // 装备区 < -> 装备区：交换
         if (sourceIsEquip && targetIsEquip)
         {
+            Debug.Log("[TrySwapOrMove] Case: 装备区 < -> 装备区 交换");
             InventoryManager.Instance?.SwapEquippedSlots(sourceIndex, targetIndex);
-            return true;
-        }
-
-        // 背包内移动：交换数据
-        if (sourceType == targetType)
-        {
-            InventoryManager.Instance?.MoveSlot(sourceType, sourceIndex, targetIndex);
             return true;
         }
 
         // 背包 -> 装备区（仅武器）
         if (!sourceIsEquip && targetIsEquip && sourceType == ItemType.Weapon)
         {
+            Debug.Log("[TrySwapOrMove] Case: 背包 -> 装备区");
             InventoryManager.Instance?.EquipFromInventory(sourceIndex, targetIndex);
             return true;
         }
@@ -244,10 +257,20 @@ public class InventoryPanel : BasePanel
         // 装备区 -> 背包（仅武器区域）
         if (sourceIsEquip && !targetIsEquip && targetType == ItemType.Weapon)
         {
+            Debug.Log("[TrySwapOrMove] Case: 装备区 -> 背包");
             InventoryManager.Instance?.UnequipWeapon(sourceIndex, targetIndex);
             return true;
         }
 
+        // 背包内移动：交换数据（必须是同性之间）
+        if (sourceType == targetType)
+        {
+            Debug.Log("[TrySwapOrMove] Case: 背包内移动");
+            InventoryManager.Instance?.MoveSlot(sourceType, sourceIndex, targetIndex);
+            return true;
+        }
+
+        Debug.Log("[TrySwapOrMove] Case: 无匹配，返回 false");
         return false;
     }
 
@@ -332,13 +355,17 @@ public class InventoryPanel : BasePanel
             var canvasGroup = _pickedUpSlot.GetComponent<CanvasGroup>();
             if (canvasGroup != null)
                 canvasGroup.blocksRaycasts = true;
+
+            // 释放到对象池（因为这个 slot 已经被 RefreshAllViews 释放了原始列表中的引用）
+            PoolManager.Instance.Release(_pickedUpSlot.gameObject);
         }
 
-        // 重新启用 LayoutGroup
+        // 重新启用 LayoutGroup 并强制重新计算
         var layoutGroup = _pickedUpParent?.GetComponent<UnityEngine.UI.LayoutGroup>();
         if (layoutGroup != null)
         {
             layoutGroup.enabled = true;
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(_pickedUpParent);
         }
 
         _pickedUpSlot = null;
