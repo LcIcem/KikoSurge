@@ -269,6 +269,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageNumberManager
   _damageNumberPrefab: {fileID: 9068188548730418095, guid: d6be90cbe25e80d4b932bf5804a8004f, type: 3}
+  _randomOffsetX: 30
+  _randomOffsetY: 20
 --- !u!4 &1171977435
 Transform:
   m_ObjectHideFlags: 0
