@@ -75,6 +75,7 @@ public class ItemSlotUI : MonoBehaviour, IPoolable, IPointerClickHandler
         if (_imgIcon != null && config != null && config.Icon != null)
         {
             _imgIcon.sprite = config.Icon;
+            _imgIcon.preserveAspect = true;
             _imgIcon.enabled = true;
         }
 

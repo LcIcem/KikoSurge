@@ -25,8 +25,9 @@ MonoBehaviour:
   magazineSize: 20
   reloadTime: 0.8
   recoilForce: 1
-  weaponDamage: 0
-  weaponCritRate: 0
-  weaponCritMultiplier: 0
-  weaponDamageBonusPercent: 0
+  penetrateCount: 0
+  weaponDamage: 1
+  weaponCritRate: 0.07
+  weaponCritMultiplier: 0.7
+  weaponDamageBonus: 0
   bulletConfig: {fileID: 11400000, guid: 0c24aea012ec60d4caf8db804a71c50f, type: 2}

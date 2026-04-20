@@ -54,6 +54,7 @@ public class HeartSystem : MonoBehaviour
             {
                 // 显示空的心
                 imgHeart.sprite = _heartSprites[0];
+                imgHeart.preserveAspect = true;
             }
             else if (index == lastFullHeart)
             {
@@ -63,11 +64,13 @@ public class HeartSystem : MonoBehaviour
                 int fractionIndex = Mathf.FloorToInt(fractionalHealth * 4); // 将剩余的生命值 分别映射为 0~3 的索引值
 
                 imgHeart.sprite = _heartSprites[fractionIndex];
+                imgHeart.preserveAspect = true;
             }
             else
             {
-                // 显示完整的心   
+                // 显示完整的心
                 imgHeart.sprite = _heartSprites[4];
+                imgHeart.preserveAspect = true;
             }
 
             index++;

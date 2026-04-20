@@ -649,6 +649,7 @@ public class InventoryPanel : BasePanel
         if (iconImg != null)
         {
             iconImg.sprite = roleData.roleIcon;
+            iconImg.preserveAspect = true;
             iconImg.enabled = iconImg.sprite != null;
         }
 

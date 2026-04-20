@@ -98,7 +98,10 @@ public class HubPanel : BasePanel
         var ammoText = GetControl<Text>(TXT_AMMO);
 
         if (weaponImg != null && weapon != null && weapon.Config.itemConfig?.Icon != null)
+        {
             weaponImg.sprite = weapon.Config.itemConfig.Icon;
+            weaponImg.preserveAspect = true;
+        }
 
         if (weaponText != null && weapon != null)
             weaponText.text = weapon.Config.itemConfig?.Name ?? "未知武器";
@@ -134,7 +137,10 @@ public class HubPanel : BasePanel
         {
             var bullet = weapon.Config.bulletConfig.bulletPrefab.GetComponent<Bullet>();
             if (bullet != null && bullet.Icon != null)
+            {
                 ammoImg.sprite = bullet.Icon;
+                ammoImg.preserveAspect = true;
+            }
 
             ammoImg.fillAmount = 1f;
 

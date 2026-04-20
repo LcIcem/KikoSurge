@@ -172,6 +172,7 @@ public class MiniMap : MonoBehaviour
         icon.transform.SetParent(_mapContainer);
         var image = icon.AddComponent<Image>();
         image.sprite = GetIcon(room.roomType);
+        image.preserveAspect = true;
         image.color = unvisitedColor;  // 初始为淡色
 
         var rect = icon.GetComponent<RectTransform>();
