@@ -17,10 +17,31 @@ public class ItemSlotData
     /// </summary>
     public int quantity;
 
-    public ItemSlotData(int itemId = 0, int quantity = 0)
+    /// <summary>
+    /// 武器当前弹药（仅武器槽位使用）
+    /// </summary>
+    public int ammo;
+
+    /// <summary>
+    /// 默认构造函数（LitJson 反序列化需要）
+    /// </summary>
+    public ItemSlotData()
+    {
+        itemId = 0;
+        quantity = 0;
+    }
+
+    public ItemSlotData(int itemId, int quantity)
     {
         this.itemId = itemId;
         this.quantity = quantity;
+    }
+
+    public ItemSlotData(int itemId, int quantity, int ammo)
+    {
+        this.itemId = itemId;
+        this.quantity = quantity;
+        this.ammo = ammo;
     }
 
     /// <summary>

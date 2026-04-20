@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 2338134393801098866}
   - component: {fileID: 7862926315998275775}
   - component: {fileID: -1534031036119120928}
+  - component: {fileID: -3881205755757166192}
   m_Layer: 0
   m_Name: Pistol
   m_TagString: Untagged
@@ -139,6 +140,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponRotation
   _sprite: {fileID: 2338134393801098866}
   _offset: 0.4
+  _muzzle: {fileID: 1073980717217089775}
 --- !u!114 &-1534031036119120928
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,3 +154,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponBase
   _muzzle: {fileID: 1073980717217089775}
+  _shootSFX: {fileID: 8300000, guid: 2b7a708f2a7d0cf4087ca7fb477fdc66, type: 3}
+  _weaponAnimator: {fileID: -3881205755757166192}
+  _reloadSFX: {fileID: 8300000, guid: ca488ec823cc08245a4cd549edd89092, type: 3}
+--- !u!95 &-3881205755757166192
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1645332420106596854}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 362d0c7b5dce48f4c9ee8eead0e33b44, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

@@ -83,9 +83,7 @@ public class SaveSlotPanel : BasePanel
     private void UpdateSlotHighlight(int slotIndex)
     {
         string borderKey = GetBorderKey(slotIndex);
-        print("borderKey" + borderKey);
         var borderImg = GetControl<Image>(borderKey);
-        print("borderName" + borderImg.name);
         if (borderImg == null)
             return;
 

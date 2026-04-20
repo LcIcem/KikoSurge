@@ -6,8 +6,8 @@ namespace LcIcemFramework
 public static class AudioID
 {
     // BGM
-    public const string BGM_MENU = "BGM_Menu";
-    public const string BGM_BATTLE = "BGM_Battle";
+    public const string BGM_MAIN_MENU = "BGM-MainMenu";
+    public const string BGM_GAMING = "BGM-Gaming";
 
     // SFX
     public const string SFX_SHOOT = "SFX_Shoot";

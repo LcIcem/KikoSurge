@@ -40,6 +40,9 @@ public class SessionManager : SingletonMono<SessionManager>
         var roleData = GameDataManager.Instance?.GetRoleStaticData(roleId);
         Debug.Log($"[SessionManager] Session started: role={roleData?.roleName ?? roleId.ToString()}, seed={seed}, maxWeaponSlots={roleData?.maxWeaponSlots ?? 2}, equipped=[{string.Join(", ", _currentSession.equippedWeaponSlots)}], inventory=[{string.Join(", ", _currentSession.inventoryWeaponSlots)}]");
 
+        // 记录当前游戏开始时间戳
+        SaveLoadManager.Instance?.RecordSessionStart();
+
         // 将 runtime session 与存档关联（共享同一个 SessionData 引用）
         // 这样 SaveSession() 才能正确地将数据写回存档
         if (SaveLoadManager.Instance?.CurrentSaveData != null)
@@ -61,6 +64,9 @@ public class SessionManager : SingletonMono<SessionManager>
     {
         _currentSession = sessionData;
         Debug.Log($"[SessionManager] Session loaded: role={sessionData.selectedRoleName}, floor={sessionData.currentFloor}");
+
+        // 恢复会话开始时间（用于计算当前游戏时长）
+        SaveLoadManager.Instance?.RestoreSessionStart(sessionData.startTimestamp);
 
         // 绑定 SessionData 到 InventoryManager
         InventoryManager.Instance?.BindSessionData(_currentSession);

@@ -26,15 +26,15 @@ public class SaveConfirmPanel : BasePanel
         {
             case BTN_OVERWRITE:
                 _onConfirm?.Invoke(_slotIndex, ConfirmAction.Overwrite);
-                GameLifecycleManager.Instance.CloseCurrentPanel();
+                ManagerHub.UI.HidePanel<SaveConfirmPanel>();
                 break;
             case BTN_DELETE:
                 _onConfirm?.Invoke(_slotIndex, ConfirmAction.Delete);
-                GameLifecycleManager.Instance.CloseCurrentPanel();
+                ManagerHub.UI.HidePanel<SaveConfirmPanel>();
                 break;
             case BTN_CANCEL:
                 _onConfirm?.Invoke(_slotIndex, ConfirmAction.Cancel);
-                GameLifecycleManager.Instance.CloseCurrentPanel();
+                ManagerHub.UI.HidePanel<SaveConfirmPanel>();
                 break;
         }
     }

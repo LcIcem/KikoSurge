@@ -25,8 +25,28 @@ public class WeaponBase : MonoBehaviour, IPoolable
     /// </summary>
     [SerializeField] private Transform _muzzle;
 
+    /// <summary>
+    /// 射击音效
+    /// </summary>
+    [SerializeField] private AudioClip _shootSFX;
+
+    /// <summary>
+    /// 武器动画控制器
+    /// </summary>
+    [SerializeField] private Animator _weaponAnimator;
+
+    /// <summary>
+    /// 换弹音效（音效时长应与武器的 reloadTime 一致）
+    /// </summary>
+    [SerializeField] private AudioClip _reloadSFX;
+
     // 运行时状态
     public int CurrentAmmo { get; private set; }
+
+    /// <summary>
+    /// 设置当前弹药（由 WeaponHandler 在切换武器时恢复弹药使用）
+    /// </summary>
+    public void SetAmmo(int ammo) => CurrentAmmo = ammo;
     public bool IsReloading { get; private set; }
     public bool CanFire => !IsReloading && !_isBursting && CurrentAmmo > 0 && _fireCooldown <= 0f;
 
@@ -49,6 +69,14 @@ public class WeaponBase : MonoBehaviour, IPoolable
     }
 
     /// <summary>
+    /// 从会话数据恢复弹药状态
+    /// </summary>
+    public void RestoreAmmo(int ammo)
+    {
+        CurrentAmmo = ammo;
+    }
+
+    /// <summary>
     /// 枪口位置（子弹生成点）
     /// </summary>
     public Transform Muzzle => _muzzle != null ? _muzzle : transform;
@@ -64,6 +92,8 @@ public class WeaponBase : MonoBehaviour, IPoolable
             {
                 CurrentAmmo = Config.magazineSize;
                 IsReloading = false;
+                if (_weaponAnimator != null)
+                    _weaponAnimator.SetBool("isReload", false);
                 EventCenter.Instance.Publish(GameEventID.Combat_Reloaded, this);
                 EventCenter.Instance.Publish(GameEventID.OnAmmoChanged, this);
             }
@@ -82,6 +112,14 @@ public class WeaponBase : MonoBehaviour, IPoolable
     public void Fire(Vector3 direction)
     {
         if (!CanFire) return;
+
+        // 播放射击音效
+        if (_shootSFX != null)
+            ManagerHub.Audio.PlaySFX(_shootSFX);
+
+        // 播放射击动画
+        if (_weaponAnimator != null)
+            _weaponAnimator.SetTrigger("shoot");
 
         // 调用开火模块（弹药消耗由模块内部处理）
         // 冷却由模块内部处理（连发模式需要等全部射出后才开始冷却）
@@ -106,6 +144,14 @@ public class WeaponBase : MonoBehaviour, IPoolable
     public void Reload()
     {
         if (IsReloading || CurrentAmmo == Config.magazineSize) return;
+
+        // 播放换弹音效
+        if (_reloadSFX != null)
+            ManagerHub.Audio.PlaySFX(_reloadSFX);
+
+        // 播放换弹动画（用 bool 保持到换弹结束）
+        if (_weaponAnimator != null)
+            _weaponAnimator.SetBool("isReload", true);
 
         IsReloading = true;
         _reloadTimer = Config.reloadTime;
@@ -136,6 +182,8 @@ public class WeaponBase : MonoBehaviour, IPoolable
         if (!IsReloading) return;
         IsReloading = false;
         _reloadTimer = 0f;
+        if (_weaponAnimator != null)
+            _weaponAnimator.SetBool("isReload", false);
         EventCenter.Instance.Publish(GameEventID.Combat_CancelReload);
     }
 

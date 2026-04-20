@@ -95,6 +95,32 @@ public class InventoryManager : SingletonMono<InventoryManager>
     /// <returns>是否添加成功</returns>
     public bool AddItem(ItemType type, int itemId, int quantity = 1)
     {
+        return AddItemToSlot(type, itemId, quantity, allowStack: true);
+    }
+
+    /// <summary>
+    /// 添加物品到空格子（不堆叠，用于拆分等场景）
+    /// </summary>
+    /// <param name="type">物品类型</param>
+    /// <param name="itemId">物品ID</param>
+    /// <param name="quantity">数量</param>
+    /// <returns>是否添加成功</returns>
+    public bool AddItemToEmptySlot(ItemType type, int itemId, int quantity = 1)
+    {
+        Debug.Log($"[InventoryManager.AddItemToEmptySlot] type={type}, itemId={itemId}, quantity={quantity}");
+        return AddItemToSlot(type, itemId, quantity, allowStack: false);
+    }
+
+    /// <summary>
+    /// 添加物品到背包
+    /// </summary>
+    /// <param name="type">物品类型</param>
+    /// <param name="itemId">物品ID</param>
+    /// <param name="quantity">数量</param>
+    /// <param name="allowStack">是否允许堆叠</param>
+    /// <returns>是否添加成功</returns>
+    private bool AddItemToSlot(ItemType type, int itemId, int quantity, bool allowStack)
+    {
         if (_sessionData == null || quantity <= 0 || itemId == 0)
             return false;
 
@@ -106,8 +132,8 @@ public class InventoryManager : SingletonMono<InventoryManager>
         int maxStack = config?.MaxStack ?? 1;
         int remaining = quantity;
 
-        // 1. 先尝试堆叠到已有同 ID 格子
-        if (remaining > 0)
+        // 1. 先尝试堆叠到已有同 ID 格子（仅当允许堆叠时）
+        if (remaining > 0 && allowStack)
         {
             foreach (var slot in slots)
             {
@@ -131,6 +157,9 @@ public class InventoryManager : SingletonMono<InventoryManager>
                     int stackCount = Mathf.Min(remaining, maxStack);
                     slot.itemId = itemId;
                     slot.quantity = stackCount;
+                    // 武器槽需要设置初始弹药
+                    if (type == ItemType.Weapon)
+                        slot.ammo = GameDataManager.Instance?.GetWeaponConfig(itemId)?.magazineSize ?? 0;
                     remaining -= stackCount;
                     if (remaining <= 0) break;
                 }
@@ -141,7 +170,9 @@ public class InventoryManager : SingletonMono<InventoryManager>
         while (remaining > 0)
         {
             int stackCount = Mathf.Min(remaining, maxStack);
-            slots.Add(new ItemSlotData(itemId, stackCount));
+            // 武器槽需要设置初始弹药
+            int ammo = (type == ItemType.Weapon) ? (GameDataManager.Instance?.GetWeaponConfig(itemId)?.magazineSize ?? 0) : 0;
+            slots.Add(new ItemSlotData(itemId, stackCount, ammo));
             remaining -= stackCount;
         }
 
@@ -151,7 +182,7 @@ public class InventoryManager : SingletonMono<InventoryManager>
                 new InventoryChangeParams(type, itemId, quantity, InventoryChangeType.Add));
             EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
                 new InventoryChangeParams(type, itemId, quantity, InventoryChangeType.Add));
-            Log($"Added {quantity} item(s) of type {type} with id {itemId}.");
+            Log($"Added {quantity} item(s) of type {type} with id {itemId} (allowStack={allowStack}).");
         }
 
         return true;
@@ -166,6 +197,8 @@ public class InventoryManager : SingletonMono<InventoryManager>
     /// <returns>是否移除成功</returns>
     public bool RemoveItem(ItemType type, int itemId, int quantity = 1)
     {
+        Debug.Log($"[InventoryManager.RemoveItem] type={type}, itemId={itemId}, quantity={quantity}");
+
         if (_sessionData == null || quantity <= 0 || itemId == 0)
             return false;
 
@@ -358,7 +391,7 @@ public class InventoryManager : SingletonMono<InventoryManager>
             // 目标格子是空的：直接移动
             if (targetSlot.IsEmpty)
             {
-                inventory[targetInventorySlotIndex] = new ItemSlotData(itemId, quantity);
+                inventory[targetInventorySlotIndex] = new ItemSlotData(itemId, quantity, slot.ammo);
                 equipped[equippedSlotIndex] = new ItemSlotData();
 
                 EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
@@ -529,6 +562,53 @@ public class InventoryManager : SingletonMono<InventoryManager>
         EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
             new InventoryChangeParams(type, 0, 0, InventoryChangeType.Clear));
         Log($"Cleared inventory of type {type}.");
+    }
+
+    /// <summary>
+    /// 拆分物品（不触发合并，直接在原位置减少数量 + 新格子放置剩余）
+    /// </summary>
+    /// <param name="slotIndex">原格子索引</param>
+    /// <param name="type">物品类型</param>
+    /// <param name="itemId">物品ID</param>
+    /// <param name="originalQuantity">原始数量</param>
+    /// <param name="splitQuantity">要拆分出去的数量</param>
+    public void SplitItem(int slotIndex, ItemType type, int itemId, int originalQuantity, int splitQuantity)
+    {
+        if (slotIndex < 0 || originalQuantity <= 0 || splitQuantity <= 0)
+            return;
+
+        var slots = GetSlotList(type);
+        if (slots == null || slotIndex >= slots.Count)
+            return;
+
+        int remainQuantity = originalQuantity - splitQuantity;
+
+        // 获取武器初始弹药（用于拆分后新格子的 ammo）
+        int weaponAmmo = (type == ItemType.Weapon) ? (GameDataManager.Instance?.GetWeaponConfig(itemId)?.magazineSize ?? 0) : 0;
+
+        // 原格子保留剩余数量
+        slots[slotIndex] = new ItemSlotData(itemId, remainQuantity, weaponAmmo);
+
+        // 找一个空格子放置拆分出的数量
+        for (int i = 0; i < slots.Count; i++)
+        {
+            if (i == slotIndex)
+                continue;
+            if (slots[i].IsEmpty)
+            {
+                slots[i] = new ItemSlotData(itemId, splitQuantity, weaponAmmo);
+                Log($"SplitItem: slot[{slotIndex}]={remainQuantity}, slot[{i}]={splitQuantity}");
+                EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
+                    new InventoryChangeParams(type, itemId, originalQuantity, InventoryChangeType.Move));
+                return;
+            }
+        }
+
+        // 没有空格子，创建新格子
+        slots.Add(new ItemSlotData(itemId, splitQuantity, weaponAmmo));
+        Log($"SplitItem: slot[{slotIndex}]={remainQuantity}, newSlot={splitQuantity}");
+        EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
+            new InventoryChangeParams(type, itemId, originalQuantity, InventoryChangeType.Move));
     }
 
     #endregion

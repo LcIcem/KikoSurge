@@ -17,6 +17,7 @@ MonoBehaviour:
   Type: 0
   MaxStack: 2
   Value: 0
-  Icon: {fileID: 3404276450375173017, guid: 0a6cc4db7a41d5549a80f5ab9d1b1c80, type: 3}
+  Icon: {fileID: 1998232740679139318, guid: 7715e7b57b627124e91e8d578c361d24, type: 3}
   Description: "\u624B\u67AA"
   PickupSFX: {fileID: 8300000, guid: 4696d070aecc09c4d958c86c663ca912, type: 3}
+  DisplayAnimation: {fileID: 0}

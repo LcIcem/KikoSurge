@@ -20,6 +20,6 @@ public class GameEntry : MonoBehaviour
         ManagerHub.UI.ShowPanel<LoginPanel>(UILayerType.Middle);
         // 播放背景音乐（启动时同步一次持久化数据）
         ManagerHub.Audio.ApplySettings();
-        ManagerHub.Audio.PlayBGM("BGM-1");
+        // BGM 将在 GameLifecycleManager.ChangeState 时自动播放
     }
 }

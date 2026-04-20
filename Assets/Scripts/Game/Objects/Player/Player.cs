@@ -192,6 +192,12 @@ public class Player : MonoBehaviour
         {
             weaponHandler.SwitchToNextWeapon();
         }
+
+        // 处理换弹
+        if (InputManager.Instance.Actions["Reload"].WasPressedThisFrame())
+        {
+            weaponHandler.CurrentWeapon?.Reload();
+        }
     }
 
     // 伤害处理
@@ -393,7 +399,7 @@ public class Player : MonoBehaviour
         var sessionData = SessionManager.Instance?.CurrentSession;
         if (sessionData != null)
         {
-            weaponHandler.SyncFromSessionData(sessionData.equippedWeaponIds, _weaponPivot);
+            weaponHandler.SyncFromSessionData(sessionData.equippedWeaponSlots, _weaponPivot);
         }
     }
 }

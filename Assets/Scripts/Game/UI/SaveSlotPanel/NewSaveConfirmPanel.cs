@@ -40,11 +40,11 @@ public class NewSaveConfirmPanel : BasePanel
     private void OnNewGameClicked()
     {
         _onConfirm?.Invoke(_slotIndex);
-        GameLifecycleManager.Instance.CloseCurrentPanel();
+        ManagerHub.UI.HidePanel<NewSaveConfirmPanel>();
     }
 
     private void OnBackClicked()
     {
-        GameLifecycleManager.Instance.CloseCurrentPanel();
+        ManagerHub.UI.HidePanel<NewSaveConfirmPanel>();
     }
 }

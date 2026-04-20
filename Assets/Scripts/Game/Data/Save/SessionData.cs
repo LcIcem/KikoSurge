@@ -32,6 +32,9 @@ public class SessionData
     // 已装备武器列表（最大数量由 RoleStaticData.maxWeaponSlots 决定）
     public List<ItemSlotData> equippedWeaponSlots = new();
 
+    // 垃圾桶待删除物品（用于关闭背包后恢复）
+    public ItemSlotData trashPendingItem;
+
     // 地牢状态快照
     public List<LayerSnapshot> layerSnapshots;
 
@@ -74,7 +77,10 @@ public class SessionData
         {
             for (int i = 0; i < initialWeaponIds.Count; i++)
             {
-                var slot = new ItemSlotData(initialWeaponIds[i], 1);
+                // 从武器配置获取初始弹药量
+                var weaponConfig = GameDataManager.Instance?.GetWeaponConfig(initialWeaponIds[i]);
+                int ammo = weaponConfig?.magazineSize ?? 0;
+                var slot = new ItemSlotData(initialWeaponIds[i], 1, ammo);
                 if (i < maxWeaponSlots)
                     equipped.Add(slot);
                 else

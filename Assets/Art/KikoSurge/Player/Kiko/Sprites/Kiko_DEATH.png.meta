@@ -1,19 +1,19 @@
 fileFormatVersion: 2
-guid: 5c3f2dfe050697447a993b8022d7ff09
+guid: e0f2bbf7c97bf394088dea4a03ebd25b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 396694146565765895
-    second: Kiko_DEADTH_0
+      213: -3693141214307001493
+    second: Kiko_DEATH_0
   - first:
-      213: 7279394523097885729
-    second: Kiko_DEADTH_1
+      213: -3690307076511982392
+    second: Kiko_DEATH_1
   - first:
-      213: 2532792665296375946
-    second: Kiko_DEADTH_2
+      213: 1079373755443225124
+    second: Kiko_DEATH_2
   - first:
-      213: -274615959590829002
-    second: Kiko_DEADTH_3
+      213: 8207984339923939487
+    second: Kiko_DEATH_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -148,7 +148,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Kiko_DEADTH_0
+      name: Kiko_DEATH_0
       rect:
         serializedVersion: 2
         x: 0
@@ -163,14 +163,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 70b778a7937518500800000000000000
-      internalID: 396694146565765895
+      spriteID: b6b50e7f1a35fbcc0800000000000000
+      internalID: -3693141214307001493
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Kiko_DEADTH_1
+      name: Kiko_DEATH_1
       rect:
         serializedVersion: 2
         x: 32
@@ -185,14 +185,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 12c6c2930ca950560800000000000000
-      internalID: 7279394523097885729
+      spriteID: 8cc9468144569ccc0800000000000000
+      internalID: -3690307076511982392
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Kiko_DEADTH_2
+      name: Kiko_DEATH_2
       rect:
         serializedVersion: 2
         x: 64
@@ -207,14 +207,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a8094b08289462320800000000000000
-      internalID: 2532792665296375946
+      spriteID: 422a21936b4bafe00800000000000000
+      internalID: 1079373755443225124
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Kiko_DEADTH_3
+      name: Kiko_DEATH_3
       rect:
         serializedVersion: 2
         x: 96
@@ -229,8 +229,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6348fee5d3e503cf0800000000000000
-      internalID: -274615959590829002
+      spriteID: f90b227f44e98e170800000000000000
+      internalID: 8207984339923939487
       vertices: []
       indices: 
       edges: []
@@ -239,7 +239,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 2d7565fade371664db8ab8bded8277a1
+    spriteID: 974a17981da711149a643dc48929e190
     internalID: 0
     vertices: []
     indices: 
@@ -251,10 +251,10 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      Kiko_DEADTH_0: 396694146565765895
-      Kiko_DEADTH_1: 7279394523097885729
-      Kiko_DEADTH_2: 2532792665296375946
-      Kiko_DEADTH_3: -274615959590829002
+      Kiko_DEATH_0: -3693141214307001493
+      Kiko_DEATH_1: -3690307076511982392
+      Kiko_DEATH_2: 1079373755443225124
+      Kiko_DEATH_3: 8207984339923939487
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

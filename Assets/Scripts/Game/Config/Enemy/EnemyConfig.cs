@@ -33,7 +33,5 @@ public abstract class EnemyConfig : ScriptableObject
 
     [Header("掉落")]
     [Tooltip("掉落表（直接配置，无需 EnemyId 查找）")]
-    [SerializeField] private LootTableConfig _lootTable;
-
-    public LootTableConfig lootTable => _lootTable;
+    public LootTableConfig lootTable;
 }

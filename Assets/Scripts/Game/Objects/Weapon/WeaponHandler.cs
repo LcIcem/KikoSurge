@@ -137,6 +137,10 @@ public class WeaponHandler
         if (nextIndex < 0 || nextIndex == currentEquipIndex)
             return;
 
+        // 保存当前武器的弹药到 ItemSlotData
+        if (CurrentWeapon != null)
+            equippedSlots[currentEquipIndex].ammo = CurrentWeapon.CurrentAmmo;
+
         // 交换 SessionData 中的两个槽位
         var temp = equippedSlots[currentEquipIndex];
         equippedSlots[currentEquipIndex] = equippedSlots[nextIndex];
@@ -189,7 +193,10 @@ public class WeaponHandler
         {
             if (!equippedSlots[i].IsEmpty && _currentWeaponIndex < _weapons.Count)
             {
-                _weapons[_currentWeaponIndex].gameObject.SetActive(true);
+                var weapon = _weapons[_currentWeaponIndex];
+                weapon.gameObject.SetActive(true);
+                // 从 ItemSlotData 恢复弹药
+                weapon.SetAmmo(equippedSlots[i].ammo);
                 break;
             }
             if (!equippedSlots[i].IsEmpty)
@@ -246,5 +253,29 @@ public class WeaponHandler
         }
 
         Debug.Log($"[WeaponHandler] Synced weapons from SessionData: {equippedWeaponIds.Count} weapons");
+    }
+
+    /// <summary>
+    /// 从 SessionData 同步武器列表（带 ItemSlotData 以恢复弹药）
+    /// </summary>
+    public void SyncFromSessionData(List<ItemSlotData> equippedSlots, Transform weaponPivot)
+    {
+        // 清空现有武器
+        ClearAllWeapons();
+
+        // 根据 equippedSlots 重新创建武器
+        foreach (var slot in equippedSlots)
+        {
+            if (slot.IsEmpty) continue;
+            WeaponFactory.Instance.Create(slot.itemId, weaponPivot, (weapon) =>
+            {
+                if (weapon == null) return;
+                // 先设置弹药（必须在 AddWeapon 之前，因为 AddWeapon 会触发 EquipWeaponInternal）
+                weapon.SetAmmo(slot.ammo);
+                AddWeapon(weapon);
+            });
+        }
+
+        Debug.Log($"[WeaponHandler] Synced weapons from SessionData: {equippedSlots.Count} slots");
     }
 }

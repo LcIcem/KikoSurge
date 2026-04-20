@@ -27,6 +27,15 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     [Header("LevelController")]
     [SerializeField] private LevelController _levelControllerPrefab;
 
+    [Header("BGM 配置")]
+    [SerializeField] private string _bgmMainMenu = "BGM-MainMenu";
+    [SerializeField] private string _bgmLobby = "BGM-MainMenu";
+    [SerializeField] private string _bgmPlaying = "BGM-Gaming";
+    [Range(0f, 1f)]
+    [Tooltip("暂停时音量系数（当前音量 × 系数）")]
+    [SerializeField] private float _pausedBGMVolumeFactor = 0.3f;
+    private float _originalBGMVolume = 1f;
+
     /// <summary>
     /// 当前游戏状态
     /// </summary>
@@ -387,11 +396,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         // 隐藏游戏Hub
         ManagerHub.UI.HidePanel<HubPanel>();
 
-        // 大厅玩家由 LobbySceneInstaller 在 Lobby 场景加载时创建
-        // 无需在此处管理
-
-        // TODO: 保存当前进度
-
         ChangeState(GameState.Lobby);
     }
 
@@ -456,6 +460,50 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         {
             ManagerHub.Input.SwitchActionMapByGameState(newState);
         }
+
+        // 切换 BGM
+        SwitchBGM(oldState, newState);
+    }
+
+    private void SwitchBGM(GameState oldState, GameState newState)
+    {
+        if (ManagerHub.Audio == null)
+            return;
+
+        // Interacting、GameOver 状态不切换 BGM，保持当前播放
+        if (newState == GameState.Interacting || newState == GameState.GameOver)
+            return;
+
+        // Paused 状态：降低音量，不切换曲目
+        if (newState == GameState.Paused)
+        {
+            _originalBGMVolume = ManagerHub.Audio.GetBGMVolume();
+            ManagerHub.Audio.SetBGMVolume(_originalBGMVolume * _pausedBGMVolumeFactor);
+            return;
+        }
+
+        // 从暂停恢复
+        if (oldState == GameState.Paused)
+        {
+            ManagerHub.Audio.SetBGMVolume(_originalBGMVolume);
+
+            // 同状态恢复（Paused -> Playing）：不切换音乐
+            if (newState == GameState.Playing)
+                return;
+
+            // 不同状态（如 Paused -> Lobby）：切换音乐
+        }
+
+        // 正常切换 BGM
+        string bgmId = newState switch
+        {
+            GameState.MainMenu => _bgmMainMenu,
+            GameState.Lobby => _bgmLobby,
+            GameState.Playing => _bgmPlaying,
+            _ => _bgmMainMenu
+        };
+
+        ManagerHub.Audio.PlayBGM(bgmId);
     }
 
     /// <summary>
@@ -640,6 +688,9 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
 
         // 恢复时间（以防从暂停状态重启）
         Time.timeScale = 1f;
+
+        // 恢复瞄准输入（死亡时会被禁用）
+        AimInput.Enabled = true;
 
         // 重新生成 seed 并创建新 session（全新开始）
         long newSeed = SaveLoadManager.Instance.GenerateSeed();

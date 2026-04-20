@@ -268,6 +268,9 @@ public class LootItem : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>
+    /// 播放掉落物显示动画
+    /// </summary>
     private Interactable _interactable;
 
     /// <summary>

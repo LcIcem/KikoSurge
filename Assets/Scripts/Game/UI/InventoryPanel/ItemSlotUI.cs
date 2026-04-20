@@ -26,6 +26,11 @@ public class ItemSlotUI : MonoBehaviour, IPoolable, IPointerClickHandler
     /// </summary>
     public event Action<ItemSlotUI> OnSlotClicked;
 
+    /// <summary>
+    /// 格子右键点击事件回调（slotUI, screenPosition）
+    /// </summary>
+    public event Action<ItemSlotUI, Vector2> OnSlotRightClicked;
+
     #endregion
 
     #region 字段
@@ -50,9 +55,18 @@ public class ItemSlotUI : MonoBehaviour, IPoolable, IPointerClickHandler
         _itemType = type;
         _currentIndex = index;
 
-        // 空格子不需要获取配置
+        // 空格子：清除图标和数量
         if (itemId == 0)
+        {
+            if (_imgIcon != null)
+            {
+                _imgIcon.sprite = null;
+                _imgIcon.enabled = false;
+            }
+            if (_txtCount != null)
+                _txtCount.text = "";
             return;
+        }
 
         // 获取物品配置
         var config = GameDataManager.Instance?.GetItemConfig(itemId);
@@ -124,11 +138,18 @@ public class ItemSlotUI : MonoBehaviour, IPoolable, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // 只处理左键点击
-        if (eventData.button != PointerEventData.InputButton.Left)
+        // 右键点击
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            OnSlotRightClicked?.Invoke(this, eventData.position);
             return;
+        }
 
-        OnSlotClicked?.Invoke(this);
+        // 左键点击
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            OnSlotClicked?.Invoke(this);
+        }
     }
 
     /// <summary>

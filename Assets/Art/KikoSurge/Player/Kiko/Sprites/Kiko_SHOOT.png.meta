@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 0e14acfb68437a141b932495e5057ecf
+guid: 11244f4da8d47564f8a6d6c58a9c8a52
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -11,21 +11,6 @@ TextureImporter:
   - first:
       213: -5254627300655789524
     second: Kiko_SHOOT_2
-  - first:
-      213: 2062393080328755913
-    second: Kiko_SHOOT_3
-  - first:
-      213: 7599331181334521619
-    second: Kiko_SHOOT_4
-  - first:
-      213: -247968806114568307
-    second: Kiko_SHOOT_5
-  - first:
-      213: 5142285941186662790
-    second: Kiko_SHOOT_6
-  - first:
-      213: 7572368769338824965
-    second: Kiko_SHOOT_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -225,121 +210,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: Kiko_SHOOT_3
-      rect:
-        serializedVersion: 2
-        x: 96
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9ca183c54971f9c10800000000000000
-      internalID: 2062393080328755913
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Kiko_SHOOT_4
-      rect:
-        serializedVersion: 2
-        x: 128
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3176ef9427f367960800000000000000
-      internalID: 7599331181334521619
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Kiko_SHOOT_5
-      rect:
-        serializedVersion: 2
-        x: 160
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d87d9244fa90f8cf0800000000000000
-      internalID: -247968806114568307
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Kiko_SHOOT_6
-      rect:
-        serializedVersion: 2
-        x: 192
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6819ae981d11d5740800000000000000
-      internalID: 5142285941186662790
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Kiko_SHOOT_7
-      rect:
-        serializedVersion: 2
-        x: 224
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 509d3bc8645761960800000000000000
-      internalID: 7572368769338824965
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 88a9c8a2285672144b1fb21ceb903db7
+    spriteID: fdd391f7a0b23e1429d2ebfd7c722bdb
     internalID: 0
     vertices: []
     indices: 
@@ -354,11 +229,6 @@ TextureImporter:
       Kiko_SHOOT_0: -4155579264251382372
       Kiko_SHOOT_1: -1328339674985740075
       Kiko_SHOOT_2: -5254627300655789524
-      Kiko_SHOOT_3: 2062393080328755913
-      Kiko_SHOOT_4: 7599331181334521619
-      Kiko_SHOOT_5: -247968806114568307
-      Kiko_SHOOT_6: 5142285941186662790
-      Kiko_SHOOT_7: 7572368769338824965
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

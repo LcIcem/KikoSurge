@@ -13,7 +13,6 @@ using LcIcemFramework.Util.Const;
 /// </summary>
 public class SaveLoadManager : SingletonMono<SaveLoadManager>
 {
-    private const int MAX_SLOT = 3;
     private const int SAVE_VERSION = 1;
     private const string PLAYERPREFS_LAST_SLOT = "LastUsedSaveSlot";
 
@@ -22,6 +21,11 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
 
     [Header("当前存档数据（运行时）")]
     private PlayerSaveData _currentSaveData;
+
+    /// <summary>
+    /// 当前游戏开始时间戳（用于计算当前会话时长）
+    /// </summary>
+    private long _sessionStartTimestamp;
 
     /// <summary>
     /// 当前存档槽位
@@ -37,6 +41,19 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     /// 上次选择的角色ID（用于开始游戏时创建角色）
     /// </summary>
     public int LastSelectedRoleId => _currentSaveData?.lastSelectedRoleId ?? 0;
+
+    /// <summary>
+    /// 当前游戏已游玩时长（秒）
+    /// </summary>
+    public long CurrentSessionPlayTime
+    {
+        get
+        {
+            if (_sessionStartTimestamp <= 0)
+                return 0;
+            return DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _sessionStartTimestamp;
+        }
+    }
 
     /// <summary>
     /// 是否有进行中的游戏
@@ -109,7 +126,7 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     /// </summary>
     public bool HasSaveData(int slotId)
     {
-        if (slotId < 0 || slotId >= MAX_SLOT)
+        if (slotId < 0 || slotId >= Constants.MAX_SLOT)
             return false;
         return ManagerHub.Save.Exists(slotId);
     }
@@ -127,7 +144,7 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     /// </summary>
     public PlayerSaveData LoadSlotInfo(int slotId)
     {
-        if (slotId < 0 || slotId >= MAX_SLOT)
+        if (slotId < 0 || slotId >= Constants.MAX_SLOT)
             return null;
 
         try
@@ -156,7 +173,7 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     /// </summary>
     public bool SelectSlot(int slotId)
     {
-        if (slotId < 0 || slotId >= MAX_SLOT)
+        if (slotId < 0 || slotId >= Constants.MAX_SLOT)
         {
             Debug.LogError($"[SaveLoadManager] Invalid slot: {slotId}");
             return false;
@@ -191,7 +208,7 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     /// </summary>
     public void CreateNewSave(int slotId)
     {
-        if (slotId < 0 || slotId >= MAX_SLOT)
+        if (slotId < 0 || slotId >= Constants.MAX_SLOT)
         {
             Debug.LogError($"[SaveLoadManager] Invalid slot: {slotId}");
             return;
@@ -219,19 +236,48 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
 
         // 保存所有 session 关键数据
         session.seed = current.seed;
+        session.startTimestamp = current.startTimestamp;
+        session.selectedRoleId = current.selectedRoleId;
+        session.selectedRoleName = current.selectedRoleName;
         session.currentFloor = current.currentFloor;
         session.SetPlayerPos(current.GetPlayerPos());
+
+        // 保存所有背包槽位
         session.inventoryWeaponSlots = current.inventoryWeaponSlots != null
             ? new List<ItemSlotData>(current.inventoryWeaponSlots)
+            : new List<ItemSlotData>();
+        session.inventoryAmmoSlots = current.inventoryAmmoSlots != null
+            ? new List<ItemSlotData>(current.inventoryAmmoSlots)
+            : new List<ItemSlotData>();
+        session.inventoryPotionSlots = current.inventoryPotionSlots != null
+            ? new List<ItemSlotData>(current.inventoryPotionSlots)
+            : new List<ItemSlotData>();
+        session.inventoryArmorSlots = current.inventoryArmorSlots != null
+            ? new List<ItemSlotData>(current.inventoryArmorSlots)
             : new List<ItemSlotData>();
         session.inventoryRelicSlots = current.inventoryRelicSlots != null
             ? new List<ItemSlotData>(current.inventoryRelicSlots)
             : new List<ItemSlotData>();
+        session.inventoryCurrencySlots = current.inventoryCurrencySlots != null
+            ? new List<ItemSlotData>(current.inventoryCurrencySlots)
+            : new List<ItemSlotData>();
+
+        // 保存已装备武器
         session.equippedWeaponSlots = current.equippedWeaponSlots != null
             ? new List<ItemSlotData>(current.equippedWeaponSlots)
             : new List<ItemSlotData>();
+
+        // 保存垃圾桶
+        session.trashPendingItem = current.trashPendingItem;
+
+        // 保存生命值和检查点
         session.currentHealth = current.currentHealth;
         session.currentCheckpoint = current.currentCheckpoint;
+
+        // 保存 layerSnapshots
+        session.layerSnapshots = current.layerSnapshots != null
+            ? new List<LayerSnapshot>(current.layerSnapshots)
+            : new List<LayerSnapshot>();
 
         // 保存 modifiers 列表（创建副本避免引用问题）
         session.modifiers = current.modifiers != null
@@ -263,7 +309,7 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     /// </summary>
     private void SaveCurrentSlot()
     {
-        if (_currentSlotId < 0 || _currentSlotId >= MAX_SLOT)
+        if (_currentSlotId < 0 || _currentSlotId >= Constants.MAX_SLOT)
         {
             Debug.LogWarning("[SaveLoadManager] No slot selected, cannot save");
             return;
@@ -325,8 +371,18 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
             return;
         }
 
+        // 将当前游戏时长累加到累计时长
+        long currentPlayTime = CurrentSessionPlayTime;
+        if (currentPlayTime > 0)
+        {
+            _currentSaveData.AddPlayTime(currentPlayTime);
+        }
+
         // 应用游戏结果到 MetaData
         _currentSaveData.metaData.ApplyGameResult(isVictory);
+
+        // 重置会话开始时间
+        _sessionStartTimestamp = 0;
 
         // 清空 SessionData
         _currentSaveData.sessionData.Clear();
@@ -334,7 +390,7 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
 
         // 保存
         SaveCurrentSlot();
-        Debug.Log($"[SaveLoadManager] Game ended: victory={isVictory}");
+        Debug.Log($"[SaveLoadManager] Game ended: victory={isVictory}, playTime={currentPlayTime}s");
     }
 
     /// <summary>
@@ -342,7 +398,7 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     /// </summary>
     public bool DeleteSlot(int slotId)
     {
-        if (slotId < 0 || slotId >= MAX_SLOT)
+        if (slotId < 0 || slotId >= Constants.MAX_SLOT)
             return false;
 
         bool deleted = ManagerHub.Save.Delete(slotId);
@@ -367,6 +423,23 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
             _currentSaveData.AddPlayTime(seconds);
             SaveCurrentSlot();
         }
+    }
+
+    /// <summary>
+    /// 记录当前游戏会话的开始时间（每次开始新游戏时调用）
+    /// </summary>
+    public void RecordSessionStart()
+    {
+        _sessionStartTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        Debug.Log($"[SaveLoadManager] Session start recorded: {_sessionStartTimestamp}");
+    }
+
+    /// <summary>
+    /// 恢复会话开始时间（从存档加载后调用）
+    /// </summary>
+    public void RestoreSessionStart(long startTimestamp)
+    {
+        _sessionStartTimestamp = startTimestamp;
     }
 
     #endregion
