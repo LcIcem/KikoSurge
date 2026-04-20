@@ -138,6 +138,7 @@ public class DamageNumberParams
     public float damage;
     public bool isCrit;
     public Vector3 worldPosition;
+    public bool isPlayerDamage;
 }
 
 /// <summary>

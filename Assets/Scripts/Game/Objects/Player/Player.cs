@@ -231,6 +231,17 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Publish(GameEventID.OnPlayerDamaged,
             new DamageParams { damage = damage, from = transform.position });
 
+        // 发送玩家受伤飘字（红色）
+        EventCenter.Instance.Publish(GameEventID.Combat_ShowDamageNumber,
+            new DamageNumberParams
+            {
+                target = transform,
+                damage = damage,
+                isCrit = false,
+                worldPosition = transform.position,
+                isPlayerDamage = true
+            });
+
         _playerData.Health = hp;
         EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, _playerData);
 

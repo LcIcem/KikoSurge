@@ -80,7 +80,7 @@ public class DamageNumberManager : SingletonMono<DamageNumberManager>
 
     private void OnShowDamageNumber(DamageNumberParams p)
     {
-        SpawnDamageNumber(p.damage, p.worldPosition, p.isCrit, false);
+        SpawnDamageNumber(p.damage, p.worldPosition, p.isCrit, p.isPlayerDamage);
     }
 
     public void SpawnDamageNumber(float damage, Vector3 worldPosition, bool isCrit = false, bool isPlayerDamage = false)

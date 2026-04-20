@@ -65,7 +65,15 @@ public class DamageNumberUI : MonoBehaviour, IPoolable
     public void Show(float damage, bool isCrit = false, bool isPlayerDamage = false)
     {
         // 设置文本
-        _text.text = Mathf.FloorToInt(damage).ToString();
+        int displayDamage = Mathf.FloorToInt(damage);
+        if (isPlayerDamage)
+        {
+            _text.text = $"-{displayDamage}";
+        }
+        else
+        {
+            _text.text = displayDamage.ToString();
+        }
 
         if (isPlayerDamage)
         {
