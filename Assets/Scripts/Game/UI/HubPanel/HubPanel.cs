@@ -41,8 +41,24 @@ public class HubPanel : BasePanel
     {
         base.Show();
         SubscribeEvents();
+        // 初始化红屏控件为隐藏状态
+        EnsureDamageFlashHidden();
         // 请求刷新当前房间UI
         EventCenter.Instance.Publish(GameEventID.OnRequestRoomRefresh);
+    }
+
+    /// <summary>
+    /// 确保红屏控件默认隐藏
+    /// </summary>
+    private void EnsureDamageFlashHidden()
+    {
+        if (_damageFlashImage == null)
+            _damageFlashImage = GetControl<Image>(IMG_DAMAGE_FLASH);
+
+        if (_damageFlashImage != null)
+        {
+            _damageFlashImage.gameObject.SetActive(false);
+        }
     }
 
     public override void Hide()
@@ -256,7 +272,92 @@ public class HubPanel : BasePanel
 
     private void OnPlayerDamaged(DamageParams p)
     {
-        // TODO: 受伤红屏特效
+        TriggerDamageFlash();
+    }
+
+    // 红屏特效相关
+    private Image _damageFlashImage;
+    private Material _damageFlashMaterial;
+    private IEnumerator _damageFlashCoroutine;
+    private const string IMG_DAMAGE_FLASH = "img_damageFlash";
+
+    // Shader 属性名称（与 UIRadialGradient.shader 中的 Properties 对应）
+    private const string K_RADIUS = "_Radius";
+    private const string K_ALPHA = "_Alpha";
+
+    /// <summary>
+    /// 触发受伤红屏闪烁（径向渐变：从边缘红到中心透明）
+    /// </summary>
+    private void TriggerDamageFlash()
+    {
+        if (_damageFlashImage == null)
+            _damageFlashImage = GetControl<Image>(IMG_DAMAGE_FLASH);
+
+        if (_damageFlashImage == null) return;
+
+        // 初始化材质（使用 material 获取可修改的实例）
+        if (_damageFlashMaterial == null)
+            _damageFlashMaterial = _damageFlashImage.material;
+
+        // 停止之前的闪烁协程
+        if (_damageFlashCoroutine != null)
+            MonoManager.Instance.StopCoroutine(_damageFlashCoroutine);
+
+        _damageFlashCoroutine = DamageFlashSequence();
+        MonoManager.Instance.StartCoroutine(_damageFlashCoroutine);
+    }
+
+    /// <summary>
+    /// 红屏闪烁序列（径向渐变 Shader 版本）
+    /// 边缘红色高 → 中心渐变透明 → 整体淡出
+    /// </summary>
+    private IEnumerator DamageFlashSequence()
+    {
+        _damageFlashImage.gameObject.SetActive(true);
+
+        // 从编辑器设置的当前值开始动画（不重置）
+        float startRadius = _damageFlashMaterial.GetFloat(K_RADIUS);
+
+        // 阶段1：淡入（快速）
+        float fadeInDuration = 0.05f;
+        float fadeInElapsed = 0f;
+        while (fadeInElapsed < fadeInDuration)
+        {
+            fadeInElapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(fadeInElapsed / fadeInDuration);
+            _damageFlashMaterial.SetFloat(K_ALPHA, t);
+            yield return null;
+        }
+        _damageFlashMaterial.SetFloat(K_ALPHA, 1f);
+
+        // 阶段2：半径收缩（保持显示一段时间）
+        float holdDuration = 0.15f;
+        float shrinkDuration = 0.2f;
+        float shrinkElapsed = 0f;
+        while (shrinkElapsed < shrinkDuration + holdDuration)
+        {
+            shrinkElapsed += Time.deltaTime;
+            if (shrinkElapsed < shrinkDuration)
+            {
+                float t = shrinkElapsed / shrinkDuration;
+                float radius = Mathf.Lerp(startRadius, 0f, t);
+                _damageFlashMaterial.SetFloat(K_RADIUS, radius);
+            }
+            yield return null;
+        }
+
+        // 阶段3：淡出
+        float fadeOutDuration = 0.15f;
+        float fadeOutElapsed = 0f;
+        while (fadeOutElapsed < fadeOutDuration)
+        {
+            fadeOutElapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(fadeOutElapsed / fadeOutDuration);
+            _damageFlashMaterial.SetFloat(K_ALPHA, 1f - t);
+            yield return null;
+        }
+
+        _damageFlashImage.gameObject.SetActive(false);
     }
 
     private void OnRoomEnter(RoomEnterParams p)
