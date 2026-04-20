@@ -1405,7 +1405,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ScrollRect
-  m_Content: {fileID: 0}
+  m_Content: {fileID: 6123965829775803524}
   m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
@@ -3110,7 +3110,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3678267484793764049}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.99999815
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3996,7 +3996,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00030624273}
+  m_AnchoredPosition: {x: 0, y: 0.000082413695}
   m_SizeDelta: {x: 783, y: 635.82}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &3966699860167122983
@@ -4134,8 +4134,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.0000038146973, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -17, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &252393053629896506
 CanvasRenderer:

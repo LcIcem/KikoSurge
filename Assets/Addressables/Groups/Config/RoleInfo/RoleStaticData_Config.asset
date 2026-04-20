@@ -21,9 +21,9 @@ MonoBehaviour:
     baseAtk: 2
     baseDef: 1
     baseMoveSpeed: 4
-    dashSpeed: 6
-    dashDuration: 0.5
-    dashGap: 1
+    dashSpeed: 10
+    dashDuration: 0.2
+    dashGap: 0.8
     invincibleDuration: 0.5
     hurtDuration: 0.3
     initialWeaponIds: 0100000002000000
