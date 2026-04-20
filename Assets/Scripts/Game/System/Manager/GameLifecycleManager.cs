@@ -31,10 +31,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     [SerializeField] private string _bgmMainMenu = "BGM-MainMenu";
     [SerializeField] private string _bgmLobby = "BGM-MainMenu";
     [SerializeField] private string _bgmPlaying = "BGM-Gaming";
-    [Range(0f, 1f)]
-    [Tooltip("暂停时音量系数（当前音量 × 系数）")]
-    [SerializeField] private float _pausedBGMVolumeFactor = 0.3f;
-    private float _originalBGMVolume = 1f;
 
     /// <summary>
     /// 当前游戏状态
@@ -470,31 +466,19 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         if (ManagerHub.Audio == null)
             return;
 
-        // Interacting、GameOver 状态不切换 BGM，保持当前播放
-        if (newState == GameState.Interacting || newState == GameState.GameOver)
+        // Interacting、GameOver、Paused 状态不切换 BGM，保持当前播放
+        if (newState == GameState.Interacting || newState == GameState.GameOver || newState == GameState.Paused)
             return;
 
-        // Paused 状态：降低音量，不切换曲目
-        if (newState == GameState.Paused)
-        {
-            _originalBGMVolume = ManagerHub.Audio.GetBGMVolume();
-            ManagerHub.Audio.SetBGMVolume(_originalBGMVolume * _pausedBGMVolumeFactor);
+        // 从 Interacting 恢复时也不切换 BGM，保持之前的 BGM 继续播放
+        if (oldState == GameState.Interacting)
             return;
-        }
 
-        // 从暂停恢复
+        // 从暂停恢复时也不切换 BGM，保持当前播放
         if (oldState == GameState.Paused)
-        {
-            ManagerHub.Audio.SetBGMVolume(_originalBGMVolume);
+            return;
 
-            // 同状态恢复（Paused -> Playing）：不切换音乐
-            if (newState == GameState.Playing)
-                return;
-
-            // 不同状态（如 Paused -> Lobby）：切换音乐
-        }
-
-        // 正常切换 BGM
+        // 正常切换 BGM（Lobby <-> Playing 之间的切换）
         string bgmId = newState switch
         {
             GameState.MainMenu => _bgmMainMenu,
