@@ -12,6 +12,14 @@ public static class BulletModule
     /// </summary>
     public static void Spawn(WeaponBase gun, float angleOffset, float randomSpread, string ownerTag)
     {
+        Spawn(gun, angleOffset, randomSpread, ownerTag, null);
+    }
+
+    /// <summary>
+    /// 创建子弹（带玩家数据，用于伤害计算）
+    /// </summary>
+    public static void Spawn(WeaponBase gun, float angleOffset, float randomSpread, string ownerTag, PlayerRuntimeData playerData)
+    {
         BulletConfig config = gun.Config.bulletConfig;
         if (config == null) return;
 
@@ -33,7 +41,26 @@ public static class BulletModule
         // 设置子弹归属
         bullet.SetOwnerTag(ownerTag);
 
-        bullet.Init(config, dir);
+        // 组装伤害参数
+        BulletDamageParams damageParams = null;
+        if (playerData != null && gun.Config != null)
+        {
+            damageParams = new BulletDamageParams
+            {
+                bulletBaseDamage = config.baseDamage,
+                playerAtk = playerData.atk,
+                playerCritRate = playerData.critRate,
+                playerCritMultiplier = playerData.critMultiplier,
+                playerDamageBonus = playerData.damageBonus,
+                playerDefBreak = playerData.defBreak,
+                weaponDamage = gun.Config.weaponDamage,
+                weaponCritRate = gun.Config.weaponCritRate,
+                weaponCritMultiplier = gun.Config.weaponCritMultiplier,
+                weaponDamageBonusPercent = gun.Config.weaponDamageBonusPercent
+            };
+        }
+
+        bullet.Init(config, dir, damageParams);
     }
 
     /// <summary>

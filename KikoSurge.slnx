@@ -2,6 +2,6 @@
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="AstarPathfindingProject.csproj" />
   <Project Path="PackageToolsEditor.csproj" />
-  <Project Path="AstarPathfindingProjectEditor.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="AstarPathfindingProjectEditor.csproj" />
 </Solution>

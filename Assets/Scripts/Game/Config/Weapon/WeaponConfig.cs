@@ -47,6 +47,19 @@ public class WeaponConfig : ScriptableObject
     [Tooltip("后坐力")]
     public float recoilForce = 1f;
 
+    [Header("伤害属性")]
+    [Tooltip("武器固定伤害加成")]
+    public float weaponDamage = 0f;
+
+    [Tooltip("武器暴击率加成")]
+    public float weaponCritRate = 0f;
+
+    [Tooltip("武器暴击倍率加成")]
+    public float weaponCritMultiplier = 0f;
+
+    [Tooltip("武器伤害加成%")]
+    public float weaponDamageBonusPercent = 0f;
+
     [Tooltip("子弹配置")]
     public BulletConfig bulletConfig;
 }

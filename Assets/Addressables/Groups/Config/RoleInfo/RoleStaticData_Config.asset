@@ -26,7 +26,11 @@ MonoBehaviour:
     dashGap: 0.8
     invincibleDuration: 0.5
     hurtDuration: 0.3
+    baseCritRate: 100
+    baseCritMultiplier: 1.5
+    baseDamageBonus: 1
+    baseDefBreak: 1
     initialWeaponIds: 0100000002000000
     maxWeaponSlots: 2
-    initialEmptySlotCount: 20
+    initialEmptySlotCount: 40
     maxInventorySlotCount: 40

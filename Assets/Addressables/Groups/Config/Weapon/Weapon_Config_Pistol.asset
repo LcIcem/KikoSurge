@@ -13,9 +13,7 @@ MonoBehaviour:
   m_Name: Weapon_Config_Pistol
   m_EditorClassIdentifier: Assembly-CSharp::WeaponConfig
   itemConfig: {fileID: 11400000, guid: f273b95930b4f8044a4d25f83312e731, type: 2}
-  weaponName: "\u5355\u53D1\u624B\u67AA"
   prefab: {fileID: 1645332420106596854, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
-  icon: {fileID: 3404276450375173017, guid: 0a6cc4db7a41d5549a80f5ab9d1b1c80, type: 3}
   fireMode: 0
   fireRate: 0.5
   randomSpreadAngle: 15
@@ -24,7 +22,11 @@ MonoBehaviour:
   burstCount: 3
   burstSpeed: 0.05
   chargeTime: 1
-  magazineSize: 30
-  reloadTime: 1
+  magazineSize: 20
+  reloadTime: 0.8
   recoilForce: 1
+  weaponDamage: 0
+  weaponCritRate: 0
+  weaponCritMultiplier: 0
+  weaponDamageBonusPercent: 0
   bulletConfig: {fileID: 11400000, guid: 0c24aea012ec60d4caf8db804a71c50f, type: 2}

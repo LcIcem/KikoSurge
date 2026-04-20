@@ -33,6 +33,18 @@ public class RoleStaticData
     [Tooltip("基础移动速度")]
     public float baseMoveSpeed = 4f;
 
+    [Tooltip("基础暴击率")]
+    public float baseCritRate = 0f;
+
+    [Tooltip("基础暴击倍率")]
+    public float baseCritMultiplier = 1.5f;
+
+    [Tooltip("基础伤害加成%")]
+    public float baseDamageBonus = 0f;
+
+    [Tooltip("基础防御穿透%")]
+    public float baseDefBreak = 0f;
+
     [Header("战斗属性")]
     [Tooltip("冲刺速度")]
     public float dashSpeed = 6f;

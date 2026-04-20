@@ -15,7 +15,7 @@ public class BulletConfig : ScriptableObject
     public float maxDistance = 50f;
 
     [Header("伤害")]
-    public int damage = 10;
+    public int baseDamage = 10;
 
     [Header("命中效果")]
     public HitEffect hitEffect = HitEffect.None;

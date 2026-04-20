@@ -19,6 +19,8 @@ public abstract class EnemyConfig : ScriptableObject
     public float MaxHP;
     public float MoveSpeed;
     public float Attack;
+    [Tooltip("防御力（用于伤害减伤计算）")]
+    public float Defense;
     public float AttackInterval = 1f;   // 攻击间隔（秒）
     public float AttackDuration = 0.5f;  // 攻击动画持续时间（秒）
     public float AttackHitTime = 0.2f;   // 攻击生效时间点（秒，从动画开始计时）

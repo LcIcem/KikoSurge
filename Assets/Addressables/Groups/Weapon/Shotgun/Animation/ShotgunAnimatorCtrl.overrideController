@@ -8,4 +8,10 @@ AnimatorOverrideController:
   m_PrefabAsset: {fileID: 0}
   m_Name: ShotgunAnimatorCtrl
   m_Controller: {fileID: 9100000, guid: 362d0c7b5dce48f4c9ee8eead0e33b44, type: 2}
-  m_Clips: []
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: a46602a7851ca4b45bc945f819a633af, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: da3b1a728cb087f44a8fbe62778bf774, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: e234b1605b4c3cc4ebbe3f1a4a241003, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: e2a3c6704c1af994f96a40f36dc19440, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 082acbbceda9ea24e885f56b47ff6228, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 6fb02db2ef0c79a47aee96ffe71e4c54, type: 2}

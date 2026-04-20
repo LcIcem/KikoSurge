@@ -61,4 +61,12 @@ public enum ModifierType
     InvincibleDuration,
     /// <summary>受伤持续时间</summary>
     HurtDuration,
+    /// <summary>暴击率</summary>
+    CritRate,
+    /// <summary>暴击倍率</summary>
+    CritMultiplier,
+    /// <summary>伤害加成百分比</summary>
+    DamageBonus,
+    /// <summary>防御穿透</summary>
+    DefBreak,
 }

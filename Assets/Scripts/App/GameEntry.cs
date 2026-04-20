@@ -15,6 +15,10 @@ public class GameEntry : MonoBehaviour
         _ = ManagerHub.Instance;
         _ = GameDataManager.Instance;
         _ = LootManager.Instance;
+
+        // 初始化 xLua 伤害公式
+        DamageLuaBridge.Initialize();
+
         // 显示游戏开始面板
         Log("Game started");
         ManagerHub.UI.ShowPanel<LoginPanel>(UILayerType.Middle);

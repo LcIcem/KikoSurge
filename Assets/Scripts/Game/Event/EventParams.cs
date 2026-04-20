@@ -114,6 +114,30 @@ public class BulletHitParams
     public Bullet bullet;
     public Transform target;
     public float damage;
+    public bool isCrit;
+}
+
+/// <summary>
+/// 暴击事件参数
+/// </summary>
+public class CriticalHitParams
+{
+    public Transform target;
+    public Transform attacker;
+    public float damage;
+    public float critMultiplier;
+    public Vector3 worldPosition;
+}
+
+/// <summary>
+/// 伤害数字显示事件参数
+/// </summary>
+public class DamageNumberParams
+{
+    public Transform target;
+    public float damage;
+    public bool isCrit;
+    public Vector3 worldPosition;
 }
 
 /// <summary>

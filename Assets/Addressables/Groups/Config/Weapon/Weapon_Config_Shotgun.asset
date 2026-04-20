@@ -13,16 +13,20 @@ MonoBehaviour:
   m_Name: Weapon_Config_Shotgun
   m_EditorClassIdentifier: Assembly-CSharp::WeaponConfig
   itemConfig: {fileID: 11400000, guid: 41133e477919bc24ca1a751fde8b4981, type: 2}
-  prefab: {fileID: 1645332420106596854, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
+  prefab: {fileID: 1645332420106596854, guid: d24a62f4b758bd443b54f25b11423683, type: 3}
   fireMode: 1
-  fireRate: 0.7
+  fireRate: 1
   randomSpreadAngle: 15
-  bulletCount: 3
-  shotgunSpreadAngle: 30
+  bulletCount: 5
+  shotgunSpreadAngle: 15
   burstCount: 3
   burstSpeed: 0.05
   chargeTime: 1
-  magazineSize: 20
+  magazineSize: 7
   reloadTime: 1
   recoilForce: 5
+  weaponDamage: 0
+  weaponCritRate: 0
+  weaponCritMultiplier: 0
+  weaponDamageBonusPercent: 0
   bulletConfig: {fileID: 11400000, guid: 0c24aea012ec60d4caf8db804a71c50f, type: 2}

@@ -16,8 +16,12 @@ public class Bullet : MonoBehaviour, IPoolable
     // 子弹归属标签（由发射者在Spawn时设置）
     private string _ownerTag = "Enemy";
 
-    // 飞行参数
+    // 伤害参数
+    public BulletDamageParams damageParams { get; private set; }
+
+    // 降级用的基础伤害（当 damageParams 为 null 时使用）
     public int Damage { get; private set; }
+
     public Vector3 Direction { get; private set; }
     public float Speed { get; private set; }
     public float MaxDistance { get; private set; }
@@ -80,7 +84,16 @@ public class Bullet : MonoBehaviour, IPoolable
     /// </summary>
     public void Init(BulletConfig config, Vector3 direction)
     {
-        Damage = config.damage;
+        Init(config, direction, null);
+    }
+
+    /// <summary>
+    /// 初始化子弹（带伤害参数）
+    /// </summary>
+    public void Init(BulletConfig config, Vector3 direction, BulletDamageParams damageParams)
+    {
+        Damage = config.baseDamage;
+        this.damageParams = damageParams;
         Direction = direction.normalized;
         Speed = config.bulletSpeed;
         BulletType = config.bulletType;
@@ -135,14 +148,49 @@ public class Bullet : MonoBehaviour, IPoolable
             var enemy = other.GetComponent<EnemyBase>();
             if (enemy != null)
             {
-                enemy.TakeDamage(Damage);
+                DamageResult result;
+
+                // 如果有完整伤害参数，使用 DamageCalculator 计算
+                if (damageParams != null)
+                {
+                    damageParams.targetDefense = enemy.EnemyConfig?.Defense ?? 0f;
+                    result = DamageCalculator.CalculateEnemyDamage(damageParams, enemy.transform.position);
+                }
+                else
+                {
+                    // 降级处理：使用原始 Damage
+                    result = new DamageResult
+                    {
+                        finalDamage = Damage,
+                        isCrit = false,
+                        critRate = 0f,
+                        critMultiplier = 1f,
+                        source = DamageSource.PlayerBullet,
+                        rawDamage = Damage,
+                        defenseReduction = 0f,
+                        worldPosition = enemy.transform.position
+                    };
+                }
+
+                enemy.TakeDamage(result.finalDamage);
 
                 EventCenter.Instance.Publish(GameEventID.Combat_BulletHit,
                     new BulletHitParams
                     {
                         bullet = this,
                         target = enemy.transform,
-                        damage = Damage
+                        damage = result.finalDamage,
+                        isCrit = result.isCrit
+                    });
+
+                // 发布伤害数字显示事件（由接收方根据 isCrit 决定显示样式）
+                EventCenter.Instance.Publish(GameEventID.Combat_ShowDamageNumber,
+                    new DamageNumberParams
+                    {
+                        target = enemy.transform,
+                        damage = result.finalDamage,
+                        isCrit = result.isCrit,
+                        worldPosition = enemy.transform.position
                     });
             }
 

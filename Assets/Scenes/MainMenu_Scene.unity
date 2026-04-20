@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 639524669}
   - component: {fileID: 639524668}
   m_Layer: 0
-  m_Name: InputManager
+  m_Name: '[Singleton] InputManager'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -164,34 +164,6 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: f1a2b3c4-1111-2222-3333-444455550001
-    m_ActionName: 'MainMenu/Navigate[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: f1a2b3c4-1111-2222-3333-444455550002
-    m_ActionName: 'MainMenu/Submit[/Keyboard/enter]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: f1a2b3c4-1111-2222-3333-444455550003
-    m_ActionName: 'MainMenu/Cancel[/Keyboard/escape]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: f1a2b3c4-1111-2222-3333-444455550004
-    m_ActionName: 'MainMenu/SelectSlot1[/Keyboard/1]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: f1a2b3c4-1111-2222-3333-444455550005
-    m_ActionName: 'MainMenu/SelectSlot2[/Keyboard/2]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: f1a2b3c4-1111-2222-3333-444455550006
-    m_ActionName: 'MainMenu/SelectSlot3[/Keyboard/3]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: f1a2b3c4-1111-2222-3333-444455550007
-    m_ActionName: 'MainMenu/StartGame[/Keyboard/z]'
-  - m_PersistentCalls:
-      m_Calls: []
     m_ActionId: c3d4e5f6-3333-4444-5555-666677770001
     m_ActionName: 'Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]'
   - m_PersistentCalls:
@@ -222,6 +194,18 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 6d3b7c55-fe8d-4a4d-99b5-42d120ede09e
     m_ActionName: 'Player/Interact[/Keyboard/r]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 72939b14-d0db-448d-b2e0-d9c39a8bac2a
+    m_ActionName: 'UI/CloseInventory[/Keyboard/tab]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ed92b1c6-9e36-42c1-862d-08a8881f0ac2
+    m_ActionName: 'Player/Reload[/Keyboard/r]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: a7e61c2b-4b01-481b-bb2c-8cae6b61973e
+    m_ActionName: 'Player/OpenInventory[/Keyboard/tab]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: UI
@@ -250,6 +234,51 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 10.257355, y: 7.6939697, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1171977433
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1171977435}
+  - component: {fileID: 1171977434}
+  m_Layer: 0
+  m_Name: '[Singleton] DamageNumberManager'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1171977434
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1171977433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 236f46338cb20354ca98cb94d7fcb196, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageNumberManager
+  _damageNumberPrefab: {fileID: 9068188548730418095, guid: d6be90cbe25e80d4b932bf5804a8004f, type: 3}
+--- !u!4 &1171977435
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1171977433}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -12.54645, y: -8.94918, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -472,7 +501,7 @@ GameObject:
   - component: {fileID: 2018529841}
   - component: {fileID: 2018529840}
   m_Layer: 0
-  m_Name: GameLifeCycleManager
+  m_Name: '[Singleton] GameLifeCycleManager'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -518,3 +547,4 @@ SceneRoots:
   - {fileID: 1954561253}
   - {fileID: 2018529841}
   - {fileID: 639524670}
+  - {fileID: 1171977435}

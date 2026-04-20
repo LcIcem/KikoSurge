@@ -53,10 +53,16 @@ public class SessionData
     /// </summary>
     public List<ModifierData> modifiers;
 
+    /// <summary>
+    /// 当前单局激活的遗物效果列表
+    /// </summary>
+    public List<RelicEffect> activeRelicEffects;
+
     public SessionData()
     {
         layerSnapshots = new List<LayerSnapshot>();
         modifiers = new List<ModifierData>();
+        activeRelicEffects = new List<RelicEffect>();
     }
 
     public static SessionData CreateNew(int roleId, long seedVal)
@@ -114,6 +120,7 @@ public class SessionData
             equippedWeaponSlots = equipped,
             layerSnapshots = new List<LayerSnapshot>(),
             modifiers = new List<ModifierData>(),
+            activeRelicEffects = new List<RelicEffect>(),
             currentHealth = 0f
         };
     }
@@ -221,6 +228,7 @@ public class SessionData
     {
         layerSnapshots?.Clear();
         modifiers?.Clear();
+        activeRelicEffects?.Clear();
         currentCheckpoint = null;
         currentHealth = 0f;
     }

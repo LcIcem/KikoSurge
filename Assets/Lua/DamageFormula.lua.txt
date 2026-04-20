@@ -1,0 +1,91 @@
+-- 伤害计算公式
+-- 可热更新
+
+-- 初始化随机种子
+math.randomseed(os.time())
+
+-- 计算最终暴击率
+-- @param baseCritRate 基础暴击率
+-- @param weaponCritRate 武器暴击率加成
+-- @return 最终暴击率 (0 ~ 1)
+local function CalculateCritRate(baseCritRate, weaponCritRate)
+    local rate = baseCritRate + weaponCritRate
+    return math.min(math.max(rate, 0), 1)  -- clamp [0, 1]
+end
+
+-- 计算暴击伤害倍率
+-- @param baseCritMultiplier 基础暴击倍率
+-- @param weaponCritMultiplier 武器暴击倍率加成
+-- @return 暴击伤害倍率
+local function CalculateCritMultiplier(baseCritMultiplier, weaponCritMultiplier)
+    return baseCritMultiplier + weaponCritMultiplier
+end
+
+-- 计算伤害加成后的伤害
+-- @param baseDamage 基础伤害
+-- @param playerDamageBonusPercent 玩家伤害加成百分比
+-- @param weaponDamageBonusPercent 武器伤害加成百分比
+-- @param weaponFlatDamage 武器固定伤害加成
+-- @return 加成后伤害
+local function ApplyDamageBonus(baseDamage, playerDamageBonusPercent, weaponDamageBonusPercent, weaponFlatDamage)
+    local totalBonusPercent = playerDamageBonusPercent + weaponDamageBonusPercent
+    return baseDamage * (1 + totalBonusPercent) + weaponFlatDamage
+end
+
+-- 计算防御减伤
+-- @param damage 当前伤害
+-- @param targetDefense 目标防御力
+-- @param defBreak 防御穿透（0 ~ 1）
+-- @return 减伤后的伤害
+local function ApplyDefenseReduction(damage, targetDefense, defBreak)
+    local effectiveDefense = targetDefense * (1 - defBreak)
+    local reduction = effectiveDefense / (effectiveDefense + 100)
+    return damage * (1 - reduction)
+end
+
+-- 主计算函数（由 C# 调用）
+-- @param params 伤害参数表
+-- @return 结果表 {finalDamage, isCrit, critRate, critMultiplier}
+local function CalculateDamage(params)
+    -- 1. 暴击判定
+    local critRate = CalculateCritRate(params.baseCritRate, params.weaponCritRate)
+    local isCrit = math.random() < critRate
+
+    -- 2. 伤害加成
+    local damaged = ApplyDamageBonus(
+        params.baseDamage,
+        params.playerDamageBonusPercent,
+        params.weaponDamageBonusPercent,
+        params.weaponFlatDamage
+    )
+
+    -- 3. 暴击伤害
+    local critMultiplier = isCrit and CalculateCritMultiplier(
+        params.baseCritMultiplier,
+        params.weaponCritMultiplier
+    ) or 1.0
+    damaged = damaged * critMultiplier
+
+    -- 4. 防御减伤
+    damaged = ApplyDefenseReduction(
+        damaged,
+        params.targetDefense,
+        params.defBreak
+    )
+
+    return {
+        finalDamage = damaged,
+        isCrit = isCrit,
+        critRate = critRate,
+        critMultiplier = critMultiplier
+    }
+end
+
+-- 导出模块
+return {
+    CalculateCritRate = CalculateCritRate,
+    CalculateCritMultiplier = CalculateCritMultiplier,
+    ApplyDamageBonus = ApplyDamageBonus,
+    ApplyDefenseReduction = ApplyDefenseReduction,
+    CalculateDamage = CalculateDamage
+}

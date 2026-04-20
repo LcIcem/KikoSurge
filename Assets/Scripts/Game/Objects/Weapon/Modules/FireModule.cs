@@ -15,29 +15,37 @@ public static class FireModule
     {
         WeaponConfig config = gun.Config;
 
+        // 获取玩家运行时数据（用于伤害计算）
+        PlayerRuntimeData playerData = null;
+        Player player = gun.transform.root.GetComponent<Player>();
+        if (player != null)
+        {
+            playerData = player.RuntimeData;
+        }
+
         switch (config.fireMode)
         {
             case FireMode.Single:
-                FireSingle(gun, config);
+                FireSingle(gun, config, playerData);
                 // 单发：立即设置冷却
                 gun.SetFireCooldown(config.fireRate);
                 break;
             case FireMode.Spread:
-                FireSpread(gun, config);
+                FireSpread(gun, config, playerData);
                 // 散射：立即设置冷却
                 gun.SetFireCooldown(config.fireRate);
                 break;
             case FireMode.Burst:
-                FireBurst(gun, config);
+                FireBurst(gun, config, playerData);
                 // 连发：冷却由 FireBurst 内部在最后一发射出后设置
                 break;
             case FireMode.Continuous:
-                FireSingle(gun, config);
+                FireSingle(gun, config, playerData);
                 // 持续模式：立即设置冷却
                 gun.SetFireCooldown(config.fireRate);
                 break;
             case FireMode.Charge:
-                FireSingle(gun, config);
+                FireSingle(gun, config, playerData);
                 // 蓄力模式：立即设置冷却
                 gun.SetFireCooldown(config.fireRate);
                 break;
@@ -47,17 +55,17 @@ public static class FireModule
     /// <summary>
     /// 单发
     /// </summary>
-    private static void FireSingle(WeaponBase gun, WeaponConfig config)
+    private static void FireSingle(WeaponBase gun, WeaponConfig config, PlayerRuntimeData playerData)
     {
         // 消耗弹药并发射
         gun.ConsumeAmmo();
-        BulletModule.Spawn(gun, 0, config.randomSpreadAngle, gun.transform.root.tag);
+        BulletModule.Spawn(gun, 0, config.randomSpreadAngle, gun.transform.root.tag, playerData);
     }
 
     /// <summary>
     /// 散射（霰弹）
     /// </summary>
-    private static void FireSpread(WeaponBase gun, WeaponConfig config)
+    private static void FireSpread(WeaponBase gun, WeaponConfig config, PlayerRuntimeData playerData)
     {
         int bulletCount = config.bulletCount;
         float shotgunAngle = config.shotgunSpreadAngle;
@@ -66,7 +74,7 @@ public static class FireModule
         // 如果只有一颗子弹，直接发射
         if (bulletCount <= 1)
         {
-            FireSingle(gun, config);
+            FireSingle(gun, config, playerData);
             return;
         }
 
@@ -80,7 +88,7 @@ public static class FireModule
         {
             float angle = startAngle + step * i;
             // 霰弹的每颗子弹都有随机散布
-            BulletModule.Spawn(gun, angle, randomSpread, gun.transform.root.tag);
+            BulletModule.Spawn(gun, angle, randomSpread, gun.transform.root.tag, playerData);
         }
     }
 
@@ -88,7 +96,7 @@ public static class FireModule
     /// 连发（三连发等）- 带延迟，每颗子弹检查并消耗弹药
     /// 冷却在最后一发射出后才开始计算
     /// </summary>
-    private static void FireBurst(WeaponBase gun, WeaponConfig config)
+    private static void FireBurst(WeaponBase gun, WeaponConfig config, PlayerRuntimeData playerData)
     {
         float burstSpeed = config.burstSpeed;
         float randomSpread = config.randomSpreadAngle;
@@ -101,7 +109,7 @@ public static class FireModule
         if (gun.CurrentAmmo > 0)
         {
             gun.ConsumeAmmo();
-            BulletModule.Spawn(gun, 0, randomSpread, gun.transform.root.tag);
+            BulletModule.Spawn(gun, 0, randomSpread, gun.transform.root.tag, playerData);
         }
 
         // 后续子弹带延迟，最后一发射出后设置冷却并解除连发状态
@@ -117,7 +125,7 @@ public static class FireModule
                     return;
                 }
                 gun.ConsumeAmmo();
-                BulletModule.Spawn(gun, 0, randomSpread, gun.transform.root.tag);
+                BulletModule.Spawn(gun, 0, randomSpread, gun.transform.root.tag, playerData);
 
                 if (isLastShot)
                 {

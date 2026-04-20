@@ -26,5 +26,5 @@ MonoBehaviour:
   AttackRange: 0.5
   LoseRange: 5
   PrefabAddress: Enemy
-  lootTable: {fileID: 0}
+  lootTable: {fileID: 11400000, guid: e1996294394bdef4cab54d8fc62db7cf, type: 2}
   PatrolSpeed: 1

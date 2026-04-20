@@ -75,6 +75,8 @@ namespace Game.Event
         public static readonly EventID Combat_Reloading = (EventID)8010;         // 开始换弹
         public static readonly EventID Combat_Reloaded = (EventID)8011;          // 换弹完成
         public static readonly EventID Combat_CancelReload = (EventID)8012;      // 取消换弹
+        public static readonly EventID Combat_CriticalHit = (EventID)8020;      // 暴击发生（UI显示暴击特效）
+        public static readonly EventID Combat_ShowDamageNumber = (EventID)8021; // 伤害数字显示
 
         // 9000-9999: UI 框架扩展
         public static readonly EventID UpdateHeartDisplay = (EventID)9000; // 更新血量显示

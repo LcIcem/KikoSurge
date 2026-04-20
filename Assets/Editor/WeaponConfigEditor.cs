@@ -18,6 +18,10 @@ public class WeaponConfigEditor : Editor
     private SerializedProperty _spReloadTime;
     private SerializedProperty _spRecoilForce;
     private SerializedProperty _spBulletConfig;
+    private SerializedProperty _spWeaponDamage;
+    private SerializedProperty _spWeaponCritRate;
+    private SerializedProperty _spWeaponCritMultiplier;
+    private SerializedProperty _spWeaponDamageBonusPercent;
 
     private void OnEnable()
     {
@@ -36,6 +40,10 @@ public class WeaponConfigEditor : Editor
         _spReloadTime = so.FindProperty("reloadTime");
         _spRecoilForce = so.FindProperty("recoilForce");
         _spBulletConfig = so.FindProperty("bulletConfig");
+        _spWeaponDamage = so.FindProperty("weaponDamage");
+        _spWeaponCritRate = so.FindProperty("weaponCritRate");
+        _spWeaponCritMultiplier = so.FindProperty("weaponCritMultiplier");
+        _spWeaponDamageBonusPercent = so.FindProperty("weaponDamageBonusPercent");
     }
 
     public override void OnInspectorGUI()
@@ -98,6 +106,14 @@ public class WeaponConfigEditor : Editor
         // 后坐力
         EditorGUILayout.LabelField("后坐力");
         EditorGUILayout.PropertyField(_spRecoilForce);
+        EditorGUILayout.Space();
+
+        // 伤害属性
+        EditorGUILayout.LabelField("伤害属性");
+        EditorGUILayout.PropertyField(_spWeaponDamage);
+        EditorGUILayout.PropertyField(_spWeaponCritRate);
+        EditorGUILayout.PropertyField(_spWeaponCritMultiplier);
+        EditorGUILayout.PropertyField(_spWeaponDamageBonusPercent);
         EditorGUILayout.Space();
 
         // 子弹配置

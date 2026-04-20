@@ -25,6 +25,13 @@ public class PlayerRuntimeData
     public float invincibleDuration; // 最终无敌持续时间
     public float hurtDuration;   // 最终受伤动画持续时间
 
+    // ========== 战斗属性 ==========
+    public float critRate;         // 最终暴击率
+    public float critMultiplier;   // 最终暴击倍率
+    public float damageBonus;     // 最终伤害加成%
+    public float defBreak;        // 最终防御穿透%
+    public float damageReduction;  // 伤害减免（来自护甲遗物）
+
     // 当前生命值（单独存储，因为会频繁变化）
     private float _health = 5f;
 
@@ -78,6 +85,17 @@ public class PlayerRuntimeData
         float finalInvincibleDuration = ApplyModifiers(staticData.invincibleDuration, ModifierType.InvincibleDuration, modifiers);
         float finalHurtDuration = ApplyModifiers(staticData.hurtDuration, ModifierType.HurtDuration, modifiers);
 
+        // 计算战斗属性
+        float globalCritRateBonus = metaData?.globalCritRateBonus ?? 0f;
+        float globalCritMultiplierBonus = metaData?.globalCritMultiplierBonus ?? 0f;
+        float globalDamageBonusPercent = metaData?.globalDamageBonusPercent ?? 0f;
+        float globalDefBreakBonus = metaData?.globalDefBreakBonus ?? 0f;
+
+        float finalCritRate = ApplyModifiers(staticData.baseCritRate + globalCritRateBonus, ModifierType.CritRate, modifiers);
+        float finalCritMultiplier = ApplyModifiers(staticData.baseCritMultiplier + globalCritMultiplierBonus, ModifierType.CritMultiplier, modifiers);
+        float finalDamageBonus = ApplyModifiers(staticData.baseDamageBonus + globalDamageBonusPercent, ModifierType.DamageBonus, modifiers);
+        float finalDefBreak = ApplyModifiers(staticData.baseDefBreak + globalDefBreakBonus, ModifierType.DefBreak, modifiers);
+
         // 如果没有传入当前生命值或值无效，默认满血
         float health = (currentHealth == null || currentHealth <= 0) ? finalMaxHealth : currentHealth.Value;
 
@@ -94,6 +112,11 @@ public class PlayerRuntimeData
             dashGap = staticData.dashGap, // 冲刺间隔通常不需要加成
             invincibleDuration = finalInvincibleDuration,
             hurtDuration = finalHurtDuration,
+            critRate = finalCritRate,
+            critMultiplier = finalCritMultiplier,
+            damageBonus = finalDamageBonus,
+            defBreak = finalDefBreak,
+            damageReduction = 0f, // 护甲遗物装备时由外部设置
             _health = health
         };
     }
@@ -141,6 +164,11 @@ public class PlayerRuntimeData
             dashGap = staticData.dashGap,
             invincibleDuration = staticData.invincibleDuration,
             hurtDuration = staticData.hurtDuration,
+            critRate = staticData.baseCritRate,
+            critMultiplier = staticData.baseCritMultiplier,
+            damageBonus = staticData.baseDamageBonus,
+            defBreak = staticData.baseDefBreak,
+            damageReduction = 0f,
             _health = staticData.baseMaxHealth
         };
     }
