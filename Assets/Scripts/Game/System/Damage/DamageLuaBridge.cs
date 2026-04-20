@@ -58,34 +58,46 @@ public static class DamageLuaBridge
             paramTable.Set("weaponCritRate", p.weaponCritRate);
             paramTable.Set("weaponCritMultiplier", p.weaponCritMultiplier);
             paramTable.Set("playerDamageBonusPercent", p.playerDamageBonus);
-            paramTable.Set("weaponDamageBonusPercent", p.weaponDamageBonusPercent);
+            paramTable.Set("weaponDamageBonusPercent", p.weaponDamageBonus);
             paramTable.Set("weaponFlatDamage", p.weaponDamage);
             paramTable.Set("targetDefense", p.targetDefense);
             paramTable.Set("defBreak", p.playerDefBreak);
 
-            Debug.Log($"[Lua] playerCritRate={p.playerCritRate}, weaponCritRate={p.weaponCritRate}");
+            // 打印所有输入参数
+            Debug.Log($"========== Lua伤害计算 ==========");
+            Debug.Log($"[输入] bulletBaseDamage={p.bulletBaseDamage}");
+            Debug.Log($"[输入] playerCritRate={p.playerCritRate}, playerCritMultiplier={p.playerCritMultiplier}");
+            Debug.Log($"[输入] playerDamageBonus={p.playerDamageBonus}, playerDefBreak={p.playerDefBreak}");
+            Debug.Log($"[输入] weaponCritRate={p.weaponCritRate}, weaponCritMultiplier={p.weaponCritMultiplier}");
+            Debug.Log($"[输入] weaponDamageBonus={p.weaponDamageBonus}, weaponFlatDamage={p.weaponDamage}");
+            Debug.Log($"[输入] targetDefense={p.targetDefense}");
 
             LuaTable result = calcFunc.Func<LuaTable, LuaTable>(paramTable);
 
             // 清理
             paramTable.Dispose();
 
-            if (result != null)
+            if (result == null)
             {
-                bool isCrit = result.Get<bool>("isCrit");
-                float critRate = result.Get<float>("critRate");
-                Debug.Log($"[Lua] isCrit={isCrit}, critRate={critRate}");
+                Debug.LogError("[Lua] result is null!");
+                return null;
             }
 
-            if (result == null)
-                return null;
+            float finalDamage = result.Get<float>("finalDamage");
+            bool isCrit = result.Get<bool>("isCrit");
+            float critRate = result.Get<float>("critRate");
+            float critMultiplier = result.Get<float>("critMultiplier");
+
+            Debug.Log($"[Lua结果] isCrit={isCrit}, critRate={critRate}, critMultiplier={critMultiplier}");
+            Debug.Log($"[Lua结果] finalDamage={finalDamage}");
+            Debug.Log($"========== Lua伤害计算结束 ==========");
 
             return new DamageResult
             {
-                finalDamage = result.Get<float>("finalDamage"),
-                isCrit = result.Get<bool>("isCrit"),
-                critRate = result.Get<float>("critRate"),
-                critMultiplier = result.Get<float>("critMultiplier"),
+                finalDamage = finalDamage,
+                isCrit = isCrit,
+                critRate = critRate,
+                critMultiplier = critMultiplier,
                 source = DamageSource.PlayerBullet,
                 rawDamage = p.bulletBaseDamage,
                 defenseReduction = 0f,

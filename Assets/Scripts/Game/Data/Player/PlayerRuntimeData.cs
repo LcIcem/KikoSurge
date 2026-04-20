@@ -88,12 +88,12 @@ public class PlayerRuntimeData
         // 计算战斗属性
         float globalCritRateBonus = metaData?.globalCritRateBonus ?? 0f;
         float globalCritMultiplierBonus = metaData?.globalCritMultiplierBonus ?? 0f;
-        float globalDamageBonusPercent = metaData?.globalDamageBonusPercent ?? 0f;
+        float globalDamageBonus = metaData?.globalDamageBonus ?? 0f;
         float globalDefBreakBonus = metaData?.globalDefBreakBonus ?? 0f;
 
         float finalCritRate = ApplyModifiers(staticData.baseCritRate + globalCritRateBonus, ModifierType.CritRate, modifiers);
         float finalCritMultiplier = ApplyModifiers(staticData.baseCritMultiplier + globalCritMultiplierBonus, ModifierType.CritMultiplier, modifiers);
-        float finalDamageBonus = ApplyModifiers(staticData.baseDamageBonus + globalDamageBonusPercent, ModifierType.DamageBonus, modifiers);
+        float finalDamageBonus = ApplyModifiers(staticData.baseDamageBonus + globalDamageBonus, ModifierType.DamageBonus, modifiers);
         float finalDefBreak = ApplyModifiers(staticData.baseDefBreak + globalDefBreakBonus, ModifierType.DefBreak, modifiers);
 
         // 如果没有传入当前生命值或值无效，默认满血

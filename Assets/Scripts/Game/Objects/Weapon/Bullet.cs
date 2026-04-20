@@ -16,6 +16,9 @@ public class Bullet : MonoBehaviour, IPoolable
     // 子弹归属标签（由发射者在Spawn时设置）
     private string _ownerTag = "Enemy";
 
+    // 标记是否已造成过伤害（防止同一发子弹触发多次伤害事件）
+    private bool _hasDealtDamage = false;
+
     // 伤害参数
     public BulletDamageParams damageParams { get; private set; }
 
@@ -63,6 +66,7 @@ public class Bullet : MonoBehaviour, IPoolable
     // IPoolable
     public void OnSpawn()
     {
+        _hasDealtDamage = false;
         _collider.enabled = true;
         _rigidbody.linearVelocity = Vector2.zero;
         _rigidbody.angularVelocity = 0f;
@@ -92,6 +96,14 @@ public class Bullet : MonoBehaviour, IPoolable
     /// </summary>
     public void Init(BulletConfig config, Vector3 direction, BulletDamageParams damageParams)
     {
+        Init(config, direction, damageParams, 0);
+    }
+
+    /// <summary>
+    /// 初始化子弹（带伤害参数和穿透数量）
+    /// </summary>
+    public void Init(BulletConfig config, Vector3 direction, BulletDamageParams damageParams, int penetrateCount)
+    {
         Damage = config.baseDamage;
         this.damageParams = damageParams;
         Direction = direction.normalized;
@@ -99,7 +111,7 @@ public class Bullet : MonoBehaviour, IPoolable
         BulletType = config.bulletType;
         HitEffect = config.hitEffect;
         EffectValue = config.effectValue;
-        PierceCount = config.penetrateCount;
+        PierceCount = penetrateCount;
         MaxDistance = config.maxDistance;
         _homingRange = config.homingRange;
         _homingStrength = config.homingStrength;
@@ -139,6 +151,9 @@ public class Bullet : MonoBehaviour, IPoolable
     // 碰撞检测
     private void OnTriggerEnter2D(Collider2D other)
     {
+        // 防止同一发子弹触发多次伤害事件
+        if (_hasDealtDamage) return;
+
         // 过滤己方子弹：如果碰撞对象的 tag 与 ownerTag 相同，跳过
         if (other.CompareTag(_ownerTag)) return;
 
@@ -173,6 +188,19 @@ public class Bullet : MonoBehaviour, IPoolable
                 }
 
                 enemy.TakeDamage(result.finalDamage);
+                _hasDealtDamage = true;
+
+                // 如果穿透，不重置标记但继续飞行
+                if (PierceCount > 0)
+                {
+                    PierceCount--;
+                    // 穿透后允许再次造成伤害
+                    _hasDealtDamage = false;
+                }
+                else
+                {
+                    ManagerHub.Pool.Release(gameObject);
+                }
 
                 EventCenter.Instance.Publish(GameEventID.Combat_BulletHit,
                     new BulletHitParams
@@ -195,15 +223,6 @@ public class Bullet : MonoBehaviour, IPoolable
             }
 
             HitEffectModule.Apply(other.gameObject, HitEffect, EffectValue);
-
-            if (PierceCount > 0)
-            {
-                PierceCount--;
-            }
-            else
-            {
-                ManagerHub.Pool.Release(gameObject);
-            }
         }
         else if (other.CompareTag("Player") && _ownerTag == "Enemy")
         {

@@ -17,7 +17,7 @@ public class BulletDamageParams
     public float weaponDamage;
     public float weaponCritRate;
     public float weaponCritMultiplier;
-    public float weaponDamageBonusPercent;
+    public float weaponDamageBonus;
 
     // ===== 目标属性 =====
     public float targetDefense;

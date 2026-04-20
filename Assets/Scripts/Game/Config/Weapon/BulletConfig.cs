@@ -21,9 +21,6 @@ public class BulletConfig : ScriptableObject
     public HitEffect hitEffect = HitEffect.None;
     public float effectValue = 1f;
 
-    [Header("穿透")]
-    public int penetrateCount = 0;
-
     [Header("追踪（仅追踪弹）")]
     public float homingRange = 10f;
     public float homingStrength = 5f;  // 追踪转向速度

@@ -17,11 +17,12 @@ public class WeaponConfigEditor : Editor
     private SerializedProperty _spMagazineSize;
     private SerializedProperty _spReloadTime;
     private SerializedProperty _spRecoilForce;
+    private SerializedProperty _spPenetrateCount;
     private SerializedProperty _spBulletConfig;
     private SerializedProperty _spWeaponDamage;
     private SerializedProperty _spWeaponCritRate;
     private SerializedProperty _spWeaponCritMultiplier;
-    private SerializedProperty _spWeaponDamageBonusPercent;
+    private SerializedProperty _spWeaponDamageBonus;
 
     private void OnEnable()
     {
@@ -39,11 +40,12 @@ public class WeaponConfigEditor : Editor
         _spMagazineSize = so.FindProperty("magazineSize");
         _spReloadTime = so.FindProperty("reloadTime");
         _spRecoilForce = so.FindProperty("recoilForce");
+        _spPenetrateCount = so.FindProperty("penetrateCount");
         _spBulletConfig = so.FindProperty("bulletConfig");
         _spWeaponDamage = so.FindProperty("weaponDamage");
         _spWeaponCritRate = so.FindProperty("weaponCritRate");
         _spWeaponCritMultiplier = so.FindProperty("weaponCritMultiplier");
-        _spWeaponDamageBonusPercent = so.FindProperty("weaponDamageBonusPercent");
+        _spWeaponDamageBonus = so.FindProperty("weaponDamageBonus");
     }
 
     public override void OnInspectorGUI()
@@ -106,6 +108,7 @@ public class WeaponConfigEditor : Editor
         // 后坐力
         EditorGUILayout.LabelField("后坐力");
         EditorGUILayout.PropertyField(_spRecoilForce);
+        EditorGUILayout.PropertyField(_spPenetrateCount);
         EditorGUILayout.Space();
 
         // 伤害属性
@@ -113,7 +116,7 @@ public class WeaponConfigEditor : Editor
         EditorGUILayout.PropertyField(_spWeaponDamage);
         EditorGUILayout.PropertyField(_spWeaponCritRate);
         EditorGUILayout.PropertyField(_spWeaponCritMultiplier);
-        EditorGUILayout.PropertyField(_spWeaponDamageBonusPercent);
+        EditorGUILayout.PropertyField(_spWeaponDamageBonus);
         EditorGUILayout.Space();
 
         // 子弹配置

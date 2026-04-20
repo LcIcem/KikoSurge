@@ -27,24 +27,47 @@ public static class DamageCalculator
     /// </summary>
     private static DamageResult CalculateEnemyDamageNative(BulletDamageParams p, Vector3 worldPosition)
     {
+        // 打印所有输入参数
+        Debug.Log($"========== 伤害计算 ==========");
+        Debug.Log($"[输入] bulletBaseDamage={p.bulletBaseDamage}");
+        Debug.Log($"[输入] playerAtk={p.playerAtk}, playerCritRate={p.playerCritRate}, playerCritMultiplier={p.playerCritMultiplier}");
+        Debug.Log($"[输入] playerDamageBonus={p.playerDamageBonus}, playerDefBreak={p.playerDefBreak}");
+        Debug.Log($"[输入] weaponDamage={p.weaponDamage}, weaponCritRate={p.weaponCritRate}, weaponCritMultiplier={p.weaponCritMultiplier}");
+        Debug.Log($"[输入] weaponDamageBonus={p.weaponDamageBonus}");
+        Debug.Log($"[输入] targetDefense={p.targetDefense}");
+
         // 1. 暴击判定
         float critRate = Mathf.Clamp01(p.playerCritRate + p.weaponCritRate);
         bool isCrit = Random.value < critRate;
 
-        Debug.Log($"[Damage] critRate={critRate} (player={p.playerCritRate}, weapon={p.weaponCritRate}), isCrit={isCrit}");
+        Debug.Log($"[暴击] critRate={critRate} (player={p.playerCritRate} + weapon={p.weaponCritRate}), roll={Random.value}, isCrit={isCrit}");
 
         // 2. 伤害加成
-        float damaged = p.bulletBaseDamage * (1 + p.playerDamageBonus + p.weaponDamageBonusPercent) + p.weaponDamage;
+        float beforeBonus = p.bulletBaseDamage;
+        float afterBonus = (1 + p.playerDamageBonus + p.weaponDamageBonus);
+        float damaged = beforeBonus * afterBonus + p.weaponDamage;
         float rawDamage = damaged;
+
+        Debug.Log($"[伤害加成] {beforeBonus} * {afterBonus} + {p.weaponDamage} = {damaged}");
 
         // 3. 暴击伤害
         float critMultiplier = isCrit ? (p.playerCritMultiplier + p.weaponCritMultiplier) : 1f;
+        float beforeCrit = damaged;
         damaged *= critMultiplier;
+
+        Debug.Log($"[暴击伤害] {beforeCrit} * {critMultiplier} = {damaged}");
 
         // 4. 防御减伤
         float effectiveDefense = p.targetDefense * (1 - p.playerDefBreak);
         float reduction = effectiveDefense / (effectiveDefense + 100f);
+        float beforeDefense = damaged;
         float finalDamage = damaged * (1 - reduction);
+
+        Debug.Log($"[防御减伤] effectiveDefense={effectiveDefense} (def={p.targetDefense}, defBreak={p.playerDefBreak})");
+        Debug.Log($"[防御减伤] reduction={reduction} ({effectiveDefense}/({effectiveDefense}+100))");
+        Debug.Log($"[防御减伤] {beforeDefense} * (1 - {reduction}) = {finalDamage}");
+        Debug.Log($"========== 最终结果 ==========");
+        Debug.Log($"finalDamage={finalDamage}, isCrit={isCrit}, rawDamage={rawDamage}");
 
         return new DamageResult
         {
@@ -54,7 +77,7 @@ public static class DamageCalculator
             critMultiplier = critMultiplier,
             source = DamageSource.PlayerBullet,
             rawDamage = rawDamage,
-            defenseReduction = damaged - finalDamage,
+            defenseReduction = beforeDefense - finalDamage,
             worldPosition = worldPosition
         };
     }

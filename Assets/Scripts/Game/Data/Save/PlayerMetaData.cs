@@ -35,7 +35,7 @@ public class PlayerMetaData
     [Header("战斗属性全局加成")]
     public float globalCritRateBonus = 0f;
     public float globalCritMultiplierBonus = 0f;
-    public float globalDamageBonusPercent = 0f;
+    public float globalDamageBonus = 0f;
     public float globalDefBreakBonus = 0f;
 
     public int totalGamesPlayed = 0;

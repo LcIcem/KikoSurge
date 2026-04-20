@@ -56,11 +56,11 @@ public static class BulletModule
                 weaponDamage = gun.Config.weaponDamage,
                 weaponCritRate = gun.Config.weaponCritRate,
                 weaponCritMultiplier = gun.Config.weaponCritMultiplier,
-                weaponDamageBonusPercent = gun.Config.weaponDamageBonusPercent
+                weaponDamageBonus = gun.Config.weaponDamageBonus
             };
         }
 
-        bullet.Init(config, dir, damageParams);
+        bullet.Init(config, dir, damageParams, gun.Config.penetrateCount);
     }
 
     /// <summary>
