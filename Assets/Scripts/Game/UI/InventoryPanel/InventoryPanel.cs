@@ -20,6 +20,7 @@ public class InventoryPanel : BasePanel
     private const string IMG_ROLE_ICON = "img_role_icon";
     private const string TXT_ROLE_NAME = "txt_role_name";
     private const string TXT_HEALTH = "txt_health";
+    private const string TXT_MAX_HEALTH = "txt_maxHealth";
     private const string TXT_ATK = "txt_atk";
     private const string TXT_DEF = "txt_def";
     private const string TXT_SPEED = "txt_speed";
@@ -28,6 +29,10 @@ public class InventoryPanel : BasePanel
     private const string TXT_DASH_GAP = "txt_dashGap";
     private const string TXT_INVINCIBLE = "txt_invincible";
     private const string TXT_HURT_DURATION = "txt_hurtDuration";
+    private const string TXT_CRIT_RATE = "txt_critRate";
+    private const string TXT_CRIT_MULT = "txt_critMult";
+    private const string TXT_DAMAGE_BONUS = "txt_damageBonus";
+    private const string TXT_DEF_BREAK = "txt_defBreak";
     private const string TAB_WEAPON = "tog_tab_weapon";
     private const string TAB_AMMO = "tog_tab_ammo";
     private const string TAB_POTION = "tog_tab_potion";
@@ -628,18 +633,24 @@ public class InventoryPanel : BasePanel
     {
         PlayerRuntimeData playerData;
         RoleStaticData roleData;
+        PlayerMetaData metaData;
+        List<ModifierData> modifiers;
         bool hasActiveSession = SessionManager.Instance?.HasActiveSession == true;
 
         if (hasActiveSession)
         {
             playerData = SessionManager.Instance?.GetPlayerData();
             roleData = playerData != null ? GameDataManager.Instance?.GetRoleStaticData(playerData.id) : null;
+            metaData = SaveLoadManager.Instance?.CurrentSaveData?.metaData;
+            modifiers = SessionManager.Instance?.GetModifiers();
         }
         else
         {
             int roleId = SaveLoadManager.Instance?.LastSelectedRoleId ?? 0;
             roleData = GameDataManager.Instance?.GetRoleStaticData(roleId);
             playerData = roleData != null ? PlayerRuntimeData.CreateBasic(roleData) : null;
+            metaData = SaveLoadManager.Instance?.CurrentSaveData?.metaData;
+            modifiers = null;
         }
 
         if (playerData == null || roleData == null)
@@ -657,15 +668,135 @@ public class InventoryPanel : BasePanel
         if (nameText != null)
             nameText.text = string.IsNullOrEmpty(playerData.name) ? roleData.roleName : playerData.name;
 
-        SetText(TXT_HEALTH, $"生命: {playerData.Health:F0}/{playerData.maxHealth:F0}");
-        SetText(TXT_ATK, $"攻击: {playerData.atk:F1}");
-        SetText(TXT_DEF, $"防御: {playerData.def:F1}");
-        SetText(TXT_SPEED, $"速度: {playerData.moveSpeed:F1}");
-        SetText(TXT_DASH_SPEED, $"冲刺速度: {playerData.dashSpeed:F1}");
-        SetText(TXT_DASH_DURATION, $"冲刺持续: {playerData.dashDuration:F2}s");
-        SetText(TXT_DASH_GAP, $"冲刺间隔: {playerData.dashGap:F2}s");
-        SetText(TXT_INVINCIBLE, $"无敌: {playerData.invincibleDuration:F2}s");
-        SetText(TXT_HURT_DURATION, $"受伤持续: {playerData.hurtDuration:F2}s");
+        // 计算各属性加成
+        float metaHealthBonus = metaData?.globalMaxHealthBonus ?? 0f;
+        float metaAtkBonus = metaData?.globalAtkBonus ?? 0f;
+        float metaDefBonus = metaData?.globalDefBonus ?? 0f;
+        float metaCritRateBonus = metaData?.globalCritRateBonus ?? 0f;
+        float metaCritMultBonus = metaData?.globalCritMultiplierBonus ?? 0f;
+        float metaDamageBonus = metaData?.globalDamageBonus ?? 0f;
+        float metaDefBreakBonus = metaData?.globalDefBreakBonus ?? 0f;
+
+        // 基础值
+        float baseMaxHealth = roleData.baseMaxHealth;
+        float baseAtk = roleData.baseAtk;
+        float baseDef = roleData.baseDef;
+        float baseMoveSpeed = roleData.baseMoveSpeed;
+        float baseDashSpeed = roleData.dashSpeed;
+        float baseDashDuration = roleData.dashDuration;
+        float baseDashGap = roleData.dashGap;
+        float baseInvincibleDuration = roleData.invincibleDuration;
+        float baseHurtDuration = roleData.hurtDuration;
+        float baseCritRate = roleData.baseCritRate;
+        float baseCritMult = roleData.baseCritMultiplier;
+        float baseDamageBonus = roleData.baseDamageBonus;
+        float baseDefBreak = roleData.baseDefBreak;
+
+        // Modifier 加成
+        float modMaxHealth = GetModifierBonus(ModifierType.MaxHealth, modifiers);
+        float modAtk = GetModifierBonus(ModifierType.Attack, modifiers);
+        float modDef = GetModifierBonus(ModifierType.Defense, modifiers);
+        float modMoveSpeed = GetModifierBonus(ModifierType.MoveSpeed, modifiers);
+        float modDashSpeed = GetModifierBonus(ModifierType.DashSpeed, modifiers);
+        float modDashDuration = GetModifierBonus(ModifierType.DashDuration, modifiers);
+        float modInvincible = GetModifierBonus(ModifierType.InvincibleDuration, modifiers);
+        float modHurtDuration = GetModifierBonus(ModifierType.HurtDuration, modifiers);
+        float modCritRate = GetModifierBonus(ModifierType.CritRate, modifiers);
+        float modCritMult = GetModifierBonus(ModifierType.CritMultiplier, modifiers);
+        float modDamageBonus = GetModifierBonus(ModifierType.DamageBonus, modifiers);
+        float modDefBreak = GetModifierBonus(ModifierType.DefBreak, modifiers);
+
+        // 药水持续效果（根据类型分配到对应属性）
+        var (potionSpeedBonus, potionShieldValue) = GetPotionTimedEffectValues();
+
+        // 当前生命值（无加成）
+        SetText(TXT_HEALTH, $"生命: {playerData.Health:F0}");
+
+        // 最大生命值（白色基础 + 黄色(meta+mod) + 紫色(potion护盾)）
+        SetText(TXT_MAX_HEALTH, $"最大生命: <color=#FFFFFF>{baseMaxHealth:F0}</color>{BuildBonusText(metaHealthBonus, modMaxHealth)}{BuildPotionBonusText(potionShieldValue)}");
+
+        // 普通数值属性：白色基础值 + 黄色加成
+        SetText(TXT_ATK, $"攻击: <color=#FFFFFF>{baseAtk:F1}</color>{BuildBonusText(metaAtkBonus, modAtk)}");
+        SetText(TXT_DEF, $"防御: <color=#FFFFFF>{baseDef:F1}</color>{BuildBonusText(metaDefBonus, modDef)}");
+        SetText(TXT_SPEED, $"速度: <color=#FFFFFF>{baseMoveSpeed:F1}</color>{BuildBonusText(0, modMoveSpeed)}{BuildPotionBonusText(potionSpeedBonus)}");
+        SetText(TXT_DASH_SPEED, $"冲刺速度: <color=#FFFFFF>{baseDashSpeed:F1}</color>{BuildBonusText(0, modDashSpeed)}");
+        SetText(TXT_DASH_DURATION, $"冲刺持续: <color=#FFFFFF>{baseDashDuration:F2}s</color>{BuildBonusText(0, modDashDuration, "s")}");
+        SetText(TXT_DASH_GAP, $"冲刺间隔: <color=#FFFFFF>{baseDashGap:F2}s</color>");
+        SetText(TXT_INVINCIBLE, $"无敌: <color=#FFFFFF>{baseInvincibleDuration:F2}s</color>{BuildBonusText(0, modInvincible, "s")}");
+        SetText(TXT_HURT_DURATION, $"受伤持续: <color=#FFFFFF>{baseHurtDuration:F2}s</color>{BuildBonusText(0, modHurtDuration, "s")}");
+
+        // 战斗属性（百分比）：白色基础值 + 黄色加成
+        SetText(TXT_CRIT_RATE, $"暴击率: <color=#FFFFFF>{baseCritRate:P0}</color>{BuildPercentBonusText(metaCritRateBonus, modCritRate)}");
+        SetText(TXT_CRIT_MULT, $"暴击倍率: <color=#FFFFFF>{baseCritMult:P0}</color>{BuildPercentBonusText(metaCritMultBonus, modCritMult)}");
+        SetText(TXT_DAMAGE_BONUS, $"伤害加成: <color=#FFFFFF>{baseDamageBonus:P0}</color>{BuildPercentBonusText(metaDamageBonus, modDamageBonus)}");
+        SetText(TXT_DEF_BREAK, $"防御穿透: <color=#FFFFFF>{baseDefBreak:P0}</color>{BuildPercentBonusText(metaDefBreakBonus, modDefBreak)}");
+    }
+
+    /// <summary>
+    /// 构建加成文本（黄色显示）
+    /// </summary>
+    private string BuildBonusText(float metaBonus, float modBonus, string suffix = "")
+    {
+        float totalBonus = metaBonus + modBonus;
+        if (Mathf.Abs(totalBonus) < 0.001f)
+            return "";
+
+        string sign = totalBonus >= 0 ? "+" : "";
+        return $"<color=#FFFF00>{sign}{totalBonus:F2}{suffix}</color>";
+    }
+
+    /// <summary>
+    /// 构建百分比加成文本（黄色显示）
+    /// </summary>
+    private string BuildPercentBonusText(float metaBonus, float modBonus)
+    {
+        float totalBonus = metaBonus + modBonus;
+        if (Mathf.Abs(totalBonus) < 0.001f)
+            return "";
+
+        string sign = totalBonus >= 0 ? "+" : "";
+        return $"<color=#FFFF00>{sign}{totalBonus:P0}</color>";
+    }
+
+    /// <summary>
+    /// 构建药水加成文本（紫色显示）
+    /// </summary>
+    private string BuildPotionBonusText(float potionValue, string suffix = "")
+    {
+        if (Mathf.Abs(potionValue) < 0.001f)
+            return "";
+
+        string sign = potionValue >= 0 ? "+" : "";
+        return $"<color=#FF00FF>{sign}{potionValue:F2}{suffix}</color>";
+    }
+
+    /// <summary>
+    /// 获取指定类型的修饰器总加成
+    /// </summary>
+    private float GetModifierBonus(ModifierType type, List<ModifierData> modifiers)
+    {
+        if (modifiers == null || modifiers.Count == 0)
+            return 0f;
+
+        float total = 0f;
+        foreach (var mod in modifiers)
+        {
+            if (mod.type == type)
+                total += mod.value;
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// 获取药水限时效果加成（根据类型分配到对应属性）
+    /// </summary>
+    private (float speedBonus, float shieldValue) GetPotionTimedEffectValues()
+    {
+        // TODO: 实际实现从当前激活的药水buff中获取效果值
+        // SpeedBoost -> 速度加成
+        // Shield -> 护盾值
+        // 目前返回0，后续接入Buff系统后完善
+        return (0f, 0f);
     }
 
     private void SetText(string controlName, string text)
