@@ -567,6 +567,12 @@ public class InventoryPanel : BasePanel
         if (_content == null)
             return;
 
+        // 禁用 LayoutGroup，防止添加时自动排列
+        var layoutGroup = _content.GetComponent<UnityEngine.UI.GridLayoutGroup>();
+        bool layoutGroupWasEnabled = layoutGroup != null && layoutGroup.enabled;
+        if (layoutGroup != null)
+            layoutGroup.enabled = false;
+
         int slotIndex = 0;
         foreach (var slotData in itemIds)
         {
@@ -601,11 +607,19 @@ public class InventoryPanel : BasePanel
                 {
                     slot.Initialize(itemId, isEmpty ? 0 : stackCount, _currentTab, slotIndex);
                     slot.transform.SetParent(_content, false);
+                    slot.transform.SetSiblingIndex(slotIndex);
                     slot.OnSlotClicked += OnSlotClicked;
                     _activeSlots.Add(slot);
                     slotIndex++;
                 }
             }
+        }
+
+        // 恢复 LayoutGroup 并强制重新计算
+        if (layoutGroup != null)
+        {
+            layoutGroup.enabled = layoutGroupWasEnabled;
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
         }
 
         UpdateContentHeightForGrid(_content, _activeSlots.Count);
@@ -633,6 +647,12 @@ public class InventoryPanel : BasePanel
             for (int i = 0; i < 20; i++)
                 currencyIds.Add(new ItemSlotData());
         }
+
+        // 禁用 LayoutGroup，防止添加时自动排列
+        var layoutGroup = _contentCurrency.GetComponent<UnityEngine.UI.GridLayoutGroup>();
+        bool layoutGroupWasEnabled = layoutGroup != null && layoutGroup.enabled;
+        if (layoutGroup != null)
+            layoutGroup.enabled = false;
 
         int currencySlotIndex = 0;
         foreach (var slotData in currencyIds)
@@ -668,11 +688,19 @@ public class InventoryPanel : BasePanel
                 {
                     slot.Initialize(itemId, isEmpty ? 0 : stackCount, ItemType.Currency, currencySlotIndex);
                     slot.transform.SetParent(_contentCurrency, false);
+                    slot.transform.SetSiblingIndex(currencySlotIndex);
                     slot.OnSlotClicked += OnSlotClicked;
                     _activeCurrencySlots.Add(slot);
                     currencySlotIndex++;
                 }
             }
+        }
+
+        // 恢复 LayoutGroup 并强制重新计算
+        if (layoutGroup != null)
+        {
+            layoutGroup.enabled = layoutGroupWasEnabled;
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(_contentCurrency);
         }
 
         UpdateContentHeightForGrid(_contentCurrency, _activeCurrencySlots.Count);
