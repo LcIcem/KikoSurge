@@ -1128,7 +1128,13 @@ public class InventoryPanel : BasePanel
 
         if (hasActiveSession)
         {
-            playerData = SessionManager.Instance?.GetPlayerData();
+            // 直接从 Player._playerData 获取（与 HeartSystem 使用同一份数据）
+            var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
+            playerData = player?.RuntimeData;
+            if (playerData == null)
+            {
+                playerData = SessionManager.Instance?.GetPlayerData();
+            }
             roleData = playerData != null ? GameDataManager.Instance?.GetRoleStaticData(playerData.id) : null;
             metaData = SaveLoadManager.Instance?.CurrentSaveData?.metaData;
             modifiers = SessionManager.Instance?.GetModifiers();
@@ -2021,7 +2027,7 @@ public class InventoryPanel : BasePanel
                     float newHealth = Mathf.Min(currentHealth + healAmount, maxHealth);
                     player.RuntimeData.Health = newHealth;
                     SessionManager.Instance?.SetPlayerHealth(newHealth);
-                    // 通知 HeartSystem 更新显示
+                    // 通知 HeartSystem 更新显示（使用 Player._playerData 引用）
                     EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, player.RuntimeData);
                     Debug.Log($"[UsePotion] Healed for {healAmount}, current health: {newHealth}/{maxHealth}");
                 }

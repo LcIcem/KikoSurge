@@ -31,6 +31,9 @@ public class InventoryManager : SingletonMono<InventoryManager>
     {
         _sessionData = sessionData;
         Log($"Session data bound. equippedWeaponSlots count={sessionData?.equippedWeaponSlots?.Count ?? -1}");
+
+        // session 绑定后，重新计算所有遗物 modifiers（加载存档或开始新游戏时都生效）
+        RefreshAllRelicModifiers();
     }
 
     #endregion
@@ -178,10 +181,10 @@ public class InventoryManager : SingletonMono<InventoryManager>
 
         if (quantity > 0)
         {
-            // 遗物在背包中就自动生效，应用 modifiers
+            // 遗物在背包中就自动生效，重新计算所有遗物 modifiers
             if (type == ItemType.Relic)
             {
-                ApplyRelicModifiers(itemId);
+                RefreshAllRelicModifiers();
             }
 
             EventCenter.Instance.Publish(GameEventID.OnInventoryItemAdded,
@@ -231,6 +234,12 @@ public class InventoryManager : SingletonMono<InventoryManager>
 
         if (quantity - remaining > 0)
         {
+            // 遗物移除时重新计算所有遗物 modifiers
+            if (type == ItemType.Relic)
+            {
+                RefreshAllRelicModifiers();
+            }
+
             EventCenter.Instance.Publish(GameEventID.OnInventoryItemRemoved,
                 new InventoryChangeParams(type, itemId, quantity - remaining, InventoryChangeType.Remove));
             EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
@@ -622,46 +631,110 @@ public class InventoryManager : SingletonMono<InventoryManager>
     #region 辅助方法
 
     /// <summary>
-    /// 应用遗物的 modifiers 到 session
+    /// 重新计算所有遗物的 modifiers（添加/移除遗物时调用）
     /// </summary>
-    private void ApplyRelicModifiers(int relicItemId)
+    private void RefreshAllRelicModifiers()
     {
-        var config = GameDataManager.Instance?.GetItemConfig(relicItemId) as RelicConfig;
-        if (config == null)
-        {
-            Debug.LogWarning($"[ApplyRelicModifiers] Relic config not found for itemId={relicItemId}");
+        if (_sessionData == null)
             return;
-        }
 
-        if (config.modifiers != null)
+        var playerData = SessionManager.Instance?.GetPlayerData();
+        float oldMaxHealth = playerData?.maxHealth ?? 0f;
+        float oldHealth = playerData?.Health ?? 0f;
+
+        // 清空旧的 relic modifiers（只清空 sourceId > 0 的，通过 modifierId 关联遗物）
+        _sessionData.modifiers.RemoveAll(m => m.modifierId > 0);
+        _sessionData.activeRelicEffects.Clear();
+
+        // 遍历背包里所有遗物，重新应用
+        var relicSlots = _sessionData.inventoryRelicSlots;
+        if (relicSlots != null)
         {
-            foreach (var mod in config.modifiers)
+            foreach (var slot in relicSlots)
             {
-                if (mod.value != 0f)
+                if (slot.IsEmpty)
+                    continue;
+
+                var config = GameDataManager.Instance?.GetItemConfig(slot.itemId) as RelicConfig;
+                if (config == null)
+                    continue;
+
+                // 应用 modifiers
+                if (config.modifiers != null)
                 {
-                    var modifierData = new ModifierData(
-                        relicItemId,
-                        config.Name ?? $"Relic_{relicItemId}",
-                        mod.type,
-                        mod.value
-                    );
-                    _sessionData?.AddModifier(modifierData);
-                    Debug.Log($"[ApplyRelicModifiers] Added modifier {mod.type} = {mod.value} from relic {relicItemId}");
+                    foreach (var mod in config.modifiers)
+                    {
+                        if (mod.value != 0f)
+                        {
+                            var modifierData = new ModifierData(
+                                slot.itemId,
+                                config.Name ?? $"Relic_{slot.itemId}",
+                                mod.type,
+                                mod.value
+                            );
+                            _sessionData.modifiers.Add(modifierData);
+                        }
+                    }
+                }
+
+                // 应用效果
+                if (config.effects != null)
+                {
+                    foreach (var effect in config.effects)
+                    {
+                        if (effect != null)
+                        {
+                            _sessionData.activeRelicEffects.Add(effect);
+                        }
+                    }
                 }
             }
         }
 
-        // 应用特殊效果
-        if (config.effects != null)
+        // 计算新的 maxHealth 和血量
+        var newPlayerData = SessionManager.Instance?.GetPlayerData();
+        if (newPlayerData != null)
         {
-            foreach (var effect in config.effects)
+            float newMaxHealth = newPlayerData.maxHealth;
+            float newHealth;
+
+            if (oldMaxHealth > 0f && newMaxHealth != oldMaxHealth)
             {
-                if (effect != null)
+                // 保持血量比例（防止 oldMaxHealth 为 0 时除法得到 NaN）
+                float healthRatio = oldHealth / oldMaxHealth;
+                if (float.IsNaN(healthRatio) || float.IsInfinity(healthRatio))
                 {
-                    _sessionData?.activeRelicEffects?.Add(effect);
-                    Debug.Log($"[ApplyRelicModifiers] Added effect {effect.GetType().Name} from relic {relicItemId}");
+                    newHealth = oldHealth;
                 }
+                else
+                {
+                    newHealth = newMaxHealth * healthRatio;
+                }
+                newHealth = Mathf.Clamp(newHealth, 0f, newMaxHealth);
             }
+            else
+            {
+                newHealth = oldHealth;
+            }
+
+            // 设置新血量（使用新的 maxHealth clamp）
+            SessionManager.Instance?.SetPlayerHealth(newHealth);
+
+            // 同步 Player._playerData（与 HeartSystem 使用同一份数据）
+            var playerGo = GameObject.FindGameObjectWithTag("Player");
+            var player = playerGo?.GetComponent<Player>();
+            if (player != null)
+            {
+                player.RuntimeData.maxHealth = newMaxHealth;
+                player.RuntimeData.Health = newHealth;
+            }
+
+            // 通知血条 UI 刷新（使用 Player._playerData 引用）
+            if (player != null)
+            {
+                EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, player.RuntimeData);
+            }
+            Debug.Log($"[RefreshAllRelicModifiers] maxHealth: {oldMaxHealth:F0} -> {newMaxHealth:F0}, health: {oldHealth:F0} -> {newHealth:F0}");
         }
     }
 

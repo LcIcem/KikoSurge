@@ -17,7 +17,7 @@ MonoBehaviour:
   Type: 3
   MaxStack: 9999
   Value: 0
-  Icon: {fileID: -2698141938090863644, guid: f6e04642224f69d4b91680897ab860c3, type: 3}
+  Icon: {fileID: 21300000, guid: df8b9df3a82e5d64bb22c803a42651ce, type: 3}
   Description: "\u91D1\u707F\u707F"
   PickupSFX: {fileID: 8300000, guid: 4745fe727422bd546bbef72b333583a6, type: 3}
   coinValue: 1

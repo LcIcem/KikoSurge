@@ -17,7 +17,7 @@ MonoBehaviour:
   Type: 1
   MaxStack: 99
   Value: 20
-  Icon: {fileID: 5795091025451059996, guid: ab43895a6164e9d45870ae3d5cdf7ea8, type: 3}
+  Icon: {fileID: 702589233838067054, guid: e713841ff139c4147bb73f2aa48d3b49, type: 3}
   Description: "\u559D\u4E86\u611F\u89C9\u5F88\u8212\u670D"
   PickupSFX: {fileID: 8300000, guid: d77616adfa4b3624395c4fd4864d8b1c, type: 3}
   instantEffectType: 1

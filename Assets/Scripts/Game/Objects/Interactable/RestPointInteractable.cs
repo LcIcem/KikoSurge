@@ -58,7 +58,7 @@ public class RestPointInteractable : MonoBehaviour
                 // 同步生命值到 SessionManager（用于检查点保存）
                 SessionManager.Instance?.SetPlayerHealth(newHealth);
 
-                // 通知UI更新
+                // 通知UI更新（使用 Player._playerData 引用）
                 EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, player.RuntimeData);
             }
         }

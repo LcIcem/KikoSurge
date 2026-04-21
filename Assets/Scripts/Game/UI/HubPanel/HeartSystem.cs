@@ -42,27 +42,34 @@ public class HeartSystem : MonoBehaviour
         // 检查最大血量是否改变
         CheckModify(playerData);
 
+        // 安全检查
+        if (_heartSprites == null || _heartSprites.Count < 5)
+            return;
+
         int index = 0;
         float curHealth = playerData.Health;
         int lastFullHeart = Mathf.FloorToInt(curHealth); // 最后一颗完整的心的索引
 
-        foreach (Transform heart in _heartContainer)
-        {
-            Image imgHeart = heart.GetComponent<Image>();
+        int childCount = _heartContainer.childCount;
 
-            if (index > lastFullHeart)
+        for (int i = 0; i < childCount; i++)
+        {
+            Transform heart = _heartContainer.GetChild(i);
+            Image imgHeart = heart?.GetComponent<Image>();
+            if (imgHeart == null)
+                continue;
+
+            if (i > lastFullHeart)
             {
                 // 显示空的心
                 imgHeart.sprite = _heartSprites[0];
                 imgHeart.preserveAspect = true;
             }
-            else if (index == lastFullHeart)
+            else if (i == lastFullHeart)
             {
                 // 显示不完整的心
-                // 除去完整的生命值 后 剩余的生命值
                 float fractionalHealth = curHealth - lastFullHeart;
-                int fractionIndex = Mathf.FloorToInt(fractionalHealth * 4); // 将剩余的生命值 分别映射为 0~3 的索引值
-
+                int fractionIndex = Mathf.Clamp(Mathf.FloorToInt(fractionalHealth * 4), 0, 4);
                 imgHeart.sprite = _heartSprites[fractionIndex];
                 imgHeart.preserveAspect = true;
             }
@@ -72,8 +79,6 @@ public class HeartSystem : MonoBehaviour
                 imgHeart.sprite = _heartSprites[4];
                 imgHeart.preserveAspect = true;
             }
-
-            index++;
         }
     }
 
@@ -82,10 +87,12 @@ public class HeartSystem : MonoBehaviour
         // 如果最大生命值发生改变 更新血量UI
         if (_lastMaxHealth != playerData.maxHealth)
         {
-            // 先删除之前的
-            foreach (Transform child in _heartContainer)
+            // 先删除所有的子对象（使用 while 循环确保全部删除）
+            while (_heartContainer.childCount > 0)
             {
-                Destroy(child.gameObject);
+                Transform child = _heartContainer.GetChild(0);
+                if (child != null)
+                    DestroyImmediate(child.gameObject);
             }
 
             // 将 玩家实际血量 转换为 要显示的心的个数

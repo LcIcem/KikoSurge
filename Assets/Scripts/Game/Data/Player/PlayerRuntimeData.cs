@@ -96,8 +96,8 @@ public class PlayerRuntimeData
         float finalDamageBonus = ApplyModifiers(staticData.baseDamageBonus + globalDamageBonus, ModifierType.DamageBonus, modifiers);
         float finalDefBreak = ApplyModifiers(staticData.baseDefBreak + globalDefBreakBonus, ModifierType.DefBreak, modifiers);
 
-        // 如果没有传入当前生命值或值无效，默认满血
-        float health = (currentHealth == null || currentHealth <= 0) ? finalMaxHealth : currentHealth.Value;
+        // 如果没有传入当前生命值或值无效（NaN），默认满血
+        float health = (currentHealth == null || float.IsNaN(currentHealth.Value) || currentHealth <= 0) ? finalMaxHealth : currentHealth.Value;
 
         return new PlayerRuntimeData
         {

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 375e9fc435139fe49b6dada1bb9c70f4
+guid: 78ad2748d6b0a5d4481a932e3f606c2d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -9095717837082945937
-    second: Capsule
+      213: 6697224285032239100
+    second: Shotgun_Icon_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,17 +46,17 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 256
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
-  spriteTessellationDetail: 0
+  spriteTessellationDetail: -1
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -68,7 +68,7 @@ TextureImporter:
   ignorePngGamma: 0
   applyGammaDecoding: 0
   swizzle: 50462976
-  cookieLightType: 1
+  cookieLightType: 0
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
@@ -110,7 +110,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: iOS
+    buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -123,7 +123,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WebGL
+    buildTarget: iOS
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -139,98 +139,30 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Capsule
+      name: Shotgun_Icon_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 256
-        height: 512
+        width: 43
+        height: 11
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
-      outline:
-      - - {x: -33, y: 256}
-        - {x: -95, y: 223}
-        - {x: -128, y: 161}
-        - {x: -128, y: -161}
-        - {x: -95, y: -223}
-        - {x: -33, y: -256}
-        - {x: 33, y: -256}
-        - {x: 95, y: -223}
-        - {x: 128, y: -161}
-        - {x: 128, y: 161}
-        - {x: 95, y: 223}
-        - {x: 33, y: 256}
-      physicsShape:
-      - - {x: 0, y: 256}
-        - {x: -39, y: 249}
-        - {x: -75, y: 231}
-        - {x: -103, y: 203}
-        - {x: -121, y: 167}
-        - {x: -128, y: 128}
-        - {x: -128, y: -128}
-        - {x: -121, y: -167}
-        - {x: -103, y: -203}
-        - {x: -75, y: -231}
-        - {x: -39, y: -249}
-        - {x: 0, y: -256}
-        - {x: 39, y: -249}
-        - {x: 75, y: -231}
-        - {x: 103, y: -203}
-        - {x: 121, y: -167}
-        - {x: 128, y: -128}
-        - {x: 128, y: 128}
-        - {x: 121, y: 167}
-        - {x: 103, y: 203}
-        - {x: 75, y: 231}
-        - {x: 39, y: 249}
-      tessellationDetail: 0
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
       bones: []
-      spriteID: f669c7f71d485c180800000000000000
-      internalID: -9095717837082945937
+      spriteID: cff477af00251fc50800000000000000
+      internalID: 6697224285032239100
       vertices: []
       indices: 
       edges: []
       weights: []
-    outline:
-    - - {x: -33, y: 256}
-      - {x: -95, y: 223}
-      - {x: -128, y: 161}
-      - {x: -128, y: -161}
-      - {x: -95, y: -223}
-      - {x: -33, y: -256}
-      - {x: 33, y: -256}
-      - {x: 95, y: -223}
-      - {x: 128, y: -161}
-      - {x: 128, y: 161}
-      - {x: 95, y: 223}
-      - {x: 33, y: 256}
+    outline: []
     customData: 
-    physicsShape:
-    - - {x: 0, y: 256}
-      - {x: -39, y: 249}
-      - {x: -75, y: 231}
-      - {x: -103, y: 203}
-      - {x: -121, y: 167}
-      - {x: -128, y: 128}
-      - {x: -128, y: -128}
-      - {x: -121, y: -167}
-      - {x: -103, y: -203}
-      - {x: -75, y: -231}
-      - {x: -39, y: -249}
-      - {x: 0, y: -256}
-      - {x: 39, y: -249}
-      - {x: 75, y: -231}
-      - {x: 103, y: -203}
-      - {x: 121, y: -167}
-      - {x: 128, y: -128}
-      - {x: 128, y: 128}
-      - {x: 121, y: 167}
-      - {x: 103, y: 203}
-      - {x: 75, y: 231}
-      - {x: 39, y: 249}
+    physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
@@ -242,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Capsule: -9095717837082945937
+      Shotgun_Icon_0: 6697224285032239100
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

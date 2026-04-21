@@ -94,6 +94,7 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Subscribe(GameEventID.Combat_CancelReload, OnCancelReload);
         EventCenter.Instance.Subscribe<EnemyHitPlayerParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyHitPlayer);
         EventCenter.Instance.Subscribe<InventoryChangeParams>(GameEventID.OnInventoryChanged, OnInventoryChanged);
+        EventCenter.Instance.Subscribe<PlayerRuntimeData>(GameEventID.UpdateHeartDisplay, OnUpdateHeartDisplay);
     }
 
     void OnDestroy()
@@ -109,6 +110,7 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Unsubscribe(GameEventID.Combat_CancelReload, OnCancelReload);
         EventCenter.Instance.Unsubscribe<EnemyHitPlayerParams>(GameEventID.Combat_EnemyHitPlayer, OnEnemyHitPlayer);
         EventCenter.Instance.Unsubscribe<InventoryChangeParams>(GameEventID.OnInventoryChanged, OnInventoryChanged);
+        EventCenter.Instance.Unsubscribe<PlayerRuntimeData>(GameEventID.UpdateHeartDisplay, OnUpdateHeartDisplay);
     }
 
     private float _curSpeed = 0f;
@@ -423,6 +425,30 @@ public class Player : MonoBehaviour
         if (sessionData != null)
         {
             weaponHandler.SyncFromSessionData(sessionData.equippedWeaponSlots, _weaponPivot);
+        }
+    }
+
+    /// <summary>
+    /// 当遗物效果改变 maxHealth 时，同步 Player._playerData
+    /// <para>确保 Player 的 maxHealth 和 SessionManager 的 currentHealth 保持一致</para>
+    /// </summary>
+    private void OnUpdateHeartDisplay(PlayerRuntimeData newData)
+    {
+        if (newData == null || _playerData == null)
+            return;
+
+        // 如果 maxHealth 发生变化，同步到 Player._playerData
+        if (Mathf.Abs(_playerData.maxHealth - newData.maxHealth) > 0.01f)
+        {
+            Debug.Log($"[Player] OnUpdateHeartDisplay: maxHealth changed {_playerData.maxHealth:F0} -> {newData.maxHealth:F0}");
+            _playerData.maxHealth = newData.maxHealth;
+        }
+
+        // 确保 Health 不超过新的 maxHealth（Health 的 setter 会自动 clamp）
+        // 但如果 newData.Health < _playerData.Health，说明血量被等比压缩了，需要同步
+        if (newData.Health < _playerData.Health)
+        {
+            _playerData.Health = newData.Health;
         }
     }
 }

@@ -115,7 +115,7 @@ public class SessionData
             layerSnapshots = new List<LayerSnapshot>(),
             modifiers = new List<ModifierData>(),
             activeRelicEffects = new List<RelicEffect>(),
-            currentHealth = 0f
+            currentHealth = float.NaN  // 使用 NaN 表示"未设置"，GetPlayerData 会自动使用 maxHealth
         };
     }
 

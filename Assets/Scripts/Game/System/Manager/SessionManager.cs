@@ -151,13 +151,14 @@ public class SessionManager : SingletonMono<SessionManager>
     }
 
     /// <summary>
-    /// 设置当前玩家生命值
+    /// 设置当前玩家生命值（自动 clamp 到 [0, maxHealth]）
     /// </summary>
     public void SetPlayerHealth(float health)
     {
         if (_currentSession != null)
         {
-            _currentSession.currentHealth = health;
+            float maxHealth = GetPlayerData()?.maxHealth ?? 100f;
+            _currentSession.currentHealth = Mathf.Clamp(health, 0f, maxHealth);
         }
     }
 
