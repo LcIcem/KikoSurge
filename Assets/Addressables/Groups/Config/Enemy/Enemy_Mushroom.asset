@@ -17,7 +17,7 @@ MonoBehaviour:
   Type: 0
   MaxHP: 20
   MoveSpeed: 2
-  Attack: 2
+  Attack: 4
   Defense: 100
   AttackInterval: 1
   AttackDuration: 1

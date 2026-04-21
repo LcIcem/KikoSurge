@@ -236,13 +236,22 @@ public class Player : MonoBehaviour
             return;
         }
 
-        // 计算实际伤害（防御力减伤 + 护盾加成）
+        // 通过伤害计算器计算实际伤害
         float defense = _playerData.def;
         if (BuffManager.Instance != null)
         {
             defense += BuffManager.Instance.GetPlayerShieldBonus();
         }
-        float actualDamage = Mathf.Max(1f, damage - defense);
+
+        var damageResult = DamageCalculator.CalculatePlayerDamage(
+            damage,
+            defense,
+            _playerData.defBreak,
+            _playerData.damageReduction,
+            transform.position
+        );
+
+        float actualDamage = damageResult.finalDamage;
         hp -= actualDamage;
 
         // 启动无敌帧
@@ -260,15 +269,15 @@ public class Player : MonoBehaviour
         EventCenter.Instance.Publish(GameEventID.Camera_TriggerHurt);
 
         EventCenter.Instance.Publish(GameEventID.OnPlayerDamaged,
-            new DamageParams { damage = damage, from = transform.position });
+            new DamageParams { damage = damageResult.finalDamage, from = transform.position });
 
         // 发送玩家受伤飘字（红色）
         EventCenter.Instance.Publish(GameEventID.Combat_ShowDamageNumber,
             new DamageNumberParams
             {
                 target = transform,
-                damage = damage,
-                isCrit = false,
+                damage = damageResult.finalDamage,
+                isCrit = damageResult.isCrit,
                 worldPosition = transform.position,
                 isPlayerDamage = true
             });

@@ -19,7 +19,7 @@ MonoBehaviour:
     prefab: {fileID: 1910594455587698007, guid: 41825e6f9db49494b96d1e52784e6a3f, type: 3}
     baseMaxHealth: 10
     baseAtk: 2
-    baseDef: 5
+    baseDef: 10
     baseMoveSpeed: 4
     baseCritRate: 0.3
     baseCritMultiplier: 0.3

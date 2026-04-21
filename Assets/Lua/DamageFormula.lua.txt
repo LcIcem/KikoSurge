@@ -14,11 +14,11 @@ local function CalculateCritRate(baseCritRate, weaponCritRate)
 end
 
 -- 计算暴击伤害倍率
--- @param baseCritMultiplier 基础暴击倍率
+-- @param baseCritMultiplier 基础暴击倍率（来自玩家数据，已经是最终值）
 -- @param weaponCritMultiplier 武器暴击倍率加成
--- @return 暴击伤害倍率
+-- @return 暴击伤害倍率（基准1.0 + 玩家加成 + 武器加成）
 local function CalculateCritMultiplier(baseCritMultiplier, weaponCritMultiplier)
-    return baseCritMultiplier + weaponCritMultiplier
+    return 1.0 + baseCritMultiplier + weaponCritMultiplier
 end
 
 -- 计算伤害加成后的伤害

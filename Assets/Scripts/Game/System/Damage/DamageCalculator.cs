@@ -13,11 +13,13 @@ public static class DamageCalculator
         // 尝试通过 Lua 计算
         if (DamageLuaBridge.IsLuaAvailable)
         {
+            Debug.Log("[DamageCalculator] 使用 Lua 计算伤害");
             DamageResult? luaResult = DamageLuaBridge.CalculateViaLua(p, worldPosition);
             if (luaResult.HasValue)
                 return luaResult.Value;
         }
 
+        Debug.Log("[DamageCalculator] 使用 C# 原生计算伤害");
         // C# 原生计算（Lua 未加载时的 fallback）
         return CalculateEnemyDamageNative(p, worldPosition);
     }

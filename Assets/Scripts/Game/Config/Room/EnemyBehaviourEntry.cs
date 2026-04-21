@@ -140,6 +140,9 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
             return;
         }
 
+        // 每次生成前，用玩家当前位置重新计算有效格子
+        CalculateValidTiles();
+
         // 生成当前波次敌人
         int count = _rng.Range(minCount, maxCount + 1);
         _enemiesAliveInCurrentWave = count;
