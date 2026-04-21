@@ -21,7 +21,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e163b7f0fbbdefe45a817ddd3a03bd83
-    m_Address: Enemy_Grunt
+    m_Address: Enemy_Mushroom
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

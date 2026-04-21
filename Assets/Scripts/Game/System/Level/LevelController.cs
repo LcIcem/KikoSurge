@@ -29,6 +29,9 @@ public class LevelController : MonoBehaviour
     [Header("休息点预设体（篝火）")]
     [SerializeField] private GameObject _restPointPrefab;
 
+    [Header("宝箱预设体")]
+    [SerializeField] private GameObject _chestPrefab;
+
     [Header("瓦片配置")]
     [SerializeField] private TileInfo_SO _tileInfo;
 
@@ -44,6 +47,7 @@ public class LevelController : MonoBehaviour
     private long _sessionSeed;
     private GameObject _currentCheckpoint;
     private readonly List<GameObject> _restPoints = new();
+    private readonly List<GameObject> _chests = new();
 
     public DungeonGraph CurrentGraph => _builder?.GetGraph();
     public DungeonTileData GetTileData() => _builder?.GetTileData();
@@ -245,6 +249,9 @@ public class LevelController : MonoBehaviour
 
         // 生成休息点（篝火）
         SpawnRestPoint();
+
+        // 生成宝箱
+        SpawnChest();
 
         EventCenter.Instance.Publish(GameEventID.OnLayerEnter, _currentLayerIndex);
     }
@@ -454,6 +461,76 @@ public class LevelController : MonoBehaviour
         }
 
         Debug.Log($"[LevelController] Spawned {_restPoints.Count} rest points (campfires)");
+    }
+
+    /// <summary>
+    /// 获取所有宝藏房间的世界坐标列表
+    /// </summary>
+    private List<Vector3> GetAllTreasureRoomWorldPos()
+    {
+        var positions = new List<Vector3>();
+        var graph = CurrentGraph;
+        var floorTilemap = _builder?.FloorTilemap;
+        if (graph == null || floorTilemap == null)
+        {
+            Debug.LogWarning("[LevelController] Graph or FloorTilemap is null");
+            return positions;
+        }
+
+        // 遍历所有房间，找到所有宝藏间类型
+        foreach (var room in graph.allRooms)
+        {
+            if (room.roomType == RoomType.Treasure)
+            {
+                // 使用房间实际地面瓦片的中心作为世界坐标
+                if (_builder.GetTileData().TryGetRoomFloorTiles(room.id, out var floorTiles) && floorTiles.Count > 0)
+                {
+                    // 计算所有地面瓦片的中心点（网格坐标）
+                    int sumX = 0, sumY = 0;
+                    foreach (var tile in floorTiles)
+                    {
+                        sumX += tile.x;
+                        sumY += tile.y;
+                    }
+                    Vector2Int centerGrid = new Vector2Int(sumX / floorTiles.Count, sumY / floorTiles.Count);
+                    Vector3 worldPos = floorTilemap.CellToWorld(new Vector3Int(centerGrid.x, centerGrid.y, 0));
+                    // CellToWorld 返回瓦片中心，加上 0.5f 偏移到世界坐标中心
+                    worldPos += new Vector3(0.5f, 0.5f, 0);
+                    positions.Add(worldPos);
+                }
+            }
+        }
+
+        return positions;
+    }
+
+    /// <summary>
+    /// 生成宝箱
+    /// </summary>
+    private void SpawnChest()
+    {
+        // 销毁旧的宝箱
+        foreach (var chest in _chests)
+        {
+            if (chest != null)
+                Destroy(chest);
+        }
+        _chests.Clear();
+
+        if (_chestPrefab == null)
+            return;
+
+        var treasurePositions = GetAllTreasureRoomWorldPos();
+        if (treasurePositions.Count == 0)
+            return;
+
+        foreach (var chestPos in treasurePositions)
+        {
+            var chest = Instantiate(_chestPrefab, chestPos, Quaternion.identity);
+            _chests.Add(chest);
+        }
+
+        Debug.Log($"[LevelController] Spawned {_chests.Count} chests");
     }
 
     /// <summary>

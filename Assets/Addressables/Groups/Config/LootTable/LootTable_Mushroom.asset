@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6ee85a3eb9878d4c99cf6b3d76585f4, type: 3}
-  m_Name: LootTable_Grunt
+  m_Name: LootTable_Mushroom
   m_EditorClassIdentifier: Assembly-CSharp::LootTableConfig
   groups:
   - groupName: "\u6B66\u5668\u6389\u843D"
