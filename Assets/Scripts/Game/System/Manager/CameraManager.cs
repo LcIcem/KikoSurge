@@ -68,8 +68,8 @@ public class CameraManager : SingletonMono<CameraManager>
     /// </summary>
     private void OnShootPerformed(WeaponBase weapon)
     {
-        // 后坐力方向：射击反方向 × recoilForce
-        Vector3 recoilDir = (Vector3)(-weapon.Owner.AimDir) * weapon.Config.recoilForce;
+        // 后坐力方向：射击方向 × recoilForce
+        Vector3 recoilDir = (Vector3)weapon.Owner.AimDir * weapon.Config.recoilForce;
         _recoilSource?.GenerateImpulse(recoilDir);
     }
 
