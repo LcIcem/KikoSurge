@@ -48,9 +48,15 @@ public class LayerSnapshot
     /// </summary>
     public int bossRoomId;
 
+    /// <summary>
+    /// 当前激活的Buff列表（用于检查点恢复）
+    /// </summary>
+    public List<ActiveBuff> activeBuffs;
+
     public LayerSnapshot()
     {
         roomStates = new List<RoomSaveState>();
+        activeBuffs = new List<ActiveBuff>();
     }
 
     public LayerSnapshot(int floorIndex, long seed)

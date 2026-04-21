@@ -525,7 +525,6 @@ MonoBehaviour:
   _bgmMainMenu: BGM-MainMenu
   _bgmLobby: BGM-MainMenu
   _bgmPlaying: BGM-Gaming
-  _pausedBGMVolumeFactor: 0.3
 --- !u!4 &2018529841
 Transform:
   m_ObjectHideFlags: 0

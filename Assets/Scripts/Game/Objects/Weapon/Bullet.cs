@@ -19,6 +19,9 @@ public class Bullet : MonoBehaviour, IPoolable
     // 标记是否已造成过伤害（防止同一发子弹触发多次伤害事件）
     private bool _hasDealtDamage = false;
 
+    // 武器ID（用于Buff来源追踪）
+    private string _weaponId;
+
     // 伤害参数
     public BulletDamageParams damageParams { get; private set; }
 
@@ -104,6 +107,14 @@ public class Bullet : MonoBehaviour, IPoolable
     /// </summary>
     public void Init(BulletConfig config, Vector3 direction, BulletDamageParams damageParams, int penetrateCount)
     {
+        Init(config, direction, damageParams, penetrateCount, null);
+    }
+
+    /// <summary>
+    /// 初始化子弹（带武器ID）
+    /// </summary>
+    public void Init(BulletConfig config, Vector3 direction, BulletDamageParams damageParams, int penetrateCount, string weaponId)
+    {
         Damage = config.baseDamage;
         this.damageParams = damageParams;
         Direction = direction.normalized;
@@ -115,6 +126,7 @@ public class Bullet : MonoBehaviour, IPoolable
         MaxDistance = config.maxDistance;
         _homingRange = config.homingRange;
         _homingStrength = config.homingStrength;
+        _weaponId = weaponId ?? "unknown";
         SpawnPos = transform.position;
 
         // 追踪子弹初始方向
@@ -222,7 +234,7 @@ public class Bullet : MonoBehaviour, IPoolable
                     });
             }
 
-            HitEffectModule.Apply(other.gameObject, HitEffect, EffectValue);
+            ApplyHitEffect(other.gameObject, HitEffect, EffectValue);
         }
         else if (other.CompareTag("Player") && _ownerTag == "Enemy")
         {
@@ -234,6 +246,56 @@ public class Bullet : MonoBehaviour, IPoolable
         else if (other.CompareTag("Solid"))
         {
             ManagerHub.Pool.Release(gameObject);
+        }
+    }
+
+    /// <summary>
+    /// 应用命中效果
+    /// </summary>
+    private void ApplyHitEffect(GameObject target, HitEffect effect, float value)
+    {
+        if (effect == HitEffect.None || target == null) return;
+
+        string targetId = target.GetInstanceID().ToString();
+
+        switch (effect)
+        {
+            case HitEffect.Freeze:
+                BuffManager.Instance.AddBuff(
+                    BuffType.Freeze, duration: 3f, value: value,
+                    sourceId: $"freeze_{_weaponId}",
+                    tickInterval: 0f, maxStacks: 1, targetId: targetId
+                );
+                break;
+
+            case HitEffect.Burn:
+                BuffManager.Instance.AddBuff(
+                    BuffType.Burn, duration: 5f, value: value,
+                    sourceId: $"burn_{_weaponId}",
+                    tickInterval: 1f, maxStacks: 3, targetId: targetId
+                );
+                break;
+
+            case HitEffect.Explode:
+                // 爆炸效果：直接造成伤害
+                var enemy = target.GetComponent<EnemyBase>();
+                if (enemy != null)
+                {
+                    enemy.TakeDamage(value);
+                }
+                // AOE伤害
+                float radius = 3f;
+                var colliders = Physics2D.OverlapCircleAll(target.transform.position, radius);
+                foreach (var col in colliders)
+                {
+                    if (col.gameObject == target) continue;
+                    var other = col.GetComponent<EnemyBase>();
+                    if (other != null)
+                    {
+                        other.TakeDamage(value * 0.8f);
+                    }
+                }
+                break;
         }
     }
 }

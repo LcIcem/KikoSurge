@@ -114,12 +114,17 @@ public class Player : MonoBehaviour
     private float _curSpeed = 0f;
     void FixedUpdate()
     {
+        // 获取药水速度加成倍率
+        float speedMultiplier = BuffManager.Instance != null
+            ? BuffManager.Instance.GetPlayerSpeedMultiplier()
+            : 1f;
+
         _curSpeed = _fsm.CurrentState switch
         {
-            PlayerMoveState => _playerData.moveSpeed,
-            PlayerShootState => _playerData.moveSpeed * 0.5f,
-            PlayerReloadState => _playerData.moveSpeed * 0.7f,
-            PlayerHurtState => _playerData.moveSpeed * 0.9f,
+            PlayerMoveState => _playerData.moveSpeed * speedMultiplier,
+            PlayerShootState => _playerData.moveSpeed * speedMultiplier * 0.5f,
+            PlayerReloadState => _playerData.moveSpeed * speedMultiplier * 0.7f,
+            PlayerHurtState => _playerData.moveSpeed * speedMultiplier * 0.9f,
             _ => 0f
         };
 
@@ -215,7 +220,14 @@ public class Player : MonoBehaviour
             return;
         }
 
-        hp -= damage;
+        // 计算实际伤害（防御力减伤 + 护盾加成）
+        float defense = _playerData.def;
+        if (BuffManager.Instance != null)
+        {
+            defense += BuffManager.Instance.GetPlayerShieldBonus();
+        }
+        float actualDamage = Mathf.Max(1f, damage - defense);
+        hp -= actualDamage;
 
         // 启动无敌帧
         _invincibleTimer = _playerData.invincibleDuration;

@@ -31,4 +31,19 @@ MonoBehaviour:
       minQuantity: 1
       maxQuantity: 3
     maxPick: 3
+  - groupName: "\u836F\u6C34\u6389\u843D"
+    entries:
+    - _itemConfig: {fileID: 11400000, guid: bd847f99dae98fa4c83a8004ffb9d71b, type: 2}
+      dropChance: 1
+      minQuantity: 2
+      maxQuantity: 3
+    - _itemConfig: {fileID: 11400000, guid: da1a8a1e7f60f334390c5d7167416f40, type: 2}
+      dropChance: 1
+      minQuantity: 2
+      maxQuantity: 3
+    - _itemConfig: {fileID: 11400000, guid: db3e2aff8dc1e8342925a4841402458c, type: 2}
+      dropChance: 1
+      minQuantity: 2
+      maxQuantity: 3
+    maxPick: 3
   DropSpreadRadius: 1

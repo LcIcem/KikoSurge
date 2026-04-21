@@ -626,9 +626,7 @@ public class InventoryManager : SingletonMono<InventoryManager>
         return type switch
         {
             ItemType.Weapon => _sessionData.inventoryWeaponSlots,
-            ItemType.Ammo => _sessionData.inventoryAmmoSlots,
             ItemType.Potion => _sessionData.inventoryPotionSlots,
-            ItemType.Armor => _sessionData.inventoryArmorSlots,
             ItemType.Relic => _sessionData.inventoryRelicSlots,
             ItemType.Currency => _sessionData.inventoryCurrencySlots,
             _ => null

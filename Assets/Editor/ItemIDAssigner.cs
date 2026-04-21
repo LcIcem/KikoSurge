@@ -62,7 +62,7 @@ public static class ItemIDAssigner
 
         // 扫描同目录下所有 ItemConfig
         string folderPath = Path.GetDirectoryName(assetPath);
-        int maxIndex = -1;
+        int maxIndex = 0;
         string[] guids = AssetDatabase.FindAssets($"t:{typeof(ItemConfig).Name}", new[] { folderPath });
 
         foreach (string guid in guids)

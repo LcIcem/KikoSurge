@@ -512,7 +512,10 @@ public class LevelController : MonoBehaviour
         // 保存玩家当前生命值
         snapshot.currentHealth = SessionManager.Instance.GetPlayerHealth();
 
-        Debug.Log($"[LevelController] Checkpoint snapshot created: floor={_currentLayerIndex}, currentRoom={snapshot.currentRoomId}, health={snapshot.currentHealth}");
+        // 保存当前激活的buff
+        snapshot.activeBuffs = BuffManager.Instance.GetAllActiveBuffs();
+
+        Debug.Log($"[LevelController] Checkpoint snapshot created: floor={_currentLayerIndex}, currentRoom={snapshot.currentRoomId}, health={snapshot.currentHealth}, buffs={snapshot.activeBuffs.Count}");
         return snapshot;
     }
 
@@ -570,7 +573,10 @@ public class LevelController : MonoBehaviour
             Debug.Log($"[LevelController] Restored player position to {worldPos}");
         }
 
-        Debug.Log($"[LevelController] Restored from checkpoint: floor={snapshot.floorIndex}, currentRoom={snapshot.currentRoomId}");
+        // 恢复激活的buff
+        BuffManager.Instance.RestoreFromSnapshot(snapshot.activeBuffs);
+
+        Debug.Log($"[LevelController] Restored from checkpoint: floor={snapshot.floorIndex}, currentRoom={snapshot.currentRoomId}, buffs={snapshot.activeBuffs?.Count ?? 0}");
     }
 
     private void OnDestroy()

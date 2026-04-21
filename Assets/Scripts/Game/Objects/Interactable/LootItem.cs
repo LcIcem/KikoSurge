@@ -227,8 +227,10 @@ public class LootItem : MonoBehaviour, IPoolable
         if (!_canPickup) return;
         if (!other.CompareTag("Player")) return;
 
-        // 武器类型需要按E交互，不自动拾取
-        if (ItemDef?.Type == ItemType.Weapon) return;
+        // 武器、药水、遗物需要按E交互，不自动拾取
+        if (ItemDef?.Type == ItemType.Weapon ||
+            ItemDef?.Type == ItemType.Potion ||
+            ItemDef?.Type == ItemType.Relic) return;
 
         Pickup();
     }
@@ -249,7 +251,7 @@ public class LootItem : MonoBehaviour, IPoolable
                 HandleCurrencyPickup();
                 break;
             case ItemType.Potion:
-            case ItemType.Ammo:
+            case ItemType.Relic:
                 HandleConsumablePickup();
                 break;
         }
@@ -281,7 +283,9 @@ public class LootItem : MonoBehaviour, IPoolable
         switch (ItemDef?.Type)
         {
             case ItemType.Weapon:
-                // 武器类型需要按E交互
+            case ItemType.Potion:
+            case ItemType.Relic:
+                // 武器、药水、遗物需要按E交互
                 SetupAsInteractable();
                 break;
             case ItemType.Currency:
@@ -318,7 +322,7 @@ public class LootItem : MonoBehaviour, IPoolable
         _interactable.SetHintText($"按[{{0}}]拾取");
 
         // 设置物品信息卡片内容（显示由 Interactable.OnTriggerEnter 控制）
-        string title = $"<B>{ItemDef?.Name ?? "Unknown"}</B>";
+        string title = $"<B>{ItemDef?.Name ?? "Unknown"}</B> <color=#FFFFFF>x{Quantity}</color>";
         string description = BuildItemDescription();
         _interactable.SetInfoCardContent(title, description);
 
@@ -344,9 +348,177 @@ public class LootItem : MonoBehaviour, IPoolable
                 }
                 return ItemDef.Description;
 
+            case ItemType.Potion:
+                return BuildPotionDescription();
+
+            case ItemType.Relic:
+                return BuildRelicDescription();
+
             default:
                 return ItemDef.Description;
         }
+    }
+
+    /// <summary>
+    /// 构建药水描述信息
+    /// </summary>
+    private string BuildPotionDescription()
+    {
+        var potionConfig = ItemDef as PotionItemConfig;
+        if (potionConfig == null)
+            return ItemDef.Description ?? "Unknown potion";
+
+        var sb = new StringBuilder();
+
+        // 即时效果
+        if (potionConfig.instantEffectType != PotionInstantEffectType.None
+            && potionConfig.instantEffectValue > 0)
+        {
+            string effectName = potionConfig.instantEffectType switch
+            {
+                PotionInstantEffectType.Heal => "恢复生命",
+                _ => potionConfig.instantEffectType.ToString()
+            };
+            sb.AppendLine($"立即: {effectName} +{potionConfig.instantEffectValue:F0}");
+        }
+
+        // 限时效果
+        if (potionConfig.timedEffectType != PotionTimedEffectType.None
+            && potionConfig.timedEffectDuration > 0
+            && potionConfig.timedEffectValue > 0)
+        {
+            string effectName = potionConfig.timedEffectType switch
+            {
+                PotionTimedEffectType.Shield => "护盾",
+                PotionTimedEffectType.SpeedBoost => "加速",
+                _ => potionConfig.timedEffectType.ToString()
+            };
+
+            if (potionConfig.timedEffectType == PotionTimedEffectType.SpeedBoost)
+            {
+                // SpeedBoost 的 value 是百分比值，如 10 表示 +10%
+                sb.AppendLine($"限时: [{effectName}] +{potionConfig.timedEffectValue:F0}% 速度");
+            }
+            else
+            {
+                sb.AppendLine($"限时: [{effectName}] +{potionConfig.timedEffectValue:F1}");
+            }
+            sb.AppendLine($"持续: {potionConfig.timedEffectDuration:F1}秒");
+        }
+
+        sb.AppendLine();
+        if (!string.IsNullOrEmpty(ItemDef.Description))
+        {
+            sb.Append(ItemDef.Description);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// 构建遗物描述信息
+    /// </summary>
+    private string BuildRelicDescription()
+    {
+        var relicConfig = ItemDef as RelicConfig;
+        if (relicConfig == null)
+            return ItemDef.Description ?? "Unknown relic";
+
+        var sb = new StringBuilder();
+
+        // 属性加成（只显示有值的）
+        var validModifiers = relicConfig.modifiers?.FindAll(m => m.value != 0f) ?? new List<ModifierData>();
+        if (validModifiers.Count > 0)
+        {
+            sb.AppendLine("属性加成:");
+            foreach (var mod in validModifiers)
+            {
+                string modName = GetModifierDisplayName(mod.type);
+                string valueStr = IsPercentModifier(mod.type)
+                    ? $"{mod.value * 100:F0}%"
+                    : $"+{mod.value:F1}";
+                sb.AppendLine($"  {modName}: {valueStr}");
+            }
+        }
+
+        // 遗物效果（只显示有值的）
+        var validEffects = relicConfig.effects?.FindAll(e => !string.IsNullOrEmpty(GetRelicEffectDescription(e))) ?? new List<RelicEffect>();
+        if (validEffects.Count > 0)
+        {
+            sb.AppendLine("遗物效果:");
+            foreach (var effect in validEffects)
+            {
+                string effectDesc = GetRelicEffectDescription(effect);
+                if (!string.IsNullOrEmpty(effectDesc))
+                {
+                    sb.AppendLine($"  {effectDesc}");
+                }
+            }
+        }
+
+        // 护甲属性（如果有）
+        if (relicConfig.baseDefense > 0 || relicConfig.damageReduction > 0)
+        {
+            sb.AppendLine($"护甲: +{relicConfig.baseDefense:F1}");
+            sb.AppendLine($"减伤: {relicConfig.damageReduction * 100:F0}%");
+        }
+
+        sb.AppendLine();
+        if (!string.IsNullOrEmpty(ItemDef.Description))
+        {
+            sb.Append(ItemDef.Description);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// 获取修饰符显示名称
+    /// </summary>
+    private string GetModifierDisplayName(ModifierType type)
+    {
+        return type switch
+        {
+            ModifierType.MaxHealth => "最大生命",
+            ModifierType.Attack => "攻击力",
+            ModifierType.Defense => "防御力",
+            ModifierType.MoveSpeed => "移动速度",
+            ModifierType.DashSpeed => "冲刺速度",
+            ModifierType.DashDuration => "冲刺持续",
+            ModifierType.InvincibleDuration => "无敌时间",
+            ModifierType.HurtDuration => "受伤持续",
+            ModifierType.CritRate => "暴击率",
+            ModifierType.CritMultiplier => "暴击倍率",
+            ModifierType.DamageBonus => "伤害加成",
+            ModifierType.DefBreak => "防御穿透",
+            _ => type.ToString()
+        };
+    }
+
+    /// <summary>
+    /// 判断是否为百分比修饰符
+    /// </summary>
+    private bool IsPercentModifier(ModifierType type)
+    {
+        return type is ModifierType.CritRate
+            or ModifierType.CritMultiplier
+            or ModifierType.DamageBonus
+            or ModifierType.DefBreak;
+    }
+
+    /// <summary>
+    /// 获取遗物效果描述
+    /// </summary>
+    private string GetRelicEffectDescription(RelicEffect effect)
+    {
+        return effect switch
+        {
+            DungeonGenerationEffect dge when dge.extraEliteChance > 0 || dge.extraTreasureChance > 0 =>
+                $"额外精英怪 +{dge.extraEliteChance}%, 额外宝箱 +{dge.extraTreasureChance}%",
+            RoomBehaviorEffect rbe when rbe.enemyCountBonus != 0 || rbe.eliteChanceBonus > 0 || rbe.lootMultiplier > 1f =>
+                $"敌人波次 +{rbe.enemyCountBonus}, 精英概率 +{rbe.eliteChanceBonus * 100:F0}%, 掉落 +{(rbe.lootMultiplier - 1f) * 100:F0}%",
+            _ => null
+        };
     }
 
     /// <summary>
@@ -356,28 +528,89 @@ public class LootItem : MonoBehaviour, IPoolable
     {
         var sb = new StringBuilder();
 
-        // 显示武器属性
+        // 武器类型
+        string fireModeName = weaponConfig.fireMode switch
+        {
+            FireMode.Single => "单发",
+            FireMode.Spread => "霰弹",
+            FireMode.Burst => "连发",
+            FireMode.Continuous => "激光",
+            FireMode.Charge => "蓄力",
+            _ => weaponConfig.fireMode.ToString()
+        };
+        sb.AppendLine($"类型: {fireModeName}");
         sb.AppendLine($"射速: {1f / weaponConfig.fireRate:F1}/秒");
+
+        // 子弹属性
+        if (weaponConfig.bulletConfig != null)
+        {
+            sb.AppendLine($"子弹伤害: {weaponConfig.bulletConfig.baseDamage}");
+            sb.AppendLine($"子弹速度: {weaponConfig.bulletConfig.bulletSpeed:F0}");
+        }
+
         sb.AppendLine($"弹夹: {weaponConfig.magazineSize} 发");
 
-        // 霰弹模式显示弹丸数量
-        if (weaponConfig.fireMode == FireMode.Spread && weaponConfig.bulletCount > 1)
-            sb.AppendLine($"弹丸: {weaponConfig.bulletCount}");
+        // 霰弹模式
+        if (weaponConfig.fireMode == FireMode.Spread)
+        {
+            if (weaponConfig.bulletCount > 1)
+                sb.AppendLine($"弹丸: {weaponConfig.bulletCount}");
+            if (weaponConfig.shotgunSpreadAngle > 0)
+                sb.AppendLine($"散布: {weaponConfig.shotgunSpreadAngle}°");
+        }
 
-        // 连发模式显示连发数量
+        // 连发模式
         if (weaponConfig.fireMode == FireMode.Burst)
+        {
             sb.AppendLine($"连发: {weaponConfig.burstCount} 发");
+            if (weaponConfig.burstSpeed > 0)
+                sb.AppendLine($"连发间隔: {weaponConfig.burstSpeed:F2}秒");
+        }
 
-        // 显示散布角度
+        // 蓄力模式
+        if (weaponConfig.fireMode == FireMode.Charge && weaponConfig.chargeTime > 0)
+        {
+            sb.AppendLine($"蓄力: {weaponConfig.chargeTime:F1}秒");
+        }
+
+        // 散布
         if (weaponConfig.randomSpreadAngle > 0)
-            sb.AppendLine($"散布: {weaponConfig.randomSpreadAngle}°");
+            sb.AppendLine($"散布: ±{weaponConfig.randomSpreadAngle}°");
+
+        // 穿透
+        if (weaponConfig.penetrateCount > 0)
+            sb.AppendLine($"穿透: {weaponConfig.penetrateCount}层");
+
+        // 后坐力
+        if (weaponConfig.recoilForce > 0)
+            sb.AppendLine($"后坐力: {weaponConfig.recoilForce:F1}");
 
         sb.AppendLine($"换弹: {weaponConfig.reloadTime:F1}秒");
+
+        // 伤害属性
+        bool hasDamageStats = weaponConfig.weaponDamage > 0
+            || weaponConfig.weaponCritRate > 0
+            || weaponConfig.weaponCritMultiplier > 0
+            || weaponConfig.weaponDamageBonus > 0;
+
+        if (hasDamageStats)
+        {
+            sb.AppendLine();
+            sb.AppendLine("伤害属性:");
+            if (weaponConfig.weaponDamage > 0)
+                sb.AppendLine($"  武器伤害: +{weaponConfig.weaponDamage:F1}");
+            if (weaponConfig.weaponCritRate > 0)
+                sb.AppendLine($"  暴击率: +{weaponConfig.weaponCritRate:P0}");
+            if (weaponConfig.weaponCritMultiplier > 0)
+                sb.AppendLine($"  暴击倍率: +{weaponConfig.weaponCritMultiplier:P0}");
+            if (weaponConfig.weaponDamageBonus > 0)
+                sb.AppendLine($"  伤害加成: +{weaponConfig.weaponDamageBonus:P0}");
+        }
 
         sb.AppendLine();
         if (!string.IsNullOrEmpty(ItemDef.Description))
         {
-            sb.AppendLine(ItemDef.Description);
+            sb.Append(ItemDef.Description);
         }
 
         return sb.ToString();
@@ -446,6 +679,13 @@ public class LootItem : MonoBehaviour, IPoolable
 
     private void HandleConsumablePickup()
     {
-        // 消耗品拾取逻辑（待实现）
+        if (InventoryManager.Instance == null) return;
+
+        bool success = InventoryManager.Instance.AddItem(ItemDef.Type, ItemDef.Id, Quantity);
+
+        if (success)
+        {
+            PlayPickupSFX();
+        }
     }
 }

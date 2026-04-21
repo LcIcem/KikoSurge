@@ -246,14 +246,8 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
         session.inventoryWeaponSlots = current.inventoryWeaponSlots != null
             ? new List<ItemSlotData>(current.inventoryWeaponSlots)
             : new List<ItemSlotData>();
-        session.inventoryAmmoSlots = current.inventoryAmmoSlots != null
-            ? new List<ItemSlotData>(current.inventoryAmmoSlots)
-            : new List<ItemSlotData>();
         session.inventoryPotionSlots = current.inventoryPotionSlots != null
             ? new List<ItemSlotData>(current.inventoryPotionSlots)
-            : new List<ItemSlotData>();
-        session.inventoryArmorSlots = current.inventoryArmorSlots != null
-            ? new List<ItemSlotData>(current.inventoryArmorSlots)
             : new List<ItemSlotData>();
         session.inventoryRelicSlots = current.inventoryRelicSlots != null
             ? new List<ItemSlotData>(current.inventoryRelicSlots)

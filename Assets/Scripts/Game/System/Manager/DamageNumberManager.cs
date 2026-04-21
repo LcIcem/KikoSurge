@@ -63,8 +63,9 @@ public class DamageNumberManager : SingletonMono<DamageNumberManager>
         _damageNumberRoot.anchoredPosition = Vector2.zero;
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         UnsubscribeEvents();
     }
 

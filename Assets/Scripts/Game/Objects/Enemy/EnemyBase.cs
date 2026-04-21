@@ -59,6 +59,34 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 防止重复释放的标记
     private bool _isReleased;
 
+    // Freeze 减速倍率
+    private float _freezeMultiplier = 1f;
+    public float FreezeMultiplier => _freezeMultiplier;
+
+    /// <summary>
+    /// 应用冻结减速效果（由BuffManager调用）
+    /// </summary>
+    public void ApplyFreezeMultiplier(float multiplier)
+    {
+        _freezeMultiplier = Mathf.Clamp(multiplier, 0.1f, 1f);
+    }
+
+    /// <summary>
+    /// 接收DOT周期性伤害（由BuffManager调用）
+    /// </summary>
+    public void TakeDotDamage(float damage)
+    {
+        if (!IsAlive) return;
+        HP -= damage;
+        EventCenter.Instance.Publish(GameEventID.Combat_EnemyDamaged,
+            new EnemyDamagedParams { enemy = this, damage = damage, currentHP = HP });
+        if (HP <= 0f)
+        {
+            HP = 0f;
+            Die();
+        }
+    }
+
     // 组件
     protected Rigidbody2D _rigidbody;
     protected SpriteRenderer _sprite;
@@ -100,6 +128,26 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _fsm = new EnemyFSM(this, _animator);
         // 缓存颜色
         _tmpColor = _sprite.color;
+    }
+
+    protected virtual void OnEnable()
+    {
+        // 注册到BuffManager
+        var buffManager = BuffManager.Instance;
+        if (buffManager != null)
+        {
+            buffManager.RegisterEnemy(gameObject.GetInstanceID().ToString(), this);
+        }
+    }
+
+    protected virtual void OnDisable()
+    {
+        // 从BuffManager注销
+        var buffManager = BuffManager.Instance;
+        if (buffManager != null)
+        {
+            buffManager.UnregisterEnemy(gameObject.GetInstanceID().ToString());
+        }
     }
 
     protected virtual void Update()

@@ -9,7 +9,7 @@ using LcIcemFramework;
 /// 背包物品格子（支持对象池）
 /// <para>显示物品图标和堆叠数量，响应点击事件</para>
 /// </summary>
-public class ItemSlotUI : MonoBehaviour, IPoolable, IPointerClickHandler
+public class ItemSlotUI : MonoBehaviour, IPoolable, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     #region 序列化字段
 
@@ -30,6 +30,16 @@ public class ItemSlotUI : MonoBehaviour, IPoolable, IPointerClickHandler
     /// 格子右键点击事件回调（slotUI, screenPosition）
     /// </summary>
     public event Action<ItemSlotUI, Vector2> OnSlotRightClicked;
+
+    /// <summary>
+    /// 格子悬停进入事件回调（slotUI）
+    /// </summary>
+    public event Action<ItemSlotUI> OnSlotHoverEnter;
+
+    /// <summary>
+    /// 格子悬停退出事件回调（slotUI）
+    /// </summary>
+    public event Action<ItemSlotUI> OnSlotHoverExit;
 
     #endregion
 
@@ -150,6 +160,22 @@ public class ItemSlotUI : MonoBehaviour, IPoolable, IPointerClickHandler
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             OnSlotClicked?.Invoke(this);
+        }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (!IsEmpty && !_isPlaceholder)
+        {
+            OnSlotHoverEnter?.Invoke(this);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (!IsEmpty && !_isPlaceholder)
+        {
+            OnSlotHoverExit?.Invoke(this);
         }
     }
 

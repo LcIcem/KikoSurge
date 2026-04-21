@@ -70,10 +70,16 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     protected override void Init()
     {
         Log("GameLifecycleManager initialized");
-        ChangeState(GameState.MainMenu);
 
         // 订阅死亡动画结束事件
         EventCenter.Instance.Subscribe(GameEventID.OnDeathAnimationEnd, OnDeathAnimationEnd);
+    }
+
+    private void Start()
+    {
+        // 在 Start 中调用 ChangeState，确保所有 SingletonMono 都已初始化完成
+        // 如果在 Init() 中调用，此时 ManagerHub 可能尚未初始化，导致 ManagerHub.Audio 为 null
+        ChangeState(GameState.MainMenu);
     }
 
     private bool _hasSubscribedPanelClosed;

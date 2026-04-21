@@ -12,13 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b43bf62c51d6cc419e360242e121cd3, type: 3}
   m_Name: Item_Currency_Gold
   m_EditorClassIdentifier: Assembly-CSharp::CurrencyConfig
-  Id: 5001
+  Id: 3001
   Name: "\u91D1\u5E01"
-  Type: 5
+  Type: 3
   MaxStack: 9999
   Value: 0
   Icon: {fileID: -2698141938090863644, guid: f6e04642224f69d4b91680897ab860c3, type: 3}
   Description: "\u91D1\u707F\u707F"
   PickupSFX: {fileID: 8300000, guid: 4745fe727422bd546bbef72b333583a6, type: 3}
-  DisplayAnimation: {fileID: 7400000, guid: a758d9f59f5ffdf4997f3b249c8e300d, type: 2}
   coinValue: 1

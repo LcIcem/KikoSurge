@@ -23,9 +23,7 @@ public class SessionData
 
     // 背包（按类型分组）
     public List<ItemSlotData> inventoryWeaponSlots = new();
-    public List<ItemSlotData> inventoryAmmoSlots = new();
     public List<ItemSlotData> inventoryPotionSlots = new();
-    public List<ItemSlotData> inventoryArmorSlots = new();
     public List<ItemSlotData> inventoryRelicSlots = new();
     public List<ItemSlotData> inventoryCurrencySlots = new();
 
@@ -96,9 +94,7 @@ public class SessionData
 
         // 创建初始空格子
         var emptyWeaponSlots = CreateEmptySlots(initialEmptySlots);
-        var emptyAmmoSlots = CreateEmptySlots(initialEmptySlots);
         var emptyPotionSlots = CreateEmptySlots(initialEmptySlots);
-        var emptyArmorSlots = CreateEmptySlots(initialEmptySlots);
         var emptyRelicSlots = CreateEmptySlots(initialEmptySlots);
         var emptyCurrencySlots = CreateEmptySlots(initialEmptySlots);
 
@@ -112,9 +108,7 @@ public class SessionData
             playerPosX = 0,
             playerPosY = 0,
             inventoryWeaponSlots = MergeInventoryAndEmpty(inventory, emptyWeaponSlots),
-            inventoryAmmoSlots = emptyAmmoSlots,
             inventoryPotionSlots = emptyPotionSlots,
-            inventoryArmorSlots = emptyArmorSlots,
             inventoryRelicSlots = MergeInventoryAndEmpty(new List<ItemSlotData>(), emptyRelicSlots),
             inventoryCurrencySlots = emptyCurrencySlots,
             equippedWeaponSlots = equipped,

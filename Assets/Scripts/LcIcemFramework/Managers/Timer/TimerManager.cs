@@ -17,6 +17,9 @@ public class TimerManager : Singleton<TimerManager>
     private Dictionary<int, TimerTask> _tasks = new Dictionary<int, TimerTask>();
     private int _nextId = 0; // 新增的计时器id 每次有一个新的计时器就 +1
 
+    // BuffTick监听器列表
+    private List<Action<float>> _buffTickListeners = new List<Action<float>>();
+
     /// <summary> 暂停标识 </summary>
     public bool IsPaused { get; private set; }
 
@@ -52,6 +55,12 @@ public class TimerManager : Singleton<TimerManager>
                 // 否则直接删除该计时器
                 _tasks.Remove(id);
             }
+        }
+
+        // 驱动Buff Tick
+        foreach (var listener in _buffTickListeners)
+        {
+            listener.Invoke(scaledDt);
         }
     }
 
@@ -154,6 +163,27 @@ public class TimerManager : Singleton<TimerManager>
     /// 获取当前活动计时器数量
     /// </summary>
     public int GetActiveTimerCount() => _tasks.Count;
+
+    #region BuffTick
+
+    /// <summary>
+    /// 注册BuffTick监听器（由BuffManager调用）
+    /// </summary>
+    public void AddBuffTickListener(Action<float> listener)
+    {
+        if (!_buffTickListeners.Contains(listener))
+            _buffTickListeners.Add(listener);
+    }
+
+    /// <summary>
+    /// 移除BuffTick监听器
+    /// </summary>
+    public void RemoveBuffTickListener(Action<float> listener)
+    {
+        _buffTickListeners.Remove(listener);
+    }
+
+    #endregion
 
     #region 日志
     private void Log(string msg) => Debug.Log($"[TimerManager] {msg}");

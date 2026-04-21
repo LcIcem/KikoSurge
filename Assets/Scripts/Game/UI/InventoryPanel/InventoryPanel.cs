@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -34,9 +36,7 @@ public class InventoryPanel : BasePanel
     private const string TXT_DAMAGE_BONUS = "txt_damageBonus";
     private const string TXT_DEF_BREAK = "txt_defBreak";
     private const string TAB_WEAPON = "tog_tab_weapon";
-    private const string TAB_AMMO = "tog_tab_ammo";
     private const string TAB_POTION = "tog_tab_potion";
-    private const string TAB_ARMOR = "tog_tab_armor";
     private const string TAB_RELIC = "tog_tab_relic";
 
     // 已装备武器区域（用于 Find 兜底）
@@ -77,6 +77,11 @@ public class InventoryPanel : BasePanel
     [SerializeField] private Button _btnSplitConfirm;
     [SerializeField] private Button _btnSplitCancel;
 
+    [Header("物品提示")]
+    [SerializeField] private GameObject _tooltipRoot;
+    [SerializeField] private TMP_Text _tooltipTitle;
+    [SerializeField] private TMP_Text _tooltipDescription;
+
     #endregion
 
     #region 字段
@@ -101,6 +106,15 @@ public class InventoryPanel : BasePanel
     private ItemSlotUI _splitContextSlot; // 拆分对话框专用 slot 引用
     private int _splitQuantity;
 
+    // 刷新计时器
+    private Coroutine _buffRefreshCoroutine;
+    private const float BUFF_REFRESH_INTERVAL = 0.2f; // 每0.2秒刷新一次buff显示
+
+    // 物品提示
+    private Coroutine _tooltipCoroutine;
+    private const float TOOLTIP_DELAY = 0.3f; // 悬停0.3秒后显示提示
+    private ItemSlotUI _hoveredSlot;
+
     #endregion
 
     #region BasePanel override
@@ -108,6 +122,9 @@ public class InventoryPanel : BasePanel
     public override void Show()
     {
         base.Show();
+
+        // 初始化时隐藏 tooltip
+        HideTooltip();
 
         Debug.Log($"[InventoryPanel.Show] _trashSlot={_trashSlot?.name}({_trashSlot?.GetInstanceID()}), _trashArea={_trashArea?.name}({_trashArea?.GetInstanceID()})");
 
@@ -124,6 +141,10 @@ public class InventoryPanel : BasePanel
         }
 
         EventCenter.Instance.Subscribe<InventoryChangeParams>(GameEventID.OnInventoryChanged, OnInventoryChanged);
+        EventCenter.Instance.Subscribe(GameEventID.OnBuffChanged, OnBuffChanged);
+
+        // 启动buff刷新计时器
+        _buffRefreshCoroutine = StartCoroutine(BuffRefreshLoop());
 
         // 初始化上下文菜单
         InitContextMenu();
@@ -141,6 +162,22 @@ public class InventoryPanel : BasePanel
     public override void Hide()
     {
         EventCenter.Instance.Unsubscribe<InventoryChangeParams>(GameEventID.OnInventoryChanged, OnInventoryChanged);
+        EventCenter.Instance.Unsubscribe(GameEventID.OnBuffChanged, OnBuffChanged);
+
+        // 停止buff刷新计时器
+        if (_buffRefreshCoroutine != null)
+        {
+            StopCoroutine(_buffRefreshCoroutine);
+            _buffRefreshCoroutine = null;
+        }
+
+        // 停止提示计时器并隐藏提示
+        if (_tooltipCoroutine != null)
+        {
+            StopCoroutine(_tooltipCoroutine);
+            _tooltipCoroutine = null;
+        }
+        HideTooltip();
 
         ReleaseAllSlots();
         ReleaseAllEquipSlots();
@@ -169,6 +206,32 @@ public class InventoryPanel : BasePanel
         {
             _pickedUpSlot.RectTransform.position = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
         }
+
+        // 检测左键点击来关闭 context menu
+        if (_contextMenuRoot != null && _contextMenuRoot.activeSelf)
+        {
+            if (UnityEngine.InputSystem.Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                Vector2 mousePos = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
+                // 如果点击在 context menu 范围内，不关闭（让按钮处理）
+                if (IsPointOverRectTransform(_contextMenuRoot, mousePos))
+                    return;
+                HideContextMenu();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 检测屏幕坐标是否在 RectTransform 范围内
+    /// </summary>
+    private bool IsPointOverRectTransform(GameObject obj, Vector2 screenPos)
+    {
+        if (obj == null)
+            return false;
+        var rt = obj.transform as RectTransform;
+        if (rt == null)
+            return false;
+        return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPos, null);
     }
 
     /// <summary>
@@ -571,6 +634,7 @@ public class InventoryPanel : BasePanel
     /// </summary>
     private void RefreshAllViews()
     {
+        RefreshCharacterInfo();
         RefreshItemList();
         // 没有 session 时不刷新装备区（因为数据源是空的，会覆盖 UI 层面的交换）
         if (SessionManager.Instance?.HasActiveSession == true)
@@ -588,6 +652,386 @@ public class InventoryPanel : BasePanel
     {
         RefreshAllViews();
     }
+
+    private void OnBuffChanged()
+    {
+        RefreshCharacterInfo();
+    }
+
+    /// <summary>
+    /// buff刷新循环（定时刷新以显示剩余时间）
+    /// </summary>
+    private IEnumerator BuffRefreshLoop()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(BUFF_REFRESH_INTERVAL);
+            RefreshCharacterInfo();
+        }
+    }
+
+    #region 物品提示
+
+    /// <summary>
+    /// 格子悬停进入
+    /// </summary>
+    private void OnSlotHoverEnter(ItemSlotUI slot)
+    {
+        if (slot == null || slot.IsEmpty || slot.IsPlaceholder)
+            return;
+
+        _hoveredSlot = slot;
+        // 延迟显示提示
+        if (_tooltipCoroutine != null)
+            StopCoroutine(_tooltipCoroutine);
+        _tooltipCoroutine = StartCoroutine(ShowTooltipDelayed(slot));
+    }
+
+    /// <summary>
+    /// 格子悬停退出
+    /// </summary>
+    private void OnSlotHoverExit(ItemSlotUI slot)
+    {
+        _hoveredSlot = null;
+        if (_tooltipCoroutine != null)
+        {
+            StopCoroutine(_tooltipCoroutine);
+            _tooltipCoroutine = null;
+        }
+        HideTooltip();
+    }
+
+    /// <summary>
+    /// 延迟显示提示
+    /// </summary>
+    private IEnumerator ShowTooltipDelayed(ItemSlotUI slot)
+    {
+        yield return new WaitForSeconds(TOOLTIP_DELAY);
+
+        // 检查是否仍然悬停在同一格子
+        if (_hoveredSlot != slot)
+            yield break;
+
+        ShowTooltip(slot);
+    }
+
+    /// <summary>
+    /// 显示物品提示
+    /// </summary>
+    private void ShowTooltip(ItemSlotUI slot)
+    {
+        if (_tooltipRoot == null || slot.IsEmpty)
+            return;
+
+        // 获取物品配置
+        var config = GameDataManager.Instance?.GetItemConfig(slot.ItemId);
+        if (config == null)
+            return;
+
+        // 构建标题和描述
+        string title = $"<B>{config.Name ?? "Unknown"}</B>";
+        if (slot.Quantity > 1)
+            title += $" <color=#FFFFFF>x{slot.Quantity}</color>";
+
+        string description = BuildItemDescription(config);
+
+        // 设置提示内容
+        if (_tooltipTitle != null)
+            _tooltipTitle.text = title;
+        if (_tooltipDescription != null)
+            _tooltipDescription.text = description;
+
+        // 显示提示
+        _tooltipRoot.SetActive(true);
+
+        // 禁用 tooltip 的射线检测，防止遮挡 item slot 触发 PointerExit
+        var canvasGroup = _tooltipRoot.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+            canvasGroup = _tooltipRoot.AddComponent<CanvasGroup>();
+        canvasGroup.blocksRaycasts = false;
+
+        // 更新位置
+        UpdateTooltipPosition();
+    }
+
+    /// <summary>
+    /// 计算 tooltip 显示位置（显示在鼠标左下）
+    /// </summary>
+    private void UpdateTooltipPosition()
+    {
+        if (_tooltipRoot == null)
+            return;
+
+        Vector2 mousePos = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
+        var rt = _tooltipRoot.transform as RectTransform;
+        if (rt == null || rt.parent == null)
+            return;
+
+        // 将屏幕坐标转换为 tooltip 父对象内的局部坐标
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            rt.parent as RectTransform,
+            mousePos,
+            null, // Camera 对于 Screen Space Overlay 填 null
+            out Vector2 localPoint
+        );
+
+        // 偏移到鼠标左下角（向左偏移宽度，向下偏移高度）
+        // 由于 pivot 是 (0.5, 0.5) 中心对齐，需要偏移半个尺寸
+        float tooltipWidth = rt.rect.width;
+        float tooltipHeight = rt.rect.height;
+        localPoint.x -= tooltipWidth * 0.5f + 10f; // 向左偏移
+        localPoint.y -= tooltipHeight * 0.5f + 10f; // 向下偏移
+
+        // 设置 anchoredPosition 来定位 tooltip
+        rt.anchoredPosition = localPoint;
+    }
+
+    /// <summary>
+    /// 隐藏物品提示
+    /// </summary>
+    private void HideTooltip()
+    {
+        if (_tooltipRoot != null)
+            _tooltipRoot.SetActive(false);
+    }
+
+    /// <summary>
+    /// 根据物品配置构建描述信息（复用 LootItem 的逻辑）
+    /// </summary>
+    private string BuildItemDescription(ItemConfig config)
+    {
+        if (config == null)
+            return "No description available.";
+
+        switch (config.Type)
+        {
+            case ItemType.Weapon:
+                var weaponConfig = GameDataManager.Instance?.GetWeaponConfig(config.Id);
+                if (weaponConfig != null)
+                {
+                    return BuildWeaponDescription(weaponConfig, config);
+                }
+                return config.Description ?? "";
+
+            case ItemType.Potion:
+                return BuildPotionDescription(config);
+
+            case ItemType.Relic:
+                return BuildRelicDescription(config);
+
+            default:
+                return config.Description ?? "";
+        }
+    }
+
+    /// <summary>
+    /// 构建武器描述信息
+    /// </summary>
+    private string BuildWeaponDescription(WeaponConfig weaponConfig, ItemConfig itemConfig)
+    {
+        var sb = new StringBuilder();
+
+        // 武器类型
+        string fireModeName = weaponConfig.fireMode switch
+        {
+            FireMode.Single => "单发",
+            FireMode.Spread => "霰弹",
+            FireMode.Burst => "连发",
+            FireMode.Continuous => "激光",
+            FireMode.Charge => "蓄力",
+            _ => weaponConfig.fireMode.ToString()
+        };
+        sb.AppendLine($"类型: {fireModeName}");
+        sb.AppendLine($"射速: {1f / weaponConfig.fireRate:F1}/秒");
+
+        // 子弹属性
+        if (weaponConfig.bulletConfig != null)
+        {
+            sb.AppendLine($"子弹伤害: {weaponConfig.bulletConfig.baseDamage}");
+            sb.AppendLine($"子弹速度: {weaponConfig.bulletConfig.bulletSpeed:F0}");
+        }
+
+        sb.AppendLine($"弹夹: {weaponConfig.magazineSize} 发");
+
+        // 霰弹模式
+        if (weaponConfig.fireMode == FireMode.Spread)
+        {
+            if (weaponConfig.bulletCount > 1)
+                sb.AppendLine($"弹丸: {weaponConfig.bulletCount}");
+            if (weaponConfig.shotgunSpreadAngle > 0)
+                sb.AppendLine($"散布: {weaponConfig.shotgunSpreadAngle}°");
+        }
+
+        // 连发模式
+        if (weaponConfig.fireMode == FireMode.Burst)
+        {
+            sb.AppendLine($"连发: {weaponConfig.burstCount} 发");
+            if (weaponConfig.burstSpeed > 0)
+                sb.AppendLine($"连发间隔: {weaponConfig.burstSpeed:F2}秒");
+        }
+
+        // 蓄力模式
+        if (weaponConfig.fireMode == FireMode.Charge && weaponConfig.chargeTime > 0)
+        {
+            sb.AppendLine($"蓄力: {weaponConfig.chargeTime:F1}秒");
+        }
+
+        // 散布
+        if (weaponConfig.randomSpreadAngle > 0)
+            sb.AppendLine($"散布: ±{weaponConfig.randomSpreadAngle}°");
+
+        // 穿透
+        if (weaponConfig.penetrateCount > 0)
+            sb.AppendLine($"穿透: {weaponConfig.penetrateCount}层");
+
+        // 后坐力
+        if (weaponConfig.recoilForce > 0)
+            sb.AppendLine($"后坐力: {weaponConfig.recoilForce:F1}");
+
+        sb.AppendLine($"换弹: {weaponConfig.reloadTime:F1}秒");
+
+        // 伤害属性
+        bool hasDamageStats = weaponConfig.weaponDamage > 0
+            || weaponConfig.weaponCritRate > 0
+            || weaponConfig.weaponCritMultiplier > 0
+            || weaponConfig.weaponDamageBonus > 0;
+
+        if (hasDamageStats)
+        {
+            sb.AppendLine();
+            sb.AppendLine("伤害属性:");
+            if (weaponConfig.weaponDamage > 0)
+                sb.AppendLine($"  武器伤害: +{weaponConfig.weaponDamage:F1}");
+            if (weaponConfig.weaponCritRate > 0)
+                sb.AppendLine($"  暴击率: +{weaponConfig.weaponCritRate:P0}");
+            if (weaponConfig.weaponCritMultiplier > 0)
+                sb.AppendLine($"  暴击倍率: +{weaponConfig.weaponCritMultiplier:P0}");
+            if (weaponConfig.weaponDamageBonus > 0)
+                sb.AppendLine($"  伤害加成: +{weaponConfig.weaponDamageBonus:P0}");
+        }
+
+        sb.AppendLine();
+        if (!string.IsNullOrEmpty(itemConfig.Description))
+        {
+            sb.Append(itemConfig.Description);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// 构建药水描述信息
+    /// </summary>
+    private string BuildPotionDescription(ItemConfig config)
+    {
+        var potionConfig = config as PotionItemConfig;
+        if (potionConfig == null)
+            return config.Description ?? "Unknown potion";
+
+        var sb = new StringBuilder();
+
+        // 即时效果
+        if (potionConfig.instantEffectType != PotionInstantEffectType.None
+            && potionConfig.instantEffectValue > 0)
+        {
+            string effectName = potionConfig.instantEffectType switch
+            {
+                PotionInstantEffectType.Heal => "恢复生命",
+                _ => potionConfig.instantEffectType.ToString()
+            };
+            sb.AppendLine($"立即: {effectName} +{potionConfig.instantEffectValue:F0}");
+        }
+
+        // 限时效果
+        if (potionConfig.timedEffectType != PotionTimedEffectType.None
+            && potionConfig.timedEffectDuration > 0
+            && potionConfig.timedEffectValue > 0)
+        {
+            string effectName = potionConfig.timedEffectType switch
+            {
+                PotionTimedEffectType.Shield => "护盾",
+                PotionTimedEffectType.SpeedBoost => "加速",
+                _ => potionConfig.timedEffectType.ToString()
+            };
+
+            if (potionConfig.timedEffectType == PotionTimedEffectType.SpeedBoost)
+            {
+                sb.AppendLine($"限时: {effectName} +{potionConfig.timedEffectValue:F0}% 速度");
+            }
+            else
+            {
+                sb.AppendLine($"限时: {effectName} +{potionConfig.timedEffectValue:F1}");
+            }
+            sb.AppendLine($"持续: {potionConfig.timedEffectDuration:F1}秒");
+        }
+
+        sb.AppendLine();
+        if (!string.IsNullOrEmpty(config.Description))
+        {
+            sb.Append(config.Description);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// 构建遗物描述信息
+    /// </summary>
+    private string BuildRelicDescription(ItemConfig config)
+    {
+        var relicConfig = config as RelicConfig;
+        if (relicConfig == null)
+            return config.Description ?? "Unknown relic";
+
+        var sb = new StringBuilder();
+
+        // 属性加成（只显示有值的）
+        var validModifiers = relicConfig.modifiers?.FindAll(m => m.value != 0f) ?? new List<ModifierData>();
+        if (validModifiers.Count > 0)
+        {
+            sb.AppendLine("属性加成:");
+            foreach (var mod in validModifiers)
+            {
+                string modName = GetModifierDisplayName(mod.type);
+                string valueStr = IsPercentModifier(mod.type)
+                    ? $"{mod.value * 100:F0}%"
+                    : $"+{mod.value:F1}";
+                sb.AppendLine($"  {modName}: {valueStr}");
+            }
+        }
+
+        // 遗物效果（只显示有值的）
+        var validEffects = relicConfig.effects?.FindAll(e => !string.IsNullOrEmpty(GetRelicEffectDescription(e))) ?? new List<RelicEffect>();
+        if (validEffects.Count > 0)
+        {
+            sb.AppendLine("遗物效果:");
+            foreach (var effect in validEffects)
+            {
+                string effectDesc = GetRelicEffectDescription(effect);
+                if (!string.IsNullOrEmpty(effectDesc))
+                {
+                    sb.AppendLine($"  {effectDesc}");
+                }
+            }
+        }
+
+        // 护甲属性（如果有）
+        if (relicConfig.baseDefense > 0 || relicConfig.damageReduction > 0)
+        {
+            sb.AppendLine($"护甲: +{relicConfig.baseDefense:F1}");
+            sb.AppendLine($"减伤: {relicConfig.damageReduction * 100:F0}%");
+        }
+
+        sb.AppendLine();
+        if (!string.IsNullOrEmpty(config.Description))
+        {
+            sb.Append(config.Description);
+        }
+
+        return sb.ToString();
+    }
+
+    #endregion
 
     protected override void OnClick(string btnName)
     {
@@ -621,13 +1065,64 @@ public class InventoryPanel : BasePanel
         return name switch
         {
             TAB_WEAPON => ItemType.Weapon,
-            TAB_AMMO => ItemType.Ammo,
             TAB_POTION => ItemType.Potion,
-            TAB_ARMOR => ItemType.Armor,
             TAB_RELIC => ItemType.Relic,
             _ => null
         };
     }
+
+    /// <summary>
+    /// 获取修饰符显示名称
+    /// </summary>
+    private string GetModifierDisplayName(ModifierType type)
+    {
+        return type switch
+        {
+            ModifierType.MaxHealth => "最大生命",
+            ModifierType.Attack => "攻击力",
+            ModifierType.Defense => "防御力",
+            ModifierType.MoveSpeed => "移动速度",
+            ModifierType.DashSpeed => "冲刺速度",
+            ModifierType.DashDuration => "冲刺持续",
+            ModifierType.InvincibleDuration => "无敌时间",
+            ModifierType.HurtDuration => "受伤持续",
+            ModifierType.CritRate => "暴击率",
+            ModifierType.CritMultiplier => "暴击倍率",
+            ModifierType.DamageBonus => "伤害加成",
+            ModifierType.DefBreak => "防御穿透",
+            _ => type.ToString()
+        };
+    }
+
+    /// <summary>
+    /// 判断是否为百分比修饰符
+    /// </summary>
+    private bool IsPercentModifier(ModifierType type)
+    {
+        return type is ModifierType.CritRate
+            or ModifierType.CritMultiplier
+            or ModifierType.DamageBonus
+            or ModifierType.DefBreak;
+    }
+
+    /// <summary>
+    /// 获取遗物效果描述
+    /// </summary>
+    private string GetRelicEffectDescription(RelicEffect effect)
+    {
+        return effect switch
+        {
+            DungeonGenerationEffect dge when dge.extraEliteChance > 0 || dge.extraTreasureChance > 0 =>
+                $"额外精英怪 +{dge.extraEliteChance}%, 额外宝箱 +{dge.extraTreasureChance}%",
+            RoomBehaviorEffect rbe when rbe.enemyCountBonus != 0 || rbe.eliteChanceBonus > 0 || rbe.lootMultiplier > 1f =>
+                $"敌人波次 +{rbe.enemyCountBonus}, 精英概率 +{rbe.eliteChanceBonus * 100:F0}%, 掉落 +{(rbe.lootMultiplier - 1f) * 100:F0}%",
+            _ => null
+        };
+    }
+
+    #endregion
+
+    #region 角色信息刷新
 
     private void RefreshCharacterInfo()
     {
@@ -706,19 +1201,19 @@ public class InventoryPanel : BasePanel
         float modDamageBonus = GetModifierBonus(ModifierType.DamageBonus, modifiers);
         float modDefBreak = GetModifierBonus(ModifierType.DefBreak, modifiers);
 
-        // 药水持续效果（根据类型分配到对应属性）
-        var (potionSpeedBonus, potionShieldValue) = GetPotionTimedEffectValues();
+        // 药水持续效果
+        var potionEffects = GetPotionTimedEffects();
 
         // 当前生命值（无加成）
         SetText(TXT_HEALTH, $"生命: {playerData.Health:F0}");
 
-        // 最大生命值（白色基础 + 黄色(meta+mod) + 紫色(potion护盾)）
-        SetText(TXT_MAX_HEALTH, $"最大生命: <color=#FFFFFF>{baseMaxHealth:F0}</color>{BuildBonusText(metaHealthBonus, modMaxHealth)}{BuildPotionBonusText(potionShieldValue)}");
+        // 最大生命值（白色基础 + 黄色(meta+mod)）
+        SetText(TXT_MAX_HEALTH, $"最大生命: <color=#FFFFFF>{baseMaxHealth:F0}</color>{BuildBonusText(metaHealthBonus, modMaxHealth)}");
 
-        // 普通数值属性：白色基础值 + 黄色加成
+        // 普通数值属性：白色基础值 + 黄色加成 + 紫色(potion效果)
         SetText(TXT_ATK, $"攻击: <color=#FFFFFF>{baseAtk:F1}</color>{BuildBonusText(metaAtkBonus, modAtk)}");
-        SetText(TXT_DEF, $"防御: <color=#FFFFFF>{baseDef:F1}</color>{BuildBonusText(metaDefBonus, modDef)}");
-        SetText(TXT_SPEED, $"速度: <color=#FFFFFF>{baseMoveSpeed:F1}</color>{BuildBonusText(0, modMoveSpeed)}{BuildPotionBonusText(potionSpeedBonus)}");
+        SetText(TXT_DEF, $"防御: <color=#FFFFFF>{baseDef:F1}</color>{BuildBonusText(metaDefBonus, modDef)}{BuildPotionEffectText(potionEffects, BuffType.Shield)}");
+        SetText(TXT_SPEED, $"速度: <color=#FFFFFF>{baseMoveSpeed:F1}</color>{BuildBonusText(0, modMoveSpeed)}{BuildPotionEffectText(potionEffects, BuffType.SpeedBoost)}");
         SetText(TXT_DASH_SPEED, $"冲刺速度: <color=#FFFFFF>{baseDashSpeed:F1}</color>{BuildBonusText(0, modDashSpeed)}");
         SetText(TXT_DASH_DURATION, $"冲刺持续: <color=#FFFFFF>{baseDashDuration:F2}s</color>{BuildBonusText(0, modDashDuration, "s")}");
         SetText(TXT_DASH_GAP, $"冲刺间隔: <color=#FFFFFF>{baseDashGap:F2}s</color>");
@@ -759,15 +1254,34 @@ public class InventoryPanel : BasePanel
     }
 
     /// <summary>
-    /// 构建药水加成文本（紫色显示）
+    /// 构建药水效果文本（根据类型获取对应效果）
     /// </summary>
-    private string BuildPotionBonusText(float potionValue, string suffix = "")
+    private string BuildPotionEffectText(List<PotionEffectInfo> effects, BuffType targetType)
     {
-        if (Mathf.Abs(potionValue) < 0.001f)
+        var effect = effects.Find(e => e.type == targetType);
+        if (effect == null)
             return "";
 
-        string sign = potionValue >= 0 ? "+" : "";
-        return $"<color=#FF00FF>{sign}{potionValue:F2}{suffix}</color>";
+        float value = effect.value;
+        float remainingTime = effect.remainingTime;
+
+        // 根据类型计算显示值
+        float displayValue = value;
+        string suffix = "";
+
+        if (targetType == BuffType.SpeedBoost)
+        {
+            // SpeedBoost 的 value 是倍率，如 1.5 表示 +50%
+            displayValue = (value - 1f) * 100f;
+            suffix = "%";
+        }
+
+        if (Mathf.Abs(displayValue) < 0.001f)
+            return "";
+
+        string sign = displayValue >= 0 ? "+" : "";
+        string timeStr = remainingTime > 0 ? $" <color=#FF00FF>({remainingTime:F0}s)</color>" : "";
+        return $"<color=#FF00FF>{sign}{displayValue:F0}{suffix}</color>{timeStr}";
     }
 
     /// <summary>
@@ -788,15 +1302,34 @@ public class InventoryPanel : BasePanel
     }
 
     /// <summary>
-    /// 获取药水限时效果加成（根据类型分配到对应属性）
+    /// 获取药水限时效果列表
     /// </summary>
-    private (float speedBonus, float shieldValue) GetPotionTimedEffectValues()
+    private List<PotionEffectInfo> GetPotionTimedEffects()
     {
-        // TODO: 实际实现从当前激活的药水buff中获取效果值
-        // SpeedBoost -> 速度加成
-        // Shield -> 护盾值
-        // 目前返回0，后续接入Buff系统后完善
-        return (0f, 0f);
+        if (BuffManager.Instance == null)
+            return new List<PotionEffectInfo>();
+
+        var effects = new List<PotionEffectInfo>();
+
+        var activeBuffs = BuffManager.Instance.GetAllActiveBuffs();
+        foreach (var buff in activeBuffs)
+        {
+            if (buff.IsExpired)
+                continue;
+
+            // 从药水来源的buff中提取效果值
+            if (buff.sourceId.StartsWith("potion_"))
+            {
+                effects.Add(new PotionEffectInfo
+                {
+                    type = buff.type,
+                    value = buff.value,
+                    remainingTime = buff.remainingTime
+                });
+            }
+        }
+
+        return effects;
     }
 
     private void SetText(string controlName, string text)
@@ -805,6 +1338,10 @@ public class InventoryPanel : BasePanel
         if (txt != null)
             txt.text = text;
     }
+
+    #endregion
+
+    #region 物品列表刷新
 
     private void RefreshEquipedWeapon()
     {
@@ -880,6 +1417,8 @@ public class InventoryPanel : BasePanel
                 slot.transform.SetSiblingIndex(i);
                 slot.OnSlotClicked += OnSlotClicked;
                 slot.OnSlotRightClicked += OnSlotRightClicked;
+                slot.OnSlotHoverEnter += OnSlotHoverEnter;
+                slot.OnSlotHoverExit += OnSlotHoverExit;
                 _activeEquipSlots.Add(slot);
             }
         }
@@ -959,6 +1498,8 @@ public class InventoryPanel : BasePanel
                     slot.transform.SetSiblingIndex(slotIndex);
                     slot.OnSlotClicked += OnSlotClicked;
                     slot.OnSlotRightClicked += OnSlotRightClicked;
+                    slot.OnSlotHoverEnter += OnSlotHoverEnter;
+                    slot.OnSlotHoverExit += OnSlotHoverExit;
                     _activeSlots.Add(slot);
                     slotIndex++;
                 }
@@ -1038,6 +1579,8 @@ public class InventoryPanel : BasePanel
                     slot.transform.SetSiblingIndex(currencySlotIndex);
                     slot.OnSlotClicked += OnSlotClicked;
                     slot.OnSlotRightClicked += OnSlotRightClicked;
+                    slot.OnSlotHoverEnter += OnSlotHoverEnter;
+                    slot.OnSlotHoverExit += OnSlotHoverExit;
                     _activeCurrencySlots.Add(slot);
                     currencySlotIndex++;
                 }
@@ -1069,6 +1612,8 @@ public class InventoryPanel : BasePanel
                 slot.transform.SetSiblingIndex(i);
                 slot.OnSlotClicked += OnSlotClicked;
                 slot.OnSlotRightClicked += OnSlotRightClicked;
+                slot.OnSlotHoverEnter += OnSlotHoverEnter;
+                slot.OnSlotHoverExit += OnSlotHoverExit;
                 _activeCurrencySlots.Add(slot);
             }
         }
@@ -1137,6 +1682,8 @@ public class InventoryPanel : BasePanel
             {
                 slot.OnSlotClicked -= OnSlotClicked;
                 slot.OnSlotRightClicked -= OnSlotRightClicked;
+                slot.OnSlotHoverEnter -= OnSlotHoverEnter;
+                slot.OnSlotHoverExit -= OnSlotHoverExit;
                 PoolManager.Instance.Release(slot.gameObject);
             }
         }
@@ -1151,6 +1698,8 @@ public class InventoryPanel : BasePanel
             {
                 slot.OnSlotClicked -= OnSlotClicked;
                 slot.OnSlotRightClicked -= OnSlotRightClicked;
+                slot.OnSlotHoverEnter -= OnSlotHoverEnter;
+                slot.OnSlotHoverExit -= OnSlotHoverExit;
                 PoolManager.Instance.Release(slot.gameObject);
             }
         }
@@ -1165,6 +1714,8 @@ public class InventoryPanel : BasePanel
             {
                 slot.OnSlotClicked -= OnSlotClicked;
                 slot.OnSlotRightClicked -= OnSlotRightClicked;
+                slot.OnSlotHoverEnter -= OnSlotHoverEnter;
+                slot.OnSlotHoverExit -= OnSlotHoverExit;
                 PoolManager.Instance.Release(slot.gameObject);
             }
         }
@@ -1191,6 +1742,8 @@ public class InventoryPanel : BasePanel
             _trashSlot.Initialize(0, 0, ItemType.Weapon);
     }
 
+    #endregion
+
     #region 上下文菜单
 
     /// <summary>
@@ -1211,7 +1764,7 @@ public class InventoryPanel : BasePanel
     }
 
     /// <summary>
-    /// 显示上下文菜单（依附于格子位置）
+    /// 显示上下文菜单（显示在鼠标右边）
     /// </summary>
     private void ShowContextMenu(ItemSlotUI slot)
     {
@@ -1221,21 +1774,34 @@ public class InventoryPanel : BasePanel
         _contextMenuSlot = slot;
         _contextMenuRoot?.SetActive(true);
 
-        // 设置位置到格子的位置
-        if (_contextMenuRoot != null && slot != null)
+        // 设置位置到鼠标右边
+        if (_contextMenuRoot != null)
         {
             var rt = _contextMenuRoot.transform as RectTransform;
-            var slotRect = slot.RectTransform;
 
-            // 获取格子在世界坐标系中的屏幕位置
-            Vector3[] corners = new Vector3[4];
-            slotRect.GetWorldCorners(corners);
+            // 获取鼠标屏幕位置
+            Vector2 mousePos = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
 
-            // 使用格子右上角作为菜单位置
-            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, corners[1]);
+            // 转换为父对象内的局部坐标
+            if (rt.parent != null)
+            {
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    rt.parent as RectTransform,
+                    mousePos,
+                    null,
+                    out Vector2 localPos
+                );
 
-            // 调整为屏幕内可见（简单偏移）
-            rt.position = screenPos;
+                // 偏移到鼠标右边
+                float menuWidth = rt.rect.width;
+                localPos.x += menuWidth * 0.5f + 10f;
+
+                rt.anchoredPosition = localPos;
+            }
+            else
+            {
+                rt.position = mousePos;
+            }
         }
 
         // 根据物品类型显示/隐藏按钮
@@ -1383,12 +1949,61 @@ public class InventoryPanel : BasePanel
             return false;
 
         int itemId = slot.itemId;
-        int quantity = slot.quantity;
 
-        // TODO: 实现药水使用效果
-        // 目前只是移除一个
+        // 获取药水配置
+        var config = GameDataManager.Instance?.GetItemConfig(itemId) as PotionItemConfig;
+        if (config == null)
+        {
+            Debug.LogWarning($"[UsePotion] Potion config not found for itemId={itemId}");
+            return false;
+        }
+
+        // 即时效果
+        switch (config.instantEffectType)
+        {
+            case PotionInstantEffectType.Heal:
+                float healAmount = config.instantEffectValue;
+                var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
+                if (player != null)
+                {
+                    float currentHealth = player.RuntimeData.Health;
+                    float maxHealth = player.RuntimeData.maxHealth;
+                    float newHealth = Mathf.Min(currentHealth + healAmount, maxHealth);
+                    player.RuntimeData.Health = newHealth;
+                    SessionManager.Instance?.SetPlayerHealth(newHealth);
+                    // 通知 HeartSystem 更新显示
+                    EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, player.RuntimeData);
+                    Debug.Log($"[UsePotion] Healed for {healAmount}, current health: {newHealth}/{maxHealth}");
+                }
+                break;
+        }
+
+        // 限时效果 - 通过BuffManager
+        if (config.timedEffectType == PotionTimedEffectType.Shield)
+        {
+            BuffManager.Instance.AddBuff(
+                BuffType.Shield,
+                config.timedEffectDuration,
+                config.timedEffectValue,
+                $"potion_{itemId}"
+            );
+            Debug.Log($"[UsePotion] Applied Shield buff: duration={config.timedEffectDuration}s, value={config.timedEffectValue}");
+        }
+        else if (config.timedEffectType == PotionTimedEffectType.SpeedBoost)
+        {
+            // SpeedBoost 的 value 是倍率：配置值 10 表示 +10%，需要转换为 1.1
+            float speedMultiplier = 1f + config.timedEffectValue / 100f;
+            BuffManager.Instance.AddBuff(
+                BuffType.SpeedBoost,
+                config.timedEffectDuration,
+                speedMultiplier,
+                $"potion_{itemId}"
+            );
+            Debug.Log($"[UsePotion] Applied SpeedBoost buff: duration={config.timedEffectDuration}s, value={speedMultiplier} (+{config.timedEffectValue}%)");
+        }
+
+        // 移除药水
         InventoryManager.Instance?.RemoveItem(ItemType.Potion, itemId, 1);
-
         Debug.Log($"[UsePotion] Used potion itemId={itemId}");
         return true;
     }
@@ -1533,8 +2148,6 @@ public class InventoryPanel : BasePanel
     {
         HideSplitDialog();
     }
-
-    #endregion
 
     #endregion
 
