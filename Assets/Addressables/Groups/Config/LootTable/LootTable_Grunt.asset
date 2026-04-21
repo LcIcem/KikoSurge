@@ -46,4 +46,11 @@ MonoBehaviour:
       minQuantity: 2
       maxQuantity: 3
     maxPick: 3
+  - groupName: "\u9057\u7269\u6389\u843D"
+    entries:
+    - _itemConfig: {fileID: 11400000, guid: 8bea861fcea0e0342a3b2031540451e6, type: 2}
+      dropChance: 1
+      minQuantity: 2
+      maxQuantity: 3
+    maxPick: 1
   DropSpreadRadius: 1

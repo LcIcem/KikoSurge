@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Config-Relic
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Config-Relic
+  m_GUID: 7b138523f8e6dc54aa13d305b62e77b1
+  m_SerializeEntries:
+  - m_GUID: 8bea861fcea0e0342a3b2031540451e6
+    m_Address: Item_Relic
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: fc31030671b1eb2468e260f0796f7d65, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: dd0ca2fa262f58a4ab314fbe7a96240f, type: 2}
+    - {fileID: 11400000, guid: b4f3305717d7843438f8621b75531fd1, type: 2}

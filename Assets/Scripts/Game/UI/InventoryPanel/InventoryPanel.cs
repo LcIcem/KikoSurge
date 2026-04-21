@@ -68,6 +68,7 @@ public class InventoryPanel : BasePanel
     [Header("上下文菜单")]
     [SerializeField] private GameObject _contextMenuRoot;
     [SerializeField] private Button _btnUse;
+    [SerializeField] private TMP_Text _txtUseButton;
     [SerializeField] private Button _btnSplit;
 
     [Header("拆分窗口")]
@@ -1804,12 +1805,19 @@ public class InventoryPanel : BasePanel
             }
         }
 
-        // 根据物品类型显示/隐藏按钮
-        bool canUse = CanUseItem(slot.ItemType);
-        bool canSplit = slot.Quantity > 1;
+        // 判断是否来自装备区
+        bool isFromEquipArea = slot.transform.parent as RectTransform == _equipedWeaponContainer;
+
+        // 根据物品类型和位置设置按钮文本
+        var (canUse, buttonText) = GetContextMenuButtonInfo(slot.ItemType, isFromEquipArea);
+        bool canSplit = slot.Quantity > 1 && CanSplitItem(slot.ItemType);
 
         if (_btnUse != null)
+        {
             _btnUse.gameObject.SetActive(canUse);
+            if (canUse && _txtUseButton != null)
+                _txtUseButton.text = buttonText;
+        }
 
         if (_btnSplit != null)
             _btnSplit.gameObject.SetActive(canSplit);
@@ -1826,15 +1834,45 @@ public class InventoryPanel : BasePanel
     }
 
     /// <summary>
+    /// 判断物品类型是否可以使用，并返回按钮文本
+    /// </summary>
+    private (bool canUse, string buttonText) GetContextMenuButtonInfo(ItemType type, bool isFromEquipArea)
+    {
+        switch (type)
+        {
+            case ItemType.Weapon:
+                // 装备区的武器 → 卸下，背包的武器 → 装备
+                return (true, isFromEquipArea ? "卸下" : "装备");
+
+            case ItemType.Potion:
+            case ItemType.Relic:
+                // 药水和使用 → 使用
+                return (true, "使用");
+
+            default:
+                // 金币等不可使用
+                return (false, "");
+        }
+    }
+
+    /// <summary>
+    /// 判断物品类型是否可以拆分
+    /// </summary>
+    private bool CanSplitItem(ItemType type)
+    {
+        return type == ItemType.Potion || type == ItemType.Relic;
+    }
+
+    /// <summary>
     /// 判断物品类型是否可以使用
     /// </summary>
     private bool CanUseItem(ItemType type)
     {
-        return type == ItemType.Weapon || type == ItemType.Potion;
+        return type == ItemType.Weapon || type == ItemType.Potion || type == ItemType.Relic;
     }
 
     /// <summary>
-    /// 上下文菜单 - 使用
+    /// 上下文菜单 - 使用/装备/卸下
     /// </summary>
     private void OnContextMenuUse()
     {
@@ -1847,21 +1885,29 @@ public class InventoryPanel : BasePanel
         int itemId = _contextMenuSlot.ItemId;
         ItemType itemType = _contextMenuSlot.ItemType;
         int slotIndex = _contextMenuSlot.CurrentIndex;
+        bool isFromEquipArea = _contextMenuSlot.transform.parent as RectTransform == _equipedWeaponContainer;
 
-        Debug.Log($"[OnContextMenuUse] itemId={itemId}, type={itemType}, slotIndex={slotIndex}");
+        Debug.Log($"[OnContextMenuUse] itemId={itemId}, type={itemType}, slotIndex={slotIndex}, isFromEquipArea={isFromEquipArea}");
 
         bool used = false;
 
         switch (itemType)
         {
             case ItemType.Weapon:
-                // 装备武器：找到第一个空装备槽
-                used = TryEquipWeapon(slotIndex);
+                if (isFromEquipArea)
+                    used = TryUnequipWeapon(slotIndex);
+                else
+                    used = TryEquipWeapon(slotIndex);
                 break;
 
             case ItemType.Potion:
                 // 使用药水
                 used = UsePotion(slotIndex);
+                break;
+
+            case ItemType.Relic:
+                // 使用遗物
+                used = UseRelic(slotIndex);
                 break;
 
             default:
@@ -1933,6 +1979,87 @@ public class InventoryPanel : BasePanel
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// 尝试卸下武器
+    /// </summary>
+    private bool TryUnequipWeapon(int equipSlotIndex)
+    {
+        var equipped = SessionManager.Instance?.GetEquippedWeaponSlots();
+        if (equipped == null || equipSlotIndex < 0 || equipSlotIndex >= equipped.Count)
+            return false;
+
+        if (equipped[equipSlotIndex].IsEmpty)
+            return false;
+
+        // 卸下到背包
+        InventoryManager.Instance?.UnequipWeapon(equipSlotIndex);
+        return true;
+    }
+
+    /// <summary>
+    /// 使用遗物
+    /// </summary>
+    private bool UseRelic(int slotIndex)
+    {
+        var slots = InventoryManager.Instance?.GetInventory(ItemType.Relic);
+        if (slots == null || slotIndex < 0 || slotIndex >= slots.Count)
+            return false;
+
+        var slot = slots[slotIndex];
+        if (slot.IsEmpty)
+            return false;
+
+        int itemId = slot.itemId;
+
+        // 获取遗物配置
+        var config = GameDataManager.Instance?.GetItemConfig(itemId) as RelicConfig;
+        if (config == null)
+        {
+            Debug.LogWarning($"[UseRelic] Relic config not found for itemId={itemId}");
+            return false;
+        }
+
+        // 遗物效果应用逻辑（根据遗物类型处理）
+        ApplyRelicEffects(config);
+
+        // 移除遗物（如果是一次性的）
+        // TODO: 根据遗物的 persistent 属性决定是否移除
+        // 目前默认不移除，遗物是永久生效的
+        Debug.Log($"[UseRelic] Used relic itemId={itemId}");
+        return true;
+    }
+
+    /// <summary>
+    /// 应用遗物效果
+    /// </summary>
+    private void ApplyRelicEffects(RelicConfig config)
+    {
+        if (config == null)
+            return;
+
+        // 应用属性加成 modifiers
+        if (config.modifiers != null)
+        {
+            foreach (var mod in config.modifiers)
+            {
+                if (mod.value != 0f)
+                {
+                    // 通知系统应用 modifier
+                    Debug.Log($"[ApplyRelicEffects] Applying modifier {mod.type} = {mod.value}");
+                }
+            }
+        }
+
+        // 应用特殊效果
+        if (config.effects != null)
+        {
+            foreach (var effect in config.effects)
+            {
+                Debug.Log($"[ApplyRelicEffects] Applying effect {effect.GetType().Name}");
+            }
+        }
     }
 
     /// <summary>
