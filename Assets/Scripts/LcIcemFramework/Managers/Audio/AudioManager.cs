@@ -69,14 +69,28 @@ public class AudioManager : SingletonMono<AudioManager>
     public void PlayAmbient(AudioClip clip)
     {
         if (clip == null) return;
-        _ambientSource.clip = clip;
-        _ambientSource.volume = _sfxVolume;
-        _ambientSource.Play();
+        var src = _sfxSources.Find(s => !s.isPlaying);
+        if (src == null) src = _sfxSources[0];
+        src.clip = clip;
+        src.loop = true;
+        src.volume = _sfxVolume;
+        src.Play();
     }
 
-    public void StopAmbient() => _ambientSource.Stop();
-    public void PauseAmbient() => _ambientSource.Pause();
-    public void ResumeAmbient() => _ambientSource.UnPause();
+    public void StopAmbient()
+    {
+        foreach (var s in _sfxSources)
+        {
+            if (s.clip != null && s.loop)
+            {
+                s.Stop();
+                s.loop = false;
+            }
+        }
+    }
+
+    public void PauseAmbient() { foreach (var s in _sfxSources) s.Pause(); }
+    public void ResumeAmbient() { foreach (var s in _sfxSources) s.UnPause(); }
 
     #endregion
 

@@ -243,6 +243,20 @@ public class UIManager : Singleton<UIManager>
     }
 
     /// <summary>
+    /// 销毁所有已加载的面板。
+    /// 用于游戏重新开始时清理所有旧面板。
+    /// </summary>
+    public void HideAllPanels()
+    {
+        foreach (var kvp in _panelDic)
+        {
+            kvp.Value.Hide();
+            UnityEngine.Object.Destroy(kvp.Value.gameObject);
+        }
+        _panelDic.Clear();
+    }
+
+    /// <summary>
     /// 面板关闭时回调，通知 GameLifecycleManager
     /// </summary>
     public event UnityEngine.Events.UnityAction<BasePanel> OnPanelClosed;

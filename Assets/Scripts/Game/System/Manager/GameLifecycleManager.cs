@@ -664,6 +664,9 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         try { EnemyFactory.Instance?.ReleaseAll(); } catch (System.Exception e) { Debug.LogException(e); }
         try { LootManager.Instance?.ClearAll(); } catch (System.Exception e) { Debug.LogException(e); }
 
+        // 销毁所有UI面板（确保旧面板不会残留）
+        ManagerHub.UI.HideAllPanels();
+
         // 通过 PlayerHandler 清理玩家
         Debug.Log($"[RestartGame] Calling DestroyPlayer...");
         LevelController?.DestroyPlayer();
@@ -679,10 +682,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         {
             Debug.Log("[RestartGame] LevelController is null, skipping destroy");
         }
-
-        // 隐藏 GameOver 面板和 Hub 面板（Hub 在新游戏开始时会重新 Show）
-        ManagerHub.UI.HidePanel<GameOverPanel>();
-        ManagerHub.UI.HidePanel<HubPanel>();
 
         // 恢复时间（以防从暂停状态重启）
         Time.timeScale = 1f;

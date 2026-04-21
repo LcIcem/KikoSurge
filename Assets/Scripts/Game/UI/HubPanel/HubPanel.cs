@@ -45,6 +45,20 @@ public class HubPanel : BasePanel
         EnsureDamageFlashHidden();
         // 请求刷新当前房间UI
         EventCenter.Instance.Publish(GameEventID.OnRequestRoomRefresh);
+        // 主动刷新心形UI（确保Hub显示时生命值正确）
+        RefreshHeartDisplay();
+    }
+
+    /// <summary>
+    /// 刷新心形UI显示
+    /// </summary>
+    private void RefreshHeartDisplay()
+    {
+        var playerData = SessionManager.Instance?.GetPlayerData();
+        if (playerData != null)
+        {
+            EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, playerData);
+        }
     }
 
     /// <summary>
