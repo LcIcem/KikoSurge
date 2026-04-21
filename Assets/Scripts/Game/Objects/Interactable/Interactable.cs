@@ -26,6 +26,10 @@ public class Interactable : MonoBehaviour
     [Header("交互音效")]
     [SerializeField] private AudioClip _interactSFX;
 
+    [Header("交互限制")]
+    [Tooltip("-1=无限制，0=禁止交互，1+=限制次数")]
+    [SerializeField] private int _maxInteractCount = -1;
+
     /// <summary>
     /// 交互触发时调用
     /// </summary>
@@ -34,10 +38,16 @@ public class Interactable : MonoBehaviour
     /// <summary>
     /// 玩家是否在交互范围内且交互未被禁用
     /// </summary>
-    public bool CanInteract => _isPlayerInRange && _interactionEnabled;
+    public bool CanInteract => _isPlayerInRange && _interactionEnabled && !IsExhausted;
+
+    /// <summary>
+    /// 交互次数是否已耗尽
+    /// </summary>
+    public bool IsExhausted => _maxInteractCount >= 0 && _interactCount >= _maxInteractCount;
 
     private bool _isPlayerInRange;
     private bool _interactionEnabled = true;
+    private int _interactCount;
     private InputAction _interactAction;
     private string _hintTemplate = "";
 
@@ -58,6 +68,7 @@ public class Interactable : MonoBehaviour
     {
         _isPlayerInRange = false;
         _interactionEnabled = true;
+        _interactCount = 0;
         ShowInteractionHint(false);
         ShowInfoCard(false);
     }
@@ -112,6 +123,10 @@ public class Interactable : MonoBehaviour
 
         _isPlayerInRange = true;
 
+        // 交互次数耗尽时不显示提示
+        if (IsExhausted)
+            return;
+
         // 如果已有其他交互物激活，不显示交互提示
         if (Player.CurrentInteractable != null && Player.CurrentInteractable != this)
             return;
@@ -155,6 +170,9 @@ public class Interactable : MonoBehaviour
     {
         if (!CanInteract)
             return;
+
+        // 消耗交互次数
+        _interactCount++;
 
         ShowInteractionHint(false);
         ShowInfoCard(false);
