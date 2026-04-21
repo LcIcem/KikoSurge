@@ -78,9 +78,9 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingLayerID: -178446317
+  m_SortingLayer: 1
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -104,9 +104,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75b236263b5c9e840b6924165aed792e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShadowController
-  _lifeTime: 4
-  _velocity: 2
-  _acc: 3
+  _lifeTime: 0.8
+  _velocity: 7
+  _acc: 12
   _randomColors:
   - {r: 0.1908935, g: 0.24726835, b: 0.3056603, a: 0.33333334}
   - {r: 0.26907086, g: 0.35231707, b: 0.4415095, a: 0.34509805}

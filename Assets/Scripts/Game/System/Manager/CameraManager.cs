@@ -1,6 +1,7 @@
 using LcIcemFramework.Core;
 using Unity.Cinemachine;
 using UnityEngine;
+using Game.Event;
 
 /// <summary>
 /// 摄像机管理器 -基于CinemachineCamera
@@ -9,12 +10,18 @@ public class CameraManager : SingletonMono<CameraManager>
 {
     [SerializeField] private CinemachineCamera _cinemachineCam;
 
-    private CinemachineImpulseSource impulseSrc;
+    // 当前跟随目标（Player）的相机冲击 Source
+    private CinemachineImpulseSource _recoilSource;
+    private CinemachineImpulseSource _hurtSource;
+    private CinemachineImpulseSource _dashSource;
+
     public Transform Target { get; private set; }
 
     protected override void Init()
     {
-        EventCenter.Instance.Subscribe<WeaponBase>(EventID.ShootPerformed, ScreenShake);
+        EventCenter.Instance.Subscribe<WeaponBase>(EventID.ShootPerformed, OnShootPerformed);
+        EventCenter.Instance.Subscribe(GameEventID.Camera_TriggerHurt, OnHurt);
+        EventCenter.Instance.Subscribe(GameEventID.Camera_TriggerDash, OnDash);
 
         // 运行时在场景中查找 CinemachineCamera（避免 SerializeField 跨场景失效）
         if (_cinemachineCam == null)
@@ -24,7 +31,9 @@ public class CameraManager : SingletonMono<CameraManager>
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.ShootPerformed, ScreenShake);
+        EventCenter.Instance.Unsubscribe<WeaponBase>(EventID.ShootPerformed, OnShootPerformed);
+        EventCenter.Instance.Unsubscribe(GameEventID.Camera_TriggerHurt, OnHurt);
+        EventCenter.Instance.Unsubscribe(GameEventID.Camera_TriggerDash, OnDash);
     }
 
     // 设置摄像机跟随
@@ -39,16 +48,49 @@ public class CameraManager : SingletonMono<CameraManager>
         if (_cinemachineCam != null)
             _cinemachineCam.Follow = target;
         else
-            Debug.LogWarning("[CameraManager] CinemachineCamera not found in scene.");
-    }
-
-    public void ScreenShake(WeaponBase weapon)
-    {
-        impulseSrc = Target.gameObject.GetComponent<CinemachineImpulseSource>();
-        if (impulseSrc != null)
         {
-            impulseSrc.GenerateImpulse(weapon.Config.recoilForce);
+            Debug.LogWarning("[CameraManager] CinemachineCamera not found in scene.");
+            return;
+        }
+
+        // 从 Player 获取三个冲击 Source
+        var player = target.GetComponent<Player>();
+        if (player != null)
+        {
+            _recoilSource = player.RecoilSource;
+            _hurtSource = player.HurtSource;
+            _dashSource = player.DashSource;
         }
     }
 
+    /// <summary>
+    /// 武器射击时震动（后坐力），方向为射击反方向，强度由 recoilForce 控制
+    /// </summary>
+    private void OnShootPerformed(WeaponBase weapon)
+    {
+        // 后坐力方向：射击反方向 × recoilForce
+        Vector3 recoilDir = (Vector3)(-weapon.Owner.AimDir) * weapon.Config.recoilForce;
+        _recoilSource?.GenerateImpulse(recoilDir);
+    }
+
+    /// <summary>
+    /// 受伤相机震动（无方向，随机）
+    /// </summary>
+    private void OnHurt()
+    {
+        _hurtSource?.GenerateImpulse();
+    }
+
+    /// <summary>
+    /// 冲刺相机震动，方向为冲刺方向
+    /// </summary>
+    private void OnDash()
+    {
+        var player = Target.GetComponent<Player>();
+        if (player != null)
+        {
+            Vector3 dashDir = new Vector3(player.MoveDir.x, player.MoveDir.y, 0f);
+            _dashSource?.GenerateImpulse(dashDir);
+        }
+    }
 }

@@ -50,7 +50,10 @@ public class ShadowController : MonoBehaviour, IPoolable
     {
         _sr.sprite = targetSr.sprite;
         _sr.flipX = targetSr.flipX;
-        _sr.color = _randomColors[Random.Range(0, _randomColors.Count)];
+        if (_randomColors != null && _randomColors.Count > 0)
+            _sr.color = _randomColors[Random.Range(0, _randomColors.Count)];
+        else
+            _sr.color = Color.white;
 
         chasePos = targetSr.transform.position;
         transform.position = chasePos;
@@ -96,7 +99,7 @@ public class ShadowController : MonoBehaviour, IPoolable
                 Vector3 curPos = chasePos;
                 chasePos = targetPosQueue.Dequeue();
                 _sr.sprite = spriteQueue.Dequeue();
-                _sr.flipX = spriteQueue.Dequeue();
+                _sr.flipX = flipQueue.Dequeue();
 
                 distance -= distanceMoveTo;
                 transform.position = Vector3.MoveTowards(curPos, chasePos, distance);

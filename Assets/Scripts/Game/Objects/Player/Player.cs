@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Cinemachine;
 using LcIcemFramework.Core;
 using System.Collections;
 using System.Collections.Generic;
@@ -63,6 +64,19 @@ public class Player : MonoBehaviour
     /// 当前正在交互的物品（用于防止多个交互UI重叠显示）
     /// </summary>
     public static Interactable CurrentInteractable { get; private set; } = null;
+
+    // 相机冲击 Source（手动挂载到 CameraSources/Recoil|Hurt|Dash 子对象）
+    [Header("相机冲击源")]
+    [SerializeField] private CinemachineImpulseSource _recoilSource;
+    [SerializeField] private CinemachineImpulseSource _hurtSource;
+    [SerializeField] private CinemachineImpulseSource _dashSource;
+
+    /// <summary>武器后坐力冲击源</summary>
+    public CinemachineImpulseSource RecoilSource => _recoilSource;
+    /// <summary>受伤冲击源</summary>
+    public CinemachineImpulseSource HurtSource => _hurtSource;
+    /// <summary>冲刺冲击源</summary>
+    public CinemachineImpulseSource DashSource => _dashSource;
 
     private void Awake()
     {
@@ -241,6 +255,9 @@ public class Player : MonoBehaviour
             _fsm.SetTrigger("hurt");
             StartCoroutine(HurtFlashCoroutine());
         }
+
+        // 触发相机冲击效果
+        EventCenter.Instance.Publish(GameEventID.Camera_TriggerHurt);
 
         EventCenter.Instance.Publish(GameEventID.OnPlayerDamaged,
             new DamageParams { damage = damage, from = transform.position });

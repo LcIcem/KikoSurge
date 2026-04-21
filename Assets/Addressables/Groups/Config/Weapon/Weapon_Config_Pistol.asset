@@ -24,7 +24,7 @@ MonoBehaviour:
   chargeTime: 1
   magazineSize: 20
   reloadTime: 0.8
-  recoilForce: 1
+  recoilForce: 0.5
   penetrateCount: 0
   weaponDamage: 1
   weaponCritRate: 0.07
