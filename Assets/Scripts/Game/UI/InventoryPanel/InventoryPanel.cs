@@ -1016,13 +1016,6 @@ public class InventoryPanel : BasePanel
             }
         }
 
-        // 护甲属性（如果有）
-        if (relicConfig.baseDefense > 0 || relicConfig.damageReduction > 0)
-        {
-            sb.AppendLine($"护甲: +{relicConfig.baseDefense:F1}");
-            sb.AppendLine($"减伤: {relicConfig.damageReduction * 100:F0}%");
-        }
-
         sb.AppendLine();
         if (!string.IsNullOrEmpty(config.Description))
         {
@@ -1845,12 +1838,11 @@ public class InventoryPanel : BasePanel
                 return (true, isFromEquipArea ? "卸下" : "装备");
 
             case ItemType.Potion:
-            case ItemType.Relic:
-                // 药水和使用 → 使用
+                // 药水 → 使用
                 return (true, "使用");
 
             default:
-                // 金币等不可使用
+                // 遗物在背包中自动生效，金币不可使用
                 return (false, "");
         }
     }
@@ -1860,7 +1852,7 @@ public class InventoryPanel : BasePanel
     /// </summary>
     private bool CanSplitItem(ItemType type)
     {
-        return type == ItemType.Potion || type == ItemType.Relic;
+        return type == ItemType.Potion || type == ItemType.Relic || type == ItemType.Currency;
     }
 
     /// <summary>
@@ -1868,7 +1860,7 @@ public class InventoryPanel : BasePanel
     /// </summary>
     private bool CanUseItem(ItemType type)
     {
-        return type == ItemType.Weapon || type == ItemType.Potion || type == ItemType.Relic;
+        return type == ItemType.Weapon || type == ItemType.Potion;
     }
 
     /// <summary>
@@ -1903,11 +1895,6 @@ public class InventoryPanel : BasePanel
             case ItemType.Potion:
                 // 使用药水
                 used = UsePotion(slotIndex);
-                break;
-
-            case ItemType.Relic:
-                // 使用遗物
-                used = UseRelic(slotIndex);
                 break;
 
             default:
@@ -1996,70 +1983,6 @@ public class InventoryPanel : BasePanel
         // 卸下到背包
         InventoryManager.Instance?.UnequipWeapon(equipSlotIndex);
         return true;
-    }
-
-    /// <summary>
-    /// 使用遗物
-    /// </summary>
-    private bool UseRelic(int slotIndex)
-    {
-        var slots = InventoryManager.Instance?.GetInventory(ItemType.Relic);
-        if (slots == null || slotIndex < 0 || slotIndex >= slots.Count)
-            return false;
-
-        var slot = slots[slotIndex];
-        if (slot.IsEmpty)
-            return false;
-
-        int itemId = slot.itemId;
-
-        // 获取遗物配置
-        var config = GameDataManager.Instance?.GetItemConfig(itemId) as RelicConfig;
-        if (config == null)
-        {
-            Debug.LogWarning($"[UseRelic] Relic config not found for itemId={itemId}");
-            return false;
-        }
-
-        // 遗物效果应用逻辑（根据遗物类型处理）
-        ApplyRelicEffects(config);
-
-        // 移除遗物（如果是一次性的）
-        // TODO: 根据遗物的 persistent 属性决定是否移除
-        // 目前默认不移除，遗物是永久生效的
-        Debug.Log($"[UseRelic] Used relic itemId={itemId}");
-        return true;
-    }
-
-    /// <summary>
-    /// 应用遗物效果
-    /// </summary>
-    private void ApplyRelicEffects(RelicConfig config)
-    {
-        if (config == null)
-            return;
-
-        // 应用属性加成 modifiers
-        if (config.modifiers != null)
-        {
-            foreach (var mod in config.modifiers)
-            {
-                if (mod.value != 0f)
-                {
-                    // 通知系统应用 modifier
-                    Debug.Log($"[ApplyRelicEffects] Applying modifier {mod.type} = {mod.value}");
-                }
-            }
-        }
-
-        // 应用特殊效果
-        if (config.effects != null)
-        {
-            foreach (var effect in config.effects)
-            {
-                Debug.Log($"[ApplyRelicEffects] Applying effect {effect.GetType().Name}");
-            }
-        }
     }
 
     /// <summary>

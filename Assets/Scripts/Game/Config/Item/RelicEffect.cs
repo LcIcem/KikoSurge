@@ -1,5 +1,6 @@
 using System;
 using ProcGen.Config;
+using UnityEngine;
 
 /// <summary>
 /// 遗物效果基类

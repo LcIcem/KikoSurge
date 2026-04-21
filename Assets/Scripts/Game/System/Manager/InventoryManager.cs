@@ -178,6 +178,12 @@ public class InventoryManager : SingletonMono<InventoryManager>
 
         if (quantity > 0)
         {
+            // 遗物在背包中就自动生效，应用 modifiers
+            if (type == ItemType.Relic)
+            {
+                ApplyRelicModifiers(itemId);
+            }
+
             EventCenter.Instance.Publish(GameEventID.OnInventoryItemAdded,
                 new InventoryChangeParams(type, itemId, quantity, InventoryChangeType.Add));
             EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
@@ -614,6 +620,50 @@ public class InventoryManager : SingletonMono<InventoryManager>
     #endregion
 
     #region 辅助方法
+
+    /// <summary>
+    /// 应用遗物的 modifiers 到 session
+    /// </summary>
+    private void ApplyRelicModifiers(int relicItemId)
+    {
+        var config = GameDataManager.Instance?.GetItemConfig(relicItemId) as RelicConfig;
+        if (config == null)
+        {
+            Debug.LogWarning($"[ApplyRelicModifiers] Relic config not found for itemId={relicItemId}");
+            return;
+        }
+
+        if (config.modifiers != null)
+        {
+            foreach (var mod in config.modifiers)
+            {
+                if (mod.value != 0f)
+                {
+                    var modifierData = new ModifierData(
+                        relicItemId,
+                        config.Name ?? $"Relic_{relicItemId}",
+                        mod.type,
+                        mod.value
+                    );
+                    _sessionData?.AddModifier(modifierData);
+                    Debug.Log($"[ApplyRelicModifiers] Added modifier {mod.type} = {mod.value} from relic {relicItemId}");
+                }
+            }
+        }
+
+        // 应用特殊效果
+        if (config.effects != null)
+        {
+            foreach (var effect in config.effects)
+            {
+                if (effect != null)
+                {
+                    _sessionData?.activeRelicEffects?.Add(effect);
+                    Debug.Log($"[ApplyRelicModifiers] Added effect {effect.GetType().Name} from relic {relicItemId}");
+                }
+            }
+        }
+    }
 
     /// <summary>
     /// 根据类型获取 SessionData 中对应的背包格子列表

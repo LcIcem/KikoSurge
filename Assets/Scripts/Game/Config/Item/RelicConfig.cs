@@ -12,8 +12,4 @@ public class RelicConfig : ItemConfig
 
     [Header("遗物效果")]
     public List<RelicEffect> effects = new();
-
-    [Header("护甲属性（可选）")]
-    public float baseDefense;
-    public float damageReduction;
 }

@@ -456,13 +456,6 @@ public class LootItem : MonoBehaviour, IPoolable
             }
         }
 
-        // 护甲属性（如果有）
-        if (relicConfig.baseDefense > 0 || relicConfig.damageReduction > 0)
-        {
-            sb.AppendLine($"护甲: +{relicConfig.baseDefense:F1}");
-            sb.AppendLine($"减伤: {relicConfig.damageReduction * 100:F0}%");
-        }
-
         sb.AppendLine();
         if (!string.IsNullOrEmpty(ItemDef.Description))
         {
