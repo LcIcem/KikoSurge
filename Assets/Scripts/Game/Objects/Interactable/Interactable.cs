@@ -23,6 +23,9 @@ public class Interactable : MonoBehaviour
     [SerializeField] private TMP_Text _infoCardTitle;
     [SerializeField] private TMP_Text _infoCardDescription;
 
+    [Header("交互音效")]
+    [SerializeField] private AudioClip _interactSFX;
+
     /// <summary>
     /// 交互触发时调用
     /// </summary>
@@ -165,6 +168,10 @@ public class Interactable : MonoBehaviour
         }
 
         OnInteract?.Invoke();
+
+        // 播放交互音效
+        if (_interactSFX != null)
+            ManagerHub.Audio?.PlaySFX(_interactSFX);
     }
 
     /// <summary>

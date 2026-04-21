@@ -1,13 +1,43 @@
 fileFormatVersion: 2
-guid: 8b1558a66d522634d8af0554b6004319
+guid: 282224ee0b99a74488d352d18057ce60
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1944594620076283797
-    second: Btn_0
+      213: 6288149956449613759
+    second: LongButtons2_0
   - first:
-      213: -6127056871468091566
-    second: Btn_1
+      213: -2962138920334322917
+    second: LongButtons2_1
+  - first:
+      213: 7519322782809774738
+    second: LongButtons2_2
+  - first:
+      213: 1358772151087685006
+    second: LongButtons2_3
+  - first:
+      213: 249631063346645988
+    second: LongButtons2_4
+  - first:
+      213: -8513111617521997985
+    second: LongButtons2_5
+  - first:
+      213: -475137262764482375
+    second: LongButtons2_6
+  - first:
+      213: 8738340696712637372
+    second: LongButtons2_7
+  - first:
+      213: 2190201341752627788
+    second: LongButtons2_8
+  - first:
+      213: 9023329015167707215
+    second: LongButtons2_9
+  - first:
+      213: -6632559143772950285
+    second: LongButtons2_10
+  - first:
+      213: -8592836897827547158
+    second: LongButtons2_11
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -142,45 +172,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Btn_0
+      name: LongButtons2_2
       rect:
         serializedVersion: 2
-        x: 5
-        y: 5
-        width: 26
-        height: 26
+        x: 33
+        y: 35
+        width: 14
+        height: 10
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 59758c901869cfa10800000000000000
-      internalID: 1944594620076283797
+      spriteID: 6130c4a9e2845844ea6149f153a21be2
+      internalID: 7519322782809774738
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Btn_1
+      name: LongButtons2_3
       rect:
         serializedVersion: 2
-        x: 53
-        y: 5
-        width: 26
-        height: 26
+        x: 49
+        y: 35
+        width: 14
+        height: 10
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 2573789ec3258faa0800000000000000
-      internalID: -6127056871468091566
+      spriteID: 76071822b6d572443bad391d3bf4dabd
+      internalID: 1358772151087685006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LongButtons2_4
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 19
+        width: 14
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39aa40c91a4d12d4b87e93426ca43431
+      internalID: 249631063346645988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LongButtons2_5
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 19
+        width: 14
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 89207ab6a944c464b81e60efd5997d83
+      internalID: -8513111617521997985
       vertices: []
       indices: 
       edges: []
@@ -189,7 +263,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: f988100982d21c24aabc544cf8a94a91
+    spriteID: d0193565f9d7d6e4587a66710acf8f6f
     internalID: 0
     vertices: []
     indices: 
@@ -199,10 +273,20 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":16.0,"y":16.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      Btn_0: 1944594620076283797
-      Btn_1: -6127056871468091566
+      LongButtons2_0: 6288149956449613759
+      LongButtons2_1: -2962138920334322917
+      LongButtons2_10: 1809151108
+      LongButtons2_11: 518767735
+      LongButtons2_2: 7519322782809774738
+      LongButtons2_3: 1358772151087685006
+      LongButtons2_4: 249631063346645988
+      LongButtons2_5: -8513111617521997985
+      LongButtons2_6: -471211306
+      LongButtons2_7: -2042803422
+      LongButtons2_8: 1297911340
+      LongButtons2_9: -1421587897
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
