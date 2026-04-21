@@ -1,6 +1,7 @@
 using UnityEngine;
 using Game.Event;
 using LcIcemFramework.Core;
+using LcIcemFramework;
 
 /// <summary>
 /// 篝火点交互脚本
@@ -15,6 +16,13 @@ public class RestPointInteractable : MonoBehaviour
     [Header("交互配置")]
     [SerializeField] private Interactable _interactable;
 
+    [Header("环境音效配置")]
+    [SerializeField] private AudioClip _ambientSFX;
+
+    private int _myRoomId = -1;
+    private int _currentPlayerRoomId = -1;
+    private bool _isPlayerInMyRoom;
+
     private void Start()
     {
         if (_interactable == null)
@@ -26,6 +34,53 @@ public class RestPointInteractable : MonoBehaviour
         {
             _interactable.SetHintText("按[{0}]休息");
             _interactable.OnInteract += OnInteract;
+        }
+
+        // 获取自己所在房间的ID
+        var levelController = FindFirstObjectByType<LevelController>();
+        if (levelController != null)
+        {
+            var tileData = levelController.GetTileData();
+            if (tileData != null)
+            {
+                Vector2Int gridPos = Vector2Int.FloorToInt(transform.position);
+                _myRoomId = tileData.GetRoomIdAt(gridPos);
+            }
+        }
+
+        // 订阅房间事件
+        EventCenter.Instance.Subscribe<RoomEnterParams>(GameEventID.OnRoomEnter, OnRoomEnter);
+        EventCenter.Instance.Subscribe<CorridorEnterParams>(GameEventID.OnCorridorEnter, OnCorridorEnter);
+    }
+
+    private void OnRoomEnter(RoomEnterParams p)
+    {
+        _currentPlayerRoomId = p.roomId;
+
+        if (p.roomId == _myRoomId && !_isPlayerInMyRoom)
+        {
+            // 玩家进入自己所在房间，播放音效
+            _isPlayerInMyRoom = true;
+            if (_ambientSFX != null)
+            {
+                ManagerHub.Audio.PlayAmbient(_ambientSFX);
+            }
+        }
+        else if (_isPlayerInMyRoom && p.roomId != _myRoomId)
+        {
+            // 玩家离开自己所在房间，停止音效
+            _isPlayerInMyRoom = false;
+            ManagerHub.Audio.StopAmbient();
+        }
+    }
+
+    private void OnCorridorEnter(CorridorEnterParams p)
+    {
+        if (_isPlayerInMyRoom)
+        {
+            // 玩家进入走廊，停止音效
+            _isPlayerInMyRoom = false;
+            ManagerHub.Audio.StopAmbient();
         }
     }
 
@@ -67,7 +122,7 @@ public class RestPointInteractable : MonoBehaviour
     private void SaveCheckpoint()
     {
         // 创建checkpoint快照（用于中途退出后继续游玩）
-        var levelController = FindAnyObjectByType<LevelController>();
+        var levelController = FindFirstObjectByType<LevelController>();
         if (levelController != null)
         {
             var snapshot = levelController.CreateCheckpointSnapshot();
@@ -84,5 +139,8 @@ public class RestPointInteractable : MonoBehaviour
         {
             _interactable.OnInteract -= OnInteract;
         }
+
+        EventCenter.Instance.Unsubscribe<RoomEnterParams>(GameEventID.OnRoomEnter, OnRoomEnter);
+        EventCenter.Instance.Unsubscribe<CorridorEnterParams>(GameEventID.OnCorridorEnter, OnCorridorEnter);
     }
 }

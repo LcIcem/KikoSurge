@@ -14,6 +14,7 @@ public class AudioManager : SingletonMono<AudioManager>
 {
     private AudioSource _bgmSource;
     private List<AudioSource> _sfxSources = new List<AudioSource>();
+    private AudioSource _ambientSource;
     private const int SFX_POOL_SIZE = Constants.SFX_POOL_SIZE;
     private float _bgmVolume = 1f;
     private float _sfxVolume = 1f;
@@ -33,6 +34,10 @@ public class AudioManager : SingletonMono<AudioManager>
             src.playOnAwake = false;
             _sfxSources.Add(src);
         }
+
+        _ambientSource = gameObject.AddComponent<AudioSource>();
+        _ambientSource.loop = true;
+        _ambientSource.playOnAwake = false;
     }
 
     #endregion
@@ -56,6 +61,22 @@ public class AudioManager : SingletonMono<AudioManager>
     public void ResumeBGM() => _bgmSource.UnPause();
     public void MuteBGM() => _bgmSource.mute = true;
     public void UnmuteBGM() => _bgmSource.mute = false;
+
+    #endregion
+
+    #region Ambient
+
+    public void PlayAmbient(AudioClip clip)
+    {
+        if (clip == null) return;
+        _ambientSource.clip = clip;
+        _ambientSource.volume = _sfxVolume;
+        _ambientSource.Play();
+    }
+
+    public void StopAmbient() => _ambientSource.Stop();
+    public void PauseAmbient() => _ambientSource.Pause();
+    public void ResumeAmbient() => _ambientSource.UnPause();
 
     #endregion
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -155,8 +156,20 @@ public class UIManager : Singleton<UIManager>
         // 已存在则直接显示，不再重复加载
         if (_panelDic.ContainsKey(panelName))
         {
-            _panelDic[panelName].Show();
-            callBack?.Invoke(_panelDic[panelName] as T);
+            var panel = _panelDic[panelName] as T;
+            // 确保面板初始透明
+            if (panel.CanvasGroup != null)
+            {
+                panel.CanvasGroup.alpha = 0;
+                panel.CanvasGroup.blocksRaycasts = false;
+            }
+            panel.Show();
+            callBack?.Invoke(panel);
+            // 渐显面板
+            if (panel.CanvasGroup != null)
+            {
+                FadeIn(panel.CanvasGroup, 0.3f);
+            }
             return;
         }
 
@@ -213,8 +226,21 @@ public class UIManager : Singleton<UIManager>
                 return;
             }
 
+            // 确保面板初始透明，用户看不到 Show() 中的 UI 操作
+            if (panel.CanvasGroup != null)
+            {
+                panel.CanvasGroup.alpha = 0;
+                panel.CanvasGroup.blocksRaycasts = false;
+            }
+
             panel.Show();
             callBack?.Invoke(panel);
+
+            // 渐显面板（Show() 完成后触发）
+            if (panel.CanvasGroup != null)
+            {
+                FadeIn(panel.CanvasGroup, 0.3f);
+            }
 
             // 注册到字典中，防止重复加载
             if (_panelDic.ContainsKey(panelName))
@@ -276,6 +302,13 @@ public class UIManager : Singleton<UIManager>
         {
             string panelName = topPanel.GetType().Name;
             topPanel.OnBeforeClose(); // 关闭前回调
+
+            // 确保面板先设为透明，再调用 Hide
+            if (topPanel.CanvasGroup != null)
+            {
+                topPanel.CanvasGroup.alpha = 0;
+                topPanel.CanvasGroup.blocksRaycasts = false;
+            }
             topPanel.Hide();
             UnityEngine.Object.Destroy(topPanel.gameObject);
             _panelDic.Remove(panelName);
@@ -324,6 +357,29 @@ public class UIManager : Singleton<UIManager>
         }
 
         return topPanel;
+    }
+
+    /// <summary>
+    /// 渐显面板（alpha 从 0 到 1）。
+    /// </summary>
+    private void FadeIn(CanvasGroup canvasGroup, float duration)
+    {
+        if (canvasGroup == null) return;
+        MonoManager.Instance.StartCoroutine(FadeInCoroutine(canvasGroup, duration));
+    }
+
+    private IEnumerator FadeInCoroutine(CanvasGroup canvasGroup, float duration)
+    {
+        float elapsed = 0;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            canvasGroup.alpha = Mathf.Lerp(0, 1, t);
+            yield return null;
+        }
+        canvasGroup.alpha = 1;
+        canvasGroup.blocksRaycasts = true;
     }
 
     /// <summary>
