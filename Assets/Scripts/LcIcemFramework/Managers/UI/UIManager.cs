@@ -157,19 +157,8 @@ public class UIManager : Singleton<UIManager>
         if (_panelDic.ContainsKey(panelName))
         {
             var panel = _panelDic[panelName] as T;
-            // 确保面板初始透明
-            if (panel.CanvasGroup != null)
-            {
-                panel.CanvasGroup.alpha = 0;
-                panel.CanvasGroup.blocksRaycasts = false;
-            }
             panel.Show();
             callBack?.Invoke(panel);
-            // 渐显面板
-            if (panel.CanvasGroup != null)
-            {
-                FadeIn(panel.CanvasGroup, 0.3f);
-            }
             return;
         }
 
@@ -185,7 +174,7 @@ public class UIManager : Singleton<UIManager>
     }
 
     /// <summary>
-    /// 异步加载面板 Prefab。
+    /// 同步加载面板 Prefab。
     /// </summary>
     private void LoadPanelAsync<T>(UILayerType layer, UnityAction<T> callBack)
         where T : BasePanel
@@ -193,63 +182,46 @@ public class UIManager : Singleton<UIManager>
         string panelName = typeof(T).Name;
         Transform father = GetLayerFather(layer);
 
-        // 标记为正在加载
-        _loadingPanels.Add(panelName);
-
-        ManagerHub.Addressables.InstantiateAsync($"{Constants.UI_PATH}{panelName}", father, (obj) =>
+        // 同步加载面板 Prefab
+        string address = $"{Constants.UI_PATH}{panelName}";
+        GameObject prefab = ManagerHub.Addressables.Load<GameObject>(address);
+        if (prefab == null)
         {
-            // 无论成功失败，都要移除加载标记
-            _loadingPanels.Remove(panelName);
+            LogError($"面板加载失败: {address}");
+            return;
+        }
 
-            if (obj == null)
-            if (obj == null)
-            {
-                LogError($"面板加载失败: {Constants.UI_PATH}{panelName}");
-                return;
-            }
+        // 实例化面板
+        GameObject obj = UnityEngine.Object.Instantiate(prefab, father);
 
-            // 重置本地坐标，使 Rect 左下角对齐锚点中心
-            obj.transform.localPosition = Vector3.zero;
-            // 重置缩放，避免 Prefab 缩放不为 1 的问题
-            obj.transform.localScale = Vector3.one;
+        // 重置本地坐标，使 Rect 左下角对齐锚点中心
+        obj.transform.localPosition = Vector3.zero;
+        // 重置缩放，避免 Prefab 缩放不为 1 的问题
+        obj.transform.localScale = Vector3.one;
 
-            // 重置 RectTransform 的左右上下边距，使其撑满父级
-            RectTransform rect = obj.transform as RectTransform;
-            rect.offsetMax = Vector2.zero;  // 右、上边距归零
-            rect.offsetMin = Vector2.zero;  // 左、下边距归零
+        // 重置 RectTransform 的左右上下边距，使其撑满父级
+        RectTransform rect = obj.transform as RectTransform;
+        rect.offsetMax = Vector2.zero;  // 右、上边距归零
+        rect.offsetMin = Vector2.zero;  // 左、下边距归零
 
-            // 获取面板组件，调用 Show 并触发回调
-            T panel = obj.GetComponent<T>();
-            if (panel == null)
-            {
-                LogError($"面板 {panelName} 上未找到 {typeof(T).Name} 组件！");
-                return;
-            }
+        // 获取面板组件，调用 Show 并触发回调
+        T panel = obj.GetComponent<T>();
+        if (panel == null)
+        {
+            LogError($"面板 {panelName} 上未找到 {typeof(T).Name} 组件！");
+            return;
+        }
 
-            // 确保面板初始透明，用户看不到 Show() 中的 UI 操作
-            if (panel.CanvasGroup != null)
-            {
-                panel.CanvasGroup.alpha = 0;
-                panel.CanvasGroup.blocksRaycasts = false;
-            }
+        panel.Show();
+        callBack?.Invoke(panel);
 
-            panel.Show();
-            callBack?.Invoke(panel);
-
-            // 渐显面板（Show() 完成后触发）
-            if (panel.CanvasGroup != null)
-            {
-                FadeIn(panel.CanvasGroup, 0.3f);
-            }
-
-            // 注册到字典中，防止重复加载
-            if (_panelDic.ContainsKey(panelName))
-            {
-                Log($"面板 {panelName} 已存在，跳过重复添加");
-                return;
-            }
-            _panelDic.Add(panelName, panel);
-        });
+        // 注册到字典中，防止重复加载
+        if (_panelDic.ContainsKey(panelName))
+        {
+            Log($"面板 {panelName} 已存在，跳过重复添加");
+            return;
+        }
+        _panelDic.Add(panelName, panel);
     }
 
     /// <summary>
@@ -302,13 +274,6 @@ public class UIManager : Singleton<UIManager>
         {
             string panelName = topPanel.GetType().Name;
             topPanel.OnBeforeClose(); // 关闭前回调
-
-            // 确保面板先设为透明，再调用 Hide
-            if (topPanel.CanvasGroup != null)
-            {
-                topPanel.CanvasGroup.alpha = 0;
-                topPanel.CanvasGroup.blocksRaycasts = false;
-            }
             topPanel.Hide();
             UnityEngine.Object.Destroy(topPanel.gameObject);
             _panelDic.Remove(panelName);
@@ -357,29 +322,6 @@ public class UIManager : Singleton<UIManager>
         }
 
         return topPanel;
-    }
-
-    /// <summary>
-    /// 渐显面板（alpha 从 0 到 1）。
-    /// </summary>
-    private void FadeIn(CanvasGroup canvasGroup, float duration)
-    {
-        if (canvasGroup == null) return;
-        MonoManager.Instance.StartCoroutine(FadeInCoroutine(canvasGroup, duration));
-    }
-
-    private IEnumerator FadeInCoroutine(CanvasGroup canvasGroup, float duration)
-    {
-        float elapsed = 0;
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            canvasGroup.alpha = Mathf.Lerp(0, 1, t);
-            yield return null;
-        }
-        canvasGroup.alpha = 1;
-        canvasGroup.blocksRaycasts = true;
     }
 
     /// <summary>

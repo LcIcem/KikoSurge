@@ -81,12 +81,11 @@ public class PausePanel : BasePanel
                 GameLifecycleManager.Instance.ResumeGame();
                 break;
             case BTN_BACK_TO_LOBBY:
-                // 返回大厅
+                // 先返回大厅（会切换状态），再隐藏面板（避免 OnPanelClosed 触发 ResumeGame）
+                GameLifecycleManager.Instance.ReturnToLobby();
                 ManagerHub.UI.HidePanel<PausePanel>();
-                GameLifecycleManager.Instance.SetSceneLoading(true);
                 ManagerHub.Scene.LoadSceneAsync("Lobby_Scene", null, () =>
                 {
-                    GameLifecycleManager.Instance.ReturnToLobby();
                     GameLifecycleManager.Instance.SetSceneLoading(false);
                 });
                 break;
@@ -94,9 +93,9 @@ public class PausePanel : BasePanel
                 ManagerHub.UI.ShowPanel<SettingsPanel>();
                 break;
             case BTN_BACK_TO_MAINMENU:
-                ManagerHub.UI.HidePanel<PausePanel>();
+                // 先返回主菜单（会切换状态），再隐藏面板（避免 OnPanelClosed 触发 ResumeGame）
                 GameLifecycleManager.Instance.ReturnToMainMenu();
-                GameLifecycleManager.Instance.SetSceneLoading(true);
+                ManagerHub.UI.HidePanel<PausePanel>();
                 ManagerHub.Scene.LoadSceneAsync("MainMenu_Scene", null, () =>
                 {
                     GameLifecycleManager.Instance.SetSceneLoading(false);

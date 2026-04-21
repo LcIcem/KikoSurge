@@ -480,11 +480,19 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         if (oldState == GameState.Interacting)
             return;
 
-        // 从暂停恢复时也不切换 BGM，保持当前播放
+        // 从暂停恢复到之前的状态（Playing<->Lobby）不切换 BGM
         if (oldState == GameState.Paused)
-            return;
+        {
+            // _wasInLobbyBeforePause 表示进入暂停前是否在 Lobby
+            // 如果恢复到相同状态则不切换 BGM
+            bool wasInLobbyBeforePause = _wasInLobbyBeforePause;
+            bool returningToSameState = (wasInLobbyBeforePause && newState == GameState.Lobby) ||
+                                       (!wasInLobbyBeforePause && newState == GameState.Playing);
+            if (returningToSameState)
+                return;
+        }
 
-        // 正常切换 BGM（Lobby <-> Playing 之间的切换）
+        // 正常切换 BGM
         string bgmId = newState switch
         {
             GameState.MainMenu => _bgmMainMenu,

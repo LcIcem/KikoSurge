@@ -26,12 +26,6 @@ public class BasePanel : MonoBehaviour
     private Dictionary<string, List<UIBehaviour>> _controlDic = new Dictionary<string, List<UIBehaviour>>();
 
     /// <summary>
-    /// 面板 CanvasGroup，用于控制透明度和射线拦截。
-    /// </summary>
-    public CanvasGroup CanvasGroup => _canvasGroup;
-    protected CanvasGroup _canvasGroup;
-
-    /// <summary>
     /// 面板初始化时自动调用，查找并缓存常见类型的子控件。
     /// 同时为 Button 和 Toggle 自动注册事件监听。
     /// </summary>
@@ -45,11 +39,6 @@ public class BasePanel : MonoBehaviour
         FindChildControls<Slider>();
         FindChildControls<ScrollRect>();
         FindChildControls<InputField>();
-
-        // 获取或添加 CanvasGroup，初始设为透明
-        _canvasGroup = GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
-        _canvasGroup.alpha = 0;
-        _canvasGroup.blocksRaycasts = false;
     }
 
     /// <summary>
@@ -63,11 +52,6 @@ public class BasePanel : MonoBehaviour
     /// </summary>
     public virtual void Hide()
     {
-        if (_canvasGroup != null)
-        {
-            _canvasGroup.alpha = 0;
-            _canvasGroup.blocksRaycasts = false;
-        }
     }
 
     /// <summary>

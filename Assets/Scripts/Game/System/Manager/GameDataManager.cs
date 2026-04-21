@@ -48,9 +48,8 @@ public class GameDataManager : SingletonMono<GameDataManager>
 
         // 加载敌人配置（统一SO）
         ManagerHub.Addressables.LoadAsync<EnemyConfigRegistry>("Enemy_Config_Registry", OnAllEnemyDefsLoaded);
-    }
 
-    private void Start() {
+        // 加载设置数据（必须在 ApplySettings 之前完成）
         LoadSettings();
         LoadKeybindings();
     }
