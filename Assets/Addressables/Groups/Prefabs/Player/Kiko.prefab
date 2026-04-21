@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 7779930149827198509}
   - component: {fileID: 5342527582834612684}
   - component: {fileID: 4606069832840529454}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Kiko
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -265,7 +265,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2325840198630639269}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: CameraSources
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -300,7 +300,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1599218770221446628}
   - component: {fileID: 560359807800438917}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hurt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -385,7 +385,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1499298120271016199}
   - component: {fileID: 9141556088821139913}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Dash
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -469,7 +469,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7184763047501895454}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: WeaponPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -501,7 +501,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1712509361479100614}
   - component: {fileID: 1906304438483558271}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Recoil
   m_TagString: Untagged
   m_Icon: {fileID: 0}

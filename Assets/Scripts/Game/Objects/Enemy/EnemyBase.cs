@@ -495,14 +495,20 @@ public class EnemyBase : MonoBehaviour, IPoolable
         }
     }
 
-    // 敌人的触发器碰撞体（CircleCollider2D isTrigger=true）与玩家的触发器_hitCollider重叠时触发
+    // 敌人的触发器碰撞体（isTrigger=true）与玩家的触发器_hitCollider重叠时触发
+    // 其他碰撞体（isTrigger=false）用于物理排斥，不触发此处
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
-        {
-            Debug.Log($"[Enemy] OnTriggerEnter2D with Player! CollisionDamage={CollisionDamage}");
-            PublishCollisionDamage(other.transform);
-        }
+        if (!other.CompareTag("Player"))
+            return;
+
+        // 只检测玩家的 HitCollider，避免检测到玩家其他碰撞体
+        var player = other.GetComponent<Player>();
+        if (player != null && other != player.HitCollider)
+            return;
+
+        Debug.Log($"[Enemy] OnTriggerEnter2D with Player HitCollider! CollisionDamage={CollisionDamage}");
+        PublishCollisionDamage(other.transform);
     }
 
     // ========== 调试特效 ==========

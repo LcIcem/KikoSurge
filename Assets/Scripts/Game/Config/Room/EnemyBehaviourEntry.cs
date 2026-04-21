@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using LcIcemFramework;
 using ProcGen.Core;
 using ProcGen.Seed;
@@ -75,11 +76,12 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
     {
         _validTiles = new List<Vector2Int>();
         RectInt bounds = _room.Bounds;
+        Vector2Int playerTile = Vector2Int.FloorToInt(_playerPos);
 
         foreach (var tile in _floorTiles)
         {
             // 排除距离玩家太近的格子
-            float dist = Vector2Int.Distance(tile, Vector2Int.FloorToInt(_playerPos));
+            float dist = Vector2Int.Distance(tile, playerTile);
             if (dist < minSpawnDist)
                 continue;
 
@@ -93,8 +95,44 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
             _validTiles.Add(tile);
         }
 
+        // 兜底：如果有效格子为空，不再退回全部 floor tiles
+        // 而是放宽 minSpawnDist 条件重新计算
         if (_validTiles.Count == 0)
-            _validTiles.AddRange(_floorTiles);
+        {
+            foreach (var tile in _floorTiles)
+            {
+                float dist = Vector2Int.Distance(tile, playerTile);
+                // 只排除距离玩家太近的格子，保留边缘限制
+                if (dist < 1)
+                    continue;
+
+                // 排除距离房间边缘太近的格子
+                if (tile.x - bounds.x < minEdgeDist ||
+                    tile.y - bounds.y < minEdgeDist ||
+                    bounds.x + bounds.width - tile.x - 1 < minEdgeDist ||
+                    bounds.y + bounds.height - tile.y - 1 < minEdgeDist)
+                    continue;
+
+                _validTiles.Add(tile);
+            }
+        }
+
+        // 如果仍然为空（房间极小），取距离玩家最远的格子
+        if (_validTiles.Count == 0)
+        {
+            float maxDist = 0f;
+            Vector2Int bestTile = _floorTiles.Count > 0 ? _floorTiles.ElementAt(0) : playerTile;
+            foreach (var tile in _floorTiles)
+            {
+                float dist = Vector2Int.Distance(tile, playerTile);
+                if (dist > maxDist)
+                {
+                    maxDist = dist;
+                    bestTile = tile;
+                }
+            }
+            _validTiles.Add(bestTile);
+        }
     }
 
     private EnemyConfig SelectEnemyByWeight()

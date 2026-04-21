@@ -38,7 +38,7 @@ public class DamageNumberManager : SingletonMono<DamageNumberManager>
         // 如果还没找到 Canvas，每帧尝试找一次
         if (_uiCanvas == null)
         {
-            _uiCanvas = FindObjectOfType<Canvas>();
+            _uiCanvas = FindFirstObjectByType<Canvas>();
             if (_uiCanvas != null)
                 _canvasRect = _uiCanvas.GetComponent<RectTransform>();
         }

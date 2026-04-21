@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
 {
     // 组件引用 
     [SerializeField] private CapsuleCollider2D _hitCollider;
+    public CapsuleCollider2D HitCollider => _hitCollider;
     [HideInInspector] public Rigidbody2D _rigidbody;
     private SpriteRenderer _sprite;
     private Animator _animator;
