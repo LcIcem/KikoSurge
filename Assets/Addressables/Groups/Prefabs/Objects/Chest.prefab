@@ -269,6 +269,8 @@ MonoBehaviour:
   _infoCardRoot: {fileID: 0}
   _infoCardTitle: {fileID: 0}
   _infoCardDescription: {fileID: 0}
+  _interactSFX: {fileID: 8300000, guid: d0eb23cbd417f804d8acbac373a3ca2a, type: 3}
+  _maxInteractCount: 1
 --- !u!114 &6799679614530541927
 MonoBehaviour:
   m_ObjectHideFlags: 0
