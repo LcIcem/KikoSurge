@@ -15,8 +15,8 @@ public class CursorManager : SingletonMono<CursorManager>
     public Texture2D cursorTexture;  // 主菜单/UI 时的光标
 
     [Header("运行时调试（可调整）")]
-    [Range(16f, 128f)]
-    public float cursorSize = 32f;  // 光标图片的像素尺寸（正方形）
+    [Range(0f, 2f)]
+    public float cursorScale = 1f;  // 光标整体缩放倍率
 
     private bool _isInGame;
     private bool _isUIPanelOpen;
@@ -105,13 +105,22 @@ public class CursorManager : SingletonMono<CursorManager>
         {
             Cursor.lockState = CursorLockMode.Confined;
             if (aimTexture != null)
-                Cursor.SetCursor(aimTexture, new Vector2(cursorSize / 2f, cursorSize / 2f), CursorMode.ForceSoftware);
+            {
+                // 使用纹理实际尺寸计算热点（中心点）
+                Vector2 hotspot = new Vector2(aimTexture.width * 0.5f, aimTexture.height * 0.5f) * cursorScale;
+                Cursor.SetCursor(aimTexture, hotspot, CursorMode.ForceSoftware);
+            }
         }
         else
         {
             Cursor.lockState = CursorLockMode.None;
             if (cursorTexture != null)
-                Cursor.SetCursor(cursorTexture, new Vector2(0, cursorSize), CursorMode.ForceSoftware);
+            {
+                // 使用纹理实际尺寸计算热点（普通箭头光标热点在左上角偏移2像素）
+                // 注：若纹理透明部分显示异常，将 TextureType 从 Cursor 改回 Default
+                Vector2 hotspot = new Vector2(2f, 2f) * cursorScale;
+                Cursor.SetCursor(cursorTexture, hotspot, CursorMode.ForceSoftware);
+            }
         }
     }
 }

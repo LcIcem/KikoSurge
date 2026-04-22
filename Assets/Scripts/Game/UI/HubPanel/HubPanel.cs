@@ -205,7 +205,7 @@ public class HubPanel : BasePanel
             ammoImg.fillAmount = 1f;
 
             float ratio = (float)weapon.CurrentAmmo / weapon.Config.magazineSize;
-            ammoImg.color = ratio <= 0.2f ? Color.red.WithAlpha(125) : Color.white;
+            ammoImg.color = ratio <= 0.2f ? new Color(1f, 0f, 0f, 125f / 255f) : Color.white;
         }
     }
 
