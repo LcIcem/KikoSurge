@@ -183,13 +183,23 @@ public class HubPanel : BasePanel
         if (ammoText != null)
             ammoText.text = $"{weapon.CurrentAmmo}/{weapon.Config.magazineSize}";
 
-        if (ammoImg != null && weapon.Config.bulletConfig != null && weapon.Config.bulletConfig.bulletPrefab != null)
+        if (ammoImg != null)
         {
-            var bullet = weapon.Config.bulletConfig.bulletPrefab.GetComponent<Bullet>();
-            if (bullet != null && bullet.Icon != null)
+            // 优先使用物品配置中自定义的 ammoIcon
+            if (weapon.Config.itemConfig?.ammoIcon != null)
             {
-                ammoImg.sprite = bullet.Icon;
+                ammoImg.sprite = weapon.Config.itemConfig.ammoIcon;
                 ammoImg.preserveAspect = true;
+            }
+            // 回退：从子弹预制体读取 Icon
+            else if (weapon.Config.bulletConfig != null && weapon.Config.bulletConfig.bulletPrefab != null)
+            {
+                var bullet = weapon.Config.bulletConfig.bulletPrefab.GetComponent<Bullet>();
+                if (bullet != null && bullet.Icon != null)
+                {
+                    ammoImg.sprite = bullet.Icon;
+                    ammoImg.preserveAspect = true;
+                }
             }
 
             ammoImg.fillAmount = 1f;

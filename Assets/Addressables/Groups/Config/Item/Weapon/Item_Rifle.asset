@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1263a87267f5e3d4c8681647be3b50bf, type: 3}
-  m_Name: Item_Pistol
+  m_Name: Item_Rifle
   m_EditorClassIdentifier: Assembly-CSharp::ItemConfig
-  Id: 1
-  Name: "\u5355\u53D1\u624B\u67AA"
+  Id: 0
+  Name: 
   Type: 0
-  MaxStack: 2
-  Value: 10
-  Icon: {fileID: 21300000, guid: 691f8ebf421e8674fa13d11f7dd08cbc, type: 3}
-  Description: biubiubiu
-  PickupSFX: {fileID: 8300000, guid: 4696d070aecc09c4d958c86c663ca912, type: 3}
+  MaxStack: 1
+  Value: 0
+  Icon: {fileID: 0}
+  Description: 
+  PickupSFX: {fileID: 0}

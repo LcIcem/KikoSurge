@@ -16,6 +16,10 @@ public class GameEntry : MonoBehaviour
         Log("初始化 ManagerHub...");
         _ = ManagerHub.Instance;
 
+        // 确保 GameLifecycleManager 在任何场景加载前就已初始化（持久化）
+        // 防止 domain reload 后静态实例丢失
+        _ = GameLifecycleManager.Instance;
+
 
         Log("初始化 DamageLuaBridge...");
         DamageLuaBridge.Initialize();
@@ -37,6 +41,14 @@ public class GameEntry : MonoBehaviour
         Log("初始化 CursorManager...");
         var cursorMgr = CursorManager.Instance;
 
+        // 确保 ManagerHub.Addressables 已初始化
+        if (ManagerHub.Addressables == null)
+        {
+            LogError("ManagerHub.Addressables 为 null，CursorManager 跳过光标资源加载");
+            cursorMgr.InitAndSubscribe();
+            return;
+        }
+
         // 加载光标资源（Addressables 同步加载）
         cursorMgr.aimTexture = ManagerHub.Addressables.Load<Texture2D>("cursorTexture_aim");
         cursorMgr.cursorTexture = ManagerHub.Addressables.Load<Texture2D>("cursorTexture_normal");
@@ -45,4 +57,6 @@ public class GameEntry : MonoBehaviour
         cursorMgr.InitAndSubscribe();
         Log("CursorManager 初始化完成");
     }
+
+    private void LogError(string msg) => Debug.LogError($"[{GetType().Name}] {msg}");
 }

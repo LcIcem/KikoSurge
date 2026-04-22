@@ -26,6 +26,9 @@ public class ItemConfig : ScriptableObject
     [Tooltip("图标")]
     public Sprite Icon;
 
+    [Tooltip("弹药图标（HUD显示用，留空则使用子弹预制体的Icon）")]
+    public Sprite ammoIcon;
+
     [Tooltip("描述")]
     public string Description;
 

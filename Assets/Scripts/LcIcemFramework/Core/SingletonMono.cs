@@ -20,6 +20,9 @@ public abstract class SingletonMono<T> : MonoBehaviour where T : MonoBehaviour
     {
         get
         {
+            // Domain Reload 后 _applicationIsQuitting 可能仍为 true，但对象实际已重建，需要重置
+            _applicationIsQuitting = false;
+
             if (_applicationIsQuitting)
                 return null;
 

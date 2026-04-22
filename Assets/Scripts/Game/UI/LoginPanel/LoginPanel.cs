@@ -1,3 +1,4 @@
+using System.Collections;
 using LcIcemFramework;
 using UnityEngine;
 using UnityEngine.UI;
@@ -56,7 +57,29 @@ public class LoginPanel : BasePanel
         ManagerHub.UI.HidePanel<LoginPanel>();
         ManagerHub.Scene.LoadSceneAsync("Lobby_Scene", null, () =>
         {
-            GameLifecycleManager.Instance.EnterLobby(currentSlot);
+            // 确保 GameLifecycleManager 已初始化（防止 domain reload 后静态实例丢失）
+            if (GameLifecycleManager.Instance != null)
+            {
+                GameLifecycleManager.Instance.EnterLobby(currentSlot);
+            }
+            else
+            {
+                Debug.LogWarning("[LoginPanel] GameLifecycleManager is null after scene load, retrying...");
+                StartCoroutine(RetryEnterLobby(currentSlot));
+            }
         });
+    }
+
+    private IEnumerator RetryEnterLobby(int slot)
+    {
+        yield return new WaitForSeconds(0.1f);
+        if (GameLifecycleManager.Instance != null)
+        {
+            GameLifecycleManager.Instance.EnterLobby(slot);
+        }
+        else
+        {
+            Debug.LogError("[LoginPanel] GameLifecycleManager still null after retry!");
+        }
     }
 }
