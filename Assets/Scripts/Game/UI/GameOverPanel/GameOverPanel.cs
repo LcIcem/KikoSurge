@@ -11,6 +11,7 @@ public class GameOverPanel : BasePanel
     // 控件名称常量
     private const string TXT_TITLE = "txt_title";
     private const string BTN_RESTART = "btn_restart";
+    private const string BTN_BACK_TO_LOBBY = "btn_backToLobby";
     private const string BTN_BACK_TO_MAINMENU = "btn_backToMainmenu";
 
     // true = 死亡（游戏结束），false = 通关
@@ -22,6 +23,8 @@ public class GameOverPanel : BasePanel
     {
         base.Show();
         Time.timeScale = 0;
+        // 禁止玩家瞄准输入
+        AimInput.Enabled = false;
         UpdateTitle();
     }
 
@@ -29,6 +32,8 @@ public class GameOverPanel : BasePanel
     {
         base.Hide();
         Time.timeScale = 1f;
+        // 恢复玩家瞄准输入
+        AimInput.Enabled = true;
         _isGameOver = true;
     }
 
@@ -65,6 +70,11 @@ public class GameOverPanel : BasePanel
         {
             case BTN_RESTART:
                 GameLifecycleManager.Instance.RestartGame();
+                break;
+            case BTN_BACK_TO_LOBBY:
+                ManagerHub.UI.HidePanel<GameOverPanel>();
+                GameLifecycleManager.Instance.ReturnToLobby();
+                ManagerHub.Scene.LoadSceneAsync("Lobby_Scene", null, null);
                 break;
             case BTN_BACK_TO_MAINMENU:
                 ManagerHub.UI.HidePanel<GameOverPanel>();
