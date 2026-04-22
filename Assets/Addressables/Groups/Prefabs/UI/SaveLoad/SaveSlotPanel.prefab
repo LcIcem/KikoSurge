@@ -478,6 +478,7 @@ GameObject:
   - component: {fileID: 3381835890126828077}
   - component: {fileID: 4124646427846959202}
   - component: {fileID: 8709326043880604808}
+  - component: {fileID: 4314763314416251993}
   m_Layer: 5
   m_Name: btn_back
   m_TagString: Untagged
@@ -586,6 +587,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4314763314416251993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3288804387116061903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4906532d30e7cf409d90633aef1333c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonAudioHandler
+  _clickSFX: {fileID: 8300000, guid: 45f3038d0868fa248a5bb780b82c6655, type: 3}
 --- !u!1 &3478820312460731188
 GameObject:
   m_ObjectHideFlags: 0

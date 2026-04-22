@@ -86,9 +86,16 @@ public class AudioSettingsPage : ISettingsPage
                   $"AudioManager.BGM={AudioManager.Instance?.GetBGMVolume()}, " +
                   $"AudioManager.SFX={AudioManager.Instance?.GetSFXVolume()}");
 
-        if (bgmToggle != null) bgmToggle.isOn = !AudioManager.Instance.IsBgmMuted();
+        // 先设置忽略标志，防止代码设置值时触发 ToggleAudioHandler 音效
+        bgmToggle?.GetComponent<ToggleAudioHandler>()?.SetIgnoreNext();
+        sfxToggle?.GetComponent<ToggleAudioHandler>()?.SetIgnoreNext();
+
+        // 仅在值改变时设置
+        if (bgmToggle != null && bgmToggle.isOn != !AudioManager.Instance.IsBgmMuted())
+            bgmToggle.isOn = !AudioManager.Instance.IsBgmMuted();
         if (bgmSlider != null) bgmSlider.value = AudioManager.Instance.GetBGMVolume();
-        if (sfxToggle != null) sfxToggle.isOn = !AudioManager.Instance.IsSfxMuted();
+        if (sfxToggle != null && sfxToggle.isOn != !AudioManager.Instance.IsSfxMuted())
+            sfxToggle.isOn = !AudioManager.Instance.IsSfxMuted();
         if (sfxSlider != null) sfxSlider.value = AudioManager.Instance.GetSFXVolume();
 
         Debug.Log($"[AudioSettingsPage] RefreshUI done: bgmSli.value={bgmSlider?.value}, sfxSli.value={sfxSlider?.value}");

@@ -17,6 +17,11 @@ public class ToggleAudioHandler : MonoBehaviour
 
     private Toggle _toggle;
 
+    /// <summary>
+    /// 忽略下一次值变化事件（用于代码设置值时避免触发音效）
+    /// </summary>
+    private bool _ignoreNext;
+
     private void Awake()
     {
         _toggle = GetComponent<Toggle>();
@@ -31,8 +36,22 @@ public class ToggleAudioHandler : MonoBehaviour
 
     private void OnToggleValueChanged(bool isOn)
     {
+        if (_ignoreNext)
+        {
+            _ignoreNext = false;
+            return;
+        }
+
         AudioClip clip = isOn ? _onSFX : _offSFX;
         if (clip != null)
             ManagerHub.Audio?.PlaySFX(clip);
+    }
+
+    /// <summary>
+    /// 设置忽略标志，下次值变化时不播放音效
+    /// </summary>
+    public void SetIgnoreNext()
+    {
+        _ignoreNext = true;
     }
 }
