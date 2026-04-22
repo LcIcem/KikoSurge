@@ -215,8 +215,12 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _fsm.SetAnimatorBool("dead", false);
         _fsm.CheckTrigger("dead"); // 重置 FSM 内部的 dead trigger
 
-        // 重置碰撞器
-        GetComponent<Collider2D>().enabled = true;
+        // 重置所有碰撞体（包括子物体的）
+        foreach (var col in GetComponentsInChildren<Collider2D>())
+        {
+            col.enabled = true;
+        }
+        _rigidbody.bodyType = RigidbodyType2D.Dynamic;
 
         // 重置 Player 引用
         _player = GameObject.FindGameObjectWithTag("Player")?.transform;
@@ -271,10 +275,14 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _rigidbody.linearVelocity = Vector2.zero;
         StopChaseTarget();
 
-        // 禁用碰撞体，防止死亡后继续造成碰撞伤害
-        var collider = GetComponent<Collider2D>();
-        if (collider != null)
-            collider.enabled = false;
+        // 禁用所有碰撞体（包括子物体的实体碰撞体），防止死亡后继续造成碰撞伤害
+        foreach (var col in GetComponentsInChildren<Collider2D>())
+        {
+            col.enabled = false;
+        }
+
+        // 改为 Kinematic，防止死亡后被其他敌人推动
+        _rigidbody.bodyType = RigidbodyType2D.Kinematic;
 
         EventCenter.Instance.Publish(GameEventID.Combat_EnemyKilled,
             new EnemyKilledParams { enemy = this, position = transform.position });
