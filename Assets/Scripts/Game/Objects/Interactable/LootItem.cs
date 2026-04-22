@@ -57,6 +57,7 @@ public class LootItem : MonoBehaviour, IPoolable
     private BoxCollider2D _collider;
     [SerializeField] private Transform _visualRoot;
     private bool _canPickup;
+    private bool _isPlayerInRange;
 
     private void Awake()
     {
@@ -114,10 +115,50 @@ public class LootItem : MonoBehaviour, IPoolable
         }
         _canPickup = true;
 
+        // 碰撞体启用后，检查玩家是否已经在碰撞体范围内
+        // 因为碰撞体启用前玩家可能已经站在上面了（OnTriggerEnter2D 不会再次触发）
+        CheckPlayerAlreadyInRange();
+
         // 开始浮动效果
         _floatCoroutine = StartCoroutine(FloatEffect());
         // 开始闪烁效果
         _blinkCoroutine = StartCoroutine(BlinkEffect());
+    }
+
+    /// <summary>
+    /// 检查玩家是否已经在碰撞体范围内（碰撞体启用前玩家可能已在内）
+    /// </summary>
+    private void CheckPlayerAlreadyInRange()
+    {
+        if (_collider == null) return;
+
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return;
+
+        // 使用 OverlapCollider 可靠检测玩家碰撞体是否与自己的碰撞体重叠
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.useTriggers = true;
+        Collider2D[] results = new Collider2D[1];
+
+        int count = _collider.Overlap(filter, results);
+        if (count > 0 && results[0].CompareTag("Player"))
+        {
+            // 手动触发 OnTriggerEnter2D 的逻辑
+            _isPlayerInRange = true;
+
+            // 如果已有其他交互物激活，不处理
+            if (Player.CurrentInteractable != null && Player.CurrentInteractable != _interactable)
+                return;
+
+            // 设置自己为当前交互物
+            Player.StartInteraction(_interactable);
+
+            // 通知 Interactable 显示 UI
+            if (_interactable != null)
+            {
+                _interactable.ResumePrompt();
+            }
+        }
     }
 
     private IEnumerator FloatEffect()
@@ -227,12 +268,20 @@ public class LootItem : MonoBehaviour, IPoolable
         if (!_canPickup) return;
         if (!other.CompareTag("Player")) return;
 
+        _isPlayerInRange = true;
+
         // 武器、药水、遗物需要按E交互，不自动拾取
         if (ItemDef?.Type == ItemType.Weapon ||
             ItemDef?.Type == ItemType.Potion ||
             ItemDef?.Type == ItemType.Relic) return;
 
         Pickup();
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+        _isPlayerInRange = false;
     }
 
     private void Pickup()
@@ -622,9 +671,33 @@ public class LootItem : MonoBehaviour, IPoolable
     /// </summary>
     private void OnInteractTriggered()
     {
-        // 结束交互状态
+        // 先清空当前交互状态，让范围内的所有物品公平竞争
         Player.EndInteraction();
+
+        // 通知范围内的其他交互物品重新检查状态（在回收前通知）
+        NotifyOtherInteractablesInRange();
+
         Pickup();
+    }
+
+    /// <summary>
+    /// 通知范围内的其他Interactable重新检查状态
+    /// </summary>
+    private void NotifyOtherInteractablesInRange()
+    {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return;
+
+        // 使用玩家位置查找范围内的所有碰撞体
+        Collider2D[] cols = Physics2D.OverlapCircleAll(player.transform.position, 3f);
+        foreach (var col in cols)
+        {
+            var otherInteractable = col.GetComponent<Interactable>();
+            if (otherInteractable != null && otherInteractable != _interactable)
+            {
+                otherInteractable.CheckAndShowUIIfInRange();
+            }
+        }
     }
 
     private void HandleWeaponPickup()

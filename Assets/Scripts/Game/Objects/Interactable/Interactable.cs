@@ -160,7 +160,14 @@ public class Interactable : MonoBehaviour
     {
         // 只有自己是当前激活的交互物时才响应按键
         if (CanInteract && Player.CurrentInteractable == this)
+        {
+            Debug.Log($"[Interactable] {gameObject.name} Interact triggered, CanInteract={CanInteract}");
             Interact();
+        }
+        else
+        {
+            Debug.Log($"[Interactable] {gameObject.name} Interact blocked: CanInteract={CanInteract}, CurrentInteractable={Player.CurrentInteractable?.gameObject.name}");
+        }
     }
 
     /// <summary>
@@ -199,8 +206,15 @@ public class Interactable : MonoBehaviour
     {
         yield return null; // 等待一帧
 
-        // 使用物理检测查找范围内的其他Interactable
-        Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, 0.1f);
+        // 获取玩家位置
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+            yield break;
+
+        Vector2 playerPos = player.transform.position;
+
+        // 使用玩家位置和足够大的检测半径（3f）查找范围内的其他Interactable
+        Collider2D[] cols = Physics2D.OverlapCircleAll(playerPos, 3f);
         foreach (var col in cols)
         {
             var otherInteractable = col.GetComponent<Interactable>();
@@ -217,11 +231,37 @@ public class Interactable : MonoBehaviour
     /// </summary>
     public void CheckAndShowUIIfInRange()
     {
-        if (_isPlayerInRange && Player.CurrentInteractable == null)
+        if (Player.CurrentInteractable != null)
         {
+            Debug.Log($"[Interactable] {gameObject.name} CheckAndShowUIIfInRange skipped: CurrentInteractable={Player.CurrentInteractable.gameObject.name}");
+            return;
+        }
+
+        // 直接检测玩家是否在碰撞体范围内
+        Collider2D col = GetComponent<Collider2D>();
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (col == null || player == null)
+        {
+            Debug.Log($"[Interactable] {gameObject.name} CheckAndShowUIIfInRange: col or player is null");
+            return;
+        }
+
+        // 使用 OverlapCollider 检测（适用于 isTrigger 的碰撞体）
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.useTriggers = true;
+        Collider2D[] results = new Collider2D[1];
+        int count = col.Overlap(filter, results);
+
+        Debug.Log($"[Interactable] {gameObject.name} CheckAndShowUIIfInRange: count={count}, tag={(count > 0 ? results[0].tag : "null")}");
+
+        if (count > 0 && results[0].CompareTag("Player"))
+        {
+            _interactionEnabled = true;
+            _isPlayerInRange = true;
             Player.StartInteraction(this);
             ShowInteractionHint(true);
             ShowInfoCard(true);
+            Debug.Log($"[Interactable] {gameObject.name} CheckAndShowUIIfInRange: SUCCESS, _isPlayerInRange={_isPlayerInRange}, _interactionEnabled={_interactionEnabled}");
         }
     }
 
@@ -230,8 +270,26 @@ public class Interactable : MonoBehaviour
     /// </summary>
     public virtual void ResumePrompt()
     {
-        if (_isPlayerInRange)
+        if (Player.CurrentInteractable != null)
+            return;
+
+        // 直接检测玩家是否在碰撞体范围内
+        Collider2D col = GetComponent<Collider2D>();
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (col == null || player == null)
+            return;
+
+        // 使用 OverlapCollider 检测（适用于 isTrigger 的碰撞体）
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.useTriggers = true;
+        Collider2D[] results = new Collider2D[1];
+        int count = col.Overlap(filter, results);
+
+        if (count > 0 && results[0].CompareTag("Player"))
         {
+            _interactionEnabled = true;
+            _isPlayerInRange = true;
+            Player.StartInteraction(this);
             ShowInteractionHint(true);
         }
     }

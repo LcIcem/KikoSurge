@@ -141,10 +141,11 @@ public class ShopkeeperInteractable : MonoBehaviour, ISpawnable
     private void OnShopClosed()
     {
         // 重新启用交互
+        // 注意：不调用 ResetInteractionState()，因为玩家可能仍在触发器范围内
         if (_interactable != null)
         {
             _interactable.SetInteractionEnabled(true);
-            _interactable.ResetInteractionState();
+            _interactable.ResumePrompt();
         }
     }
 
