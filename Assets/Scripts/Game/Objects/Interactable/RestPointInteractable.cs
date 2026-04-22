@@ -32,7 +32,7 @@ public class RestPointInteractable : MonoBehaviour
 
         if (_interactable != null)
         {
-            _interactable.SetHintText("按[{0}]休息");
+            _interactable.SetHintText("休息[{0}]");
             _interactable.OnInteract += OnInteract;
         }
 

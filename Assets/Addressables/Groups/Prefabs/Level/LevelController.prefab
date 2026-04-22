@@ -69,5 +69,6 @@ MonoBehaviour:
   _checkpointPrefab: {fileID: 140860234070293769, guid: 73f6790a547bcac4b81076e4cf17e59f, type: 3}
   _restPointPrefab: {fileID: 7963566250706060789, guid: b311bf882aa00564e9359c4066da612c, type: 3}
   _chestPrefab: {fileID: 5690721142840895671, guid: 8ec2f8df77a6e6349b6fb3f5cd5763dc, type: 3}
+  _shopkeeperPrefab: {fileID: 1816454192215884134, guid: b773d6a869f48554abe670fc2c5a8caf, type: 3}
   _tileInfo: {fileID: 11400000, guid: 4ad6cd1c1d4fa0f4682cb4fb0fb9a845, type: 2}
   _tilemapPrefab: {fileID: 5379538912178641955, guid: a93c450d8d6aa25469165555f01182d0, type: 3}

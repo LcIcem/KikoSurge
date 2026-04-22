@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39f2c7538871d714890d042107aece78, type: 3}
+  m_Name: Shop
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Config.Shop.ShopConfig
+  _categories:
+  - _itemType: 0
+    _availableItems:
+    - _itemConfig: {fileID: 11400000, guid: f273b95930b4f8044a4d25f83312e731, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: 41133e477919bc24ca1a751fde8b4981, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 1
+    _maxDisplayCount: 1
+  - _itemType: 1
+    _availableItems:
+    - _itemConfig: {fileID: 11400000, guid: bd847f99dae98fa4c83a8004ffb9d71b, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 3
+    - _itemConfig: {fileID: 11400000, guid: db3e2aff8dc1e8342925a4841402458c, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 3
+    - _itemConfig: {fileID: 11400000, guid: da1a8a1e7f60f334390c5d7167416f40, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 3
+    _maxDisplayCount: 2
+  - _itemType: 2
+    _availableItems:
+    - _itemConfig: {fileID: 11400000, guid: 8bea861fcea0e0342a3b2031540451e6, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 1
+    _maxDisplayCount: 1

@@ -25,7 +25,7 @@ public class Checkpoint : MonoBehaviour
 
     private void Start()
     {
-        _interactable.SetHintText("按[{0}]激活检查点");
+        _interactable.SetHintText("进入下一层[{0}]");
         _interactable.OnInteract += OnInteractTriggered;
     }
 

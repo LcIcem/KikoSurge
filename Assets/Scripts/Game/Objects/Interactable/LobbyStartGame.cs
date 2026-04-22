@@ -13,7 +13,7 @@ public class LobbyStartGame : MonoBehaviour
 
     private void Start()
     {
-        _interactable.SetHintText("按[{0}]开始游戏");
+        _interactable.SetHintText("进入[{0}]");
         _interactable.OnInteract += OnInteractTriggered;
     }
 

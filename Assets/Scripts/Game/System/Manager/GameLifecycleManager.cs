@@ -552,6 +552,25 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     }
 
     /// <summary>
+    /// 打开商店
+    /// </summary>
+    public void OpenShop(UnityEngine.Events.UnityAction<global::ShopPanel> onShopShown = null)
+    {
+        // 只在 Playing 状态允许打开商店
+        if (CurrentState == GameState.Playing)
+        {
+            // 保存当前状态，切换到交互状态
+            _stateBeforeInteracting = CurrentState;
+            ChangeState(GameState.Interacting);
+            // 关闭玩家旋转
+            AimInput.Enabled = false;
+            // 锁定玩家移动，防止滑行
+            LockPlayerMovement();
+            ManagerHub.UI.ShowPanel<ShopPanel>(UILayerType.Top, onShopShown);
+        }
+    }
+
+    /// <summary>
     /// 锁定玩家移动（进入交互状态时调用）
     /// </summary>
     private void LockPlayerMovement()

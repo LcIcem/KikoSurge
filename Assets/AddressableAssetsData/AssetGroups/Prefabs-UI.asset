@@ -20,6 +20,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0c152d77e4e0c9243b6328d0588d50dc
+    m_Address: ShopPanel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0d8d624b23592a34d839d5c9908457cf
+    m_Address: ShopItemCell
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 11bf9ae7dceb6944d9bb192cc4d3c1ce
     m_Address: heartPrefab
     m_ReadOnly: 0

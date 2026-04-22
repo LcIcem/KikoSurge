@@ -37,7 +37,7 @@ public class ChestInteractable : MonoBehaviour
     private void Start()
     {
         // 初始化交互提示文本
-        _interactable.SetHintText("开启 {0}");
+        _interactable.SetHintText("开启[{0}]");
 
         // 如果配置了标题，设置信息卡片
         if (_chestConfig != null && !string.IsNullOrEmpty(_chestConfig.ChestName))
