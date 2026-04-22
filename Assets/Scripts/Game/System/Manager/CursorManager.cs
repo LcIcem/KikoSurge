@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using LcIcemFramework;
 using LcIcemFramework.Core;
 using UnityEngine;
@@ -22,36 +23,37 @@ public class CursorManager : SingletonMono<CursorManager>
 
     protected override void Init()
     {
-        try
-        {
-            TrySubscribeEvents();
-            ApplyCursorState();
-        }
-        catch (Exception e)
-        {
-            Debug.LogException(e);
-        }
+        // 由 GameEntry 统一调用 InitAndSubscribe()
     }
 
-    private void Update()
+    /// <summary>
+    /// 由 GameEntry 在确认所有 Manager 就绪后调用，完成事件订阅
+    /// </summary>
+    public void InitAndSubscribe()
     {
-        if (!_subscriptionsReady)
-            TrySubscribeEvents();
-    }
-
-    private bool _subscriptionsReady;
-
-    private void TrySubscribeEvents()
-    {
-        if (_subscriptionsReady) return;
-        if (GameLifecycleManager.Instance == null) return;
-        if (ManagerHub.UI == null) return;
+        if (GameLifecycleManager.Instance == null)
+        {
+            Debug.LogWarning("[CursorManager] GameLifecycleManager not ready, retrying next frame...");
+            StartCoroutine(RetrySubscribe());
+            return;
+        }
+        if (ManagerHub.UI == null)
+        {
+            Debug.LogWarning("[CursorManager] ManagerHub.UI not ready, retrying next frame...");
+            StartCoroutine(RetrySubscribe());
+            return;
+        }
 
         GameLifecycleManager.Instance.OnStateChanged += OnGameStateChanged;
         ManagerHub.UI.OnAnyPanelShown += OnAnyPanelShown;
         ManagerHub.UI.OnAnyPanelHidden += OnAnyPanelHidden;
+        ApplyCursorState();
+    }
 
-        _subscriptionsReady = true;
+    private IEnumerator RetrySubscribe()
+    {
+        yield return new WaitForSeconds(0.1f);
+        InitAndSubscribe();
     }
 
     protected override void OnDestroy()

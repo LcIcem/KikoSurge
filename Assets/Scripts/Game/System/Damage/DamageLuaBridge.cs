@@ -23,6 +23,11 @@ public static class DamageLuaBridge
         _initializing = true;
 
         // 通过 Addressables 异步加载 Lua 脚本
+        if (ManagerHub.Addressables == null)
+        {
+            Debug.LogError("[DamageLuaBridge] ManagerHub.Addressables 为 null，跳过初始化");
+            return;
+        }
         ManagerHub.Addressables.LoadAsync<TextAsset>("DamageFormula", (luaText) =>
         {
             _luaEnv = new LuaEnv();

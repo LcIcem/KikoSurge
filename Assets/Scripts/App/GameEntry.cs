@@ -11,18 +11,38 @@ public class GameEntry : MonoBehaviour
 
     private void Start()
     {
-        // 按顺序初始化 不是手动创建GameObject 的单例
-        _ = ManagerHub.Instance;
-        _ = GameDataManager.Instance;
-        _ = LootManager.Instance;
+        Log("GameEntry.Start() 开始");
 
-        // 初始化 xLua 伤害公式
+        Log("初始化 ManagerHub...");
+        _ = ManagerHub.Instance;
+
+
+        Log("初始化 DamageLuaBridge...");
         DamageLuaBridge.Initialize();
 
-        // 显示游戏开始面板
+        // 4. 初始化 CursorManager（必须在 UI 面板显示之前）
+        InitCursorManager();
+
+        Log("显示 LoginPanel...");
         ManagerHub.UI.ShowPanel<LoginPanel>(UILayerType.Middle);
-        // 播放背景音乐（启动时同步一次持久化数据）
+
+        Log("应用音频设置...");
         ManagerHub.Audio.ApplySettings();
-        // BGM 将在 GameLifecycleManager.ChangeState 时自动播放
+
+        Log("GameEntry.Start() 完成");
+    }
+
+    private void InitCursorManager()
+    {
+        Log("初始化 CursorManager...");
+        var cursorMgr = CursorManager.Instance;
+
+        // 加载光标资源（Addressables 同步加载）
+        cursorMgr.aimTexture = ManagerHub.Addressables.Load<Texture2D>("cursorTexture_aim");
+        cursorMgr.cursorTexture = ManagerHub.Addressables.Load<Texture2D>("cursorTexture_normal");
+
+        // 完成事件订阅（此时 ManagerHub 已就绪）
+        cursorMgr.InitAndSubscribe();
+        Log("CursorManager 初始化完成");
     }
 }

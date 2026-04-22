@@ -15,7 +15,6 @@ using ProcGen.Core;
 public class HubPanel : BasePanel
 {
     // HUD 控件名称常量（与子对象名字一一对应）
-    private const string IMG_GOLD = "img_gold";
     private const string TXT_GOLD = "txt_gold";
     private const string IMG_WEAPON = "img_weapon";
     private const string TXT_WEAPON = "txt_weapon";
@@ -24,11 +23,6 @@ public class HubPanel : BasePanel
     private const string TXT_WAVE = "txt_wave";
     private const string TXT_ROOM = "txt_room";
     private const string TXT_FLOOR = "txt_floor";
-    private const string IMG_ITEM_SLOT_1 = "img_itemSlot1";
-    private const string IMG_ITEM_SLOT_2 = "img_itemSlot2";
-    private const string IMG_ITEM_SLOT_3 = "img_itemSlot3";
-    private const string IMG_ITEM_SLOT_4 = "img_itemSlot4";
-    private const string TXT_ITEM_COUNT = "txt_itemCount";
 
     // 波次淡入淡出时长
     private const float WAVE_FADE_DURATION = 0.3f;

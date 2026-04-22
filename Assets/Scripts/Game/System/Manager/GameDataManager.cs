@@ -37,6 +37,14 @@ public class GameDataManager : SingletonMono<GameDataManager>
 
     protected override void Init()
     {
+        Log("GameDataManager.Init() 开始");
+
+        if (ManagerHub.Addressables == null)
+        {
+            LogError("ManagerHub.Addressables 为 null，初始化跳过");
+            return;
+        }
+
         // 加载角色静态数据配置
         ManagerHub.Addressables.LoadAsync<RoleStaticDataConfig>("RoleStaticData_Config", OnRoleStaticDataLoaded);
 

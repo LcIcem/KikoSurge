@@ -34,7 +34,7 @@ public class Checkpoint : MonoBehaviour
     /// </summary>
     private void UpdateHintText()
     {
-        var levelController = FindObjectOfType<LevelController>();
+        var levelController = FindFirstObjectByType<LevelController>();
         bool isLastLayer = levelController != null && levelController.IsLastLayer;
         string hintText = isLastLayer ? "退出地牢[{0}]" : "进入下一层[{0}]";
         _interactable.SetHintText(hintText);

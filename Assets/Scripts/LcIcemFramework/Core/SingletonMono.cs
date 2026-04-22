@@ -11,6 +11,10 @@ public abstract class SingletonMono<T> : MonoBehaviour where T : MonoBehaviour
     private static T _instance;
     private static readonly object _lockObj = new object();
     private static bool _applicationIsQuitting = false;
+    /// <summary>
+    /// 代码主动注册的实例（优先级最高，在 Awake 之前就可以注册）
+    /// </summary>
+    private static T _registeredInstance;
 
     public static T Instance
     {
@@ -32,6 +36,14 @@ public abstract class SingletonMono<T> : MonoBehaviour where T : MonoBehaviour
 
             lock (_lockObj)
             {
+                // 代码注册的实例优先级最高
+                if (_registeredInstance != null)
+                {
+                    _instance = _registeredInstance;
+                    _registeredInstance = null; // 只使用一次
+                    return _instance;
+                }
+
                 if (_instance == null)
                 {
                     // 场景中查找有效实例
@@ -39,14 +51,14 @@ public abstract class SingletonMono<T> : MonoBehaviour where T : MonoBehaviour
                     {
                         try
                         {
-                            _ = obj.name; // 验证有效性
+                            _ = obj.name;
                             _instance = obj;
                             return _instance;
                         }
                         catch (MissingReferenceException) { }
                     }
 
-                    // 没有找到有效实例，创建一个新的（仅作为兜底，不应为正常流程）
+                    // 没有找到有效实例，创建一个新的（仅作为兜底）
                     GameObject go = new GameObject($"[Singleton]{typeof(T).Name}");
                     _instance = go.AddComponent<T>();
                     DontDestroyOnLoad(go);
@@ -54,6 +66,20 @@ public abstract class SingletonMono<T> : MonoBehaviour where T : MonoBehaviour
             }
             return _instance;
         }
+    }
+
+    /// <summary>
+    /// 主动注册实例（在 Awake 之前调用，优先级最高）
+    /// 用于代码控制初始化顺序
+    /// </summary>
+    public static void RegisterInstance(T instance)
+    {
+        if (_instance != null && _instance != instance)
+        {
+            Debug.LogWarning($"[SingletonMono] {typeof(T).Name} RegisterInstance: 已有实例，跳过注册");
+            return;
+        }
+        _registeredInstance = instance;
     }
 
     /// <summary>
@@ -68,23 +94,29 @@ public abstract class SingletonMono<T> : MonoBehaviour where T : MonoBehaviour
     /// </summary>
     protected virtual void Awake()
     {
-        // 检查已有实例是否已失效
+        // 如果已有有效实例，当前实例作为普通组件存在
         try
         {
             if (_instance != null && _instance != this)
-            {
-                // 已有有效实例，当前实例作为普通组件存在（供序列化使用）
                 return;
-            }
         }
         catch (MissingReferenceException)
         {
             _instance = null;
         }
 
-        // 当前实例成为单例
-        _instance = this as T;
-        DontDestroyOnLoad(gameObject);
+        // 如果代码已经注册了实例（_registeredInstance），使用它
+        if (_registeredInstance != null)
+        {
+            _instance = _registeredInstance;
+            _registeredInstance = null;
+        }
+        else
+        {
+            _instance = this as T;
+            DontDestroyOnLoad(gameObject);
+        }
+
         Init();
     }
 

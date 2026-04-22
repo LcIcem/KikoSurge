@@ -21,8 +21,8 @@ public class CameraManager : SingletonMono<CameraManager>
     private Vector2 _currentMouseOffset;
 
     [Header("鼠标偏移跟随")]
-    public float MinMouseOffsetThreshold = 0.05f;   // 死区阈值（屏幕空间 0~0.707）：鼠标距屏幕中心小于此值时偏移归零
-    public float MaxMouseOffsetMagnitude = 0.2f;   // 最大范围（屏幕空间 0~0.707）：鼠标超出此半径时方向向量钳制到此半径
+    public float MinMouseOffsetThreshold = 0.5f;   // 死区阈值（屏幕空间 0~0.707）：鼠标距屏幕中心小于此值时偏移归零
+    public float MaxMouseOffsetMagnitude = 0.7f;   // 最大范围（屏幕空间 0~0.707）：鼠标超出此半径时方向向量钳制到此半径
     public float MouseOffsetWorldScale = 1f;        // 世界空间缩放系数：乘以视锥体尺寸，控制最大偏移时的世界坐标倍率
     public float MouseOffsetSmoothSpeed = 8f;       // 平滑速度：值越大从当前位置过渡到目标偏移越快
 

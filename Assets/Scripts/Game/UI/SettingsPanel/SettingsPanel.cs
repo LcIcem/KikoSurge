@@ -93,7 +93,7 @@ public class SettingsPanel : BasePanel
         switch (btnName)
         {
             case BTN_CLOSE:
-                GameLifecycleManager.Instance.CloseCurrentPanel();
+                GameLifecycleManager.Instance?.CloseCurrentPanel();
                 break;
             case BTN_CATEGORY_AUDIO:
                 ShowSettings(_audioPage.PageKey);

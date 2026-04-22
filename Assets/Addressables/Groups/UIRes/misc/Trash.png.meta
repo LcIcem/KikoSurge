@@ -1,19 +1,10 @@
 fileFormatVersion: 2
-guid: cc3c6f0e83278c548aacc64f2b144a2f
+guid: f5e45fc4d09c3724b915de220ad98ec6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3795675482090570979
-    second: target_a_0
-  - first:
-      213: -933805848997108095
-    second: target_a_1
-  - first:
-      213: 5921600988316989567
-    second: target_a_2
-  - first:
-      213: 5017320697537854007
-    second: target_a_3
+      213: 2433294883196242628
+    second: Trash_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -33,7 +24,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 1
+  isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -55,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -66,7 +57,7 @@ TextureImporter:
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
-  textureType: 7
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -148,89 +139,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: target_a_0
+      name: Trash_0
       rect:
         serializedVersion: 2
-        x: 27
-        y: 41
-        width: 10
-        height: 18
+        x: 0
+        y: 0
+        width: 48
+        height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3e40ba89db2fca430800000000000000
-      internalID: 3795675482090570979
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: target_a_1
-      rect:
-        serializedVersion: 2
-        x: 5
-        y: 27
-        width: 18
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 186685127847a03f0800000000000000
-      internalID: -933805848997108095
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: target_a_2
-      rect:
-        serializedVersion: 2
-        x: 41
-        y: 27
-        width: 18
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f787c3299b0cd2250800000000000000
-      internalID: 5921600988316989567
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: target_a_3
-      rect:
-        serializedVersion: 2
-        x: 27
-        y: 5
-        width: 10
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 73a75fc679a11a540800000000000000
-      internalID: 5017320697537854007
+      spriteID: 4ca00baddccc4c120800000000000000
+      internalID: 2433294883196242628
       vertices: []
       indices: 
       edges: []
@@ -239,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: d68f976a2dcb5514899dad98fa74819d
     internalID: 0
     vertices: []
     indices: 
@@ -249,10 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      target_a_0: 3795675482090570979
-      target_a_1: -933805848997108095
-      target_a_2: 5921600988316989567
-      target_a_3: 5017320697537854007
+      Trash_0: 2433294883196242628
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
