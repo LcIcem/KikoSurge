@@ -9,11 +9,13 @@ public class WeaponRotation : MonoBehaviour
     [SerializeField] private SpriteRenderer _sprite;
     [SerializeField] private float _offset;
     [SerializeField] private Transform _muzzle;
+    [SerializeField] private float _aimDeadzoneRadius = 0.5f;
     public bool IsActive => AimInput.Enabled;
 
     private Vector3 _mousePos;      // 鼠标世界坐标
     private Transform _weaponPivot; // 武器要挂到的锚点的Transform
     private bool _wasFlipped;      // 记录上次翻转状态，用于检测切换
+    private float _stableAngle;     // 上次稳定的角度，用于死区时保持角度
 
     void Awake()
     {
@@ -40,8 +42,18 @@ public class WeaponRotation : MonoBehaviour
 
         // 计算武器锚点到鼠标的一条方向向量
         Vector3 dir = _mousePos - _weaponPivot.position;
+
+        // 死区：距离过小时使用上次稳定角度，避免微小向量导致Atan2震荡
+        if (dir.magnitude < _aimDeadzoneRadius)
+        {
+            transform.rotation = Quaternion.AngleAxis(_stableAngle, Vector3.forward);
+            transform.localPosition = transform.rotation * new Vector3(_offset, 0, 0);
+            return;
+        }
+
         // 从该方向向量计算出沿x轴正向开始的角度
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        _stableAngle = angle;  // 记录稳定角度
 
         // 根据旋转的角度决定是否翻转sprite
         bool shouldFlip = angle >= 86 || angle <= -86;

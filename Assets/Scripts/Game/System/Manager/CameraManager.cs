@@ -1,6 +1,7 @@
 using LcIcemFramework.Core;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Game.Event;
 
 /// <summary>
@@ -14,6 +15,15 @@ public class CameraManager : SingletonMono<CameraManager>
     private CinemachineImpulseSource _recoilSource;
     private CinemachineImpulseSource _hurtSource;
     private CinemachineImpulseSource _dashSource;
+
+    // 鼠标偏移跟随
+    private CinemachinePositionComposer _positionComposer;
+    private Vector2 _currentMouseOffset;
+
+    [Header("鼠标偏移跟随")]
+    public float MinMouseOffsetThreshold = 1f;
+    public float MaxMouseOffsetMagnitude = 1f;
+    public float MouseOffsetSmoothSpeed = 8f;
 
     public Transform Target { get; private set; }
 
@@ -46,7 +56,10 @@ public class CameraManager : SingletonMono<CameraManager>
             _cinemachineCam = FindFirstObjectByType<CinemachineCamera>();
 
         if (_cinemachineCam != null)
+        {
             _cinemachineCam.Follow = target;
+            _positionComposer = _cinemachineCam.GetCinemachineComponent(CinemachineCore.Stage.Body) as CinemachinePositionComposer;
+        }
         else
         {
             Debug.LogWarning("[CameraManager] CinemachineCamera not found in scene.");
@@ -92,5 +105,31 @@ public class CameraManager : SingletonMono<CameraManager>
             Vector3 dashDir = new Vector3(player.MoveDir.x, player.MoveDir.y, 0f);
             _dashSource?.GenerateImpulse(dashDir);
         }
+    }
+
+    private void LateUpdate()
+    {
+        if (Target == null) return;
+
+        // 保障：如果引用丢失，运行时重新获取
+        if (_positionComposer == null)
+            _positionComposer = _cinemachineCam?.GetCinemachineComponent(CinemachineCore.Stage.Body) as CinemachinePositionComposer;
+
+        if (_positionComposer == null) return;
+
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        mouseWorldPos.z = 0;
+
+        Vector2 targetToMouse = (Vector2)(mouseWorldPos - Target.position);
+
+        if (targetToMouse.magnitude < MinMouseOffsetThreshold)
+            targetToMouse = Vector2.zero;
+        else if (targetToMouse.magnitude > MaxMouseOffsetMagnitude)
+            targetToMouse = targetToMouse.normalized * MaxMouseOffsetMagnitude;
+
+        _currentMouseOffset = Vector2.Lerp(_currentMouseOffset, targetToMouse, MouseOffsetSmoothSpeed * Time.deltaTime);
+        _positionComposer.TargetOffset = _currentMouseOffset;
+
+        Debug.Log($"[CameraManager] mouseOffset={_currentMouseOffset}, TargetOffset={_positionComposer.TargetOffset}");
     }
 }
