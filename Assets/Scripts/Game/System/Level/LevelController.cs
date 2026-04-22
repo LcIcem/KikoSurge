@@ -202,6 +202,7 @@ public class LevelController : MonoBehaviour
         }
 
         _currentLayerIndex = layerIndex;
+        SessionManager.Instance.SetCurrentFloor(_currentLayerIndex);
         _rng = new GameRandom(DeriveLayerSeed(_sessionSeed, _currentLayerIndex));
 
         // 构建地牢

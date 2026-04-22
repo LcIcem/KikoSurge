@@ -23,6 +23,7 @@ public class HubPanel : BasePanel
     private const string TXT_AMMO = "txt_ammo";
     private const string TXT_WAVE = "txt_wave";
     private const string TXT_ROOM = "txt_room";
+    private const string TXT_FLOOR = "txt_floor";
     private const string IMG_ITEM_SLOT_1 = "img_itemSlot1";
     private const string IMG_ITEM_SLOT_2 = "img_itemSlot2";
     private const string IMG_ITEM_SLOT_3 = "img_itemSlot3";
@@ -47,6 +48,8 @@ public class HubPanel : BasePanel
         EventCenter.Instance.Publish(GameEventID.OnRequestRoomRefresh);
         // 主动刷新心形UI（确保Hub显示时生命值正确）
         RefreshHeartDisplay();
+        // 刷新楼层显示
+        RefreshFloorDisplay();
     }
 
     /// <summary>
@@ -59,6 +62,27 @@ public class HubPanel : BasePanel
         {
             EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, playerData);
         }
+    }
+
+    /// <summary>
+    /// 刷新楼层显示
+    /// </summary>
+    private void RefreshFloorDisplay()
+    {
+        var text = GetControl<Text>(TXT_FLOOR);
+        if (text != null)
+        {
+            int currentFloor = SessionManager.Instance?.GetCurrentFloor() ?? 0;
+            text.text = $"第{currentFloor + 1}层";
+        }
+    }
+
+    /// <summary>
+    /// 进入新层时更新楼层显示
+    /// </summary>
+    private void OnLayerEnter(int layerIndex)
+    {
+        RefreshFloorDisplay();
     }
 
     /// <summary>
@@ -94,6 +118,7 @@ public class HubPanel : BasePanel
         EventCenter.Instance.Subscribe<RoomBehaviourEntry>(GameEventID.OnBehaviourEnd, OnBehaviourEnd);
         EventCenter.Instance.Subscribe<RoomEnterParams>(GameEventID.OnRoomEnter, OnRoomEnter);
         EventCenter.Instance.Subscribe<CorridorEnterParams>(GameEventID.OnCorridorEnter, OnCorridorEnter);
+        EventCenter.Instance.Subscribe<int>(GameEventID.OnLayerEnter, OnLayerEnter);
     }
 
     private void UnsubscribeEvents()
@@ -109,6 +134,7 @@ public class HubPanel : BasePanel
         EventCenter.Instance.Unsubscribe<RoomBehaviourEntry>(GameEventID.OnBehaviourEnd, OnBehaviourEnd);
         EventCenter.Instance.Unsubscribe<RoomEnterParams>(GameEventID.OnRoomEnter, OnRoomEnter);
         EventCenter.Instance.Unsubscribe<CorridorEnterParams>(GameEventID.OnCorridorEnter, OnCorridorEnter);
+        EventCenter.Instance.Unsubscribe<int>(GameEventID.OnLayerEnter, OnLayerEnter);
     }
 
     #region 事件处理

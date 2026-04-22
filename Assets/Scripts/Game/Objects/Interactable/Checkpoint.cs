@@ -25,8 +25,19 @@ public class Checkpoint : MonoBehaviour
 
     private void Start()
     {
-        _interactable.SetHintText("进入下一层[{0}]");
+        UpdateHintText();
         _interactable.OnInteract += OnInteractTriggered;
+    }
+
+    /// <summary>
+    /// 根据是否是最后一层更新提示文本
+    /// </summary>
+    private void UpdateHintText()
+    {
+        var levelController = FindObjectOfType<LevelController>();
+        bool isLastLayer = levelController != null && levelController.IsLastLayer;
+        string hintText = isLastLayer ? "退出地牢[{0}]" : "进入下一层[{0}]";
+        _interactable.SetHintText(hintText);
     }
 
     private void OnInteractTriggered()
