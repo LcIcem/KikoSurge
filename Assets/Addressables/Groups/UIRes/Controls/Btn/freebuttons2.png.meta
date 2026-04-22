@@ -130,7 +130,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -144,7 +144,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -168,7 +168,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -240,7 +240,7 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -257,12 +257,12 @@ TextureImporter:
       name: freebuttons2_1
       rect:
         serializedVersion: 2
-        x: 0
-        y: 32
+        x: 16
+        y: 48
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -276,199 +276,23 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: freebuttons2_2
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 48
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 97dffc5313ed04070800000000000000
-      internalID: 8088709233694997881
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_3
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 48
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ddf60d0e318314c10800000000000000
-      internalID: 2035970164575465437
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_4
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 32
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2290e5bf5958be1b0800000000000000
-      internalID: -5626256430255437534
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_5
-      rect:
-        serializedVersion: 2
-        x: 48
-        y: 48
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ae313e4864aea5e90800000000000000
-      internalID: -7036053879214894102
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_6
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 48
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e9bde0e7d6d89d140800000000000000
-      internalID: 4744979183817382814
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_7
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 32
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5baf7494badbae1e0800000000000000
-      internalID: -2167711727258961227
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_8
-      rect:
-        serializedVersion: 2
-        x: 80
-        y: 48
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6224db8f9e49bf2b0800000000000000
-      internalID: -5549678383182560730
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_9
-      rect:
-        serializedVersion: 2
-        x: 96
-        y: 48
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 70cb0f6af2ff09400800000000000000
-      internalID: 329043352927386631
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: freebuttons2_10
       rect:
         serializedVersion: 2
-        x: 96
+        x: 32
         y: 32
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 44c106586a8b0f420800000000000000
-      internalID: 2661830405117713476
+      spriteID: 895b2771c7071b24fa18c623cc538eec
+      internalID: -300868909
       vertices: []
       indices: 
       edges: []
@@ -477,108 +301,20 @@ TextureImporter:
       name: freebuttons2_11
       rect:
         serializedVersion: 2
-        x: 112
-        y: 48
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7d6da536566560330800000000000000
-      internalID: 3676721139253171927
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_12
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 16
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 148bad63463b1b030800000000000000
-      internalID: 3508782827696732225
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_13
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 32
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 70c12370d4da6e110800000000000000
-      internalID: 1289908889633037319
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_14
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 16
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d30153cb1449cc010800000000000000
-      internalID: 1210505409907200061
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_15
-      rect:
-        serializedVersion: 2
         x: 48
         y: 32
         width: 16
-        height: 15
+        height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: af25e1ce23721a690800000000000000
-      internalID: -7592744397106687238
+      spriteID: 2861d5d79d57d074991a1947a331a06b
+      internalID: 2059493468
       vertices: []
       indices: 
       edges: []
@@ -587,20 +323,20 @@ TextureImporter:
       name: freebuttons2_16
       rect:
         serializedVersion: 2
-        x: 64
+        x: 0
         y: 16
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 96c35865ee3d2e180800000000000000
-      internalID: -9087468077472990103
+      spriteID: ba9900bc52b9e264a8e70b08fa1ac016
+      internalID: -1582550073
       vertices: []
       indices: 
       edges: []
@@ -609,20 +345,20 @@ TextureImporter:
       name: freebuttons2_17
       rect:
         serializedVersion: 2
-        x: 80
-        y: 32
+        x: 16
+        y: 16
         width: 16
-        height: 15
+        height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 41a31d82383586a80800000000000000
-      internalID: -8473430876106966508
+      spriteID: 097308a6341a04c47899fa9ee79512eb
+      internalID: -398132146
       vertices: []
       indices: 
       edges: []
@@ -631,20 +367,20 @@ TextureImporter:
       name: freebuttons2_18
       rect:
         serializedVersion: 2
-        x: 96
+        x: 32
         y: 16
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: c3f245b3a96e32770800000000000000
-      internalID: 8584958864793022268
+      spriteID: aab9d1db232d64441be6a37b52f7d2ae
+      internalID: 837622472
       vertices: []
       indices: 
       edges: []
@@ -653,284 +389,20 @@ TextureImporter:
       name: freebuttons2_19
       rect:
         serializedVersion: 2
-        x: 112
-        y: 32
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 30b6abb8e4f3ffb50800000000000000
-      internalID: 6629086783096908547
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_20
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 07d56298a43185d60800000000000000
-      internalID: 7879068758934183280
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_21
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 16
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: dbab797ade7072170800000000000000
-      internalID: 8153494367677954749
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_22
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: cf67ba9ac0b4f50e0800000000000000
-      internalID: -2279020368667904260
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_23
-      rect:
-        serializedVersion: 2
         x: 48
         y: 16
         width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3b301a40b51ed7d40800000000000000
-      internalID: 5583866894045217715
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_24
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 0
-        width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: a82a7417d15d6e0b0800000000000000
-      internalID: -5699633955959496054
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_25
-      rect:
-        serializedVersion: 2
-        x: 80
-        y: 16
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4e61c6ccf13de2240800000000000000
-      internalID: 4768981188959016676
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_26
-      rect:
-        serializedVersion: 2
-        x: 96
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d06eab7482ca33440800000000000000
-      internalID: 4914460907393443341
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_27
-      rect:
-        serializedVersion: 2
-        x: 112
-        y: 16
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 63332194a9f6c6cd0800000000000000
-      internalID: -2563551379439078602
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_28
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 0
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 03023ed2826a483d0800000000000000
-      internalID: -3205254343282188240
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_29
-      rect:
-        serializedVersion: 2
-        x: 48
-        y: 0
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a5bf39a16f1d0c890800000000000000
-      internalID: -7439715729477993638
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_30
-      rect:
-        serializedVersion: 2
-        x: 80
-        y: 0
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a1ac86943c35e8d10800000000000000
-      internalID: 2129731772008155674
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: freebuttons2_31
-      rect:
-        serializedVersion: 2
-        x: 112
-        y: 0
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: fa71ef2676ab6aff0800000000000000
-      internalID: -25127794698741841
+      spriteID: 27e5551b2f592434b818ebd0d0f568f8
+      internalID: -118819910
       vertices: []
       indices: 
       edges: []
@@ -939,7 +411,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 17e7b3ee3bd7e0849952192e466c5353
     internalID: 0
     vertices: []
     indices: 
@@ -947,40 +419,42 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":16.0,"y":16.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       freebuttons2_0: -1572581450591566368
       freebuttons2_1: 5347564824689686261
-      freebuttons2_10: 2661830405117713476
-      freebuttons2_11: 3676721139253171927
-      freebuttons2_12: 3508782827696732225
-      freebuttons2_13: 1289908889633037319
-      freebuttons2_14: 1210505409907200061
-      freebuttons2_15: -7592744397106687238
-      freebuttons2_16: -9087468077472990103
-      freebuttons2_17: -8473430876106966508
-      freebuttons2_18: 8584958864793022268
-      freebuttons2_19: 6629086783096908547
+      freebuttons2_10: -300868909
+      freebuttons2_11: 2059493468
+      freebuttons2_12: 1024361220
+      freebuttons2_13: 1248785453
+      freebuttons2_14: 936559456
+      freebuttons2_15: 1861548921
+      freebuttons2_16: -1582550073
+      freebuttons2_17: -398132146
+      freebuttons2_18: 837622472
+      freebuttons2_19: -118819910
       freebuttons2_2: 8088709233694997881
-      freebuttons2_20: 7879068758934183280
-      freebuttons2_21: 8153494367677954749
-      freebuttons2_22: -2279020368667904260
-      freebuttons2_23: 5583866894045217715
-      freebuttons2_24: -5699633955959496054
-      freebuttons2_25: 4768981188959016676
-      freebuttons2_26: 4914460907393443341
-      freebuttons2_27: -2563551379439078602
-      freebuttons2_28: -3205254343282188240
-      freebuttons2_29: -7439715729477993638
+      freebuttons2_20: -978039217
+      freebuttons2_21: -797409497
+      freebuttons2_22: 2115249511
+      freebuttons2_23: 850211728
+      freebuttons2_24: -1328988040
+      freebuttons2_25: 990444833
+      freebuttons2_26: 1753514697
+      freebuttons2_27: 2144087698
+      freebuttons2_28: 491262610
+      freebuttons2_29: 1927766405
       freebuttons2_3: 2035970164575465437
-      freebuttons2_30: 2129731772008155674
-      freebuttons2_31: -25127794698741841
+      freebuttons2_30: -1534238633
+      freebuttons2_31: 568238468
       freebuttons2_4: -5626256430255437534
       freebuttons2_5: -7036053879214894102
       freebuttons2_6: 4744979183817382814
       freebuttons2_7: -2167711727258961227
-      freebuttons2_8: -5549678383182560730
-      freebuttons2_9: 329043352927386631
+      freebuttons2_8: -1313391629
+      freebuttons2_9: 1038548405
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

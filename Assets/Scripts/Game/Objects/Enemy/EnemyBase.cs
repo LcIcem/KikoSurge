@@ -52,6 +52,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     private bool _attackHitTriggered = false;  // 攻击是否已触发
     private bool _shouldExitAfterAttack = false;  // 攻击动画完成后是否需要退出（冷却期间离开攻击范围时设置）
     private float _shockwaveTimer = 0f;  // 冲击波特效计时器
+    protected Vector2 _attackDirection;  // 攻击方向（开始攻击时锁定）
 
     // 保存的配置引用（用于池化后重置）
     private EnemyConfig _config;
@@ -400,6 +401,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _attackHitTriggered = false;
         _shouldExitAfterAttack = false;
         _shockwaveTimer = 0f;
+        RecordAttackDirection();
     }
 
     /// <summary>
@@ -411,6 +413,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _attackHitTriggered = false;
         _shouldExitAfterAttack = false;
         _shockwaveTimer = 0f;
+        RecordAttackDirection();
     }
 
     /// <summary>
@@ -473,6 +476,24 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _attackTimer = 0f;
         _cooldownTimer = 0f;
         _attackHitTriggered = false;
+    }
+
+    /// <summary>
+    /// 记录攻击方向（进入攻击状态时调用，锁定攻击方向）
+    /// </summary>
+    protected virtual void RecordAttackDirection()
+    {
+        // 强制获取一次玩家引用（防止 ResetAttackState 比 Update 先执行时 _player 为 null）
+        if (_player == null)
+        {
+            _player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        }
+
+        if (_player != null)
+        {
+            _attackDirection = (_player.position - transform.position).normalized;
+            Debug.Log($"[RecordAttackDirection] _attackDirection={_attackDirection}, player={_player.position}, enemy={transform.position}");
+        }
     }
 
     /// <summary>

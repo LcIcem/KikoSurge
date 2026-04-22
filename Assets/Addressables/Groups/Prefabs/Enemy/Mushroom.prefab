@@ -309,6 +309,7 @@ MonoBehaviour:
   _fanRenderer: {fileID: 5967373190526657537}
   _fanSegments: 20
   _fanColor: {r: 1, g: 0.09365711, b: 0, a: 0.3}
+  _fanLineWidth: 0.01
   _fanDisplayDuration: 0.3
 --- !u!70 &1445548212346479564
 CapsuleCollider2D:
@@ -373,7 +374,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 87dee5d03323e4003a9785eface0284a, type: 2}
+  - {fileID: 2100000, guid: a96f0d7bb7979c649947103b01ce9502, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -392,8 +393,8 @@ LineRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -178446317
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions: []
@@ -404,7 +405,7 @@ LineRenderer:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0.0018081665
+        time: 0
         value: 0.09651375
         inSlope: 0
         outSlope: 0
