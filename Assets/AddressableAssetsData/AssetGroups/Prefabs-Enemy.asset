@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Prefabs-Enemy
   m_GUID: b62016f16e51bcc4094a384e033e1f2a
   m_SerializeEntries:
+  - m_GUID: 1a16389f026650648856b3d465359f88
+    m_Address: Boss
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ef161c29c31f64246939bc2154a19622
     m_Address: Mushroom
     m_ReadOnly: 0

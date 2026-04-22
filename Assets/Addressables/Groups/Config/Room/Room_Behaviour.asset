@@ -60,7 +60,7 @@ MonoBehaviour:
         waveDelay: 2
         spawnMode: 0
         enemyChoices:
-        - enemyConfig: {fileID: 11400000, guid: e163b7f0fbbdefe45a817ddd3a03bd83, type: 2}
+        - enemyConfig: {fileID: 11400000, guid: 9d13e353f79d80447b85f6dee40dc05a, type: 2}
           weight: 1
         minCount: 1
         maxCount: 1

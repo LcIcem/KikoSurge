@@ -15,18 +15,17 @@ public class KeysSettingsPage : ISettingsPage
     // Action 名称常量（Player Map 中的 Actions）
     private static readonly string[] ActionNames = new[]
     {
-        "Move", "Look", "Interact", "Shoot", "Dash", "SwitchWeapon", "OpenInventory"
+        "Move", "Shoot", "Dash", "SwitchWeapon", "Interact", "OpenInventory"
     };
 
     // Action 显示名称映射
     private static readonly Dictionary<string, string> ActionDisplayNames = new Dictionary<string, string>
     {
         { "Move", "移动" },
-        { "Look", "视角" },
-        { "Interact", "交互"},
         { "Shoot", "射击" },
         { "Dash", "闪避" },
         { "SwitchWeapon", "切换武器" },
+        { "Interact", "交互"},
         { "OpenInventory", "打开背包" },
     };
 

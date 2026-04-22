@@ -174,7 +174,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     }
 
     // 初始化（从对象池取出时调用）
-    public void Init(EnemyConfig config)
+    public virtual void Init(EnemyConfig config)
     {
         _config = config;
         EnemyId = config.EnemyId;

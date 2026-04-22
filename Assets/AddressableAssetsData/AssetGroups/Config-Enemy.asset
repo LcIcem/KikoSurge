@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9d13e353f79d80447b85f6dee40dc05a
+    m_Address: Enemy_Boss
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e163b7f0fbbdefe45a817ddd3a03bd83
     m_Address: Enemy_Mushroom
     m_ReadOnly: 0

@@ -10,20 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f249117abb169d42938c3f7d5a135b4, type: 3}
-  m_Name: Item_Relic
+  m_Name: Item_Relic_Helm
   m_EditorClassIdentifier: Assembly-CSharp::RelicConfig
-  Id: 2001
-  Name: "\u9057\u72691"
+  Id: 2002
+  Name: "\u76D4\u7532"
   Type: 2
   MaxStack: 1
-  Value: 100
-  Icon: {fileID: 3433854091183550752, guid: e64be2a0595a486478dab8d9f5ab3c7e, type: 3}
-  Description: "\u4E00\u4E2A\u9057\u7269"
-  PickupSFX: {fileID: 8300000, guid: d77616adfa4b3624395c4fd4864d8b1c, type: 3}
+  Value: 80
+  Icon: {fileID: 5774581190672780694, guid: f1f963f801c80914bae6453e19e39caf, type: 3}
+  ammoIcon: {fileID: 0}
+  Description: "\u5B89\u5168\u611F\u5341\u8DB3"
+  PickupSFX: {fileID: 8300000, guid: 96c7718a07b9ee14990c8fa1023b6af8, type: 3}
   modifiers:
-  - modifierId: 1
-    modifierName: "\u6700\u5927\u751F\u547D\u503C"
-    type: 0
-    value: 1
-  baseDefense: 0
-  damageReduction: 0
+  - modifierId: 2
+    modifierName: "\u589E\u52A0\u9632\u5FA1\u529B"
+    type: 2
+    value: 10

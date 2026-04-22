@@ -64,24 +64,6 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Look",
-                    "type": "Value",
-                    "id": "c3d4e5f6-3333-4444-5555-666677770002",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
-                    "name": "Interact",
-                    "type": "Button",
-                    "id": "6d3b7c55-fe8d-4a4d-99b5-42d120ede09e",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Shoot",
                     "type": "Button",
                     "id": "c3d4e5f6-3333-4444-5555-666677770003",
@@ -118,9 +100,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Pause",
+                    "name": "Interact",
                     "type": "Button",
-                    "id": "c3d4e5f6-3333-4444-5555-666677770006",
+                    "id": "6d3b7c55-fe8d-4a4d-99b5-42d120ede09e",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -130,6 +112,15 @@
                     "name": "OpenInventory",
                     "type": "Button",
                     "id": "a7e61c2b-4b01-481b-bb2c-8cae6b61973e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "c3d4e5f6-3333-4444-5555-666677770006",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -191,17 +182,6 @@
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
-                },
-                {
-                    "name": "",
-                    "id": "d4e5f6a7-3333-4444-5555-666677771006",
-                    "path": "<Mouse>/delta",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Look",
-                    "isComposite": false,
-                    "isPartOfComposite": false
                 },
                 {
                     "name": "",
