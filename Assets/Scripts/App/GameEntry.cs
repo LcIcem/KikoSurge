@@ -20,7 +20,6 @@ public class GameEntry : MonoBehaviour
         DamageLuaBridge.Initialize();
 
         // 显示游戏开始面板
-        Log("Game started");
         ManagerHub.UI.ShowPanel<LoginPanel>(UILayerType.Middle);
         // 播放背景音乐（启动时同步一次持久化数据）
         ManagerHub.Audio.ApplySettings();

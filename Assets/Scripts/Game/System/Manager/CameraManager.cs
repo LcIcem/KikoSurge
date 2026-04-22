@@ -21,9 +21,9 @@ public class CameraManager : SingletonMono<CameraManager>
     private Vector2 _currentMouseOffset;
 
     [Header("鼠标偏移跟随")]
-    public float MinMouseOffsetThreshold = 1f;
-    public float MaxMouseOffsetMagnitude = 1f;
-    public float MouseOffsetSmoothSpeed = 8f;
+    public float MinMouseOffsetThreshold = 0.2f;
+    public float MaxMouseOffsetMagnitude = 0.5f;
+    public float MouseOffsetSmoothSpeed = 9f;
 
     public Transform Target { get; private set; }
 
@@ -111,25 +111,34 @@ public class CameraManager : SingletonMono<CameraManager>
     {
         if (Target == null) return;
 
-        // 保障：如果引用丢失，运行时重新获取
         if (_positionComposer == null)
             _positionComposer = _cinemachineCam?.GetCinemachineComponent(CinemachineCore.Stage.Body) as CinemachinePositionComposer;
-
         if (_positionComposer == null) return;
 
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        mouseWorldPos.z = 0;
+        // 屏幕空间计算：鼠标位置归一化到 [-0.5, 0.5]，屏幕中心为 0
+        Vector2 screenPos = Mouse.current.position.ReadValue();
+        Vector2 screenCentered = new Vector2(
+            screenPos.x / Screen.width - 0.5f,
+            screenPos.y / Screen.height - 0.5f
+        );
 
-        Vector2 targetToMouse = (Vector2)(mouseWorldPos - Target.position);
+        float dist = screenCentered.magnitude;
 
-        if (targetToMouse.magnitude < MinMouseOffsetThreshold)
-            targetToMouse = Vector2.zero;
-        else if (targetToMouse.magnitude > MaxMouseOffsetMagnitude)
-            targetToMouse = targetToMouse.normalized * MaxMouseOffsetMagnitude;
+        // 死区 + 最大限制
+        if (dist < MinMouseOffsetThreshold)
+            screenCentered = Vector2.zero;
+        else if (dist > MaxMouseOffsetMagnitude)
+            screenCentered = screenCentered.normalized * MaxMouseOffsetMagnitude;
 
-        _currentMouseOffset = Vector2.Lerp(_currentMouseOffset, targetToMouse, MouseOffsetSmoothSpeed * Time.deltaTime);
+        // 转换为世界空间偏移量：screenCentered ∈ [-0.5,0.5] → 世界单位
+        float orthoSize = Camera.main.orthographicSize;
+        float aspect = (float)Screen.width / Screen.height;
+        Vector2 worldOffset = new Vector2(
+            screenCentered.x * MaxMouseOffsetMagnitude * 2f * orthoSize * aspect,
+            screenCentered.y * MaxMouseOffsetMagnitude * 2f * orthoSize
+        );
+
+        _currentMouseOffset = Vector2.Lerp(_currentMouseOffset, worldOffset, MouseOffsetSmoothSpeed * Time.deltaTime);
         _positionComposer.TargetOffset = _currentMouseOffset;
-
-        Debug.Log($"[CameraManager] mouseOffset={_currentMouseOffset}, TargetOffset={_positionComposer.TargetOffset}");
     }
 }
