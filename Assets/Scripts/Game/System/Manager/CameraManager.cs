@@ -21,9 +21,10 @@ public class CameraManager : SingletonMono<CameraManager>
     private Vector2 _currentMouseOffset;
 
     [Header("鼠标偏移跟随")]
-    public float MinMouseOffsetThreshold = 0.2f;
-    public float MaxMouseOffsetMagnitude = 0.5f;
-    public float MouseOffsetSmoothSpeed = 9f;
+    public float MinMouseOffsetThreshold = 0.05f;   // 死区阈值（屏幕空间 0~0.707）：鼠标距屏幕中心小于此值时偏移归零
+    public float MaxMouseOffsetMagnitude = 0.2f;   // 最大范围（屏幕空间 0~0.707）：鼠标超出此半径时方向向量钳制到此半径
+    public float MouseOffsetWorldScale = 1f;        // 世界空间缩放系数：乘以视锥体尺寸，控制最大偏移时的世界坐标倍率
+    public float MouseOffsetSmoothSpeed = 8f;       // 平滑速度：值越大从当前位置过渡到目标偏移越快
 
     public Transform Target { get; private set; }
 
@@ -115,7 +116,9 @@ public class CameraManager : SingletonMono<CameraManager>
             _positionComposer = _cinemachineCam?.GetCinemachineComponent(CinemachineCore.Stage.Body) as CinemachinePositionComposer;
         if (_positionComposer == null) return;
 
-        // 屏幕空间计算：鼠标位置归一化到 [-0.5, 0.5]，屏幕中心为 0
+        // 第一步：屏幕空间计算
+        // 将鼠标像素坐标 (0~Screen.width, 0~Screen.height) 归一化到以屏幕中心为原点的 [-0.5, 0.5] 范围
+        // 屏幕中心=(0,0)，左边缘=(-0.5,0)，右边缘=(0.5,0)，下边缘=(0,-0.5)，上边缘=(0,0.5)
         Vector2 screenPos = Mouse.current.position.ReadValue();
         Vector2 screenCentered = new Vector2(
             screenPos.x / Screen.width - 0.5f,
@@ -124,21 +127,29 @@ public class CameraManager : SingletonMono<CameraManager>
 
         float dist = screenCentered.magnitude;
 
-        // 死区 + 最大限制
+        // 第二步：死区 + 屏幕空间钳制
+        // 鼠标距屏幕中心 < 死区阈值时归零，避免相机在鼠标靠近中心时频繁抖动
+        // 鼠标距屏幕中心 > 最大范围时，将方向向量钳制到最大半径内
         if (dist < MinMouseOffsetThreshold)
             screenCentered = Vector2.zero;
         else if (dist > MaxMouseOffsetMagnitude)
             screenCentered = screenCentered.normalized * MaxMouseOffsetMagnitude;
 
-        // 转换为世界空间偏移量：screenCentered ∈ [-0.5,0.5] → 世界单位
+        // 第三步：转换为世界空间偏移量
+        // 正交相机视锥体：X方向总宽度 = orthoSize × aspect × 2，Y方向总高度 = orthoSize × 2
+        // screenCentered ∈ [-0.5, 0.5] → screenCentered × 2 ∈ [-1, 1]（全屏比例）
+        // 乘以视锥体总尺寸得到世界坐标，再乘以 MouseOffsetWorldScale 控制整体强度
         float orthoSize = Camera.main.orthographicSize;
         float aspect = (float)Screen.width / Screen.height;
         Vector2 worldOffset = new Vector2(
-            screenCentered.x * MaxMouseOffsetMagnitude * 2f * orthoSize * aspect,
-            screenCentered.y * MaxMouseOffsetMagnitude * 2f * orthoSize
+            screenCentered.x * 2f * orthoSize * aspect * MouseOffsetWorldScale,
+            screenCentered.y * 2f * orthoSize * MouseOffsetWorldScale
         );
 
+        // 第四步：平滑插值，避免偏移量瞬间跳变导致相机抖动
         _currentMouseOffset = Vector2.Lerp(_currentMouseOffset, worldOffset, MouseOffsetSmoothSpeed * Time.deltaTime);
+
+        // 第五步：写入 CinemachinePositionComposer.TargetOffset，叠加到相机跟随点上
         _positionComposer.TargetOffset = _currentMouseOffset;
     }
 }
