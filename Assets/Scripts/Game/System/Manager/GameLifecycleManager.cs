@@ -67,6 +67,11 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// </summary>
     private bool _wasInLobbyBeforePause;
 
+    /// <summary>
+    /// 游戏状态变化时触发
+    /// </summary>
+    public event Action<GameState> OnStateChanged;
+
     protected override void Init()
     {
         Log("GameLifecycleManager initialized");
@@ -465,6 +470,9 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
 
         // 切换 BGM
         SwitchBGM(oldState, newState);
+
+        // 通知状态变化
+        OnStateChanged?.Invoke(newState);
     }
 
     private void SwitchBGM(GameState oldState, GameState newState)

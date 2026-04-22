@@ -46,6 +46,15 @@ public class UIManager : Singleton<UIManager>
     /// <summary>正在加载中的面板名称集合，防止异步加载期间重复触发。</summary>
     private HashSet<string> _loadingPanels = new HashSet<string>();
 
+    /// <summary>当前打开面板的数量（用于触发 OnAnyPanelShown/Hidden）</summary>
+    private int _openPanelCount = 0;
+
+    /// <summary>任意面板打开时触发（从0变为非0时触发）</summary>
+    public event Action OnAnyPanelShown;
+
+    /// <summary>所有面板关闭时触发（从非0变为0时触发）</summary>
+    public event Action OnAnyPanelHidden;
+
     /// <summary>Canvas 各层级根节点。</summary>
     private Transform _bottom;
     private Transform _middle;
@@ -162,6 +171,9 @@ public class UIManager : Singleton<UIManager>
             return;
         }
 
+        // 旧面板数量，用于判断是否需要触发 OnAnyPanelShown
+        bool wasEmpty = _openPanelCount == 0;
+
         // 正在加载中，防止重复触发
         if (_loadingPanels.Contains(panelName))
         {
@@ -170,13 +182,13 @@ public class UIManager : Singleton<UIManager>
         }
 
         // 异步加载面板 Prefab
-        LoadPanelAsync<T>(layer, callBack);
+        LoadPanelAsync<T>(layer, callBack, wasEmpty);
     }
 
     /// <summary>
     /// 同步加载面板 Prefab。
     /// </summary>
-    private void LoadPanelAsync<T>(UILayerType layer, UnityAction<T> callBack)
+    private void LoadPanelAsync<T>(UILayerType layer, UnityAction<T> callBack, bool wasEmpty)
         where T : BasePanel
     {
         string panelName = typeof(T).Name;
@@ -222,6 +234,11 @@ public class UIManager : Singleton<UIManager>
             return;
         }
         _panelDic.Add(panelName, panel);
+
+        // 更新计数并触发事件
+        _openPanelCount++;
+        if (wasEmpty)
+            OnAnyPanelShown?.Invoke();
     }
 
     /// <summary>
@@ -234,11 +251,18 @@ public class UIManager : Singleton<UIManager>
         string panelName = typeof(T).Name;
         if (_panelDic.ContainsKey(panelName))
         {
+            BasePanel panel = _panelDic[panelName];
             // 调用面板的 Hide 逻辑（如退场动画），然后销毁 GameObject
-            _panelDic[panelName].Hide();
-            UnityEngine.Object.Destroy(_panelDic[panelName].gameObject);
+            panel.Hide();
+            UnityEngine.Object.Destroy(panel.gameObject);
             // 从字典移除引用
             _panelDic.Remove(panelName);
+
+            // 更新计数并触发事件
+            _openPanelCount--;
+            if (_openPanelCount < 0) _openPanelCount = 0;
+            if (_openPanelCount == 0)
+                OnAnyPanelHidden?.Invoke();
         }
     }
 
@@ -254,6 +278,8 @@ public class UIManager : Singleton<UIManager>
             UnityEngine.Object.Destroy(kvp.Value.gameObject);
         }
         _panelDic.Clear();
+        _openPanelCount = 0;
+        OnAnyPanelHidden?.Invoke();
     }
 
     /// <summary>
@@ -291,6 +317,12 @@ public class UIManager : Singleton<UIManager>
             topPanel.Hide();
             UnityEngine.Object.Destroy(topPanel.gameObject);
             _panelDic.Remove(panelName);
+
+            // 更新计数并触发事件
+            _openPanelCount--;
+            if (_openPanelCount < 0) _openPanelCount = 0;
+            if (_openPanelCount == 0)
+                OnAnyPanelHidden?.Invoke();
 
             // 通知面板关闭
             OnPanelClosed?.Invoke(topPanel);
