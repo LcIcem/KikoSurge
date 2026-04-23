@@ -13,6 +13,21 @@ MonoBehaviour:
   m_Name: LootTable_Mushroom
   m_EditorClassIdentifier: Assembly-CSharp::LootTableConfig
   groups:
+  - groupName: "\u9057\u7269\u6389\u843D"
+    entries:
+    - _itemConfig: {fileID: 11400000, guid: 036be83b121f7ef4f9a07a0ee425962f, type: 2}
+      dropChance: 1
+      minQuantity: 1
+      maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: 8bea861fcea0e0342a3b2031540451e6, type: 2}
+      dropChance: 1
+      minQuantity: 1
+      maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: 126a74a1c5d106146924a86ce4e75173, type: 2}
+      dropChance: 1
+      minQuantity: 1
+      maxQuantity: 1
+    maxPick: 3
   - groupName: "\u8D27\u5E01\u6389\u843D"
     entries:
     - _itemConfig: {fileID: 11400000, guid: 628452d0397e8004e8e0b0a49d9141e0, type: 2}

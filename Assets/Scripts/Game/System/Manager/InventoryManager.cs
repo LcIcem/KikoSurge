@@ -720,13 +720,25 @@ public class InventoryManager : SingletonMono<InventoryManager>
             // 设置新血量（使用新的 maxHealth clamp）
             SessionManager.Instance?.SetPlayerHealth(newHealth);
 
-            // 同步 Player._playerData（与 HeartSystem 使用同一份数据）
+            // 同步 Player.RuntimeData（所有属性）
             var playerGo = GameObject.FindGameObjectWithTag("Player");
             var player = playerGo?.GetComponent<Player>();
-            if (player != null)
+            if (player != null && newPlayerData != null)
             {
-                player.RuntimeData.maxHealth = newMaxHealth;
+                player.RuntimeData.maxHealth = newPlayerData.maxHealth;
                 player.RuntimeData.Health = newHealth;
+                player.RuntimeData.atk = newPlayerData.atk;
+                player.RuntimeData.def = newPlayerData.def;
+                player.RuntimeData.moveSpeed = newPlayerData.moveSpeed;
+                player.RuntimeData.dashSpeed = newPlayerData.dashSpeed;
+                player.RuntimeData.dashDuration = newPlayerData.dashDuration;
+                player.RuntimeData.invincibleDuration = newPlayerData.invincibleDuration;
+                player.RuntimeData.hurtDuration = newPlayerData.hurtDuration;
+                player.RuntimeData.critRate = newPlayerData.critRate;
+                player.RuntimeData.critMultiplier = newPlayerData.critMultiplier;
+                player.RuntimeData.damageBonus = newPlayerData.damageBonus;
+                player.RuntimeData.defBreak = newPlayerData.defBreak;
+                player.RuntimeData.damageReduction = newPlayerData.damageReduction;
             }
 
             // 通知血条 UI 刷新（使用 Player._playerData 引用）

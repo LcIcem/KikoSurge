@@ -1205,7 +1205,7 @@ public class InventoryPanel : BasePanel
         var potionEffects = GetPotionTimedEffects();
 
         // 当前生命值（无加成）
-        SetText(TXT_HEALTH, $"生命: {playerData.Health:F0}");
+        SetText(TXT_HEALTH, $"生命: {playerData.Health:F1}");
 
         // 最大生命值（白色基础 + 黄色(meta+mod)）
         SetText(TXT_MAX_HEALTH, $"最大生命: <color=#FFFFFF>{baseMaxHealth:F0}</color>{BuildBonusText(metaHealthBonus, modMaxHealth)}");
