@@ -449,3 +449,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemyBase
   _player: {fileID: 0}
+  _walkSFX: {fileID: 8300000, guid: 2a813154ad21d384d9dc4c30ecf10d8c, type: 3}
+  _dashSFX: {fileID: 8300000, guid: 10122450b5e1f8942a70a2114cc18dc4, type: 3}
+  _hurtSFX: {fileID: 8300000, guid: 597da929ff1c110489941c42c99ad351, type: 3}
+  _deathSFX: {fileID: 8300000, guid: 3a530907ed35c0c44bbf68d4400705bb, type: 3}
+  _bossDashSFX: {fileID: 8300000, guid: 10122450b5e1f8942a70a2114cc18dc4, type: 3}

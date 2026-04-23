@@ -304,6 +304,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mushroom
   _player: {fileID: 0}
+  _walkSFX: {fileID: 0}
+  _dashSFX: {fileID: 0}
+  _hurtSFX: {fileID: 8300000, guid: 9027b64acf4e8f741acea835b3291827, type: 3}
+  _deathSFX: {fileID: 0}
   _fanAngle: 60
   _fanRange: 1.5
   _fanRenderer: {fileID: 5967373190526657537}

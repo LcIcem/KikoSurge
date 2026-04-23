@@ -7,10 +7,15 @@ using UnityEngine;
 /// </summary>
 public class EnemyChaseState : StateBase
 {
+    private const float WALK_SFX_INTERVAL = 0.42f;
+    private float _walkSFXTimer;
+
     public override void Enter()
     {
         EnemyFSM enemyFSM = _fsm as EnemyFSM;
         enemyFSM.SetAnimatorBool("isMoving", true);
+
+        _walkSFXTimer = 0f;
     }
 
     public override void Exec()
@@ -20,6 +25,13 @@ public class EnemyChaseState : StateBase
         {
             enemy.ChaseTarget();
             enemy.FacePlayer();
+
+            _walkSFXTimer += Time.deltaTime;
+            if (_walkSFXTimer >= WALK_SFX_INTERVAL)
+            {
+                _walkSFXTimer = 0f;
+                enemy.PlaySFX(enemy.WalkSFX);
+            }
         }
     }
 

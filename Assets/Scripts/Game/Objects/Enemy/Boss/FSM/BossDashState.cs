@@ -26,6 +26,8 @@ public class BossDashState : StateBase
         bossFSM.SetAnimatorBool("isMoving", false);
         bossFSM.SetAnimatorBool("isDashing", true);
 
+        enemy.PlaySFX(enemy.BossDashSFX);
+
         _phase = Phase.Dash;
         _timer = 0f;
     }

@@ -102,6 +102,28 @@ public class EnemyBase : MonoBehaviour, IPoolable
     [HideInInspector]
     public Transform _player;   // 玩家位置程序化生成的，无法在Inspector拖拽
 
+    [Header("音效")]
+    [SerializeField] private AudioClip _walkSFX;
+    [SerializeField] private AudioClip _dashSFX;
+    [SerializeField] private AudioClip _hurtSFX;
+    [SerializeField] private AudioClip _deathSFX;
+
+    /// <summary>走路音效</summary>
+    public AudioClip WalkSFX => _walkSFX;
+    /// <summary>冲刺音效</summary>
+    public AudioClip DashSFX => _dashSFX;
+    /// <summary>受伤音效</summary>
+    public AudioClip HurtSFX => _hurtSFX;
+    /// <summary>死亡音效</summary>
+    public AudioClip DeathSFX => _deathSFX;
+
+    /// <summary>播放音效（null-safe）</summary>
+    public void PlaySFX(AudioClip clip)
+    {
+        if (clip != null)
+            ManagerHub.Audio.PlaySFX(clip);
+    }
+
     // 工具属性
     // 与玩家的距离
     public float DistanceToPlayer
@@ -258,6 +280,8 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         HP -= damage;
 
+        PlaySFX(_hurtSFX);
+
         EventCenter.Instance.Publish(GameEventID.Combat_EnemyDamaged,
             new EnemyDamagedParams { enemy = this, damage = damage, currentHP = HP });
 
@@ -271,6 +295,8 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 死亡处理
     protected virtual void Die()
     {
+        PlaySFX(_deathSFX);
+
         _fsm.SetAnimatorBool("dead", true);
 
         _rigidbody.linearVelocity = Vector2.zero;
@@ -288,15 +314,16 @@ public class EnemyBase : MonoBehaviour, IPoolable
         EventCenter.Instance.Publish(GameEventID.Combat_EnemyKilled,
             new EnemyKilledParams { enemy = this, position = transform.position });
 
-        // 延迟回收至对象池（等待死亡动画播放）
-        _deathCoroutine = StartCoroutine(DelayRelease());
+        // 延迟回收至对象池（等待死亡动画播放 + 死亡音效播放完毕）
+        float sfxDelay = _deathSFX != null ? _deathSFX.length : 0f;
+        _deathCoroutine = StartCoroutine(DelayRelease(sfxDelay));
     }
 
     private Coroutine _deathCoroutine;
 
-    private IEnumerator DelayRelease()
+    private IEnumerator DelayRelease(float extraDelay = 0f)
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1f + extraDelay);
         if (!_isReleased)
         {
             _isReleased = true;

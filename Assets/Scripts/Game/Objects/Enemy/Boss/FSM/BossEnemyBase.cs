@@ -7,6 +7,12 @@ public class BossEnemyBase : EnemyBase
     public float DashCooldown { get; protected set; }
     public float StunDuration { get; protected set; }
 
+    [Header("Boss音效")]
+    [SerializeField] private AudioClip _bossDashSFX;
+
+    /// <summary>Boss冲刺音效</summary>
+    public AudioClip BossDashSFX => _bossDashSFX;
+
     /// <summary>
     /// 供 BossDashState 访问 Rigidbody2D
     /// </summary>
