@@ -22,6 +22,8 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public float DetectRange { get; protected set; }
     public float AttackRange { get; protected set; }
     public float LoseRange { get; protected set; }
+    public float PatrolRange { get; protected set; }
+    public float PatrolWaitTime { get; protected set; }
     public bool IsAlive => HP > 0f;
     public EnemyType Type { get; protected set; }
     public int EnemyId { get; private set; }
@@ -94,6 +96,11 @@ public class EnemyBase : MonoBehaviour, IPoolable
     protected Animator _animator;
     protected EnemyFSM _fsm;
     protected EnemyPathfinder _pathfinder;
+
+    /// <summary>
+    /// pathfinder 是否正在移动（巡逻状态使用）
+    /// </summary>
+    public bool IsPathfinderMoving => _pathfinder != null && _pathfinder.IsMoving;
 
     // 颜色缓存
     private Color _tmpColor;
@@ -212,6 +219,8 @@ public class EnemyBase : MonoBehaviour, IPoolable
         DetectRange = config.DetectRange;
         AttackRange = config.AttackRange;
         LoseRange = config.LoseRange;
+        PatrolRange = config.PatrolRange;
+        PatrolWaitTime = config.PatrolWaitTime;
         _attackTimer = 0f;
         _cooldownTimer = 0f;
         _attackHitTriggered = false;
@@ -369,6 +378,91 @@ public class EnemyBase : MonoBehaviour, IPoolable
             // 如果没有_pathfinder 则将速度设为0
             _rigidbody.linearVelocity = Vector2.zero;
         }
+    }
+
+    // 巡逻相关
+    private Vector3 _patrolOrigin;  // 巡逻原点（进入待机时记录）
+    private Vector3 _patrolTarget; // 当前巡逻目标点
+    private bool _isPatrolWaiting; // 是否在等待
+
+    /// <summary>
+    /// 开始巡逻（从当前位置随机选择一个目标点）
+    /// </summary>
+    public void StartPatrol()
+    {
+        _patrolOrigin = transform.position;
+        PickNewPatrolTarget();
+    }
+
+    /// <summary>
+    /// 选择新的巡逻目标点（在巡逻范围内随机）
+    /// </summary>
+    public void PickNewPatrolTarget()
+    {
+        // 在以巡逻原点为中心、PatrolRange 为半径的圆内随机选择一点
+        float angle = Random.Range(0f, Mathf.PI * 2f);
+        float radius = Random.Range(0f, PatrolRange);
+        _patrolTarget = _patrolOrigin + new Vector3(
+            Mathf.Cos(angle) * radius,
+            Mathf.Sin(angle) * radius,
+            0f
+        );
+        _isPatrolWaiting = false;
+
+        if (_pathfinder != null)
+        {
+            _pathfinder.StartMoveToPosition(_patrolTarget);
+        }
+    }
+
+    /// <summary>
+    /// 设置是否在等待（到达巡逻点后）
+    /// </summary>
+    public void SetPatrolWaiting(bool waiting)
+    {
+        _isPatrolWaiting = waiting;
+        if (waiting && _pathfinder != null)
+        {
+            _pathfinder.StopMove();
+        }
+    }
+
+    /// <summary>
+    /// 是否在等待中
+    /// </summary>
+    public bool IsPatrolWaiting => _isPatrolWaiting;
+
+    /// <summary>
+    /// 停止巡逻
+    /// </summary>
+    public void StopPatrol()
+    {
+        if (_pathfinder != null)
+        {
+            _pathfinder.StopMove();
+        }
+        _isPatrolWaiting = false;
+    }
+
+    /// <summary>
+    /// 更新巡逻原点（重新设置巡逻基准点）
+    /// </summary>
+    public void UpdatePatrolOrigin(Vector3 newOrigin)
+    {
+        _patrolOrigin = newOrigin;
+    }
+
+    /// <summary>
+    /// 朝巡逻方向翻转（用于巡逻移动时）
+    /// </summary>
+    public void FacePatrolDirection()
+    {
+        if (_patrolTarget == null) return;
+        Vector3 dir = _patrolTarget - transform.position;
+        if (dir.x < -0.1f)
+            _sprite.flipX = true;
+        else if (dir.x > 0.1f)
+            _sprite.flipX = false;
     }
 
     /// <summary>

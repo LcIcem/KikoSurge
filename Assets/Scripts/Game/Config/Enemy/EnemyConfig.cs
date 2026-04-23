@@ -36,4 +36,10 @@ public abstract class EnemyConfig : ScriptableObject
     [Header("掉落")]
     [Tooltip("掉落表（直接配置，无需 EnemyId 查找）")]
     public LootTableConfig lootTable;
+
+    [Header("巡逻")]
+    [Tooltip("巡逻范围（待机状态下随机移动的范围）")]
+    public float PatrolRange = 3f;
+    [Tooltip("巡逻等待时间（到达目标点后等待的秒数）")]
+    public float PatrolWaitTime = 1.5f;
 }

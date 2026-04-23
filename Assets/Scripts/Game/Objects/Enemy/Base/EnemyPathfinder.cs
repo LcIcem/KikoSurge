@@ -56,16 +56,20 @@ public class EnemyPathfinder : MonoBehaviour
         _target = target.position;
     }
 
-    // 开始移动 -发起寻路请求
+    // 开始移动 - 传入 Transform（通过 Transform.position 转为 Vector3）
     public void StartMoveTo(Transform target)
     {
-        SetTarget(target);
+        if (target == null) return;
+        StartMoveToPosition(target.position);
+    }
 
-        // 当目标位置改变时 才重新生成寻路路径
-        if (_preTarget != _target)
-        {
-            _seeker.StartPath(transform.position, _target, OnPathComplete);
-        }
+    // 开始移动 - 直接传入世界坐标（用于巡逻等场景）
+    public void StartMoveToPosition(Vector3 position)
+    {
+        _preTarget = _target;
+        _target = position;
+
+        _seeker.StartPath(transform.position, _target, OnPathComplete);
     }
 
     // 路径计算完成回调
