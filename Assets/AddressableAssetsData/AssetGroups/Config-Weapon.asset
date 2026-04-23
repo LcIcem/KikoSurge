@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Config-Weapon
   m_GUID: 625f739fdacada747b100f5f6cc3a204
   m_SerializeEntries:
+  - m_GUID: 1cc6b1fbc81628a4290fe2632bbcf923
+    m_Address: Weapon_Config_Smg
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponConfigs
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2ca5bb2a9a5079747bf87eeba482e4ca
     m_Address: Weapon_Config_Shotgun
     m_ReadOnly: 0

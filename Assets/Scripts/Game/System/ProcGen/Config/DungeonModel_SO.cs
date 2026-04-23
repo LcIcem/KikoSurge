@@ -82,6 +82,13 @@ namespace ProcGen.Config
         [Tooltip("额外生成Boss房的概率（0=不额外生成）")]
         public int bossExtraChance = 0;
 
+        [Header("终点房（Goal）")]
+        [Tooltip("保证生成的终点房数量（通常为1）")]
+        public int goalRoomCount = 1;
+        [Range(0, 100)]
+        [Tooltip("额外生成终点房的概率（0=不额外生成）")]
+        public int goalExtraChance = 0;
+
         // ==================== 便利查询方法 ====================
 
         /// <summary>获取地图有效范围（排除边界）</summary>

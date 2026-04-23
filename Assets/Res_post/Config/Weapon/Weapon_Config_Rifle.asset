@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50146b9337b563d4eab994fb77898a05, type: 3}
   m_Name: Weapon_Config_Rifle
   m_EditorClassIdentifier: Assembly-CSharp::WeaponConfig
-  itemConfig: {fileID: 0}
+  itemConfig: {fileID: 11400000, guid: c67cad216a1ea2c4bb056c60a65d13f2, type: 2}
   prefab: {fileID: 1645332420106596854, guid: 8a700f047e03445448bc362f368f76f8, type: 3}
   fireMode: 2
   fireRate: 0.5
@@ -24,7 +24,7 @@ MonoBehaviour:
   chargeTime: 1
   magazineSize: 15
   reloadTime: 2
-  recoilForce: 1
+  recoilForce: 0.5
   penetrateCount: 0
   weaponDamage: 10
   weaponCritRate: 0.15

@@ -15,14 +15,14 @@ MonoBehaviour:
   EnemyId: 1
   EnemyName: "\u8611\u83C7\u602A"
   Type: 0
-  MaxHP: 20
+  MaxHP: 30
   MoveSpeed: 2
-  Attack: 4
+  Attack: 1
   Defense: 100
-  AttackInterval: 1
-  AttackDuration: 1
-  AttackHitTime: 0.8
-  CollisionDamage: 1
+  AttackInterval: 1.5
+  AttackDuration: 0.5
+  AttackHitTime: 0.2
+  CollisionDamage: 0
   DetectRange: 4
   AttackRange: 0.8
   LoseRange: 4.3

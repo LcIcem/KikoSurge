@@ -41,5 +41,13 @@ MonoBehaviour:
       dropChance: 1
       minQuantity: 1
       maxQuantity: 1
-    maxPick: 1
+    - _itemConfig: {fileID: 11400000, guid: b667ed16ac90f34438c3a0b2645f75a2, type: 2}
+      dropChance: 1
+      minQuantity: 1
+      maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: 41133e477919bc24ca1a751fde8b4981, type: 2}
+      dropChance: 1
+      minQuantity: 1
+      maxQuantity: 1
+    maxPick: 3
   DropSpreadRadius: 1

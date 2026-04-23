@@ -45,6 +45,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - ItemConfigs
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b667ed16ac90f34438c3a0b2645f75a2
+    m_Address: Item_Smg
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bd847f99dae98fa4c83a8004ffb9d71b
     m_Address: Item_Potion_HealthAdd
     m_ReadOnly: 0

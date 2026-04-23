@@ -138,8 +138,7 @@ namespace ProcGen.Generator
             TryPlaceWithHybrid(RoomType.Event, _config.eventRoomCount, _config.eventExtraChance,
                 _config.GetTemplates(RoomType.Event));
 
-            TryPlaceWithHybrid(RoomType.Boss, _config.bossRoomCount, _config.bossExtraChance,
-                _config.GetTemplates(RoomType.Boss));
+            // Boss房间在 PlaceGoalRoom() 中统一生成
 
             TryPlaceWithHybrid(RoomType.Elite, _config.eliteRoomCount, _config.eliteExtraChance,
                 _config.GetTemplates(RoomType.Elite));
@@ -547,19 +546,14 @@ namespace ProcGen.Generator
             if (_rooms.Count == 0)
                 return;
 
-            int startId = FindStartRoomId();
-            Room goalRoom = FindFarthestRoom(startId);
-            // 只有一个房间时，起点就是终点，不要把 Start 覆盖成 Goal
-            if (goalRoom.id != startId)
-                goalRoom.roomType = RoomType.Goal;
-
-            // 确保 Boss 房间是终点的前一个房间
-            EnsureBossIsBeforeGoal(startId, goalRoom.id);
+            // 生成新的终点房间（不再直接复用最远房间）
+            PlaceGoalRoom();
 
             if (_config.eliteRoomCount == 0 && _config.eliteExtraChance > 0)
             {
                 foreach (var room in _rooms)
                 {
+                    // 只将 Normal 房间（且非起点/终点/Boss）转为 Elite
                     if (room.roomType == RoomType.Normal &&
                         _rng.Range(0, 100) < _config.eliteExtraChance)
                     {
@@ -567,30 +561,6 @@ namespace ProcGen.Generator
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// 确保 Boss 房间是终点的前一个房间（从起点到终点的路径上）
-        /// 如果存在 Boss 房间但不在该位置，则与终点前一个房间交换类型
-        /// </summary>
-        private void EnsureBossIsBeforeGoal(int startId, int goalId)
-        {
-            Room bossRoom = FindBossRoom();
-            if (bossRoom == null)
-                return;
-
-            Room goalPredecessor = FindGoalPredecessor(startId, goalId);
-            if (goalPredecessor == null)
-                return;
-
-            // 如果 Boss 房间已经在终点前一个位置，不需要处理
-            if (bossRoom.id == goalPredecessor.id)
-                return;
-
-            // 交换类型：Boss 房间变为终点前一个房间的类型，终点前一个房间变为 Boss
-            var predecessorType = goalPredecessor.roomType;
-            goalPredecessor.roomType = RoomType.Boss;
-            bossRoom.roomType = predecessorType;
         }
 
         /// <summary>
@@ -603,41 +573,6 @@ namespace ProcGen.Generator
                 if (room.roomType == RoomType.Boss)
                     return room;
             }
-            return null;
-        }
-
-        /// <summary>
-        /// 查找从起点到终点的路径中，终点的前一个房间
-        /// </summary>
-        private Room FindGoalPredecessor(int startId, int goalId)
-        {
-            // BFS 记录每个节点的父节点
-            var parent = new Dictionary<int, int>();
-            var queue = new Queue<int>();
-            queue.Enqueue(startId);
-            parent[startId] = -1;
-
-            while (queue.Count > 0)
-            {
-                int current = queue.Dequeue();
-                if (current == goalId)
-                    break;
-
-                Room room = FindRoom(current);
-                foreach (int neighborId in room.connectedRoomIds)
-                {
-                    if (!parent.ContainsKey(neighborId))
-                    {
-                        parent[neighborId] = current;
-                        queue.Enqueue(neighborId);
-                    }
-                }
-            }
-
-            // 返回终点的父节点（路径上的前一个房间）
-            if (parent.TryGetValue(goalId, out int predecessorId) && predecessorId != -1)
-                return FindRoom(predecessorId);
-
             return null;
         }
 
@@ -688,6 +623,336 @@ namespace ProcGen.Generator
             }
 
             return FindRoom(farthestId);
+        }
+
+        // ==================== 终点房间生成 ====================
+
+        /// <summary>
+        /// 生成终点房间
+        /// 如果有Boss房间，以Boss为依附点生成终点
+        /// 如果没有Boss房间但需要Boss，在最远叶子节点旁生成Boss，再以Boss为依附点生成终点
+        /// </summary>
+        private void PlaceGoalRoom()
+        {
+            int startId = FindStartRoomId();
+
+            // 找到最远的叶子节点
+            var leafRooms = GetLeafRooms(startId);
+            Room farthestLeaf = FindFarthestAmong(leafRooms, startId);
+
+            // 如果需要Boss，在最远叶子节点旁生成Boss房间
+            Room bossRoom = null;
+            if (_config.bossRoomCount > 0)
+            {
+                // 在最远叶子节点旁生成Boss
+                if (farthestLeaf != null && farthestLeaf.id != startId)
+                {
+                    if (!TryPlaceBossRoom(farthestLeaf))
+                    {
+                        ExpandMap();
+                        TryPlaceBossRoom(farthestLeaf);
+                    }
+                    bossRoom = FindBossRoom();
+                }
+            }
+
+            // 以Boss房间或最远叶子节点为参考生成终点
+            Room referenceRoom = bossRoom ?? farthestLeaf;
+
+            if (referenceRoom != null && referenceRoom.id != startId)
+            {
+                if (!TryPlaceGoalRoom(referenceRoom))
+                {
+                    ExpandMap();
+                    TryPlaceGoalRoom(referenceRoom);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 获取所有叶子节点（连接数为1的房间，排除起点）
+        /// </summary>
+        private List<Room> GetLeafRooms(int startId)
+        {
+            var leafRooms = new List<Room>();
+            foreach (var room in _rooms)
+            {
+                if (room.roomType == RoomType.Start)
+                    continue;
+                if (room.connectedRoomIds.Count == 1)
+                    leafRooms.Add(room);
+            }
+            return leafRooms;
+        }
+
+        /// <summary>
+        /// 从房间列表中找到距离起点最远的房间
+        /// </summary>
+        private Room FindFarthestAmong(List<Room> rooms, int startId)
+        {
+            var distances = new Dictionary<int, int>();
+            var queue = new Queue<int>();
+            var visited = new HashSet<int>();
+
+            queue.Enqueue(startId);
+            visited.Add(startId);
+            distances[startId] = 0;
+
+            while (queue.Count > 0)
+            {
+                int currentId = queue.Dequeue();
+                int currentDist = distances[currentId];
+
+                Room current = FindRoom(currentId);
+                foreach (int neighborId in current.connectedRoomIds)
+                {
+                    if (!visited.Contains(neighborId))
+                    {
+                        visited.Add(neighborId);
+                        distances[neighborId] = currentDist + 1;
+                        queue.Enqueue(neighborId);
+                    }
+                }
+            }
+
+            Room farthest = null;
+            int maxDist = -1;
+            foreach (var room in rooms)
+            {
+                // 跳过起点本身
+                if (room.id == startId)
+                    continue;
+                if (distances.TryGetValue(room.id, out int dist) && dist >= maxDist)
+                {
+                    maxDist = dist;
+                    farthest = room;
+                }
+            }
+            return farthest ?? rooms[0];
+        }
+
+        /// <summary>
+        /// 在参考房间附近生成指定类型的房间
+        /// 由近到远、从八个方向尝试放置
+        /// </summary>
+        private bool TryPlaceRoomNear(Room referenceRoom, RoomType roomType)
+        {
+            var configs = _config.GetTemplates(roomType);
+            if (configs == null || configs.Count == 0)
+                return false;
+
+            // 八个方向
+            Vector2Int[] directions = new Vector2Int[]
+            {
+                new Vector2Int(0, 1),    // 上
+                new Vector2Int(0, -1),    // 下
+                new Vector2Int(1, 0),     // 右
+                new Vector2Int(-1, 0),    // 左
+                new Vector2Int(1, 1),     // 右上
+                new Vector2Int(-1, 1),    // 左上
+                new Vector2Int(1, -1),    // 右下
+                new Vector2Int(-1, -1)    // 左下
+            };
+
+            // 获取目标房间尺寸
+            var config = configs[0];
+            Vector2Int size = config.GetRandomSize(_rng);
+
+            // 由近到远尝试：距离从1开始，逐步增加
+            int maxDistance = Mathf.Max(_mapBounds.width, _mapBounds.height);
+            for (int distance = 1; distance <= maxDistance; distance++)
+            {
+                foreach (var dir in directions)
+                {
+                    // 计算目标位置
+                    Vector2Int targetCenter = referenceRoom.Center + dir * distance;
+                    Vector2Int gridPos = new Vector2Int(targetCenter.x - size.x / 2, targetCenter.y - size.y / 2);
+
+                    var candidate = new Room
+                    {
+                        id = _nextRoomId++,
+                        gridPos = gridPos,
+                        size = size,
+                        roomType = roomType
+                    };
+
+                    // 检查房间是否有效且不覆盖走廊
+                    if (!IsOverlapping(candidate) && IsWithinBounds(candidate) && !IsCorridorOverlappingRoom(candidate))
+                    {
+                        // 房间有效，放置房间
+                        _rooms.Add(candidate);
+                        AddRoomFloorTiles(candidate);
+
+                        // 将参考房间与房间连接（双向）
+                        referenceRoom.connectedRoomIds.Add(candidate.id);
+                        candidate.connectedRoomIds.Add(referenceRoom.id);
+                        return true;
+                    }
+
+                    // 重置id，因为这个候选位置不可以用
+                    _nextRoomId--;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 在参考房间附近生成终点房间
+        /// </summary>
+        private bool TryPlaceGoalRoom(Room referenceRoom)
+        {
+            return TryPlaceRoomNear(referenceRoom, RoomType.Goal);
+        }
+
+        /// <summary>
+        /// 在参考房间附近生成Boss房间
+        /// </summary>
+        private bool TryPlaceBossRoom(Room referenceRoom)
+        {
+            return TryPlaceRoomNear(referenceRoom, RoomType.Boss);
+        }
+
+        /// <summary>
+        /// 检查从参考房间到候选房间的走廊路径是否通畅（不会被其他房间阻断）
+        /// </summary>
+        private bool IsCorridorPathClear(Room from, Room to)
+        {
+            Vector2Int edgeA = GetClosestEdgePoint(from, to.Center);
+            Vector2Int edgeB = GetClosestEdgePoint(to, from.Center);
+
+            // 模拟L型走廊路径，检查是否经过其他房间
+            int x = edgeA.x;
+            while (x != edgeB.x)
+            {
+                for (int dy = -_corridorWidth / 2; dy <= _corridorWidth / 2; dy++)
+                {
+                    Vector2Int tile = new Vector2Int(x, edgeA.y + dy);
+                    if (IsTileInsideAnyRoom(tile))
+                        return false;
+                }
+                x += (edgeB.x > x) ? 1 : -1;
+            }
+            int y = edgeA.y;
+            while (y != edgeB.y)
+            {
+                for (int dx = -_corridorWidth / 2; dx <= _corridorWidth / 2; dx++)
+                {
+                    Vector2Int tile = new Vector2Int(edgeB.x + dx, y);
+                    if (IsTileInsideAnyRoom(tile))
+                        return false;
+                }
+                y += (edgeB.y > y) ? 1 : -1;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 检查指定格子是否在任何房间内部（排除起点房间）
+        /// </summary>
+        private bool IsTileInsideAnyRoom(Vector2Int tile)
+        {
+            foreach (var room in _rooms)
+            {
+                if (room.roomType == RoomType.Start)
+                    continue;
+                if (room.Bounds.Contains(tile))
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 计算from房间相对于to的外侧方向（背向to的方向）
+        /// </summary>
+        private Vector2Int GetOutwardDirection(Room from, Room to)
+        {
+            Vector2Int dir = from.Center - to.Center;
+            if (dir.x > 0) dir.x = 1;
+            else if (dir.x < 0) dir.x = -1;
+            else dir.x = 0;
+
+            if (dir.y > 0) dir.y = 1;
+            else if (dir.y < 0) dir.y = -1;
+            else dir.y = 0;
+
+            // 如果方向为(0,0)，使用随机方向
+            if (dir.x == 0 && dir.y == 0)
+            {
+                int randomDir = _rng.Range(0, 4);
+                switch (randomDir)
+                {
+                    case 0: dir = new Vector2Int(1, 0); break;
+                    case 1: dir = new Vector2Int(-1, 0); break;
+                    case 2: dir = new Vector2Int(0, 1); break;
+                    case 3: dir = new Vector2Int(0, -1); break;
+                }
+            }
+
+            // 外侧是背向起点的方向
+            return new Vector2Int(-dir.x, -dir.y);
+        }
+
+        /// <summary>
+        /// 检查房间是否在地图边界内
+        /// </summary>
+        private bool IsWithinBounds(Room room)
+        {
+            return room.Bounds.xMin >= _mapBounds.xMin &&
+                   room.Bounds.xMax <= _mapBounds.xMax &&
+                   room.Bounds.yMin >= _mapBounds.yMin &&
+                   room.Bounds.yMax <= _mapBounds.yMax;
+        }
+
+        /// <summary>
+        /// 检查房间是否与任何现有走廊重叠
+        /// </summary>
+        private bool IsCorridorOverlappingRoom(Room room)
+        {
+            // 在走廊生成前，检查是否会与现有房间的连接路径冲突
+            // 走廊是从房间边界点出发的L型路径
+            foreach (var existingRoom in _rooms)
+            {
+                if (existingRoom.id == room.id)
+                    continue;
+
+                foreach (int connectedId in existingRoom.connectedRoomIds)
+                {
+                    if (connectedId >= _nextRoomId) // 跳过尚未分配的连接（终点房间的连接）
+                        continue;
+
+                    Room connected = FindRoom(connectedId);
+                    if (connected == null)
+                        continue;
+
+                    // 获取L型走廊路径上的格子
+                    Vector2Int edgeA = GetClosestEdgePoint(existingRoom, connected.Center);
+                    Vector2Int edgeB = GetClosestEdgePoint(connected, existingRoom.Center);
+
+                    // 检查走廊路径是否经过候选房间
+                    int x = edgeA.x;
+                    while (x != edgeB.x)
+                    {
+                        for (int dy = -_corridorWidth / 2; dy <= _corridorWidth / 2; dy++)
+                        {
+                            if (room.Bounds.Contains(new Vector2Int(x, edgeA.y + dy)))
+                                return true;
+                        }
+                        x += (edgeB.x > x) ? 1 : -1;
+                    }
+                    int y = edgeA.y;
+                    while (y != edgeB.y)
+                    {
+                        for (int dx = -_corridorWidth / 2; dx <= _corridorWidth / 2; dx++)
+                        {
+                            if (room.Bounds.Contains(new Vector2Int(edgeB.x + dx, y)))
+                                return true;
+                        }
+                        y += (edgeB.y > y) ? 1 : -1;
+                    }
+                }
+            }
+            return false;
         }
 
         // ==================== Step 6: 生成走廊 ====================

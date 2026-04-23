@@ -15,7 +15,7 @@ MonoBehaviour:
   mapWidth: 40
   mapHeight: 40
   borderSize: 2
-  roomTemplateConfig: {fileID: 11400000, guid: 0a08277930e02d941913ed410033089b, type: 2}
+  roomTemplateConfig: {fileID: 11400000, guid: b3ae20452a526fc4ea78acba970a5b7d, type: 2}
   corridorWidth: 1
   extraCorridorChance: 0
   extraCorridorMaxDistance: 10
@@ -23,9 +23,9 @@ MonoBehaviour:
   normalExtraChance: 0
   eliteRoomCount: 0
   eliteExtraChance: 0
-  treasureRoomCount: 1
+  treasureRoomCount: 0
   treasureExtraChance: 0
-  shopRoomCount: 1
+  shopRoomCount: 0
   shopExtraChance: 0
   restRoomCount: 1
   restExtraChance: 0
@@ -33,3 +33,5 @@ MonoBehaviour:
   eventExtraChance: 0
   bossRoomCount: 1
   bossExtraChance: 0
+  goalRoomCount: 1
+  goalExtraChance: 0

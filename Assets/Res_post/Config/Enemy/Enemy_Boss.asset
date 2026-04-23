@@ -15,19 +15,19 @@ MonoBehaviour:
   EnemyId: 2
   EnemyName: "\u53F2\u83B1\u59C6"
   Type: 2
-  MaxHP: 300
+  MaxHP: 1000
   MoveSpeed: 3
-  Attack: 10
-  Defense: 100
+  Attack: 5
+  Defense: 150
   AttackInterval: 2
   AttackDuration: 1
   AttackHitTime: 0.5
-  CollisionDamage: 2
+  CollisionDamage: 3
   DetectRange: 5
   AttackRange: 4
-  LoseRange: 6
+  LoseRange: 30
   PrefabAddress: Boss
-  lootTable: {fileID: 11400000, guid: 89951133e0ae6004ab894ec789eb0789, type: 2}
+  lootTable: {fileID: 11400000, guid: e8c515ea26abf5d4eb322797fdefb869, type: 2}
   PhaseCount: 1
   PhaseThreshold: []
   DashSpeed: 12

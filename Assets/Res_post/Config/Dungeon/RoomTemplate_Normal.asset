@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 066f8c8cb70cf35459b6bb59031b84c4, type: 3}
-  m_Name: RoomTemplateConfig
+  m_Name: RoomTemplate_Normal
   m_EditorClassIdentifier: 
   templates:
   - displayName: "\u5F00\u59CB\u623F\u95F4"
