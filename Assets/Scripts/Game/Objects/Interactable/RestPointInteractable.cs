@@ -140,6 +140,12 @@ public class RestPointInteractable : MonoBehaviour
             _interactable.OnInteract -= OnInteract;
         }
 
+        // 场景切换时，如果正在播放篝火ambient音效，需要停止它
+        if (_isPlayerInMyRoom)
+        {
+            ManagerHub.Audio.StopAmbient();
+        }
+
         EventCenter.Instance.Unsubscribe<RoomEnterParams>(GameEventID.OnRoomEnter, OnRoomEnter);
         EventCenter.Instance.Unsubscribe<CorridorEnterParams>(GameEventID.OnCorridorEnter, OnCorridorEnter);
     }
