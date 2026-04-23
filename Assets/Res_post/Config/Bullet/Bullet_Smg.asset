@@ -16,7 +16,7 @@ MonoBehaviour:
   bulletPrefab: {fileID: 7818438112005476329, guid: d2ad3a84edef4b24bbe35e963be6d0c3, type: 3}
   bulletSpeed: 80
   maxDistance: 8
-  baseDamage: 4
+  baseDamage: 5
   hitEffect: 0
   effectValue: 1
   homingRange: 5

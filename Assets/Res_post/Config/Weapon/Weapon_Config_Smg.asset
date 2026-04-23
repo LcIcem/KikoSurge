@@ -15,7 +15,7 @@ MonoBehaviour:
   itemConfig: {fileID: 11400000, guid: b667ed16ac90f34438c3a0b2645f75a2, type: 2}
   prefab: {fileID: 1645332420106596854, guid: b1127163f2c6f6440904c93d3bb6dc1e, type: 3}
   fireMode: 0
-  fireRate: 0.2
+  fireRate: 0.18
   randomSpreadAngle: 5
   bulletCount: 1
   shotgunSpreadAngle: 0
@@ -26,7 +26,7 @@ MonoBehaviour:
   reloadTime: 1.2
   recoilForce: 0.1
   penetrateCount: 0
-  weaponDamage: 0.8
+  weaponDamage: 1
   weaponCritRate: 0.02
   weaponCritMultiplier: 0.2
   weaponDamageBonus: 0.1
