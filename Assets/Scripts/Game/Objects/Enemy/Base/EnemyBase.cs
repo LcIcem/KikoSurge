@@ -295,6 +295,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 死亡处理
     protected virtual void Die()
     {
+        Debug.Log($"[EnemyBase] Die() called for {gameObject.name}, EnemyId={EnemyId}");
         PlaySFX(_deathSFX);
 
         _fsm.SetAnimatorBool("dead", true);

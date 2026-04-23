@@ -16,11 +16,6 @@ public class GameEntry : MonoBehaviour
         Log("初始化 ManagerHub...");
         _ = ManagerHub.Instance;
 
-        // 确保 GameLifecycleManager 在任何场景加载前就已初始化（持久化）
-        // 防止 domain reload 后静态实例丢失
-        _ = GameLifecycleManager.Instance;
-
-
         Log("初始化 DamageLuaBridge...");
         DamageLuaBridge.Initialize();
 
