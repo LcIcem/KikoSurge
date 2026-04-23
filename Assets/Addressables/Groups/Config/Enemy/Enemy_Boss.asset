@@ -27,7 +27,7 @@ MonoBehaviour:
   AttackRange: 4
   LoseRange: 6
   PrefabAddress: Boss
-  lootTable: {fileID: 11400000, guid: e1996294394bdef4cab54d8fc62db7cf, type: 2}
+  lootTable: {fileID: 11400000, guid: 89951133e0ae6004ab894ec789eb0789, type: 2}
   PhaseCount: 1
   PhaseThreshold: []
   DashSpeed: 12

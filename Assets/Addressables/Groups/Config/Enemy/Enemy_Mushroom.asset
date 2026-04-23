@@ -27,5 +27,5 @@ MonoBehaviour:
   AttackRange: 0.8
   LoseRange: 4.3
   PrefabAddress: Mushroom
-  lootTable: {fileID: 11400000, guid: e1996294394bdef4cab54d8fc62db7cf, type: 2}
+  lootTable: {fileID: 11400000, guid: e8c515ea26abf5d4eb322797fdefb869, type: 2}
   PatrolSpeed: 1

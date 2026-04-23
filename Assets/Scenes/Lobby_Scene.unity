@@ -6580,7 +6580,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 3.75
+  orthographic size: 2.859375
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -7188,7 +7188,7 @@ MonoBehaviour:
   _infoCardRoot: {fileID: 0}
   _infoCardTitle: {fileID: 0}
   _infoCardDescription: {fileID: 0}
-  _interactSFX: {fileID: 0}
+  _interactSFX: {fileID: 8300000, guid: 56458565f4e984143a65e5fef6bdd955, type: 3}
   _maxInteractCount: -1
 --- !u!114 &4200462741264733241
 MonoBehaviour:

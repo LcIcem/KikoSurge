@@ -79,6 +79,31 @@ public class Player : MonoBehaviour
     /// <summary>冲刺冲击源</summary>
     public CinemachineImpulseSource DashSource => _dashSource;
 
+    [Header("音效")]
+    [SerializeField] private AudioClip _walkSFX;
+    [SerializeField] private AudioClip _dashSFX;
+    [SerializeField] private AudioClip _hurtSFX;
+    [SerializeField] private AudioClip _deathSFX;
+    [SerializeField] private AudioClip _switchWeaponSFX;
+
+    /// <summary>走路音效</summary>
+    public AudioClip WalkSFX => _walkSFX;
+    /// <summary>冲刺音效</summary>
+    public AudioClip DashSFX => _dashSFX;
+    /// <summary>受伤音效</summary>
+    public AudioClip HurtSFX => _hurtSFX;
+    /// <summary>死亡音效</summary>
+    public AudioClip DeathSFX => _deathSFX;
+    /// <summary>切换武器音效</summary>
+    public AudioClip SwitchWeaponSFX => _switchWeaponSFX;
+
+    /// <summary>播放音效（null-safe）</summary>
+    public void PlaySFX(AudioClip clip)
+    {
+        if (clip != null)
+            ManagerHub.Audio.PlaySFX(clip);
+    }
+
     private void Awake()
     {
         _animator = GetComponent<Animator>();
@@ -212,6 +237,7 @@ public class Player : MonoBehaviour
         // 切换到下一把武器
         if (InputManager.Instance.Actions["SwitchWeapon"].WasPressedThisFrame())
         {
+            PlaySFX(_switchWeaponSFX);
             weaponHandler.SwitchToNextWeapon();
         }
 
@@ -264,6 +290,7 @@ public class Player : MonoBehaviour
         {
             _fsm.SetTrigger("hurt");
             StartCoroutine(HurtFlashCoroutine());
+            PlaySFX(_hurtSFX);
         }
 
         // 触发相机冲击效果
@@ -346,6 +373,9 @@ public class Player : MonoBehaviour
 
         // 设置死亡标记，防止死亡后继续处理输入
         _isDead = true;
+
+        // 播放死亡音效
+        PlaySFX(_deathSFX);
 
         // 设置死亡标志，FSM 会在下一帧 UpdateTransition 处理到 DeadState
         _fsm.SetBool("isDead", true);

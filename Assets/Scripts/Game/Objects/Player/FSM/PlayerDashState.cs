@@ -21,6 +21,7 @@ public class PlayerDashState : StateBase
         var player = Owner<Player>();
 
         playerFSM.SetAnimatorTrigger("dash");
+        player.PlaySFX(player.DashSFX);
         _timer = 0f;
         _shadowSpawnTimer = 0f;
         _dir = player.MoveDir;  // 记录进入冲刺状态时的方向

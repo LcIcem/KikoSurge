@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Chest
   m_EditorClassIdentifier: Assembly-CSharp::ChestConfig
   _chestName: "\u6728\u8D28\u5B9D\u7BB1"
-  _lootTable: {fileID: 11400000, guid: e1996294394bdef4cab54d8fc62db7cf, type: 2}
+  _lootTable: {fileID: 11400000, guid: e8c515ea26abf5d4eb322797fdefb869, type: 2}

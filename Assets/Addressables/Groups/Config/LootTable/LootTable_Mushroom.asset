@@ -13,44 +13,11 @@ MonoBehaviour:
   m_Name: LootTable_Mushroom
   m_EditorClassIdentifier: Assembly-CSharp::LootTableConfig
   groups:
-  - groupName: "\u6B66\u5668\u6389\u843D"
-    entries:
-    - _itemConfig: {fileID: 11400000, guid: f273b95930b4f8044a4d25f83312e731, type: 2}
-      dropChance: 1
-      minQuantity: 4
-      maxQuantity: 4
-    - _itemConfig: {fileID: 11400000, guid: 41133e477919bc24ca1a751fde8b4981, type: 2}
-      dropChance: 0.3
-      minQuantity: 1
-      maxQuantity: 1
-    maxPick: 4
-  - groupName: "\u91D1\u5E01\u6389\u843D"
+  - groupName: "\u8D27\u5E01\u6389\u843D"
     entries:
     - _itemConfig: {fileID: 11400000, guid: 628452d0397e8004e8e0b0a49d9141e0, type: 2}
       dropChance: 1
       minQuantity: 1
-      maxQuantity: 3
-    maxPick: 3
-  - groupName: "\u836F\u6C34\u6389\u843D"
-    entries:
-    - _itemConfig: {fileID: 11400000, guid: bd847f99dae98fa4c83a8004ffb9d71b, type: 2}
-      dropChance: 1
-      minQuantity: 2
-      maxQuantity: 3
-    - _itemConfig: {fileID: 11400000, guid: da1a8a1e7f60f334390c5d7167416f40, type: 2}
-      dropChance: 1
-      minQuantity: 2
-      maxQuantity: 3
-    - _itemConfig: {fileID: 11400000, guid: db3e2aff8dc1e8342925a4841402458c, type: 2}
-      dropChance: 1
-      minQuantity: 2
-      maxQuantity: 3
-    maxPick: 3
-  - groupName: "\u9057\u7269\u6389\u843D"
-    entries:
-    - _itemConfig: {fileID: 11400000, guid: 8bea861fcea0e0342a3b2031540451e6, type: 2}
-      dropChance: 1
-      minQuantity: 2
-      maxQuantity: 3
-    maxPick: 1
+      maxQuantity: 2
+    maxPick: 7
   DropSpreadRadius: 1

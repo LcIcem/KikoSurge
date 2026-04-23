@@ -256,6 +256,11 @@ MonoBehaviour:
   _recoilSource: {fileID: 1906304438483558271}
   _hurtSource: {fileID: 560359807800438917}
   _dashSource: {fileID: 9141556088821139913}
+  _walkSFX: {fileID: 8300000, guid: ec4a862a8ef63ff4bb03e5cb8129d471, type: 3}
+  _dashSFX: {fileID: 8300000, guid: 38b2d9ed990447b468e979a598543fb1, type: 3}
+  _hurtSFX: {fileID: 0}
+  _deathSFX: {fileID: 0}
+  _switchWeaponSFX: {fileID: 8300000, guid: 7d09858e5ccfbf8468aaba959fb624be, type: 3}
 --- !u!1 &3607085981171723928
 GameObject:
   m_ObjectHideFlags: 0
