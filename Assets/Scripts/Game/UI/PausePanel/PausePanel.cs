@@ -1,6 +1,9 @@
+using System.Collections;
 using LcIcemFramework;
+using LcIcemFramework.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Events;
 
 public class PausePanel : BasePanel
 {
@@ -14,33 +17,23 @@ public class PausePanel : BasePanel
     {
         base.Show();
         Time.timeScale = 0f;
-
-        // 暂停时禁止玩家瞄准输入
         AimInput.Enabled = false;
 
         bool isFromLobby = GameLifecycleManager.Instance.WasInLobbyBeforePause;
 
-        // 大厅暂停(3按钮): 返回大厅、游戏设置、返回主菜单
-        // 游戏暂停(4按钮): 继续游戏、游戏设置、返回大厅、返回主菜单
-        // resume 按钮在大厅暂停时隐藏
         var resumeBtn = GetControl<UnityEngine.UI.Button>(BTN_RESUME);
         if (resumeBtn != null)
             resumeBtn.gameObject.SetActive(!isFromLobby);
 
-        // 大厅暂停时隐藏标题（只有游戏中才显示"暂停"）
         var titleText = GetControl<UnityEngine.UI.Text>(TXT_TITLE);
         if (titleText != null)
             titleText.gameObject.SetActive(!isFromLobby);
 
-        // 大厅暂停时显示"返回大厅"按钮（需要确认返回）
         var lobbyBtn = GetControl<UnityEngine.UI.Button>(BTN_BACK_TO_LOBBY);
         if (lobbyBtn != null)
         {
             if (isFromLobby)
-            {
-                // 大厅暂停：将"返回大厅"按钮移到最上面（sibling index 0）
                 lobbyBtn.transform.SetSiblingIndex(0);
-            }
             lobbyBtn.gameObject.SetActive(true);
         }
     }
@@ -48,11 +41,8 @@ public class PausePanel : BasePanel
     public override void Hide()
     {
         Time.timeScale = 1f;
-
-        // 隐藏时恢复玩家瞄准输入
         AimInput.Enabled = true;
 
-        // 隐藏时重置所有按钮和标题为显示状态
         var resumeBtn = GetControl<UnityEngine.UI.Button>(BTN_RESUME);
         var lobbyBtn = GetControl<UnityEngine.UI.Button>(BTN_BACK_TO_LOBBY);
         var settingsBtn = GetControl<UnityEngine.UI.Button>(BTN_SETTINGS);
@@ -62,7 +52,6 @@ public class PausePanel : BasePanel
         if (lobbyBtn != null)
         {
             lobbyBtn.gameObject.SetActive(true);
-            // 恢复按钮原始顺序：resume(0), settings(1), lobby(2), mainMenu(3)
             lobbyBtn.transform.SetSiblingIndex(2);
         }
         if (settingsBtn != null) settingsBtn.gameObject.SetActive(true);
@@ -77,30 +66,43 @@ public class PausePanel : BasePanel
         switch (btnName)
         {
             case BTN_RESUME:
-                // 恢复游戏并隐藏面板
                 GameLifecycleManager.Instance.ResumeGame();
                 break;
             case BTN_BACK_TO_LOBBY:
-                // 先返回大厅（会切换状态），再隐藏面板（避免 OnPanelClosed 触发 ResumeGame）
                 GameLifecycleManager.Instance.ReturnToLobby();
                 ManagerHub.UI.HidePanel<PausePanel>();
-                ManagerHub.Scene.LoadSceneAsync("Lobby_Scene", null, () =>
-                {
-                    GameLifecycleManager.Instance.SetSceneLoading(false);
-                });
+                MonoManager.Instance.StartCoroutine(LoadSceneWithLoading("Lobby_Scene", null));
                 break;
             case BTN_SETTINGS:
                 ManagerHub.UI.ShowPanel<SettingsPanel>();
                 break;
             case BTN_BACK_TO_MAINMENU:
-                // 先返回主菜单（会切换状态），再隐藏面板（避免 OnPanelClosed 触发 ResumeGame）
                 GameLifecycleManager.Instance.ReturnToMainMenu();
                 ManagerHub.UI.HidePanel<PausePanel>();
-                ManagerHub.Scene.LoadSceneAsync("MainMenu_Scene", null, () =>
-                {
-                    GameLifecycleManager.Instance.SetSceneLoading(false);
-                });
+                MonoManager.Instance.StartCoroutine(LoadSceneWithLoading("MainMenu_Scene", null));
                 break;
         }
+    }
+
+    private IEnumerator LoadSceneWithLoading(string sceneName, UnityAction onComplete)
+    {
+        LoadingPanel panel = null;
+        ManagerHub.UI.ShowPanel<LoadingPanel>(UILayerType.Top, p => panel = p);
+        yield return new WaitForSeconds(0.1f);
+
+        panel?.UpdateProgress(0.1f);
+
+        bool done = false;
+        ManagerHub.Scene.LoadSceneAsync(sceneName,
+            p => panel?.UpdateProgress(Mathf.Lerp(0.1f, 0.7f, p)),
+            () => done = true);
+
+        yield return new WaitUntil(() => done);
+        panel?.UpdateProgress(1f);
+        yield return new WaitForSeconds(0.2f);
+
+        panel?.Hide();
+        ManagerHub.UI.HidePanel<LoadingPanel>();
+        onComplete?.Invoke();
     }
 }

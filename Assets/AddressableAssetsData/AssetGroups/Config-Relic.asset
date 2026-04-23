@@ -15,8 +15,20 @@ MonoBehaviour:
   m_GroupName: Config-Relic
   m_GUID: 7b138523f8e6dc54aa13d305b62e77b1
   m_SerializeEntries:
+  - m_GUID: 036be83b121f7ef4f9a07a0ee425962f
+    m_Address: Item_Relic_Heart
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 126a74a1c5d106146924a86ce4e75173
+    m_Address: Item_Relic_Boot
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8bea861fcea0e0342a3b2031540451e6
-    m_Address: Item_Relic
+    m_Address: Item_Relic_Helm
     m_ReadOnly: 0
     m_SerializedLabels:
     - ItemConfigs

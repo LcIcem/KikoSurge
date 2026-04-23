@@ -1,6 +1,10 @@
+using System.Collections;
 using LcIcemFramework;
+using LcIcemFramework.Core;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
+using Game.Event;
 
 /// <summary>
 /// 游戏结束面板
@@ -8,13 +12,11 @@ using UnityEngine.UI;
 /// </summary>
 public class GameOverPanel : BasePanel
 {
-    // 控件名称常量
     private const string TXT_TITLE = "txt_title";
     private const string BTN_RESTART = "btn_restart";
     private const string BTN_BACK_TO_LOBBY = "btn_backToLobby";
     private const string BTN_BACK_TO_MAINMENU = "btn_backToMainmenu";
 
-    // true = 死亡（游戏结束），false = 通关
     private bool _isGameOver = true;
 
     public override bool CanBeClosedByClosePanel => false;
@@ -23,7 +25,6 @@ public class GameOverPanel : BasePanel
     {
         base.Show();
         Time.timeScale = 0;
-        // 禁止玩家瞄准输入
         AimInput.Enabled = false;
         UpdateTitle();
     }
@@ -32,23 +33,16 @@ public class GameOverPanel : BasePanel
     {
         base.Hide();
         Time.timeScale = 1f;
-        // 恢复玩家瞄准输入
         AimInput.Enabled = true;
         _isGameOver = true;
     }
 
-    /// <summary>
-    /// 显示为游戏结束（死亡）
-    /// </summary>
     public void ShowAsGameOver()
     {
         _isGameOver = true;
         Show();
     }
 
-    /// <summary>
-    /// 显示为通关成功
-    /// </summary>
     public void ShowAsClear()
     {
         _isGameOver = false;
@@ -59,9 +53,7 @@ public class GameOverPanel : BasePanel
     {
         var titleText = GetControl<Text>(TXT_TITLE);
         if (titleText != null)
-        {
             titleText.text = _isGameOver ? "游戏结束" : "通关成功";
-        }
     }
 
     protected override void OnClick(string btnName)
@@ -69,22 +61,65 @@ public class GameOverPanel : BasePanel
         switch (btnName)
         {
             case BTN_RESTART:
-                GameLifecycleManager.Instance.RestartGame();
+                ManagerHub.UI.HidePanel<GameOverPanel>();
+                MonoManager.Instance.StartCoroutine(RestartWithLoading());
                 break;
             case BTN_BACK_TO_LOBBY:
                 ManagerHub.UI.HidePanel<GameOverPanel>();
                 GameLifecycleManager.Instance.ReturnToLobby();
-                ManagerHub.Scene.LoadSceneAsync("Lobby_Scene", null, null);
+                MonoManager.Instance.StartCoroutine(LoadSceneWithLoading("Lobby_Scene", null));
                 break;
             case BTN_BACK_TO_MAINMENU:
                 ManagerHub.UI.HidePanel<GameOverPanel>();
                 GameLifecycleManager.Instance.ReturnToMainMenu();
-                GameLifecycleManager.Instance.SetSceneLoading(true);
-                ManagerHub.Scene.LoadSceneAsync("MainMenu_Scene", null, () =>
-                {
-                    GameLifecycleManager.Instance.SetSceneLoading(false);
-                });
+                MonoManager.Instance.StartCoroutine(LoadSceneWithLoading("MainMenu_Scene", null));
                 break;
         }
+    }
+
+    private IEnumerator LoadSceneWithLoading(string sceneName, UnityAction onComplete)
+    {
+        LoadingPanel panel = null;
+        ManagerHub.UI.ShowPanel<LoadingPanel>(UILayerType.Top, p => panel = p);
+        yield return new WaitForSeconds(0.1f);
+
+        panel?.UpdateProgress(0.1f);
+
+        bool done = false;
+        ManagerHub.Scene.LoadSceneAsync(sceneName,
+            p => panel?.UpdateProgress(Mathf.Lerp(0.1f, 0.7f, p)),
+            () => done = true);
+
+        yield return new WaitUntil(() => done);
+        panel?.UpdateProgress(1f);
+        yield return new WaitForSeconds(0.2f);
+
+        panel?.Hide();
+        ManagerHub.UI.HidePanel<LoadingPanel>();
+        onComplete?.Invoke();
+    }
+
+    private IEnumerator RestartWithLoading()
+    {
+        LoadingPanel panel = null;
+        ManagerHub.UI.ShowPanel<LoadingPanel>(UILayerType.Top, p => panel = p);
+        yield return new WaitForSeconds(0.1f);
+
+        panel?.UpdateProgress(0.15f);
+        yield return new WaitForSeconds(0.3f);
+
+        GameLifecycleManager.Instance.RestartGame();
+
+        panel?.UpdateProgress(0.5f);
+        yield return new WaitForSeconds(0.3f);
+
+        panel?.UpdateProgress(0.7f);
+        yield return new WaitForSeconds(0.3f);
+
+        panel?.UpdateProgress(1f);
+        yield return new WaitForSeconds(0.2f);
+
+        panel?.Hide();
+        ManagerHub.UI.HidePanel<LoadingPanel>();
     }
 }

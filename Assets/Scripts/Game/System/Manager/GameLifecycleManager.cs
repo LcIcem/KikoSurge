@@ -3,6 +3,7 @@ using Game.Event;
 using LcIcemFramework.Core;
 using LcIcemFramework;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 /// <summary>
@@ -61,6 +62,11 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// 是否正在加载场景（加载期间禁用 Pause 检查）
     /// </summary>
     private bool _isSceneLoading;
+
+    /// <summary>
+    /// 是否正在加载场景（供外部访问）
+    /// </summary>
+    public bool IsSceneLoading => _isSceneLoading;
 
     /// <summary>
     /// 暂停前是否来自大厅（用于 PausePanel 显示按钮判断）
@@ -299,7 +305,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// 继续游戏（断点续玩）
     /// </summary>
     /// <param name="saveSlot">存档槽位</param>
-    public void ContinueGame(int saveSlot)
+    /// <param name="onProgress">加载进度回调</param>
+    public void ContinueGame(int saveSlot, UnityAction<float> onProgress = null)
     {
         Log($"ContinueGame: slot={saveSlot}");
 
@@ -324,7 +331,7 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         }
 
         // 进入游戏（会加载 Game_Scene 并恢复 session）
-        EnterPlaying();
+        EnterPlaying(onProgress);
         EventCenter.Instance.Publish(GameEventID.OnSessionContinue);
     }
 
@@ -332,7 +339,7 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// 进入游戏
     /// <para>如果是继续游戏，根据 checkpoint 恢复对应层；如果是新游戏，从第0层开始</para>
     /// </summary>
-    public void EnterPlaying()
+    public void EnterPlaying(UnityAction<float> onProgress = null)
     {
         // 防止重复进入
         if (_isSceneLoading)
@@ -353,7 +360,7 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
 
         // 加载 Game_Scene（包含 A* 和地牢生成器），完成后实例化 LevelController
         _isSceneLoading = true;
-        ManagerHub.Scene.LoadSceneAsync("Game_Scene", null, () =>
+        ManagerHub.Scene.LoadSceneAsync("Game_Scene", onProgress, () =>
         {
             Debug.Log("[EnterPlaying] Scene loaded callback executing...");
             // 实例化 LevelController

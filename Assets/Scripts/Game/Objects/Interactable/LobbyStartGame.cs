@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using LcIcemFramework;
 using LcIcemFramework.Core;
@@ -10,6 +11,7 @@ using Game.Util;
 public class LobbyStartGame : MonoBehaviour
 {
     [SerializeField] private Interactable _interactable;
+    private EnterDungeonPanel _enterDungeonPanel;
 
     private void Start()
     {
@@ -19,25 +21,18 @@ public class LobbyStartGame : MonoBehaviour
 
     private void OnInteractTriggered()
     {
-        // 隐藏 InfoCard
         _interactable.ShowInfoCard(false);
-
-        // 标记玩家正在交互
         Player.StartInteraction(_interactable);
 
-        // 停止玩家移动，防止滑行
         var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
         player?.LockMovement();
 
-        // 禁用武器旋转跟随鼠标
         AimInput.Enabled = false;
-
-        // 切换到 UI ActionMap（玩家输入被 UI 接管）
         ManagerHub.Input.SwitchActionMap("UI");
 
-        // 显示进入地牢面板
         ManagerHub.UI.ShowPanel<EnterDungeonPanel>(UILayerType.Top, panel =>
         {
+            _enterDungeonPanel = panel;
             panel.OnEnterDungeon += OnEnterDungeon;
             panel.OnDungeonPanelClosed += OnPanelClosed;
         });
@@ -45,51 +40,65 @@ public class LobbyStartGame : MonoBehaviour
 
     private void OnEnterDungeon(long seed)
     {
-        // 结束交互状态
-        Player.EndInteraction();
+        if (_enterDungeonPanel != null)
+        {
+            _enterDungeonPanel.OnDungeonPanelClosed -= OnPanelClosed;
+        }
 
-        // 进入地牢后恢复武器旋转跟随鼠标
+        Player.EndInteraction();
         AimInput.Enabled = true;
 
+        LoadingPanel panel = null;
+        ManagerHub.UI.ShowPanel<LoadingPanel>(UILayerType.Top, p => panel = p);
+
+        MonoManager.Instance.StartCoroutine(LoadingSequence(seed, panel));
+    }
+
+    private IEnumerator LoadingSequence(long seed, LoadingPanel panel)
+    {
+        // 显示 loading
+        if (panel != null)
+            panel.UpdateProgress(1f);
+
+        // 触发场景加载
         if (seed == 0)
         {
-            // seed = 0 表示继续游戏
             GameLifecycleManager.Instance.ContinueGame(SaveLoadManager.Instance.CurrentSlotId);
         }
         else
         {
-            // 非 0 seed 表示开始新游戏
-            // 从当前选择的角色获取正确的 roleId（不是列表索引）
             int roleIndex = GameDataManager.Instance.CurSelRoleIndex;
             var roleData = GameDataManager.Instance.GetRoleStaticDataByCurSel();
             int roleId = roleData?.roleId ?? roleIndex;
 
-            // 保存选择的角色ID到 SaveLoadManager（用于后续开始游戏时创建角色）
             SaveLoadManager.Instance.SetLastSelectedRoleId(roleId);
-
-            // SessionManager 内部会使用 SaveLoadManager.LastSelectedRoleId 创建角色
             SessionManager.Instance.StartSession(seed);
             GameLifecycleManager.Instance.UpdateSessionSeed(seed);
             GameLifecycleManager.Instance.EnterPlaying();
+        }
+
+        // 等待场景激活完成
+        yield return new WaitUntil(() => !GameLifecycleManager.Instance.IsSceneLoading);
+
+        // 隐藏 loading
+        if (panel != null)
+        {
+            panel.Hide();
+            ManagerHub.UI.HidePanel<LoadingPanel>();
         }
     }
 
     private void OnPanelClosed()
     {
-        // 结束交互状态
         Player.EndInteraction();
-
-        // 返回大厅，切换回 Player ActionMap
         ManagerHub.Input.SwitchActionMap("Player");
 
-        // 解锁玩家移动
         var player = GameObject.FindGameObjectWithTag("Player")?.GetComponent<Player>();
         player?.UnlockMovement();
 
-        // 恢复武器旋转跟随鼠标
         AimInput.Enabled = true;
 
-        // 重新显示交互提示
-        _interactable.ResumePrompt();
+        if (_interactable != null)
+            _interactable.ResumePrompt();
     }
 }

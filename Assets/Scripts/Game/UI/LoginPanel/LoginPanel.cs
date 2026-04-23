@@ -1,7 +1,6 @@
 using System.Collections;
 using LcIcemFramework;
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
 /// 登录/主菜单面板
@@ -27,15 +26,12 @@ public class LoginPanel : BasePanel
             case BTN_START:
                 OnStartClicked();
                 break;
-
             case BTN_SAVE_SLOT:
                 ManagerHub.UI.ShowPanel<SaveSlotPanel>();
                 break;
-
             case BTN_SETTINGS:
                 ManagerHub.UI.ShowPanel<SettingsPanel>();
                 break;
-
             case BTN_QUIT:
                 GameLifecycleManager.Instance.QuitGame();
                 break;
@@ -46,40 +42,47 @@ public class LoginPanel : BasePanel
     {
         int currentSlot = SaveLoadManager.Instance.CurrentSlotId;
 
-        // 检测当前槽位是否有存档
         if (!SaveLoadManager.Instance.HasSaveData(currentSlot))
         {
-            // 没有存档，创建新存档到当前槽位
             SaveLoadManager.Instance.CreateNewSave(currentSlot);
         }
 
-        // 进入大厅
         ManagerHub.UI.HidePanel<LoginPanel>();
-        ManagerHub.Scene.LoadSceneAsync("Lobby_Scene", null, () =>
-        {
-            // 确保 GameLifecycleManager 已初始化（防止 domain reload 后静态实例丢失）
-            if (GameLifecycleManager.Instance != null)
-            {
-                GameLifecycleManager.Instance.EnterLobby(currentSlot);
-            }
-            else
-            {
-                Debug.LogWarning("[LoginPanel] GameLifecycleManager is null after scene load, retrying...");
-                StartCoroutine(RetryEnterLobby(currentSlot));
-            }
-        });
+        LoadingPanel panel = null;
+        ManagerHub.UI.ShowPanel<LoadingPanel>(UILayerType.Top, p => panel = p);
+
+        MonoManager.Instance.StartCoroutine(LoadLobbyScene(currentSlot, panel));
     }
 
-    private IEnumerator RetryEnterLobby(int slot)
+    private IEnumerator LoadLobbyScene(int slot, LoadingPanel panel)
     {
         yield return new WaitForSeconds(0.1f);
+
+        panel?.UpdateProgress(0.1f);
+
+        bool done = false;
+        ManagerHub.Scene.LoadSceneAsync("Lobby_Scene",
+            p => panel?.UpdateProgress(Mathf.Lerp(0.1f, 0.6f, p)),
+            () => done = true);
+
+        yield return new WaitUntil(() => done);
+        panel?.UpdateProgress(0.8f);
+        yield return new WaitForSeconds(0.1f);
+        panel?.UpdateProgress(1f);
+        yield return new WaitForSeconds(0.2f);
+
+        panel?.Hide();
+        ManagerHub.UI.HidePanel<LoadingPanel>();
+
         if (GameLifecycleManager.Instance != null)
         {
             GameLifecycleManager.Instance.EnterLobby(slot);
         }
         else
         {
-            Debug.LogError("[LoginPanel] GameLifecycleManager still null after retry!");
+            yield return new WaitForSeconds(0.1f);
+            if (GameLifecycleManager.Instance != null)
+                GameLifecycleManager.Instance.EnterLobby(slot);
         }
     }
 }
