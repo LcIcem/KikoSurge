@@ -19,6 +19,21 @@ public class EnemyChoice
 }
 
 /// <summary>
+/// Boss出生位置模式（相对于房间）
+/// </summary>
+public enum BossSpawnPosition
+{
+    RoomCenter,    // 房间中心
+    TopLeft,       // 左上角
+    TopRight,      // 右上角
+    BottomLeft,    // 左下角
+    BottomRight,   // 右下角
+    NearestEdge,   // 距玩家最近的边缘
+    FarthestEdge,  // 距玩家最远的边缘
+    Random         // 随机位置
+}
+
+/// <summary>
 /// 敌人生成行为条目
 /// </summary>
 [Serializable]
@@ -31,9 +46,12 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
     public int minCount = 1;
     public int maxCount = 3;
 
-    [Header("生成位置")]
+    [Header("生成位置（Normal/Elite房间）")]
     public int minSpawnDist = 3;  // 距离玩家最小生成距离（格）
     public int minEdgeDist = 1;   // 距离房间边缘最小距离（格），防止贴墙生成
+
+    [Header("生成位置（Boss房间）")]
+    public BossSpawnPosition bossSpawnPosition = BossSpawnPosition.RoomCenter;
 
     // 内部状态
     private int _currentWave;
@@ -78,6 +96,14 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
         RectInt bounds = _room.Bounds;
         Vector2Int playerTile = Vector2Int.FloorToInt(_playerPos);
 
+        // Boss房间使用相对位置计算，不再基于玩家距离
+        if (_room.roomType == RoomType.Boss)
+        {
+            CalculateBossSpawnTiles(bounds, playerTile);
+            return;
+        }
+
+        // Normal/Elite房间：基于玩家距离的逻辑
         foreach (var tile in _floorTiles)
         {
             // 排除距离玩家太近的格子
@@ -133,6 +159,154 @@ public class EnemyBehaviourEntry : RoomBehaviourEntry
             }
             _validTiles.Add(bestTile);
         }
+    }
+
+    /// <summary>
+    /// 计算Boss房间的出生位置（基于房间相对位置）
+    /// </summary>
+    private void CalculateBossSpawnTiles(RectInt bounds, Vector2Int playerTile)
+    {
+        switch (bossSpawnPosition)
+        {
+            case BossSpawnPosition.RoomCenter:
+                // 房间中心点
+                Vector2Int center = new Vector2Int(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+                FindNearestFloorTile(center);
+                break;
+
+            case BossSpawnPosition.TopLeft:
+                FindNearestFloorTile(new Vector2Int(bounds.x, bounds.y + bounds.height - 1));
+                break;
+
+            case BossSpawnPosition.TopRight:
+                FindNearestFloorTile(new Vector2Int(bounds.x + bounds.width - 1, bounds.y + bounds.height - 1));
+                break;
+
+            case BossSpawnPosition.BottomLeft:
+                FindNearestFloorTile(new Vector2Int(bounds.x, bounds.y));
+                break;
+
+            case BossSpawnPosition.BottomRight:
+                FindNearestFloorTile(new Vector2Int(bounds.x + bounds.width - 1, bounds.y));
+                break;
+
+            case BossSpawnPosition.NearestEdge:
+                FindNearestEdgeTile(playerTile);
+                break;
+
+            case BossSpawnPosition.FarthestEdge:
+                FindFarthestEdgeTile(playerTile);
+                break;
+
+            case BossSpawnPosition.Random:
+                // 随机位置：从所有floor tiles中排除边缘后随机选
+                foreach (var tile in _floorTiles)
+                {
+                    if (tile.x - bounds.x < minEdgeDist ||
+                        tile.y - bounds.y < minEdgeDist ||
+                        bounds.x + bounds.width - tile.x - 1 < minEdgeDist ||
+                        bounds.y + bounds.height - tile.y - 1 < minEdgeDist)
+                        continue;
+                    _validTiles.Add(tile);
+                }
+                // 如果为空则取最远边缘
+                if (_validTiles.Count == 0)
+                    FindFarthestEdgeTile(playerTile);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 找到距离目标点最近的floor tile
+    /// </summary>
+    private void FindNearestFloorTile(Vector2Int target)
+    {
+        float minDist = float.MaxValue;
+        Vector2Int bestTile = _floorTiles.Count > 0 ? _floorTiles.ElementAt(0) : target;
+
+        foreach (var tile in _floorTiles)
+        {
+            float dist = Vector2Int.Distance(tile, target);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                bestTile = tile;
+            }
+        }
+        _validTiles.Add(bestTile);
+    }
+
+    /// <summary>
+    /// 找到距离玩家最近的边缘tile
+    /// </summary>
+    private void FindNearestEdgeTile(Vector2Int playerTile)
+    {
+        float minDist = float.MaxValue;
+        Vector2Int bestTile = playerTile;
+
+        foreach (var tile in _floorTiles)
+        {
+            // 检查是否在边缘
+            if (tile.x - _room.Bounds.x < minEdgeDist ||
+                tile.y - _room.Bounds.y < minEdgeDist ||
+                _room.Bounds.x + _room.Bounds.width - tile.x - 1 < minEdgeDist ||
+                _room.Bounds.y + _room.Bounds.height - tile.y - 1 < minEdgeDist)
+            {
+                float dist = Vector2Int.Distance(tile, playerTile);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    bestTile = tile;
+                }
+            }
+        }
+
+        // 如果没找到边缘tile，取最近的floor tile
+        if (bestTile == playerTile)
+            FindNearestFloorTile(playerTile);
+        else
+            _validTiles.Add(bestTile);
+    }
+
+    /// <summary>
+    /// 找到距离玩家最远的边缘tile
+    /// </summary>
+    private void FindFarthestEdgeTile(Vector2Int playerTile)
+    {
+        float maxDist = 0f;
+        Vector2Int bestTile = playerTile;
+
+        foreach (var tile in _floorTiles)
+        {
+            // 检查是否在边缘
+            if (tile.x - _room.Bounds.x < minEdgeDist ||
+                tile.y - _room.Bounds.y < minEdgeDist ||
+                _room.Bounds.x + _room.Bounds.width - tile.x - 1 < minEdgeDist ||
+                _room.Bounds.y + _room.Bounds.height - tile.y - 1 < minEdgeDist)
+            {
+                float dist = Vector2Int.Distance(tile, playerTile);
+                if (dist > maxDist)
+                {
+                    maxDist = dist;
+                    bestTile = tile;
+                }
+            }
+        }
+
+        // 如果没找到边缘tile，取最远的floor tile
+        if (bestTile == playerTile)
+        {
+            foreach (var tile in _floorTiles)
+            {
+                float dist = Vector2Int.Distance(tile, playerTile);
+                if (dist > maxDist)
+                {
+                    maxDist = dist;
+                    bestTile = tile;
+                }
+            }
+        }
+        _validTiles.Add(bestTile);
     }
 
     private EnemyConfig SelectEnemyByWeight()
