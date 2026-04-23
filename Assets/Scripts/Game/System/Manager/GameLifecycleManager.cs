@@ -120,6 +120,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             AimInput.Enabled = true;
             // 恢复玩家移动
             UnlockPlayerMovement();
+            // 恢复相机跟随
+            CameraManager.Instance.EnableFollow();
         }
         else if (CurrentState == GameState.Paused)
         {
@@ -562,6 +564,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             AimInput.Enabled = false;
             // 锁定玩家移动，防止滑行
             LockPlayerMovement();
+            // 禁用相机跟随
+            CameraManager.Instance.DisableFollow();
             ManagerHub.UI.ShowPanel<InventoryPanel>();
         }
     }
@@ -581,6 +585,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             AimInput.Enabled = false;
             // 锁定玩家移动，防止滑行
             LockPlayerMovement();
+            // 禁用相机跟随
+            CameraManager.Instance.DisableFollow();
             ManagerHub.UI.ShowPanel<ShopPanel>(UILayerType.Top, onShopShown);
         }
     }

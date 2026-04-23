@@ -161,6 +161,14 @@ public class WeaponHandler
     /// </summary>
     private void SyncWeaponListFromSession(List<ItemSlotData> equippedSlots)
     {
+        // 取消当前武器的换弹状态，防止切换后卡在 Reload 状态
+        if (_currentWeaponIndex >= 0 && _currentWeaponIndex < _weapons.Count)
+        {
+            var currentWeapon = _weapons[_currentWeaponIndex];
+            if (currentWeapon != null && currentWeapon.IsReloading)
+                currentWeapon.CancelReload();
+        }
+
         // 收集当前非空槽的 itemId 列表（按槽位顺序）
         var currentWeaponIds = new List<int>();
         foreach (var slot in equippedSlots)

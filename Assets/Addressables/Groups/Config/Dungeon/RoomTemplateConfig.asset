@@ -33,14 +33,14 @@ MonoBehaviour:
     maxDistFromStart: -1
   - displayName: "\u5B9D\u85CF\u623F\u95F4"
     roomType: 3
-    minSize: {x: 4, y: 4}
-    maxSize: {x: 4, y: 4}
+    minSize: {x: 3, y: 3}
+    maxSize: {x: 3, y: 3}
     minDistFromStart: 5
     maxDistFromStart: -1
   - displayName: "\u5546\u5E97\u623F\u95F4"
     roomType: 4
-    minSize: {x: 4, y: 4}
-    maxSize: {x: 4, y: 4}
+    minSize: {x: 3, y: 3}
+    maxSize: {x: 3, y: 3}
     minDistFromStart: 10
     maxDistFromStart: -1
   - displayName: "\u7CBE\u82F1\u623F\u95F4"
@@ -57,13 +57,13 @@ MonoBehaviour:
     maxDistFromStart: -1
   - displayName: "\u4F11\u606F\u623F\u95F4"
     roomType: 6
-    minSize: {x: 4, y: 4}
-    maxSize: {x: 4, y: 4}
+    minSize: {x: 3, y: 3}
+    maxSize: {x: 3, y: 3}
     minDistFromStart: 0
     maxDistFromStart: 10
   - displayName: "\u4F11\u606F\u623F\u95F4"
     roomType: 6
-    minSize: {x: 4, y: 4}
-    maxSize: {x: 4, y: 4}
+    minSize: {x: 3, y: 3}
+    maxSize: {x: 3, y: 3}
     minDistFromStart: 20
     maxDistFromStart: 30

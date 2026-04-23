@@ -28,6 +28,11 @@ public class CameraManager : SingletonMono<CameraManager>
 
     public Transform Target { get; private set; }
 
+    /// <summary>
+    /// 相机跟随是否启用（打开商店/背包时禁用）
+    /// </summary>
+    public bool IsFollowEnabled { get; private set; } = true;
+
     protected override void Init()
     {
         EventCenter.Instance.Subscribe<WeaponBase>(EventID.ShootPerformed, OnShootPerformed);
@@ -75,6 +80,24 @@ public class CameraManager : SingletonMono<CameraManager>
             _hurtSource = player.HurtSource;
             _dashSource = player.DashSource;
         }
+
+        IsFollowEnabled = true;
+    }
+
+    /// <summary>
+    /// 禁用相机跟随（打开商店/背包时调用）
+    /// </summary>
+    public void DisableFollow()
+    {
+        IsFollowEnabled = false;
+    }
+
+    /// <summary>
+    /// 启用相机跟随（关闭商店/背包时调用）
+    /// </summary>
+    public void EnableFollow()
+    {
+        IsFollowEnabled = true;
     }
 
     /// <summary>
@@ -110,7 +133,7 @@ public class CameraManager : SingletonMono<CameraManager>
 
     private void LateUpdate()
     {
-        if (Target == null) return;
+        if (Target == null || !IsFollowEnabled) return;
 
         if (_positionComposer == null)
             _positionComposer = _cinemachineCam?.GetCinemachineComponent(CinemachineCore.Stage.Body) as CinemachinePositionComposer;

@@ -12,24 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b5e858eec64e2e4185cfb0597a217ef, type: 3}
   m_Name: DungeonModel_NormalLayer
   m_EditorClassIdentifier: 
-  mapWidth: 70
-  mapHeight: 70
+  mapWidth: 50
+  mapHeight: 50
   borderSize: 2
   roomTemplateConfig: {fileID: 11400000, guid: 0a08277930e02d941913ed410033089b, type: 2}
   corridorWidth: 1
   extraCorridorChance: 0
   extraCorridorMaxDistance: 25
-  normalRoomCount: 15
+  normalRoomCount: 8
   normalExtraChance: 50
   eliteRoomCount: 3
   eliteExtraChance: 30
-  treasureRoomCount: 3
+  treasureRoomCount: 2
   treasureExtraChance: 0
   shopRoomCount: 1
   shopExtraChance: 0
-  restRoomCount: 3
+  restRoomCount: 1
   restExtraChance: 0
-  eventRoomCount: 1
+  eventRoomCount: 0
   eventExtraChance: 0
-  bossRoomCount: 1
+  bossRoomCount: 0
   bossExtraChance: 0

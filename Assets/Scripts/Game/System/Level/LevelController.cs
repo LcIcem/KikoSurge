@@ -351,7 +351,10 @@ public class LevelController : MonoBehaviour
 
         Room startRoom = graph.GetRoom(graph.startRoomId);
         Vector2Int center = startRoom.Center;
-        return floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
+        Vector3 worldPos = floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
+        // CellToWorld 返回瓦片左下角，需要加 0.5f 偏移到世界坐标中心
+        worldPos += new Vector3(0.5f, 0.5f, 0);
+        return worldPos;
     }
 
     /// <summary>
@@ -369,7 +372,10 @@ public class LevelController : MonoBehaviour
 
         Room goalRoom = graph.GetRoom(graph.goalRoomId);
         Vector2Int center = goalRoom.Center;
-        return floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
+        Vector3 worldPos = floorTilemap.CellToWorld(new Vector3Int(center.x, center.y, 0));
+        // CellToWorld 返回瓦片左下角，需要加 0.5f 偏移到世界坐标中心
+        worldPos += new Vector3(0.5f, 0.5f, 0);
+        return worldPos;
     }
 
     /// <summary>
@@ -432,7 +438,7 @@ public class LevelController : MonoBehaviour
                     }
                     Vector2Int centerGrid = new Vector2Int(sumX / floorTiles.Count, sumY / floorTiles.Count);
                     Vector3 worldPos = floorTilemap.CellToWorld(new Vector3Int(centerGrid.x, centerGrid.y, 0));
-                    // CellToWorld 返回瓦片中心，加上 0.5f 偏移到世界坐标中心
+                    // CellToWorld 返回瓦片左下角，加上 0.5f 偏移到世界坐标中心
                     worldPos += new Vector3(0.5f, 0.5f, 0);
                     positions.Add(worldPos);
                 }
@@ -502,7 +508,7 @@ public class LevelController : MonoBehaviour
                     }
                     Vector2Int centerGrid = new Vector2Int(sumX / floorTiles.Count, sumY / floorTiles.Count);
                     Vector3 worldPos = floorTilemap.CellToWorld(new Vector3Int(centerGrid.x, centerGrid.y, 0));
-                    // CellToWorld 返回瓦片中心，加上 0.5f 偏移到世界坐标中心
+                    // CellToWorld 返回瓦片左下角，加上 0.5f 偏移到世界坐标中心
                     worldPos += new Vector3(0.5f, 0.5f, 0);
                     positions.Add(worldPos);
                 }
@@ -543,7 +549,7 @@ public class LevelController : MonoBehaviour
                     }
                     Vector2Int centerGrid = new Vector2Int(sumX / floorTiles.Count, sumY / floorTiles.Count);
                     Vector3 worldPos = floorTilemap.CellToWorld(new Vector3Int(centerGrid.x, centerGrid.y, 0));
-                    // CellToWorld 返回瓦片中心，加上 0.5f 偏移到世界坐标中心
+                    // CellToWorld 返回瓦片左下角，加上 0.5f 偏移到世界坐标中心
                     worldPos += new Vector3(0.5f, 0.5f, 0);
                     positions.Add(worldPos);
                 }

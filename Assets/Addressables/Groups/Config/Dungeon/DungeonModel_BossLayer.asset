@@ -19,13 +19,13 @@ MonoBehaviour:
   corridorWidth: 1
   extraCorridorChance: 0
   extraCorridorMaxDistance: 10
-  normalRoomCount: 5
-  normalExtraChance: 50
-  eliteRoomCount: 2
-  eliteExtraChance: 30
-  treasureRoomCount: 0
+  normalRoomCount: 0
+  normalExtraChance: 0
+  eliteRoomCount: 0
+  eliteExtraChance: 0
+  treasureRoomCount: 1
   treasureExtraChance: 0
-  shopRoomCount: 0
+  shopRoomCount: 1
   shopExtraChance: 0
   restRoomCount: 1
   restExtraChance: 0
