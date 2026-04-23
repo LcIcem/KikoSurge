@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - WeaponConfigs
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 30c16fa06afba884e83a1185a9a362e9
+    m_Address: Weapon_Config_Rifle
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - WeaponConfigs
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3b585f4ed0ac34645b2dbd6630a90e73
     m_Address: Weapon_Config_Pistol
     m_ReadOnly: 0

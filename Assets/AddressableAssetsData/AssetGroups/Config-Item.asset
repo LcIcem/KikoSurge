@@ -15,6 +15,18 @@ MonoBehaviour:
   m_GroupName: Config-Item
   m_GUID: 167cf353f9012a34680fb90e66168de0
   m_SerializeEntries:
+  - m_GUID: 036be83b121f7ef4f9a07a0ee425962f
+    m_Address: Item_Relic_Heart
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 126a74a1c5d106146924a86ce4e75173
+    m_Address: Item_Relic_Boot
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 41133e477919bc24ca1a751fde8b4981
     m_Address: Item_Shotgun
     m_ReadOnly: 0
@@ -23,6 +35,36 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 628452d0397e8004e8e0b0a49d9141e0
     m_Address: Item_Currency_Gold
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8bea861fcea0e0342a3b2031540451e6
+    m_Address: Item_Relic_Helm
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bd847f99dae98fa4c83a8004ffb9d71b
+    m_Address: Item_Potion_HealthAdd
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c67cad216a1ea2c4bb056c60a65d13f2
+    m_Address: Item_Rifle
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: da1a8a1e7f60f334390c5d7167416f40
+    m_Address: Item_Potion_Shield
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfigs
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db3e2aff8dc1e8342925a4841402458c
+    m_Address: Item_Potion_Speed
     m_ReadOnly: 0
     m_SerializedLabels:
     - ItemConfigs

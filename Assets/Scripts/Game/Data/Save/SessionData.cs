@@ -77,18 +77,31 @@ public class SessionData
         var equipped = new List<ItemSlotData>();
         var inventory = new List<ItemSlotData>();
 
+        // 先填充 maxWeaponSlots 个空槽位（保证装备槽位完整）
+        for (int i = 0; i < maxWeaponSlots; i++)
+        {
+            equipped.Add(new ItemSlotData());
+        }
+
+        // 放置初始武器到对应槽位
         if (initialWeaponIds != null)
         {
             for (int i = 0; i < initialWeaponIds.Count; i++)
             {
-                // 从武器配置获取初始弹药量
-                var weaponConfig = GameDataManager.Instance?.GetWeaponConfig(initialWeaponIds[i]);
-                int ammo = weaponConfig?.magazineSize ?? 0;
-                var slot = new ItemSlotData(initialWeaponIds[i], 1, ammo);
-                if (i < maxWeaponSlots)
-                    equipped.Add(slot);
+                if (i >= maxWeaponSlots)
+                {
+                    // 超出槽位数量的武器放入背包
+                    var weaponConfig = GameDataManager.Instance?.GetWeaponConfig(initialWeaponIds[i]);
+                    int ammo = weaponConfig?.magazineSize ?? 0;
+                    inventory.Add(new ItemSlotData(initialWeaponIds[i], 1, ammo));
+                }
                 else
-                    inventory.Add(slot);
+                {
+                    // 从武器配置获取初始弹药量
+                    var weaponConfig = GameDataManager.Instance?.GetWeaponConfig(initialWeaponIds[i]);
+                    int ammo = weaponConfig?.magazineSize ?? 0;
+                    equipped[i] = new ItemSlotData(initialWeaponIds[i], 1, ammo);
+                }
             }
         }
 

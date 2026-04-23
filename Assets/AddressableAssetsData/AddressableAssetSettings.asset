@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: aa105b9335b3bf34ca5babc08864e7c8
   m_currentHash:
     serializedVersion: 2
-    Hash: 00000000000000000000000000000000
+    Hash: 612a167f4fbedf66aa74b1d5f06486df
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_CatalogRequestsTimeout: 0
@@ -62,8 +62,12 @@ MonoBehaviour:
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
   - {fileID: 11400000, guid: 2ad31c422066e02408a2fd4f67ad57d3, type: 2}
+  - {fileID: 11400000, guid: 7694621a85eeea745a31b4ae7d032e37, type: 2}
   - {fileID: 11400000, guid: 5df428678dce6854280c71ad7bdf9bda, type: 2}
   - {fileID: 11400000, guid: 5befa7f41b0d75742b865d55f4121790, type: 2}
+  - {fileID: 11400000, guid: cd9bdfcffe95e2f419c1bfbb4480a798, type: 2}
+  - {fileID: 11400000, guid: 14b9d7127435dce49beccf8afdb9a314, type: 2}
+  - {fileID: 11400000, guid: 6cce48cb5fab20645a14f75eb880c8cd, type: 2}
   - {fileID: 11400000, guid: 9ee703f2a6f689c4c9e604d7c3ee59f7, type: 2}
   - {fileID: 11400000, guid: 0d2d5035caf50d446ae38010ba8a661d, type: 2}
   - {fileID: 11400000, guid: a1386bdcb9eb8ac4397edbac3eff79cd, type: 2}
@@ -71,17 +75,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c96eb7d5bca5a9a4c81e96d146b1e954, type: 2}
   - {fileID: 11400000, guid: 6aef6d90b3a2bff4a9c728cf8b5cd37d, type: 2}
   - {fileID: 11400000, guid: 8fd3f11d42b88e845b748f1a71ae8371, type: 2}
-  - {fileID: 11400000, guid: ea7c95f9adb44834091eaa706dd88982, type: 2}
   - {fileID: 11400000, guid: 3080f52939a009b40b2c9e60d60f3394, type: 2}
-  - {fileID: 11400000, guid: 6603c0308ba0b0348b5a3d84a3a561c4, type: 2}
   - {fileID: 11400000, guid: 4def5a2ec82148a4ca9888dbd5fe2827, type: 2}
-  - {fileID: 11400000, guid: a30f1d118049270469cb2d3c07a94358, type: 2}
-  - {fileID: 11400000, guid: 14ad83a76b56c7942ad1861c75001f0a, type: 2}
   - {fileID: 11400000, guid: 38fb845199f84e544bdf1b09b7e455f4, type: 2}
   - {fileID: 11400000, guid: a9b5f60633f143d4d86fbe5ac1ba2d67, type: 2}
   - {fileID: 11400000, guid: 896f679d28ad1de45be83bdd1336f0af, type: 2}
   - {fileID: 11400000, guid: 001d91eaead2e2e4da24382f6061005e, type: 2}
   - {fileID: 11400000, guid: b4a3b6d4aa92b6145afe66a7e9ec9022, type: 2}
+  - {fileID: 11400000, guid: 1ba9c3db943120445b4b7b91a98638d0, type: 2}
   - {fileID: 11400000, guid: 8ec9e039e582253459c149cbd623be14, type: 2}
   - {fileID: 11400000, guid: 6632cbb90e98dd245b35cc140401511b, type: 2}
   m_BuildSettings:

@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: RigleAnimatorCtrl
+  m_Controller: {fileID: 9100000, guid: 362d0c7b5dce48f4c9ee8eead0e33b44, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 082acbbceda9ea24e885f56b47ff6228, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 5f7501766c12d0e429b6d18813d97595, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: e234b1605b4c3cc4ebbe3f1a4a241003, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 20a5daaa4f0ee66418bf33ac4584490a, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: a46602a7851ca4b45bc945f819a633af, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 706ff1cecb17bc34fa6bd0b986c45673, type: 2}

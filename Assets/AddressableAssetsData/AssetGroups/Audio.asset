@@ -15,13 +15,103 @@ MonoBehaviour:
   m_GroupName: Audio
   m_GUID: 6d06964fff6a16d4d86b15de4c18796c
   m_SerializeEntries:
+  - m_GUID: 07ada1ac08c04b2439491c62ebc74cf4
+    m_Address: Hurt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 10122450b5e1f8942a70a2114cc18dc4
+    m_Address: Boss-Dash
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 15cc23b1de128294490f9aa7a4d70ec0
     m_Address: BGM-MainMenu
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2a813154ad21d384d9dc4c30ecf10d8c
+    m_Address: Boss-Move
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2afcdf949183cb7468fd1deeb6d13c13
+    m_Address: CampFire
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2ebc68f3edfc0d14db7a5dc9d309588c
     m_Address: BGM-Gaming
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 38b2d9ed990447b468e979a598543fb1
+    m_Address: Dodge
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3a530907ed35c0c44bbf68d4400705bb
+    m_Address: Boss-Dead
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 45f3038d0868fa248a5bb780b82c6655
+    m_Address: click-b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4696d070aecc09c4d958c86c663ca912
+    m_Address: tap-a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4745fe727422bd546bbef72b333583a6
+    m_Address: tap-b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5735ea03a4c07f14bb6e423398760e9a
+    m_Address: switch-a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 579bc22054ed63f4a9bfd647c9aec60a
+    m_Address: switch-b
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 597da929ff1c110489941c42c99ad351
+    m_Address: Boss-Hurt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6df9171bbe59bef49909c95aeb6f2fb7
+    m_Address: Walk
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7d09858e5ccfbf8468aaba959fb624be
+    m_Address: SwitchWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 96c7718a07b9ee14990c8fa1023b6af8
+    m_Address: click-a
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0c35ca222c1bce4690afd7d8e90b360
+    m_Address: tap
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b35af946ab0e07846a8ee0997a87b0d4
+    m_Address: nextLevel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd5493a0f38b54e40ab6ef7ec9ec1658
+    m_Address: Dead
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

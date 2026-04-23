@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50146b9337b563d4eab994fb77898a05, type: 3}
+  m_Name: Weapon_Config_Pistol
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponConfig
+  itemConfig: {fileID: 11400000, guid: f273b95930b4f8044a4d25f83312e731, type: 2}
+  prefab: {fileID: 1645332420106596854, guid: 36a5ff7bcec73dd4fae1b7b623ca943b, type: 3}
+  fireMode: 0
+  fireRate: 0.333
+  randomSpreadAngle: 2
+  bulletCount: 1
+  shotgunSpreadAngle: 0
+  burstCount: 3
+  burstSpeed: 0.05
+  chargeTime: 1
+  magazineSize: 20
+  reloadTime: 0.8
+  recoilForce: 0.5
+  penetrateCount: 0
+  weaponDamage: 0
+  weaponCritRate: 0.05
+  weaponCritMultiplier: 0.5
+  weaponDamageBonus: 0
+  bulletConfig: {fileID: 11400000, guid: e539f4889bc9da24380a9aa62458a083, type: 2}
