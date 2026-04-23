@@ -6605,7 +6605,7 @@ Transform:
   m_GameObject: {fileID: 1573278822}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.00000166893, y: 0.04976642, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6686,10 +6686,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraManager
   _cinemachineCam: {fileID: 51773573}
-  MinMouseOffsetThreshold: 0.4
-  MaxMouseOffsetMagnitude: 0.2
-  MouseOffsetWorldScale: 1
-  MouseOffsetSmoothSpeed: 8
+  MinMouseOffsetThreshold: 0.2
+  MaxMouseOffsetMagnitude: 0.15
+  MouseOffsetWorldScale: 2
+  MouseOffsetSmoothSpeed: 12
 --- !u!4 &1833943911
 Transform:
   m_ObjectHideFlags: 0

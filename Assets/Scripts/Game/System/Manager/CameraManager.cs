@@ -129,11 +129,15 @@ public class CameraManager : SingletonMono<CameraManager>
 
         // 第二步：死区 + 屏幕空间钳制
         // 鼠标距屏幕中心 < 死区阈值时归零，避免相机在鼠标靠近中心时频繁抖动
-        // 鼠标距屏幕中心 > 最大范围时，将方向向量钳制到最大半径内
+        // MaxMouseOffsetMagnitude：从死区边界开始的最大偏移量（语义变更）
+        // 超出死区时，偏移量为从死区边界开始的偏移量
+        float effectiveDist = dist - MinMouseOffsetThreshold;
         if (dist < MinMouseOffsetThreshold)
             screenCentered = Vector2.zero;
-        else if (dist > MaxMouseOffsetMagnitude)
+        else if (effectiveDist > MaxMouseOffsetMagnitude)
             screenCentered = screenCentered.normalized * MaxMouseOffsetMagnitude;
+        else
+            screenCentered = screenCentered.normalized * effectiveDist;
 
         // 第三步：转换为世界空间偏移量
         // 正交相机视锥体：X方向总宽度 = orthoSize × aspect × 2，Y方向总高度 = orthoSize × 2
