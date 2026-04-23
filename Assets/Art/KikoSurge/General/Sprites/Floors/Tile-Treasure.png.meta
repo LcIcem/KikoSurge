@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 3e6488185aedfbc47be0f2e077a5ed94
+guid: 779d70e33f4e65e47b14555de7026fd0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7166492694386886852
-    second: tileset_47tiles_topdown_32px_kikoSurge_floorStart_0
+      213: 6297708240612621382
+    second: Tile-Treasure_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,7 +139,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: floor_start_0
+      name: Tile-Treasure_0
       rect:
         serializedVersion: 2
         x: 0
@@ -152,16 +152,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 0cbe7981fd8b3724e9364fc8967c1a51
-      internalID: 1107015360
+      spriteID: 64cf3c43744f56750800000000000000
+      internalID: 6297708240612621382
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_start_1
+      name: Tile-Treasure_1
       rect:
         serializedVersion: 2
         x: 32
@@ -176,14 +176,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: be88d40308c1c4a499f93c4200127477
-      internalID: -443499534
+      spriteID: 9029b5cb226cd134795134f2a852e3a8
+      internalID: 1851358278
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_start_2
+      name: Tile-Treasure_2
       rect:
         serializedVersion: 2
         x: 64
@@ -198,14 +198,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 52b9b406060fa16499ea8d28062ab9be
-      internalID: -2115766172
+      spriteID: b57b28ce1a7c1b543b10c3d739e9f6b0
+      internalID: -27466238
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_start_3
+      name: Tile-Treasure_3
       rect:
         serializedVersion: 2
         x: 0
@@ -220,14 +220,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ca20fa523f458ce4a9558027322f54e4
-      internalID: -707793946
+      spriteID: 23e2542287cb41e48884004c02a50a49
+      internalID: -1471718150
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_start_4
+      name: Tile-Treasure_4
       rect:
         serializedVersion: 2
         x: 32
@@ -242,14 +242,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7237c045098d620409f2cbae7c517070
-      internalID: 2004032180
+      spriteID: d6df0d21a9dbe9e4b9e2b65363c4988f
+      internalID: 896742218
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_start_5
+      name: Tile-Treasure_5
       rect:
         serializedVersion: 2
         x: 64
@@ -264,14 +264,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: de8b0f9905038564681d56f3aa48410f
-      internalID: -436108787
+      spriteID: 768e8c9c8c9c1964094009dcd1071b06
+      internalID: -2041044858
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_start_6
+      name: Tile-Treasure_6
       rect:
         serializedVersion: 2
         x: 0
@@ -286,14 +286,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a49793fe9a3065b45b6407fae56e5af7
-      internalID: -266286900
+      spriteID: 18e0762fe57fb6b4bbf858684cf9afa8
+      internalID: 1658772312
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_start_7
+      name: Tile-Treasure_7
       rect:
         serializedVersion: 2
         x: 32
@@ -308,14 +308,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b347bd2357460b74d9d87c851c9b61a3
-      internalID: -526037294
+      spriteID: 09ac8d26adc89f64fac478eec736590c
+      internalID: 842375221
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_start_8
+      name: Tile-Treasure_8
       rect:
         serializedVersion: 2
         x: 64
@@ -330,8 +330,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 93186641450f4614286bae39f7a99e4c
-      internalID: 209927308
+      spriteID: 41f71877b40def444972ce7300b04fef
+      internalID: -1761119829
       vertices: []
       indices: 
       edges: []
@@ -340,7 +340,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: d72d4be1837e3be4da8745b1ceba190d
+    spriteID: ed88c74e41e2f62488fc569dd1006aab
     internalID: 0
     vertices: []
     indices: 
@@ -352,15 +352,15 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      floor_start_0: 1107015360
-      floor_start_1: -443499534
-      floor_start_2: -2115766172
-      floor_start_3: -707793946
-      floor_start_4: 2004032180
-      floor_start_5: -436108787
-      floor_start_6: -266286900
-      floor_start_7: -526037294
-      floor_start_8: 209927308
+      Tile-Treasure_0: 6297708240612621382
+      Tile-Treasure_1: 1851358278
+      Tile-Treasure_2: -27466238
+      Tile-Treasure_3: -1471718150
+      Tile-Treasure_4: 896742218
+      Tile-Treasure_5: -2041044858
+      Tile-Treasure_6: 1658772312
+      Tile-Treasure_7: 842375221
+      Tile-Treasure_8: -1761119829
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

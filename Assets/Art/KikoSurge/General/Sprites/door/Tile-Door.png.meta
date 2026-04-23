@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 3f605a15ef4abf348bfc3df934ea0950
+guid: 9aab3f4cf986c20429e99ba07c1edeb3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 380950528946850917
-    second: tileset_47tiles_topdown_32px_kikoSurge_floorNormal_0
+      213: 6612373126275276407
+    second: Tile-Door_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,139 +139,33 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: floor_normal_0
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 64
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 843f8bdb65f8cbe4791b5afdd96ef7a2
-      internalID: -1654221664
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: floor_normal_1
+      name: Tile-Door_0
       rect:
         serializedVersion: 2
         x: 32
-        y: 64
+        y: 17
         width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        height: 47
+      alignment: 9
+      pivot: {x: 0.5, y: 0.66}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
-      physicsShape: []
+      physicsShape:
+      - - {x: 16, y: 23.5}
+        - {x: -16, y: 23.5}
+        - {x: -16, y: -23.5}
+        - {x: 16, y: -23.5}
       tessellationDetail: 0
       bones: []
-      spriteID: ebc18269df06acd41a501ec8fb3d7478
-      internalID: 1066730265
+      spriteID: 77e1af1135ed3cb50800000000000000
+      internalID: 6612373126275276407
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_normal_2
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 64
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 685168255bf2f4a449102d04465507e7
-      internalID: 183031755
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: floor_normal_3
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 32
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: a9d9f1b688e811f43a2d966f51454700
-      internalID: 1628930536
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: floor_normal_4
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 32
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: fdfbe162ad2dce147be16c94df30cfbe
-      internalID: -1961341785
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: floor_normal_5
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 32
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: e8a47ecc054f5064e8ebb8e2465a2f18
-      internalID: 176700228
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: floor_normal_6
+      name: Tile-Door_1
       rect:
         serializedVersion: 2
         x: 0
@@ -286,52 +180,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5c5309fd3e3f87448a9d1a1b8f2c61f7
-      internalID: -1003549998
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: floor_normal_7
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 7b04400b85f4fd848be91f9679c8c678
-      internalID: -1813540076
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: floor_normal_8
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: eb202073ff458d54cbab0f4518292e10
-      internalID: 1961381988
+      spriteID: e032db30d0b4ad743a4604f7d0ce137b
+      internalID: 474479265
       vertices: []
       indices: 
       edges: []
@@ -340,7 +190,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: ff0eb3342d60ad64bbe4996acef3c750
+    spriteID: 1c855f97a5172af48b792957ac63192a
     internalID: 0
     vertices: []
     indices: 
@@ -352,15 +202,8 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      floor_normal_0: -1654221664
-      floor_normal_1: 1066730265
-      floor_normal_2: 183031755
-      floor_normal_3: 1628930536
-      floor_normal_4: -1961341785
-      floor_normal_5: 176700228
-      floor_normal_6: -1003549998
-      floor_normal_7: -1813540076
-      floor_normal_8: 1961381988
+      Tile-Door_0: 6612373126275276407
+      Tile-Door_1: 474479265
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

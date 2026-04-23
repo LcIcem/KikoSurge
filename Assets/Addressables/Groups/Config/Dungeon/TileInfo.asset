@@ -13,37 +13,27 @@ MonoBehaviour:
   m_Name: TileInfo
   m_EditorClassIdentifier: Assembly-CSharp::TileInfo_SO
   tiles:
-  - type: 0
-    tile: {fileID: 11400000, guid: 20aeec8c56e397f46b4db6321762662e, type: 2}
   - type: 1
-    tile: {fileID: 11400000, guid: e95009e59e9afbf4fbb269d07cf26274, type: 2}
+    tile: {fileID: 11400000, guid: d5f980a4d7a02b34a9edc752c77a9562, type: 2}
   - type: 2
-    tile: {fileID: 11400000, guid: 20aeec8c56e397f46b4db6321762662e, type: 2}
+    tile: {fileID: 11400000, guid: b22c1faf11345eb46b4e69a5098756a3, type: 2}
   - type: 3
-    tile: {fileID: 11400000, guid: 03514b77c9d4b5647ac3c7f1571b127a, type: 2}
+    tile: {fileID: 11400000, guid: 581b0cb63db8c0a43ba7638d025bb527, type: 2}
   - type: 4
-    tile: {fileID: 11400000, guid: 37dbd47bb6364a447805d74dc81186f5, type: 2}
+    tile: {fileID: 11400000, guid: 73bf4f3daa1ab0743b4036b1eafacd93, type: 2}
   - type: 5
-    tile: {fileID: 11400000, guid: db93f58d2ca9478449d76a1b4379dfba, type: 2}
+    tile: {fileID: 11400000, guid: 851524d530632444696e0d9be8bc1ff5, type: 2}
   - type: 6
-    tile: {fileID: 11400000, guid: 91315630dcf28e54d85a40d00a7e6804, type: 2}
+    tile: {fileID: 11400000, guid: 01e834e3524d78c4caf79400779fce5c, type: 2}
   - type: 7
-    tile: {fileID: 11400000, guid: 0c1bb5d636007e442be2e519f72ba528, type: 2}
-  - type: 9
-    tile: {fileID: 11400000, guid: 71295ffe96789b342b2c18c223d438e9, type: 2}
+    tile: {fileID: 11400000, guid: d5f980a4d7a02b34a9edc752c77a9562, type: 2}
+  - type: 8
+    tile: {fileID: 11400000, guid: 0d53a82facc86064e9bdd116d3450aa9, type: 2}
   - type: 10
-    tile: {fileID: 11400000, guid: a7b51baeefa8e2b469965546a940c6ad, type: 2}
+    tile: {fileID: 11400000, guid: cc7f473c1ad432141ae3f10f278ccaf6, type: 2}
   - type: 11
     tile: {fileID: 11400000, guid: c6ad18b9d6e9c42469f8a7f669d66fad, type: 2}
-  - type: 12
-    tile: {fileID: 11400000, guid: c6ad18b9d6e9c42469f8a7f669d66fad, type: 2}
-  - type: 19
-    tile: {fileID: 11400000, guid: c6ad18b9d6e9c42469f8a7f669d66fad, type: 2}
-  - type: 20
-    tile: {fileID: 11400000, guid: c6ad18b9d6e9c42469f8a7f669d66fad, type: 2}
-  - type: 21
-    tile: {fileID: 11400000, guid: c6ad18b9d6e9c42469f8a7f669d66fad, type: 2}
   - type: 22
-    tile: {fileID: 11400000, guid: 0c1bb5d636007e442be2e519f72ba528, type: 2}
+    tile: {fileID: 11400000, guid: 40e00f81efe71444fba5d169b22982d0, type: 2}
   - type: 23
-    tile: {fileID: 11400000, guid: c6ad18b9d6e9c42469f8a7f669d66fad, type: 2}
+    tile: {fileID: 11400000, guid: 7ab0a4161818ded46942ccec3b61a7b4, type: 2}

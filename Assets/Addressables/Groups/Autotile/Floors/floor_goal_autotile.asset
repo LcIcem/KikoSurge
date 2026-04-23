@@ -12,52 +12,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b08ceb78e3b2495b8d808a5860e66794, type: 3}
   m_Name: floor_goal_autotile
   m_EditorClassIdentifier: Unity.2D.Tilemap.Extras::UnityEngine.Tilemaps.AutoTile
-  m_DefaultSprite: {fileID: 355312596, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+  m_DefaultSprite: {fileID: -679051010, guid: b39a7fbe98723904d836fec625598955, type: 3}
   m_DefaultGameObject: {fileID: 0}
   m_DefaultColliderType: 1
   m_MaskType: 1
   m_Random: 0
   m_PhysicsShapeCheck: 0
   m_AutoTileDictionary:
-    keyData: f8010000b0010000db000000ff010000b60100001b0000003f00000036000000d8000000
+    keyData: 1b000000360000003f000000db000000f8010000b6010000d8000000ff010000b0010000
     valueData:
     - spriteList:
-      - {fileID: 1434161356, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: -1209888073, guid: b39a7fbe98723904d836fec625598955, type: 3}
       textureList:
-      - {fileID: 2800000, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2800000, guid: b39a7fbe98723904d836fec625598955, type: 3}
     - spriteList:
-      - {fileID: 792769658, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: -5153736388416455225, guid: b39a7fbe98723904d836fec625598955, type: 3}
       textureList:
-      - {fileID: 2800000, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2800000, guid: b39a7fbe98723904d836fec625598955, type: 3}
     - spriteList:
-      - {fileID: 1645777059, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: -1103151401, guid: b39a7fbe98723904d836fec625598955, type: 3}
       textureList:
-      - {fileID: 2800000, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2800000, guid: b39a7fbe98723904d836fec625598955, type: 3}
     - spriteList:
-      - {fileID: 1399264618, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 1451155474, guid: b39a7fbe98723904d836fec625598955, type: 3}
       textureList:
-      - {fileID: 2800000, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2800000, guid: b39a7fbe98723904d836fec625598955, type: 3}
     - spriteList:
-      - {fileID: -1941420030, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2072278247, guid: b39a7fbe98723904d836fec625598955, type: 3}
       textureList:
-      - {fileID: 2800000, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2800000, guid: b39a7fbe98723904d836fec625598955, type: 3}
     - spriteList:
-      - {fileID: -2139403204, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: -2053678555, guid: b39a7fbe98723904d836fec625598955, type: 3}
       textureList:
-      - {fileID: 2800000, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2800000, guid: b39a7fbe98723904d836fec625598955, type: 3}
     - spriteList:
-      - {fileID: 355312596, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2130095437, guid: b39a7fbe98723904d836fec625598955, type: 3}
       textureList:
-      - {fileID: 2800000, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2800000, guid: b39a7fbe98723904d836fec625598955, type: 3}
     - spriteList:
-      - {fileID: 981769949, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: -679051010, guid: b39a7fbe98723904d836fec625598955, type: 3}
       textureList:
-      - {fileID: 2800000, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2800000, guid: b39a7fbe98723904d836fec625598955, type: 3}
     - spriteList:
-      - {fileID: 1895162036, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: -233840831, guid: b39a7fbe98723904d836fec625598955, type: 3}
       textureList:
-      - {fileID: 2800000, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+      - {fileID: 2800000, guid: b39a7fbe98723904d836fec625598955, type: 3}
   m_TextureList:
-  - {fileID: 2800000, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
+  - {fileID: 2800000, guid: b39a7fbe98723904d836fec625598955, type: 3}
   m_TextureScaleList:
-  - 1
+  - 1.832

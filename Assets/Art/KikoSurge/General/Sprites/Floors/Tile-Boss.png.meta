@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a9ffe02ddf1db9442ad635dfad77869b
+guid: 772bd3a28580f93418833f85be4796f5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3229156804081388762
-    second: tileset_47tiles_topdown_32px_kikoSurge_floorBoss_0
+      213: -401175405405433238
+    second: Tile-Boss_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,7 +139,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: floor_boss_0
+      name: Tile-Boss_0
       rect:
         serializedVersion: 2
         x: 0
@@ -152,16 +152,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: c8a66a7289be15247b36f9135f6ec35d
-      internalID: 1732727122
+      spriteID: a629f24281dbe6af0800000000000000
+      internalID: -401175405405433238
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_boss_1
+      name: Tile-Boss_1
       rect:
         serializedVersion: 2
         x: 32
@@ -176,14 +176,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6caf6f8d086161a41a049be32e05cbef
-      internalID: 1926336969
+      spriteID: 6742733915f0d2f498b897ea4d0683b1
+      internalID: 783903030
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_boss_2
+      name: Tile-Boss_2
       rect:
         serializedVersion: 2
         x: 64
@@ -198,14 +198,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 73a8fcb34527e1445a1748534ee995ee
-      internalID: -667556646
+      spriteID: 9a9e7458eb7a09441bbe1740d2175525
+      internalID: 1868786219
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_boss_3
+      name: Tile-Boss_3
       rect:
         serializedVersion: 2
         x: 0
@@ -220,14 +220,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6deb2635ce8102442b8c2c90de170aeb
-      internalID: 719898933
+      spriteID: b32261b05cd66d541943d0e4ebe84f00
+      internalID: 1092907705
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_boss_4
+      name: Tile-Boss_4
       rect:
         serializedVersion: 2
         x: 32
@@ -242,14 +242,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d0639a9bb5b5c0842bc6d39e238f1169
-      internalID: 1310988074
+      spriteID: dd05c4ec81e840f47bee382e16fecdeb
+      internalID: 434103347
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_boss_5
+      name: Tile-Boss_5
       rect:
         serializedVersion: 2
         x: 64
@@ -264,14 +264,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 46551b2c0e3e33c40a57f8e6d3b0b43a
-      internalID: -715793207
+      spriteID: 762dd9285be353a48a47d024cbb9d533
+      internalID: 911108410
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_boss_6
+      name: Tile-Boss_6
       rect:
         serializedVersion: 2
         x: 0
@@ -286,14 +286,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e6559aed1bd2dde47a0c165d1fcce5a1
-      internalID: 1343892445
+      spriteID: df276a98ef824d64bab87c0415c66ef9
+      internalID: -1548762303
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_boss_7
+      name: Tile-Boss_7
       rect:
         serializedVersion: 2
         x: 32
@@ -308,14 +308,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 758fabfdf588ac648afbae8039641081
-      internalID: -177922673
+      spriteID: 2f4ff48cd5880864299c1dc456d96554
+      internalID: -1740746240
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_boss_8
+      name: Tile-Boss_8
       rect:
         serializedVersion: 2
         x: 64
@@ -330,8 +330,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e5fbc9403b4afed4095e514840d5341c
-      internalID: 1941918185
+      spriteID: 7281cc637cac77646af71516e41865ef
+      internalID: -1809252756
       vertices: []
       indices: 
       edges: []
@@ -340,7 +340,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: a169b2913bb7f2441a50a423f63fb530
+    spriteID: 9b5bd0ceecc49e54fb913b1bab9cbb92
     internalID: 0
     vertices: []
     indices: 
@@ -352,15 +352,15 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      floor_boss_0: 1732727122
-      floor_boss_1: 1926336969
-      floor_boss_2: -667556646
-      floor_boss_3: 719898933
-      floor_boss_4: 1310988074
-      floor_boss_5: -715793207
-      floor_boss_6: 1343892445
-      floor_boss_7: -177922673
-      floor_boss_8: 1941918185
+      Tile-Boss_0: -401175405405433238
+      Tile-Boss_1: 783903030
+      Tile-Boss_2: 1868786219
+      Tile-Boss_3: 1092907705
+      Tile-Boss_4: 434103347
+      Tile-Boss_5: 911108410
+      Tile-Boss_6: -1548762303
+      Tile-Boss_7: -1740746240
+      Tile-Boss_8: -1809252756
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -15,49 +15,55 @@ MonoBehaviour:
   templates:
   - displayName: "\u5F00\u59CB\u623F\u95F4"
     roomType: 0
-    minSize: {x: 5, y: 5}
-    maxSize: {x: 10, y: 10}
+    minSize: {x: 4, y: 4}
+    maxSize: {x: 4, y: 4}
     minDistFromStart: 0
     maxDistFromStart: -1
   - displayName: "\u666E\u901A\u623F\u95F4"
     roomType: 1
-    minSize: {x: 5, y: 5}
-    maxSize: {x: 10, y: 10}
+    minSize: {x: 7, y: 7}
+    maxSize: {x: 9, y: 9}
     minDistFromStart: 0
     maxDistFromStart: -1
   - displayName: "\u76EE\u6807\u623F\u95F4"
     roomType: 2
-    minSize: {x: 5, y: 5}
-    maxSize: {x: 10, y: 10}
+    minSize: {x: 3, y: 3}
+    maxSize: {x: 3, y: 3}
     minDistFromStart: 0
     maxDistFromStart: -1
   - displayName: "\u5B9D\u85CF\u623F\u95F4"
     roomType: 3
-    minSize: {x: 5, y: 5}
-    maxSize: {x: 10, y: 10}
-    minDistFromStart: 0
+    minSize: {x: 4, y: 4}
+    maxSize: {x: 4, y: 4}
+    minDistFromStart: 5
     maxDistFromStart: -1
   - displayName: "\u5546\u5E97\u623F\u95F4"
     roomType: 4
-    minSize: {x: 5, y: 5}
-    maxSize: {x: 10, y: 10}
-    minDistFromStart: 0
+    minSize: {x: 4, y: 4}
+    maxSize: {x: 4, y: 4}
+    minDistFromStart: 10
     maxDistFromStart: -1
   - displayName: "\u7CBE\u82F1\u623F\u95F4"
     roomType: 5
-    minSize: {x: 5, y: 5}
-    maxSize: {x: 10, y: 10}
+    minSize: {x: 7, y: 7}
+    maxSize: {x: 9, y: 9}
     minDistFromStart: 0
     maxDistFromStart: -1
   - displayName: "Boss\u623F\u95F4"
     roomType: 8
-    minSize: {x: 5, y: 5}
+    minSize: {x: 9, y: 9}
     maxSize: {x: 10, y: 10}
     minDistFromStart: 0
     maxDistFromStart: -1
   - displayName: "\u4F11\u606F\u623F\u95F4"
     roomType: 6
-    minSize: {x: 5, y: 5}
-    maxSize: {x: 5, y: 5}
+    minSize: {x: 4, y: 4}
+    maxSize: {x: 4, y: 4}
     minDistFromStart: 0
     maxDistFromStart: 10
+  - displayName: "\u4F11\u606F\u623F\u95F4"
+    roomType: 6
+    minSize: {x: 4, y: 4}
+    maxSize: {x: 4, y: 4}
+    minDistFromStart: 20
+    maxDistFromStart: 30

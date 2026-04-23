@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 2e42d6700c9c9e247b2f11936ff5259c
+guid: 764904282bbb73d42bafb6f2996f7bd4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5938033345140865904
-    second: tileset_47tiles_topdown_32px_kikoSurge_floorCorridor_0
+      213: 6719233989426004105
+    second: Tile-Corridor_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,7 +139,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: floor_corridor_0
+      name: Tile-Corridor_0
       rect:
         serializedVersion: 2
         x: 0
@@ -152,16 +152,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: b342d0ee13f5f1142adba23637a5cf0a
-      internalID: 1374800183
+      spriteID: 980c77e96b38f3d50800000000000000
+      internalID: 6719233989426004105
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_corridor_1
+      name: Tile-Corridor_1
       rect:
         serializedVersion: 2
         x: 32
@@ -176,14 +176,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8ab62c2edbdae21489d46aed11d3a484
-      internalID: 1907419652
+      spriteID: f930cf09936c4c84bb9697fb5083bc1f
+      internalID: -1486646848
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_corridor_2
+      name: Tile-Corridor_2
       rect:
         serializedVersion: 2
         x: 64
@@ -198,14 +198,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ebb86ba3df4e0a94da2d6c4d55fe4896
-      internalID: 959923039
+      spriteID: e04f305d6ec8db34dbbdb384d70defa0
+      internalID: -1104373196
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_corridor_3
+      name: Tile-Corridor_3
       rect:
         serializedVersion: 2
         x: 0
@@ -220,14 +220,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c8263b45ef934cc4a9caaba1f5b2dfd6
-      internalID: 421624895
+      spriteID: 053be4db8b063174b98df7034a012253
+      internalID: 647124179
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_corridor_4
+      name: Tile-Corridor_4
       rect:
         serializedVersion: 2
         x: 32
@@ -242,14 +242,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6f6f39005f7110140a531e7ddcd25511
-      internalID: 1303305006
+      spriteID: 3183e290dcca7c94781bc66ea0a5a1be
+      internalID: 186557947
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_corridor_5
+      name: Tile-Corridor_5
       rect:
         serializedVersion: 2
         x: 64
@@ -264,14 +264,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7afd078208472d449826721409e7ff63
-      internalID: 866137646
+      spriteID: 5c28eac33ae57e540950f4129669b6b2
+      internalID: 1437013835
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_corridor_6
+      name: Tile-Corridor_6
       rect:
         serializedVersion: 2
         x: 0
@@ -286,14 +286,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c372e28a0a7f87d4dad2dc04ee687f6c
-      internalID: -1608491853
+      spriteID: 32bfb26b1f31a154fa20c7f0304a1807
+      internalID: 761857758
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_corridor_7
+      name: Tile-Corridor_7
       rect:
         serializedVersion: 2
         x: 32
@@ -308,14 +308,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 506340b43f24d8e49a1943fc6886bbc3
-      internalID: 2091447233
+      spriteID: 2742dfb3ea85bcb4882af539ab869b08
+      internalID: -598934954
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_corridor_8
+      name: Tile-Corridor_8
       rect:
         serializedVersion: 2
         x: 64
@@ -330,8 +330,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1528803acca20994ab0096d2b811f65b
-      internalID: -868398096
+      spriteID: f34e867076d546f4d96545d3eeaec86c
+      internalID: -724651285
       vertices: []
       indices: 
       edges: []
@@ -340,7 +340,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 0d1999d1646b0ae4695a7298237bd9be
+    spriteID: 93f9ec22ab5623e428dbe107233515ee
     internalID: 0
     vertices: []
     indices: 
@@ -352,15 +352,15 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      floor_corridor_0: 1374800183
-      floor_corridor_1: 1907419652
-      floor_corridor_2: 959923039
-      floor_corridor_3: 421624895
-      floor_corridor_4: 1303305006
-      floor_corridor_5: 866137646
-      floor_corridor_6: -1608491853
-      floor_corridor_7: 2091447233
-      floor_corridor_8: -868398096
+      Tile-Corridor_0: 6719233989426004105
+      Tile-Corridor_1: -1486646848
+      Tile-Corridor_2: -1104373196
+      Tile-Corridor_3: 647124179
+      Tile-Corridor_4: 186557947
+      Tile-Corridor_5: 1437013835
+      Tile-Corridor_6: 761857758
+      Tile-Corridor_7: -598934954
+      Tile-Corridor_8: -724651285
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 17425d62dbdd59045802a44275b31415
+guid: 1bb566f5ee336d14c90ce2abd7c37976
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2229661926154263518
-    second: tileset_47tiles_topdown_32px_kikoSurge_floorElite_0
+      213: -8584337646742518166
+    second: Tile-Shop_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,7 +139,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: floor_elite_0
+      name: Tile-Shop_0
       rect:
         serializedVersion: 2
         x: 0
@@ -152,16 +152,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: f8f2a167b2b34a54ebbf3083f6da8f02
-      internalID: 611992209
+      spriteID: a6646ed546e4ed880800000000000000
+      internalID: -8584337646742518166
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_elite_1
+      name: Tile-Shop_1
       rect:
         serializedVersion: 2
         x: 32
@@ -176,14 +176,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 13b50574ae1247847ae7caec9fb54472
-      internalID: -1040714395
+      spriteID: 22eeeb7e9c06b464a83e3ae1b5752167
+      internalID: 1079965410
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_elite_2
+      name: Tile-Shop_2
       rect:
         serializedVersion: 2
         x: 64
@@ -198,14 +198,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f6fe3ac52d942e9459918ac1b1b7fc45
-      internalID: -1640289517
+      spriteID: 06ee08327f1246a469ff042159db84b0
+      internalID: 850885132
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_elite_3
+      name: Tile-Shop_3
       rect:
         serializedVersion: 2
         x: 0
@@ -220,14 +220,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a7586f746acbb1a42af67fbd825cd4c4
-      internalID: -317681722
+      spriteID: 320b7c7aa3243b54d84c08e852c59ee2
+      internalID: 77169505
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_elite_4
+      name: Tile-Shop_4
       rect:
         serializedVersion: 2
         x: 32
@@ -242,14 +242,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 551cb3b9f74ffd349bb058e0d2a1b397
-      internalID: 1436324878
+      spriteID: e30ded796c19d7346b720557a1daa589
+      internalID: -768523324
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_elite_5
+      name: Tile-Shop_5
       rect:
         serializedVersion: 2
         x: 64
@@ -264,14 +264,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: aeeb72c7c19b2a540b461f9bbd952697
-      internalID: -1605931387
+      spriteID: a24f3b45dc967cc468785e873ae36b7c
+      internalID: -840871742
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_elite_6
+      name: Tile-Shop_6
       rect:
         serializedVersion: 2
         x: 0
@@ -286,14 +286,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cd77b8efd1a68e04983e3e03836a46c8
-      internalID: -1141166116
+      spriteID: 80d88edec74b3384aa5b5fa0a60aaf45
+      internalID: 288125628
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_elite_7
+      name: Tile-Shop_7
       rect:
         serializedVersion: 2
         x: 32
@@ -308,14 +308,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 60aae4a62aef0d84092cb7477f355e13
-      internalID: -1185079157
+      spriteID: e0fe620342432ec4da06e5c2f08989cd
+      internalID: 1210557076
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_elite_8
+      name: Tile-Shop_8
       rect:
         serializedVersion: 2
         x: 64
@@ -330,8 +330,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b0dee731534ac0e4480466dda6463d1f
-      internalID: -967176812
+      spriteID: bf898bb7124efa24fa720eb83b4b5aee
+      internalID: -1003849946
       vertices: []
       indices: 
       edges: []
@@ -340,7 +340,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: ab3bf4f7003b27649984dbc03276bb21
+    spriteID: 6f5b79462cb7043459ddaeaa1795ef24
     internalID: 0
     vertices: []
     indices: 
@@ -352,15 +352,15 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      floor_elite_0: 611992209
-      floor_elite_1: -1040714395
-      floor_elite_2: -1640289517
-      floor_elite_3: -317681722
-      floor_elite_4: 1436324878
-      floor_elite_5: -1605931387
-      floor_elite_6: -1141166116
-      floor_elite_7: -1185079157
-      floor_elite_8: -967176812
+      Tile-Shop_0: -8584337646742518166
+      Tile-Shop_1: 1079965410
+      Tile-Shop_2: 850885132
+      Tile-Shop_3: 77169505
+      Tile-Shop_4: -768523324
+      Tile-Shop_5: -840871742
+      Tile-Shop_6: 288125628
+      Tile-Shop_7: 1210557076
+      Tile-Shop_8: -1003849946
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

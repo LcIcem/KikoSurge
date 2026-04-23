@@ -295,15 +295,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08e68079f36e70947b8502b48b5ff44c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MiniMap
-  startRoomIcon: {fileID: -443499534, guid: 3e6488185aedfbc47be0f2e077a5ed94, type: 3}
-  normalRoomIcon: {fileID: 1066730265, guid: 3f605a15ef4abf348bfc3df934ea0950, type: 3}
-  goalRoomIcon: {fileID: 355312596, guid: f82a2114dad3c834285e42dde58dc95d, type: 3}
-  treasureRoomIcon: {fileID: 1379194951, guid: e8e2c5c33ad9ede4491ac12c15a8282a, type: 3}
-  shopRoomIcon: {fileID: 1808860862, guid: 5e4c858791d5ddc42a43411bfae7ed18, type: 3}
-  eliteRoomIcon: {fileID: -1040714395, guid: 17425d62dbdd59045802a44275b31415, type: 3}
-  restRoomIcon: {fileID: -933347601, guid: e8e2c5c33ad9ede4491ac12c15a8282a, type: 3}
+  startRoomIcon: {fileID: 705849809, guid: 7496bd2004c944e45b146485dc85584b, type: 3}
+  normalRoomIcon: {fileID: 664747654, guid: 8142ec99cf627e84ead41fd4333029c6, type: 3}
+  goalRoomIcon: {fileID: -679051010, guid: b39a7fbe98723904d836fec625598955, type: 3}
+  treasureRoomIcon: {fileID: 896742218, guid: 779d70e33f4e65e47b14555de7026fd0, type: 3}
+  shopRoomIcon: {fileID: -768523324, guid: 1bb566f5ee336d14c90ce2abd7c37976, type: 3}
+  eliteRoomIcon: {fileID: 500011134, guid: a0e6fc16dc26cf549b8bf9d1fc88cb95, type: 3}
+  restRoomIcon: {fileID: 705849809, guid: 7496bd2004c944e45b146485dc85584b, type: 3}
   eventRoomIcon: {fileID: -2023901452, guid: d4000c983c66d6c45b6b2e359c676a5a, type: 3}
-  bossRoomIcon: {fileID: 1926336969, guid: a9ffe02ddf1db9442ad635dfad77869b, type: 3}
+  bossRoomIcon: {fileID: 434103347, guid: 772bd3a28580f93418833f85be4796f5, type: 3}
   corridorMaterial: {fileID: 2100000, guid: a96f0d7bb7979c649947103b01ce9502, type: 2}
   unvisitedColor: {r: 1, g: 1, b: 1, a: 0.83137256}
   currentRoomColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

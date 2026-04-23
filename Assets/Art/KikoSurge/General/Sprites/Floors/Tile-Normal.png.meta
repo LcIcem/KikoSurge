@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: f82a2114dad3c834285e42dde58dc95d
+guid: 8142ec99cf627e84ead41fd4333029c6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -339109474365253483
-    second: tileset_47tiles_topdown_32px_kikoSurge_floorGoal_0
+      213: -2296678389627272088
+    second: Tile-Normal_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,7 +139,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: floor_goal_0
+      name: Tile-Normal_0
       rect:
         serializedVersion: 2
         x: 0
@@ -152,16 +152,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 4fd9696dbfbbbfd49a150004f22c6c7b
-      internalID: 981769949
+      spriteID: 86443f64c2f8020e0800000000000000
+      internalID: -2296678389627272088
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_goal_1
+      name: Tile-Normal_1
       rect:
         serializedVersion: 2
         x: 32
@@ -176,14 +176,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 35de0b4b1602a9c45a04592fb6d7e9ea
-      internalID: 355312596
+      spriteID: 7e2fedd76373c5e4b8e4e76919b89af7
+      internalID: -1798528085
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_goal_2
+      name: Tile-Normal_2
       rect:
         serializedVersion: 2
         x: 64
@@ -198,14 +198,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e2c59107351760843892477d6620291b
-      internalID: -2139403204
+      spriteID: 5a8cef8843e11d34294be8376f8e19dd
+      internalID: -214178415
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_goal_3
+      name: Tile-Normal_3
       rect:
         serializedVersion: 2
         x: 0
@@ -220,14 +220,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b6208b6f192745644b26c56b8a3f1be9
-      internalID: -1941420030
+      spriteID: f6276780e3f8e494cb24bf5a78cde3d8
+      internalID: 664747654
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_goal_4
+      name: Tile-Normal_4
       rect:
         serializedVersion: 2
         x: 32
@@ -242,14 +242,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d2a69cc7138eaa048a045794a14213c5
-      internalID: 1399264618
+      spriteID: bc20f5d2e252614469da64694a95a3e7
+      internalID: 350894875
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_goal_5
+      name: Tile-Normal_5
       rect:
         serializedVersion: 2
         x: 64
@@ -264,14 +264,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b9437abfc28803542a010a16251a7136
-      internalID: 1645777059
+      spriteID: c514c4ff863fdaa438f79fda9f3a784e
+      internalID: 71910258
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_goal_6
+      name: Tile-Normal_6
       rect:
         serializedVersion: 2
         x: 0
@@ -286,14 +286,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7e87661c5ae78c047a0b33917de41b2c
-      internalID: 792769658
+      spriteID: d06d13f042217b6419ce2cdc859d129d
+      internalID: -676787200
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_goal_7
+      name: Tile-Normal_7
       rect:
         serializedVersion: 2
         x: 32
@@ -308,14 +308,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6d28d356c4c819d40a58c97be8350ffc
-      internalID: 1434161356
+      spriteID: ff75a05ee681c6b49ae6328951f2c5fd
+      internalID: -250210555
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: floor_goal_8
+      name: Tile-Normal_8
       rect:
         serializedVersion: 2
         x: 64
@@ -330,8 +330,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a6d35f6909403f4459eeadaa76305f92
-      internalID: 1895162036
+      spriteID: c7e52788d8433e041aefb1088fb48cfd
+      internalID: 138114820
       vertices: []
       indices: 
       edges: []
@@ -340,7 +340,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 789ad624a3e4f16498bc4eed55f1c825
+    spriteID: ce4e6a9d7645af24d851a6a1f774f372
     internalID: 0
     vertices: []
     indices: 
@@ -352,15 +352,15 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      floor_goal_0: 981769949
-      floor_goal_1: 355312596
-      floor_goal_2: -2139403204
-      floor_goal_3: -1941420030
-      floor_goal_4: 1399264618
-      floor_goal_5: 1645777059
-      floor_goal_6: 792769658
-      floor_goal_7: 1434161356
-      floor_goal_8: 1895162036
+      Tile-Normal_0: -2296678389627272088
+      Tile-Normal_1: -1798528085
+      Tile-Normal_2: -214178415
+      Tile-Normal_3: 664747654
+      Tile-Normal_4: 350894875
+      Tile-Normal_5: 71910258
+      Tile-Normal_6: -676787200
+      Tile-Normal_7: -250210555
+      Tile-Normal_8: 138114820
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
