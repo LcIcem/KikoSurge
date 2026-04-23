@@ -22,7 +22,7 @@ local function CalculateCritMultiplier(baseCritMultiplier, weaponCritMultiplier)
 end
 
 -- 计算伤害加成后的伤害
--- @param baseDamage 基础伤害
+-- @param baseDamage 基础伤害（玩家+武器+子弹的综合）
 -- @param playerDamageBonusPercent 玩家伤害加成百分比
 -- @param weaponDamageBonusPercent 武器伤害加成百分比
 -- @param weaponFlatDamage 武器固定伤害加成

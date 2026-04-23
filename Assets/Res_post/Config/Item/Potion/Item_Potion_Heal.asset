@@ -10,16 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea3f830523869444481411060ea66823, type: 3}
-  m_Name: Item_Potion_HealthAdd
+  m_Name: Item_Potion_Heal
   m_EditorClassIdentifier: Assembly-CSharp::PotionItemConfig
   Id: 1001
-  Name: "\u56DE\u590D\u836F\u6C34"
+  Name: "\u6062\u590D\u836F\u6C34"
   Type: 1
   MaxStack: 99
-  Value: 20
+  Value: 10
   Icon: {fileID: 702589233838067054, guid: e713841ff139c4147bb73f2aa48d3b49, type: 3}
-  Description: "\u559D\u4E86\u611F\u89C9\u5F88\u8212\u670D"
-  PickupSFX: {fileID: 8300000, guid: d77616adfa4b3624395c4fd4864d8b1c, type: 3}
+  ammoIcon: {fileID: 0}
+  Description: "\u7518\u751C\u7684\u836F\u5242\uFF0C\u996E\u4E0B\u540E\u611F\u89C9\u7CBE\u529B\u5145\u6C9B\u3002"
+  PickupSFX: {fileID: 8300000, guid: 6a0b3bfee7aa97049993120a04bf3c55, type: 3}
   instantEffectType: 1
   instantEffectValue: 2
   timedEffectType: 0

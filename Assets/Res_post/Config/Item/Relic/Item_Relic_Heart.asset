@@ -17,10 +17,10 @@ MonoBehaviour:
   Type: 2
   MaxStack: 1
   Value: 100
-  Icon: {fileID: 4606908045521496030, guid: baed9b0144ebc83429c01eb7a7acbb1d, type: 3}
+  Icon: {fileID: 21300000, guid: baed9b0144ebc83429c01eb7a7acbb1d, type: 3}
   ammoIcon: {fileID: 0}
-  Description: "\u7CBE\u529B\u5145\u6C9B"
-  PickupSFX: {fileID: 8300000, guid: 96c7718a07b9ee14990c8fa1023b6af8, type: 3}
+  Description: "\u7EA2\u5B9D\u77F3\u96D5\u523B\u7684\u5FC3\u810F\uFF0C\u8574\u542B\u7740\u751F\u547D\u7684\u529B\u91CF\u3002"
+  PickupSFX: {fileID: 8300000, guid: 692759d523e8c5946abd16fa2cb39b6c, type: 3}
   modifiers:
   - modifierId: 1
     modifierName: "\u589E\u52A0\u6700\u5927\u751F\u547D\u4E0A\u9650"

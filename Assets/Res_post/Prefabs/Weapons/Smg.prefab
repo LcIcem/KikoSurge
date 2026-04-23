@@ -155,9 +155,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponBase
   _muzzle: {fileID: 1073980717217089775}
-  _shootSFX: {fileID: 8300000, guid: 2afce9f382f065e4293139a34c7f5063, type: 3}
+  _shootSFX: {fileID: 8300000, guid: f869acf3a20dbc94f8a1cdd056a1cbcf, type: 3}
   _weaponAnimator: {fileID: -3881205755757166192}
-  _reloadSFX: {fileID: 8300000, guid: f54ff3df223020249b886e4da18287aa, type: 3}
+  _reloadSFX: {fileID: 8300000, guid: 9dd0037b55719334fadf308b4034bd16, type: 3}
 --- !u!95 &-3881205755757166192
 Animator:
   serializedVersion: 7

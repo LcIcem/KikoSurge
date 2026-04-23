@@ -15,6 +15,16 @@ MonoBehaviour:
   m_GroupName: Config-LootTable
   m_GUID: 6e4ddce9b72367646be9a64b7b84a80e
   m_SerializeEntries:
+  - m_GUID: 4c8d8b627ce5b924c8f8bacf9b2881b3
+    m_Address: LootTable_Boss
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b61a54297e05db941ac1a9ffde1c0945
+    m_Address: LootTable_Chest
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e8c515ea26abf5d4eb322797fdefb869
     m_Address: LootTable_Mushroom
     m_ReadOnly: 0

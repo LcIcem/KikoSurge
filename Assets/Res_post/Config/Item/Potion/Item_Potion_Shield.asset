@@ -16,12 +16,13 @@ MonoBehaviour:
   Name: "\u62A4\u76FE\u836F\u6C34"
   Type: 1
   MaxStack: 99
-  Value: 20
+  Value: 15
   Icon: {fileID: -1463328353914653192, guid: e713841ff139c4147bb73f2aa48d3b49, type: 3}
-  Description: "\u611F\u89C9\u539A\u539A\u7684"
-  PickupSFX: {fileID: 8300000, guid: d77616adfa4b3624395c4fd4864d8b1c, type: 3}
+  ammoIcon: {fileID: 0}
+  Description: "\u6FC0\u6D3B\u62A4\u76FE\uFF0C\u77ED\u6682\u63D0\u9AD8\u9632\u5FA1\u529B\u3002"
+  PickupSFX: {fileID: 8300000, guid: 6a0b3bfee7aa97049993120a04bf3c55, type: 3}
   instantEffectType: 0
   instantEffectValue: 0
   timedEffectType: 1
-  timedEffectDuration: 20
-  timedEffectValue: 3
+  timedEffectDuration: 15
+  timedEffectValue: 10

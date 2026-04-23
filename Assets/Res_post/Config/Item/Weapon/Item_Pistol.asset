@@ -20,4 +20,4 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: 691f8ebf421e8674fa13d11f7dd08cbc, type: 3}
   ammoIcon: {fileID: 21300000, guid: aea4de5e518423240922924437ad8133, type: 3}
   Description: "\u57FA\u7840\u6B66\u5668\uFF0C\u5C04\u901F\u7A33\u5B9A\uFF0C\u7CBE\u51C6\u5EA6\u9AD8\uFF0C\u662F\u6BCF\u4F4D\u5192\u9669\u8005\u7684\u9996\u9009\u3002"
-  PickupSFX: {fileID: 8300000, guid: 4696d070aecc09c4d958c86c663ca912, type: 3}
+  PickupSFX: {fileID: 8300000, guid: b42c982965521e041ae7db3c7f7bdba4, type: 3}

@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6ee85a3eb9878d4c99cf6b3d76585f4, type: 3}
+  m_Name: LootTable_Chest
+  m_EditorClassIdentifier: Assembly-CSharp::LootTableConfig
+  groups:
+  - groupName: "\u8D27\u5E01\u6389\u843D"
+    entries:
+    - _itemConfig: {fileID: 11400000, guid: 628452d0397e8004e8e0b0a49d9141e0, type: 2}
+      dropChance: 1
+      minQuantity: 3
+      maxQuantity: 6
+    maxPick: 10
+  - groupName: "\u836F\u6C34\u6389\u843D"
+    entries:
+    - _itemConfig: {fileID: 11400000, guid: bd847f99dae98fa4c83a8004ffb9d71b, type: 2}
+      dropChance: 0.8
+      minQuantity: 1
+      maxQuantity: 2
+    - _itemConfig: {fileID: 11400000, guid: da1a8a1e7f60f334390c5d7167416f40, type: 2}
+      dropChance: 0.5
+      minQuantity: 1
+      maxQuantity: 2
+    - _itemConfig: {fileID: 11400000, guid: db3e2aff8dc1e8342925a4841402458c, type: 2}
+      dropChance: 0.5
+      minQuantity: 1
+      maxQuantity: 2
+    maxPick: 2
+  - groupName: "\u666E\u901A\u9057\u7269\u6389\u843D"
+    entries:
+    - _itemConfig: {fileID: 11400000, guid: 126a74a1c5d106146924a86ce4e75173, type: 2}
+      dropChance: 0.5
+      minQuantity: 1
+      maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: 036be83b121f7ef4f9a07a0ee425962f, type: 2}
+      dropChance: 0.5
+      minQuantity: 1
+      maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: 8bea861fcea0e0342a3b2031540451e6, type: 2}
+      dropChance: 0.5
+      minQuantity: 1
+      maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: 4a4b096854552ac4d81124efe259422d, type: 2}
+      dropChance: 0.5
+      minQuantity: 1
+      maxQuantity: 1
+    maxPick: 1
+  - groupName: "\u7A00\u6709\u9057\u7269\u6389\u843D"
+    entries:
+    - _itemConfig: {fileID: 11400000, guid: 31e725715929d574a83f6af68eccc10f, type: 2}
+      dropChance: 0.15
+      minQuantity: 1
+      maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: d91b8070e98044243bf7d4c594b9285f, type: 2}
+      dropChance: 0.15
+      minQuantity: 1
+      maxQuantity: 1
+    maxPick: 1
+  DropSpreadRadius: 1

@@ -19,9 +19,9 @@ MonoBehaviour:
   corridorWidth: 1
   extraCorridorChance: 0
   extraCorridorMaxDistance: 25
-  normalRoomCount: 8
+  normalRoomCount: 4
   normalExtraChance: 50
-  eliteRoomCount: 3
+  eliteRoomCount: 2
   eliteExtraChance: 30
   treasureRoomCount: 2
   treasureExtraChance: 0
@@ -33,3 +33,5 @@ MonoBehaviour:
   eventExtraChance: 0
   bossRoomCount: 0
   bossExtraChance: 0
+  goalRoomCount: 1
+  goalExtraChance: 0

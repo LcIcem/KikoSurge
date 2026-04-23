@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Item_Relic_Boot
   m_EditorClassIdentifier: Assembly-CSharp::RelicConfig
   Id: 2003
-  Name: "\u8DB3\u529B\u5065"
+  Name: "\u98DE\u9774"
   Type: 2
   MaxStack: 1
   Value: 80
-  Icon: {fileID: 3758843196150832687, guid: 0be8a8f1c94667e46902688683c4855f, type: 3}
+  Icon: {fileID: 21300000, guid: 0be8a8f1c94667e46902688683c4855f, type: 3}
   ammoIcon: {fileID: 0}
-  Description: "\u7A7F\u4E0A\u8349\u978B"
-  PickupSFX: {fileID: 8300000, guid: 96c7718a07b9ee14990c8fa1023b6af8, type: 3}
+  Description: "\u7A7F\u4E0A\u8349\u978B\uFF0C\u5065\u6B65\u5982\u98DE\u3002"
+  PickupSFX: {fileID: 8300000, guid: 692759d523e8c5946abd16fa2cb39b6c, type: 3}
   modifiers:
   - modifierId: 3
     modifierName: "\u589E\u52A0\u79FB\u901F"

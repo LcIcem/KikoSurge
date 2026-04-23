@@ -15,15 +15,19 @@ MonoBehaviour:
   _categories:
   - _itemType: 0
     _availableItems:
-    - _itemConfig: {fileID: 11400000, guid: f273b95930b4f8044a4d25f83312e731, type: 2}
-      _priceRatio: 1
-      _minQuantity: 1
-      _maxQuantity: 1
     - _itemConfig: {fileID: 11400000, guid: 41133e477919bc24ca1a751fde8b4981, type: 2}
       _priceRatio: 1
       _minQuantity: 1
       _maxQuantity: 1
-    _maxDisplayCount: 1
+    - _itemConfig: {fileID: 11400000, guid: b667ed16ac90f34438c3a0b2645f75a2, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: c67cad216a1ea2c4bb056c60a65d13f2, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 1
+    _maxDisplayCount: 2
   - _itemType: 1
     _availableItems:
     - _itemConfig: {fileID: 11400000, guid: bd847f99dae98fa4c83a8004ffb9d71b, type: 2}
@@ -38,11 +42,31 @@ MonoBehaviour:
       _priceRatio: 1
       _minQuantity: 1
       _maxQuantity: 3
-    _maxDisplayCount: 2
+    _maxDisplayCount: 3
   - _itemType: 2
     _availableItems:
+    - _itemConfig: {fileID: 11400000, guid: 126a74a1c5d106146924a86ce4e75173, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: 036be83b121f7ef4f9a07a0ee425962f, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 1
     - _itemConfig: {fileID: 11400000, guid: 8bea861fcea0e0342a3b2031540451e6, type: 2}
       _priceRatio: 1
       _minQuantity: 1
       _maxQuantity: 1
-    _maxDisplayCount: 1
+    - _itemConfig: {fileID: 11400000, guid: 4a4b096854552ac4d81124efe259422d, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: 31e725715929d574a83f6af68eccc10f, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 1
+    - _itemConfig: {fileID: 11400000, guid: d91b8070e98044243bf7d4c594b9285f, type: 2}
+      _priceRatio: 1
+      _minQuantity: 1
+      _maxQuantity: 1
+    _maxDisplayCount: 2

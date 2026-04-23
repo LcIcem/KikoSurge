@@ -251,6 +251,12 @@ public class Player : MonoBehaviour
     // 伤害处理
     public void TakeDamage(float damage)
     {
+        // 防御性检查：已经死亡不处理
+        if (_playerData.IsDead)
+        {
+            return;
+        }
+
         // 无敌帧期间忽略伤害
         if (_isInvincible)
         {
@@ -258,10 +264,6 @@ public class Player : MonoBehaviour
         }
 
         float hp = _playerData.Health;
-        if (hp <= 0)
-        {
-            return;
-        }
 
         // 通过伤害计算器计算实际伤害
         float defense = _playerData.def;
@@ -310,13 +312,17 @@ public class Player : MonoBehaviour
                 isPlayerDamage = true
             });
 
+        // 更新生命值（Health setter 会自动 clamp 到 [0, maxHealth]）
         _playerData.Health = hp;
+
+        // 通知 UI 更新
         EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, _playerData);
 
         // 同步生命值到 SessionManager（用于检查点保存）
-        SessionManager.Instance?.SetPlayerHealth(hp);
+        SessionManager.Instance?.SetPlayerHealth(_playerData.Health);
 
-        if (hp <= 0f)
+        // 使用 IsDead 属性判断死亡（更可靠）
+        if (_playerData.IsDead)
         {
             TriggerDeath();
         }

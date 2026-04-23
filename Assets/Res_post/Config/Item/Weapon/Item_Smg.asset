@@ -16,8 +16,8 @@ MonoBehaviour:
   Name: "\u51B2\u950B\u67AA"
   Type: 0
   MaxStack: 1
-  Value: 20
+  Value: 250
   Icon: {fileID: 21300000, guid: d83af1a06242f404ca34d05a1389065e, type: 3}
   ammoIcon: {fileID: 21300000, guid: aea4de5e518423240922924437ad8133, type: 3}
   Description: "\u9AD8\u5C04\u901F\u6B66\u5668\uFF0C\u5355\u53D1\u4F24\u5BB3\u8F83\u4F4E\u4F46\u603B\u91CF\u60CA\u4EBA\uFF0C\u5F39\u9053\u5BC6\u96C6\u3002"
-  PickupSFX: {fileID: 8300000, guid: 4696d070aecc09c4d958c86c663ca912, type: 3}
+  PickupSFX: {fileID: 8300000, guid: b42c982965521e041ae7db3c7f7bdba4, type: 3}

@@ -47,13 +47,12 @@ public static class BulletModule
         {
             damageParams = new BulletDamageParams
             {
-                bulletBaseDamage = config.baseDamage,
-                playerAtk = playerData.atk,
+                bulletBaseDamage = config.baseDamage + playerData.atk + gun.Config.weaponDamage,
                 playerCritRate = playerData.critRate,
                 playerCritMultiplier = playerData.critMultiplier,
                 playerDamageBonus = playerData.damageBonus,
                 playerDefBreak = playerData.defBreak,
-                weaponDamage = gun.Config.weaponDamage,
+                weaponDamage = 0f,  // weaponDamage 已合并到 bulletBaseDamage
                 weaponCritRate = gun.Config.weaponCritRate,
                 weaponCritMultiplier = gun.Config.weaponCritMultiplier,
                 weaponDamageBonus = gun.Config.weaponDamageBonus

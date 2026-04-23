@@ -75,31 +75,18 @@ public class LootManager : SingletonMono<LootManager>
                 continue;
             }
 
-            // 独立判定每个条目的概率，记录命中的条目
-            var candidates = new List<LootTableConfig.LootEntry>();
-            foreach (var entry in group.entries)
+            // 过滤出有效条目
+            var validEntries = group.entries.Where(e => e != null && e.itemConfig != null).ToList();
+            if (validEntries.Count == 0) continue;
+
+            // 有放回抽取：从有效条目中随机选，每次都独立判定概率
+            for (int i = 0; i < group.maxPick; i++)
             {
-                if (entry == null || entry.itemConfig == null) continue;
+                // 随机选一个条目
+                var entry = validEntries[Random.Range(0, validEntries.Count)];
 
-                // 独立判定每个条目的概率
-                if (Random.value <= entry.dropChance)
-                {
-                    candidates.Add(entry);
-                }
-            }
-
-            // 限制最大掉落数量
-            int pickCount = Mathf.Min(candidates.Count, group.maxPick);
-            Log($"分组 '{group.groupName}' 判定掉落 {pickCount}/{group.maxPick} 个（命中 {candidates.Count} 个）");
-
-            if (pickCount == 0) continue;
-
-            // 打乱候选列表并取前 maxPick 个
-            candidates = candidates.OrderBy(_ => Random.value).ToList();
-
-            for (int i = 0; i < pickCount; i++)
-            {
-                var entry = candidates[i];
+                // 独立判定该次抽取的命中概率
+                if (Random.value > entry.dropChance) continue;
 
                 // 计算数量
                 int quantity = Random.Range(entry.minQuantity, entry.maxQuantity + 1);
@@ -177,31 +164,18 @@ public class LootManager : SingletonMono<LootManager>
                 continue;
             }
 
-            // 独立判定每个条目的概率，记录命中的条目
-            var candidates = new System.Collections.Generic.List<LootTableConfig.LootEntry>();
-            foreach (var entry in group.entries)
+            // 过滤出有效条目
+            var validEntries = group.entries.Where(e => e != null && e.itemConfig != null).ToList();
+            if (validEntries.Count == 0) continue;
+
+            // 有放回抽取：从有效条目中随机选，每次都独立判定概率
+            for (int i = 0; i < group.maxPick; i++)
             {
-                if (entry == null || entry.itemConfig == null) continue;
+                // 随机选一个条目
+                var entry = validEntries[UnityEngine.Random.Range(0, validEntries.Count)];
 
-                // 独立判定每个条目的概率
-                if (UnityEngine.Random.value <= entry.dropChance)
-                {
-                    candidates.Add(entry);
-                }
-            }
-
-            // 限制最大掉落数量
-            int pickCount = Mathf.Min(candidates.Count, group.maxPick);
-            Log($"分组 '{group.groupName}' 判定掉落 {pickCount}/{group.maxPick} 个（命中 {candidates.Count} 个）");
-
-            if (pickCount == 0) continue;
-
-            // 打乱候选列表并取前 maxPick 个
-            candidates = candidates.OrderBy(_ => UnityEngine.Random.value).ToList();
-
-            for (int i = 0; i < pickCount; i++)
-            {
-                var entry = candidates[i];
+                // 独立判定该次抽取的命中概率
+                if (UnityEngine.Random.value > entry.dropChance) continue;
 
                 // 计算数量
                 int quantity = UnityEngine.Random.Range(entry.minQuantity, entry.maxQuantity + 1);

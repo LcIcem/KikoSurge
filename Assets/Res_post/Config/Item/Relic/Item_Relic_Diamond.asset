@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f249117abb169d42938c3f7d5a135b4, type: 3}
+  m_Name: Item_Relic_Diamond
+  m_EditorClassIdentifier: Assembly-CSharp::RelicConfig
+  Id: 2005
+  Name: "\u94BB\u77F3"
+  Type: 2
+  MaxStack: 1
+  Value: 150
+  Icon: {fileID: 3244622203517571467, guid: 32729135a32a30a469619e54218f1fb7, type: 3}
+  ammoIcon: {fileID: 0}
+  Description: "\u7EAF\u51C0\u7684\u94BB\u77F3\uFF0C\u8BA9\u66B4\u51FB\u66F4\u52A0\u81F4\u547D\u3002"
+  PickupSFX: {fileID: 8300000, guid: 692759d523e8c5946abd16fa2cb39b6c, type: 3}
+  modifiers:
+  - modifierId: 5
+    modifierName: "\u589E\u52A0\u66B4\u51FB\u500D\u7387"
+    type: 9
+    value: 0.2
