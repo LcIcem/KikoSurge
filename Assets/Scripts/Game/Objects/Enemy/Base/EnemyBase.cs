@@ -62,6 +62,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 防止重复释放的标记
     private bool _isReleased;
 
+    // 死亡标记（阻止死亡后继续寻路）
+    private bool _isDead;
+
     // Freeze 减速倍率
     private float _freezeMultiplier = 1f;
     public float FreezeMultiplier => _freezeMultiplier;
@@ -302,6 +305,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
         // 重置释放标记
         _isReleased = false;
 
+        // 重置死亡标记
+        _isDead = false;
+
         // 重新初始化（使用保存的配置）
         if (_config != null)
         {
@@ -330,6 +336,10 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         // 重启 FSM
         _fsm.Start();
+
+        // 重新启用 pathfinder（死亡时被禁用了）
+        if (_pathfinder != null)
+            _pathfinder.enabled = true;
 
         // 重置血条状态（不重新创建）
         ResetHealthBar();
@@ -379,9 +389,11 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 死亡处理
     protected virtual void Die()
     {
+        _isDead = true;
         PlaySFX(_deathSFX);
 
         _fsm.SetAnimatorBool("dead", true);
+        _fsm.ChangeState(_fsm.Dead);  // 直接切换到死亡状态
 
         _rigidbody.linearVelocity = Vector2.zero;
         StopChaseTarget();
@@ -431,6 +443,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 开始寻路到目标
     public void ChaseTarget()
     {
+        if (_isDead) return;
         if (_pathfinder != null)
         {
             _pathfinder.StartMoveTo(_player.transform);

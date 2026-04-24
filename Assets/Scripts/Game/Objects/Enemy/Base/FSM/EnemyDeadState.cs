@@ -14,6 +14,11 @@ public class EnemyDeadState : StateBase
         EnemyFSM enemyFSM = _fsm as EnemyFSM;
         enemyFSM.SetAnimatorBool("isMoving", false);
         enemyFSM.SetAnimatorBool("dead", true);
+
+        // 禁用 pathfinder，防止死亡后异步路径计算完成继续移动
+        var pathfinder = enemy.GetComponent<EnemyPathfinder>();
+        if (pathfinder != null)
+            pathfinder.enabled = false;
     }
 
     public override void Exec()
