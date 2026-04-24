@@ -115,6 +115,10 @@ public class EnemyBase : MonoBehaviour, IPoolable
     [SerializeField] private AudioClip _hurtSFX;
     [SerializeField] private AudioClip _deathSFX;
 
+    [Header("血条 UI（可选，不配置则不显示血条）")]
+    [SerializeField] private GameObject _healthBarPrefab;
+    [SerializeField] private float _healthBarOffsetY = 1.5f;
+
     /// <summary>走路音效</summary>
     public AudioClip WalkSFX => _walkSFX;
     /// <summary>冲刺音效</summary>
@@ -123,6 +127,11 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public AudioClip HurtSFX => _hurtSFX;
     /// <summary>死亡音效</summary>
     public AudioClip DeathSFX => _deathSFX;
+
+    // 血条相关
+    private EnemyHealthBar _healthBar;
+    private float _healthBarHideTimer;
+    private const float HEALTH_BAR_DISPLAY_DURATION = 1f;
 
     /// <summary>播放音效（null-safe）</summary>
     public void PlaySFX(AudioClip clip)
@@ -200,6 +209,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
         }
 
         _fsm.Update();
+
+        // 血条隐藏计时
+        TickHealthBar();
     }
 
     // 初始化（从对象池取出时调用）
@@ -225,10 +237,78 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _cooldownTimer = 0f;
         _attackHitTriggered = false;
         _pathfinder.SetSpeed(MoveSpeed);
+
+        // 初始化血条
+        InitHealthBar();
+    }
+
+    /// <summary>
+    /// 初始化血条（创建但不显示，未受伤不显示）
+    /// </summary>
+    private void InitHealthBar()
+    {
+        // 如果已有血条，先销毁（防止重复创建）
+        if (_healthBar != null)
+        {
+            DestroyHealthBar();
+        }
+
+        if (_healthBarPrefab == null) return;
+
+        GameObject healthBarObj = Instantiate(_healthBarPrefab, transform);
+        _healthBar = healthBarObj.GetComponent<EnemyHealthBar>();
+        if (_healthBar != null)
+        {
+            _healthBar.BindTo(transform);
+            _healthBar.Init(MaxHP);
+            _healthBar.Hide();
+        }
+    }
+
+    /// <summary>
+    /// 更新血条（受伤时调用，显示血条并重置计时器）
+    /// </summary>
+    private void UpdateHealthBar()
+    {
+        if (_healthBar == null) return;
+
+        _healthBar.UpdateHealth(HP, MaxHP);
+        _healthBar.Show();
+        _healthBarHideTimer = HEALTH_BAR_DISPLAY_DURATION;
+    }
+
+    /// <summary>
+    /// 销毁血条
+    /// </summary>
+    private void DestroyHealthBar()
+    {
+        if (_healthBar != null)
+        {
+            _healthBar.Hide();
+            Destroy(_healthBar.gameObject);
+            _healthBar = null;
+        }
+    }
+
+    /// <summary>
+    /// 血条计时器更新（每帧调用）
+    /// </summary>
+    private void TickHealthBar()
+    {
+        if (_healthBar == null) return;
+
+        if (_healthBarHideTimer > 0f)
+        {
+            _healthBarHideTimer -= Time.deltaTime;
+            if (_healthBarHideTimer <= 0f)
+            {
+                _healthBar.Hide();
+            }
+        }
     }
 
     // IPoolable
-    public void OnSpawn()
+    public virtual void OnSpawn()
     {
         // 重置释放标记
         _isReleased = false;
@@ -263,7 +343,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _fsm.Start();
     }
 
-    public void OnDespawn()
+    public virtual void OnDespawn()
     {
         // 停止死亡协程，防止复用时错误释放
         if (_deathCoroutine != null)
@@ -272,6 +352,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
             _deathCoroutine = null;
         }
         _fsm?.Stop();
+
+        // 销毁血条
+        DestroyHealthBar();
     }
 
     // 受伤处理
@@ -293,6 +376,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         EventCenter.Instance.Publish(GameEventID.Combat_EnemyDamaged,
             new EnemyDamagedParams { enemy = this, damage = damage, currentHP = HP });
+
+        // 更新血条显示
+        UpdateHealthBar();
 
         if (HP <= 0f)
         {
@@ -327,6 +413,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
         // 延迟回收至对象池（等待死亡动画播放 + 死亡音效播放完毕）
         float sfxDelay = _deathSFX != null ? _deathSFX.length : 0f;
         _deathCoroutine = StartCoroutine(DelayRelease(sfxDelay));
+
+        // 销毁血条
+        DestroyHealthBar();
     }
 
     private Coroutine _deathCoroutine;
@@ -567,9 +656,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
     }
 
     /// <summary>
-    /// 攻击命中处理（通过 CheckAttackHit() 检测，命中则发布事件）
+    /// 攻击命中处理（通过 CheckAttackHit() 检测，命中则发布事件，可被子类覆盖）
     /// </summary>
-    private void HandleAttackHit()
+    protected virtual void HandleAttackHit()
     {
         if (!CheckAttackHit())
         {

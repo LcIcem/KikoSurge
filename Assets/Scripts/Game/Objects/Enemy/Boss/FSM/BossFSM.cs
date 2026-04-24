@@ -9,6 +9,8 @@ public class BossFSM : EnemyFSM
     public new EnemyDeadState Dead { get; private set; }
     public BossDashState Dash { get; private set; }
 
+    private BossEnemyBase _bossEnemy => Owner as BossEnemyBase;
+
     public BossFSM(EnemyBase enemy, Animator animator) : base(enemy, animator)
     {
     }
@@ -19,6 +21,28 @@ public class BossFSM : EnemyFSM
     public void TransitionToChase()
     {
         ChangeState(Chase);
+    }
+
+    public override void Update()
+    {
+        if (!_isRunning) return;
+
+        _bossEnemy.TickBirthStagger();
+        Debug.Log($"[BossFSM] IsInBirthStagger={_bossEnemy.IsInBirthStagger}, Timer={_bossEnemy.BirthStaggerTimerDebug:F2}, State={CurrentStateName}");
+
+        if (_bossEnemy.IsInBirthStagger)
+        {
+            // 出生硬直期间：只允许死亡
+            if (CheckTrigger("dead"))
+            {
+                Debug.Log("[BossFSM] Death triggered during stagger!");
+                ChangeState(Dead);
+            }
+            return;
+        }
+
+        // 硬直结束：复用基类 Update
+        base.Update();
     }
 
     protected override void OnSetup()

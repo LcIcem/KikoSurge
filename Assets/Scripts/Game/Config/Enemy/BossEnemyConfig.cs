@@ -4,6 +4,7 @@ using UnityEngine;
 public class BossEnemyConfig : EnemyConfig
 {
     [Header("Boss 特有属性")]
+    public float BirthStaggerDuration = 1.5f;
     public int PhaseCount = 3;
     public float[] PhaseThreshold;
 
