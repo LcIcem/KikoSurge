@@ -160,6 +160,14 @@ public class Bullet : MonoBehaviour, IPoolable
         _ownerTag = tag;
     }
 
+    /// <summary>
+    /// 设置子弹伤害（用于覆盖默认伤害值）
+    /// </summary>
+    public void SetDamage(int damage)
+    {
+        Damage = damage;
+    }
+
     // 碰撞检测
     private void OnTriggerEnter2D(Collider2D other)
     {

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b5e858eec64e2e4185cfb0597a217ef, type: 3}
+  m_Name: DungeonModel_Layer_2
+  m_EditorClassIdentifier: 
+  mapWidth: 60
+  mapHeight: 60
+  borderSize: 2
+  roomTemplateConfig: {fileID: 11400000, guid: ac222b72390833147b2e67361d08ff9a, type: 2}
+  corridorWidth: 1
+  extraCorridorChance: 0
+  extraCorridorMaxDistance: 25
+  normalRoomCount: 5
+  normalExtraChance: 50
+  eliteRoomCount: 3
+  eliteExtraChance: 30
+  treasureRoomCount: 3
+  treasureExtraChance: 0
+  shopRoomCount: 2
+  shopExtraChance: 0
+  restRoomCount: 2
+  restExtraChance: 0
+  eventRoomCount: 0
+  eventExtraChance: 0
+  bossRoomCount: 0
+  bossExtraChance: 0
+  goalRoomCount: 1
+  goalExtraChance: 0

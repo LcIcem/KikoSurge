@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6da633020c170a4419b0951eff06e95b
+    m_Address: LootTable_Golem
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b61a54297e05db941ac1a9ffde1c0945
     m_Address: LootTable_Chest
     m_ReadOnly: 0

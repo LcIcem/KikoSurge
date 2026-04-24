@@ -1,34 +1,37 @@
 fileFormatVersion: 2
-guid: 8a490800af682b3489fc250db01af2e5
+guid: 8e65a2836ee779c47b5fabeb41782f92
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7566001254248236219
-    second: 1-bit_UI_byBatuhanK_0
+      213: 7732794128368898894
+    second: Golem_Armor_AttackC_0
   - first:
-      213: 6900779525515493339
-    second: 1-bit_UI_byBatuhanK_1
+      213: -1400956302907089338
+    second: Golem_Armor_AttackC_1
   - first:
-      213: 3966392815263420760
-    second: 1-bit_UI_byBatuhanK_2
+      213: 5837336298148416672
+    second: Golem_Armor_AttackC_2
   - first:
-      213: -6681285175846793865
-    second: 1-bit_UI_byBatuhanK_3
+      213: -3627571292949322040
+    second: Golem_Armor_AttackC_3
   - first:
-      213: 539889525855581842
-    second: 1-bit_UI_byBatuhanK_4
+      213: 1981064499904835695
+    second: Golem_Armor_AttackC_4
   - first:
-      213: -87505471827237910
-    second: 1-bit_UI_byBatuhanK_5
+      213: -1255855889031339835
+    second: Golem_Armor_AttackC_5
   - first:
-      213: 3004623737311694110
-    second: 1-bit_UI_byBatuhanK_6
+      213: 8232612239890196568
+    second: Golem_Armor_AttackC_6
   - first:
-      213: -6893457498772346192
-    second: 1-bit_UI_byBatuhanK_7
+      213: 1440302572321906844
+    second: Golem_Armor_AttackC_7
   - first:
-      213: 998387198676639397
-    second: 1-bit_UI_byBatuhanK_8
+      213: 4889236502919126866
+    second: Golem_Armor_AttackC_8
+  - first:
+      213: -7614995391847663846
+    second: Golem_Armor_AttackC_9
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -75,7 +78,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 32
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -163,13 +166,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_0
+      name: Golem_Armor_AttackC_0
       rect:
         serializedVersion: 2
-        x: 318
-        y: 230
-        width: 20
-        height: 20
+        x: 0
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -178,42 +181,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 54bbf5612f9200790800000000000000
-      internalID: -7566001254248236219
+      spriteID: e4397a62a47605b60800000000000000
+      internalID: 7732794128368898894
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_1
+      name: Golem_Armor_AttackC_1
       rect:
         serializedVersion: 2
-        x: 91
-        y: 203
-        width: 30
-        height: 45
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 11, y: 12, z: 10, w: 12}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bdfb3a3aa6e74cf50800000000000000
-      internalID: 6900779525515493339
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_2
-      rect:
-        serializedVersion: 2
-        x: 318
-        y: 205
-        width: 20
-        height: 20
+        x: 64
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -222,20 +203,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 851107920457b0730800000000000000
-      internalID: 3966392815263420760
+      spriteID: 64ed0634aadce8ce0800000000000000
+      internalID: -1400956302907089338
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_3
+      name: Golem_Armor_AttackC_2
       rect:
         serializedVersion: 2
-        x: 368
-        y: 230
-        width: 20
-        height: 20
+        x: 128
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -244,86 +225,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 77d8192188e4743a0800000000000000
-      internalID: -6681285175846793865
+      spriteID: 0ac41a58f62620150800000000000000
+      internalID: 5837336298148416672
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_4
+      name: Golem_Armor_AttackC_3
       rect:
         serializedVersion: 2
-        x: 132
-        y: 205
-        width: 22
-        height: 29
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 7, y: 7, z: 7, w: 7}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 296739ec9a21e7700800000000000000
-      internalID: 539889525855581842
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_5
-      rect:
-        serializedVersion: 2
-        x: 96
-        y: 162
-        width: 39
-        height: 14
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 5, y: 4, z: 4, w: 4}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ae3a5dbac3e19cef0800000000000000
-      internalID: -87505471827237910
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_6
-      rect:
-        serializedVersion: 2
-        x: 271
-        y: 56
-        width: 175
-        height: 84
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 19, y: 18, z: 19, w: 15}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e1d8b22be5192b920800000000000000
-      internalID: 3004623737311694110
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_7
-      rect:
-        serializedVersion: 2
-        x: 92
-        y: 39
-        width: 14
-        height: 14
+        x: 192
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -332,20 +247,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0baeb6f8de48550a0800000000000000
-      internalID: -6893457498772346192
+      spriteID: 8c6e956f02748adc0800000000000000
+      internalID: -3627571292949322040
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_8
+      name: Golem_Armor_AttackC_4
       rect:
         serializedVersion: 2
-        x: 127
-        y: 39
-        width: 14
-        height: 14
+        x: 0
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -354,118 +269,118 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5ae1b651edbfadd00800000000000000
-      internalID: 998387198676639397
+      spriteID: f60f6f1aaa72e7b10800000000000000
+      internalID: 1981064499904835695
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_9
+      name: Golem_Armor_AttackC_5
       rect:
         serializedVersion: 2
-        x: 90
-        y: 92
-        width: 106
-        height: 8
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 4, y: 0, z: 3, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 8991f58f94039d640b853713819ae4e6
-      internalID: -1171524559
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_10
-      rect:
-        serializedVersion: 2
-        x: 90
-        y: 80
-        width: 106
-        height: 8
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 4, y: 0, z: 3, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1520cf882eadfd246ac44cdd54ee6c63
-      internalID: -143384940
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_11
-      rect:
-        serializedVersion: 2
-        x: 158
-        y: 218
-        width: 23
-        height: 30
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: e990906e4ea32664abc96383dffd20c7
-      internalID: 1904028733
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_12
-      rect:
-        serializedVersion: 2
-        x: 318
-        y: 230
-        width: 20
-        height: 20
+        x: 64
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 547df85bcec278949ab850f22e173b0b
-      internalID: -603217342
+      spriteID: 5c0643509bd429ee0800000000000000
+      internalID: -1255855889031339835
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 1-bit_UI_byBatuhanK_13
+      name: Golem_Armor_AttackC_6
       rect:
         serializedVersion: 2
-        x: 91
-        y: 56
-        width: 80
-        height: 8
+        x: 128
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 4, y: 0, z: 3, w: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 9bb1cf5d2358ec24fac38079a84a045f
-      internalID: -1767206786
+      spriteID: 8582034c63d104270800000000000000
+      internalID: 8232612239890196568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Golem_Armor_AttackC_7
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 64
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c902458fe8bfcf310800000000000000
+      internalID: 1440302572321906844
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Golem_Armor_AttackC_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25f1e53f1be0ad340800000000000000
+      internalID: 4889236502919126866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Golem_Armor_AttackC_9
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a17feae790a125690800000000000000
+      internalID: -7614995391847663846
       vertices: []
       indices: 
       edges: []
@@ -474,7 +389,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 4fde42113cd4b394a9ca243d3d8707ab
+    spriteID: 171098d07c590fa41b8b4aa3d0125dc4
     internalID: 0
     vertices: []
     indices: 
@@ -482,22 +397,20 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      1-bit_UI_byBatuhanK_0: -7566001254248236219
-      1-bit_UI_byBatuhanK_1: 6900779525515493339
-      1-bit_UI_byBatuhanK_10: -143384940
-      1-bit_UI_byBatuhanK_11: 1904028733
-      1-bit_UI_byBatuhanK_12: -603217342
-      1-bit_UI_byBatuhanK_13: -1767206786
-      1-bit_UI_byBatuhanK_2: 3966392815263420760
-      1-bit_UI_byBatuhanK_3: -6681285175846793865
-      1-bit_UI_byBatuhanK_4: 539889525855581842
-      1-bit_UI_byBatuhanK_5: -87505471827237910
-      1-bit_UI_byBatuhanK_6: 3004623737311694110
-      1-bit_UI_byBatuhanK_7: -6893457498772346192
-      1-bit_UI_byBatuhanK_8: 998387198676639397
-      1-bit_UI_byBatuhanK_9: -1171524559
+      Golem_Armor_AttackC_0: 7732794128368898894
+      Golem_Armor_AttackC_1: -1400956302907089338
+      Golem_Armor_AttackC_2: 5837336298148416672
+      Golem_Armor_AttackC_3: -3627571292949322040
+      Golem_Armor_AttackC_4: 1981064499904835695
+      Golem_Armor_AttackC_5: -1255855889031339835
+      Golem_Armor_AttackC_6: 8232612239890196568
+      Golem_Armor_AttackC_7: 1440302572321906844
+      Golem_Armor_AttackC_8: 4889236502919126866
+      Golem_Armor_AttackC_9: -7614995391847663846
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

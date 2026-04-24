@@ -90,6 +90,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d36d8ef4ecfd6aa4ba2165f0bf068fc6
+    m_Address: EnemyHealthBar
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dabba48ed5f3c9c4fb4feb1afe23b8d4
     m_Address: PausePanel
     m_ReadOnly: 0

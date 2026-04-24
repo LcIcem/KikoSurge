@@ -91,6 +91,30 @@ public static class BulletModule
     }
 
     /// <summary>
+    /// 创建敌人子弹（不依赖 WeaponBase）
+    /// </summary>
+    public static void SpawnEnemyBullet(BulletConfig config, Vector3 spawnPos, Vector3 direction, int damage, string ownerTag = "Enemy")
+    {
+        if (config == null || config.bulletPrefab == null) return;
+
+        // 从对象池获取子弹
+        GameObject bulletObj = ManagerHub.Pool.Get(config.bulletPrefab, spawnPos, Quaternion.identity);
+        if (bulletObj == null) return;
+
+        Bullet bullet = bulletObj.GetComponent<Bullet>();
+        if (bullet == null) return;
+
+        // 设置子弹归属
+        bullet.SetOwnerTag(ownerTag);
+
+        // 初始化子弹
+        bullet.Init(config, direction.normalized, null, 0, "Enemy");
+
+        // 覆盖伤害值
+        bullet.SetDamage(damage);
+    }
+
+    /// <summary>
     /// 直线移动 - 使用物理引擎 MovePosition
     /// </summary>
     private static void MoveStraight(Bullet bullet)

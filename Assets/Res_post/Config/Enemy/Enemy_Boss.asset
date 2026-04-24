@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d7064ebb3bb8e44a9641e71ebe1b152, type: 3}
   m_Name: Enemy_Boss
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemyConfig
-  EnemyId: 2
+  EnemyId: 3
   EnemyName: "\u53F2\u83B1\u59C6"
   Type: 2
   MaxHP: 1000
@@ -28,6 +28,9 @@ MonoBehaviour:
   LoseRange: 30
   PrefabAddress: Boss
   lootTable: {fileID: 11400000, guid: 4c8d8b627ce5b924c8f8bacf9b2881b3, type: 2}
+  PatrolRange: 3
+  PatrolWaitTime: 1.5
+  BirthStaggerDuration: 1.5
   PhaseCount: 1
   PhaseThreshold: []
   DashSpeed: 12

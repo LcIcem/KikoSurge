@@ -15,8 +15,18 @@ MonoBehaviour:
   m_GroupName: Config-Room
   m_GUID: 0dfeebd1788d9bc40a0266f1e553c362
   m_SerializeEntries:
+  - m_GUID: 0fdd904832d56fa4a8ff059ac3275662
+    m_Address: Room_Behaviour_Layer_Boss
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b4f79ab0c51ab154cb2f1f0b3532b2f5
-    m_Address: Room_Behaviour
+    m_Address: Room_Behaviour_Layer_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d9e572547214dba489b8a3fff0d3fb88
+    m_Address: Room_Behaviour_Layer_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

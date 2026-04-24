@@ -35,6 +35,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ac222b72390833147b2e67361d08ff9a
+    m_Address: RoomTemplate_Layer_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aecaf0d104e608f4182fc93a2b0f1e23
+    m_Address: DungeonModel_Layer_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b3ae20452a526fc4ea78acba970a5b7d
     m_Address: RoomTemplate_Boss
     m_ReadOnly: 0

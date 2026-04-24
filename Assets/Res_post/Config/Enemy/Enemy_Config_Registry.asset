@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyConfigRegistry
   enemyConfigs:
   - {fileID: 11400000, guid: e163b7f0fbbdefe45a817ddd3a03bd83, type: 2}
+  - {fileID: 11400000, guid: 4c1b6bf9c005ed04fb7b740a517f3819, type: 2}
   - {fileID: 11400000, guid: 9d13e353f79d80447b85f6dee40dc05a, type: 2}

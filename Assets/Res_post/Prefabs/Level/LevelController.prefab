@@ -63,7 +63,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelController
   _dungeonModels:
   - {fileID: 11400000, guid: 5cf029b7d503ffa4699240e59bd8c353, type: 2}
-  - {fileID: 11400000, guid: 5cf029b7d503ffa4699240e59bd8c353, type: 2}
+  - {fileID: 11400000, guid: aecaf0d104e608f4182fc93a2b0f1e23, type: 2}
   - {fileID: 11400000, guid: 1890941cf1c30ab449c6a37d58bfd831, type: 2}
   _roomBehaviourTable: {fileID: 11400000, guid: b4f79ab0c51ab154cb2f1f0b3532b2f5, type: 2}
   _checkpointPrefab: {fileID: 140860234070293769, guid: 73f6790a547bcac4b81076e4cf17e59f, type: 3}

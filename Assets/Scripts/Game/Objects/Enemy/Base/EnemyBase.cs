@@ -117,7 +117,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
     [Header("血条 UI（可选，不配置则不显示血条）")]
     [SerializeField] private GameObject _healthBarPrefab;
-    [SerializeField] private float _healthBarOffsetY = 1.5f;
 
     /// <summary>走路音效</summary>
     public AudioClip WalkSFX => _walkSFX;
@@ -130,8 +129,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
     // 血条相关
     private EnemyHealthBar _healthBar;
-    private float _healthBarHideTimer;
-    private const float HEALTH_BAR_DISPLAY_DURATION = 1f;
 
     /// <summary>播放音效（null-safe）</summary>
     public void PlaySFX(AudioClip clip)
@@ -167,6 +164,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _fsm = new EnemyFSM(this, _animator);
         // 缓存颜色
         _tmpColor = _sprite.color;
+
+        // 只在第一次创建时初始化血条（对象池复用时不调用）
+        InitHealthBarOnce();
     }
 
     protected virtual void OnEnable()
@@ -209,9 +209,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
         }
 
         _fsm.Update();
-
-        // 血条隐藏计时
-        TickHealthBar();
     }
 
     // 初始化（从对象池取出时调用）
@@ -237,25 +234,21 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _cooldownTimer = 0f;
         _attackHitTriggered = false;
         _pathfinder.SetSpeed(MoveSpeed);
-
-        // 初始化血条
-        InitHealthBar();
     }
 
     /// <summary>
-    /// 初始化血条（创建但不显示，未受伤不显示）
+    /// 初始化血条（只在第一次创建时调用，对象池复用时不调用）
     /// </summary>
-    private void InitHealthBar()
+    private void InitHealthBarOnce()
     {
-        // 如果已有血条，先销毁（防止重复创建）
-        if (_healthBar != null)
-        {
-            DestroyHealthBar();
-        }
-
+        if (_healthBar != null) return;
         if (_healthBarPrefab == null) return;
 
-        GameObject healthBarObj = Instantiate(_healthBarPrefab, transform);
+        // 血条作为UI Canvas的子物体，而不是敌人的子物体
+        Canvas uiCanvas = FindFirstObjectByType<Canvas>();
+        if (uiCanvas == null) return;
+
+        GameObject healthBarObj = Instantiate(_healthBarPrefab, uiCanvas.transform);
         _healthBar = healthBarObj.GetComponent<EnemyHealthBar>();
         if (_healthBar != null)
         {
@@ -266,15 +259,29 @@ public class EnemyBase : MonoBehaviour, IPoolable
     }
 
     /// <summary>
+    /// 重置血条状态（对象池复用时调用，null时重新创建）
+    /// </summary>
+    private void ResetHealthBar()
+    {
+        if (_healthBar == null)
+        {
+            // 血条为null时重新创建
+            InitHealthBarOnce();
+            return;
+        }
+
+        _healthBar.BindTo(transform);
+        _healthBar.Init(MaxHP);
+        _healthBar.Hide();
+    }
+
+    /// <summary>
     /// 更新血条（受伤时调用，显示血条并重置计时器）
     /// </summary>
     private void UpdateHealthBar()
     {
         if (_healthBar == null) return;
-
         _healthBar.UpdateHealth(HP, MaxHP);
-        _healthBar.Show();
-        _healthBarHideTimer = HEALTH_BAR_DISPLAY_DURATION;
     }
 
     /// <summary>
@@ -284,26 +291,8 @@ public class EnemyBase : MonoBehaviour, IPoolable
     {
         if (_healthBar != null)
         {
-            _healthBar.Hide();
             Destroy(_healthBar.gameObject);
             _healthBar = null;
-        }
-    }
-
-    /// <summary>
-    /// 血条计时器更新（每帧调用）
-    /// </summary>
-    private void TickHealthBar()
-    {
-        if (_healthBar == null) return;
-
-        if (_healthBarHideTimer > 0f)
-        {
-            _healthBarHideTimer -= Time.deltaTime;
-            if (_healthBarHideTimer <= 0f)
-            {
-                _healthBar.Hide();
-            }
         }
     }
 
@@ -341,6 +330,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         // 重启 FSM
         _fsm.Start();
+
+        // 重置血条状态（不重新创建）
+        ResetHealthBar();
     }
 
     public virtual void OnDespawn()
@@ -352,9 +344,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
             _deathCoroutine = null;
         }
         _fsm?.Stop();
-
-        // 销毁血条
-        DestroyHealthBar();
     }
 
     // 受伤处理

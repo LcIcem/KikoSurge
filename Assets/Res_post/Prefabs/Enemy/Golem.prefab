@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 4196166418857730590}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.23, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -81,7 +81,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 5827293808285669160, guid: 9041035ddad0f4746aab6fd6accb61c8, type: 3}
+  m_Sprite: {fileID: -4841409092833791354, guid: 973504340f50f6e47b03171a39c91208, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -91,6 +91,37 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &5026503785077690088
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 780459177935146755}
+  m_Layer: 9
+  m_Name: Muzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &780459177935146755
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5026503785077690088}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.11, y: -0.09, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6851947171741793231}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6396696697513599390
 GameObject:
   m_ObjectHideFlags: 0
@@ -157,7 +188,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.2}
+  m_Offset: {x: 0, y: -0.19}
   m_Size: {x: 0.16, y: 0.06}
   m_Direction: 1
 --- !u!1 &8845298876875693492
@@ -173,11 +204,11 @@ GameObject:
   - component: {fileID: 3213518240068051675}
   - component: {fileID: -8391998464684752521}
   - component: {fileID: -784008756258244488}
-  - component: {fileID: -6690661035128708324}
   - component: {fileID: 1445548212346479564}
   - component: {fileID: 5967373190526657537}
+  - component: {fileID: 3168159010721057391}
   m_Layer: 9
-  m_Name: Mushroom
+  m_Name: Golem
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -192,12 +223,13 @@ Transform:
   m_GameObject: {fileID: 8845298876875693492}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -26.21819, y: -1.34219, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1076226634044631125}
   - {fileID: 2197848490851604687}
+  - {fileID: 780459177935146755}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &4257910655772858994
@@ -210,7 +242,7 @@ Animator:
   m_GameObject: {fileID: 8845298876875693492}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: d3be00f1feb91b442a19217cc50016f3, type: 2}
+  m_Controller: {fileID: 22100000, guid: 48467db786d06a94d8370a5a6a2df69f, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -289,33 +321,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a96012dc95e6a68489b499eb7674e9a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPathfinder
-  _speed: 3
+  _speed: 2
   _nextWaypointThreshold: 0.2
---- !u!114 &-6690661035128708324
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8845298876875693492}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bdcfc5a521180a4aa9c0e0d9c7343b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Mushroom
-  _player: {fileID: 0}
-  _walkSFX: {fileID: 0}
-  _dashSFX: {fileID: 0}
-  _hurtSFX: {fileID: 8300000, guid: 9449b2c2689828144815425e51f2d192, type: 3}
-  _deathSFX: {fileID: 0}
-  _healthBarPrefab: {fileID: 9068188548730418095, guid: d36d8ef4ecfd6aa4ba2165f0bf068fc6, type: 3}
-  _fanAngle: 60
-  _fanRange: 1.5
-  _fanRenderer: {fileID: 5967373190526657537}
-  _fanSegments: 20
-  _fanColor: {r: 1, g: 0.09365711, b: 0, a: 0.3}
-  _fanLineWidth: 0.01
-  _fanDisplayDuration: 0.3
 --- !u!70 &1445548212346479564
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -350,8 +357,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.02}
-  m_Size: {x: 0.41, y: 0.49}
+  m_Offset: {x: 0, y: -0.05}
+  m_Size: {x: 0.33, y: 0.36}
   m_Direction: 0
 --- !u!120 &5967373190526657537
 LineRenderer:
@@ -461,3 +468,24 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 1
   m_ApplyActiveColorSpace: 1
+--- !u!114 &3168159010721057391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8845298876875693492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a058cfbef9b92dd4a8ae89f751e58a87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GolemEnemy
+  _player: {fileID: 0}
+  _walkSFX: {fileID: 0}
+  _dashSFX: {fileID: 0}
+  _hurtSFX: {fileID: 8300000, guid: 9449b2c2689828144815425e51f2d192, type: 3}
+  _deathSFX: {fileID: 0}
+  _healthBarPrefab: {fileID: 9068188548730418095, guid: d36d8ef4ecfd6aa4ba2165f0bf068fc6, type: 3}
+  _bulletConfig: {fileID: 11400000, guid: 6c15399cd157a8c4a945e028fa35d3a7, type: 2}
+  _muzzle: {fileID: 780459177935146755}
+  _bulletSpread: 5

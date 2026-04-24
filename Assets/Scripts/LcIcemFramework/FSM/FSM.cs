@@ -237,7 +237,7 @@ public abstract class FSM
 
     // ========== 私有方法 ==========
     /// <summary>检查 from 的所有转换条件，找到第一个满足的则跳转并返回 true</summary>
-    private bool TryTransitionFrom(IFSMState from)
+    protected bool TryTransitionFrom(IFSMState from)
     {
         if (!_transitions.TryGetValue(from, out List<Transition> list)) return false;
 

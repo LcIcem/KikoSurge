@@ -453,4 +453,5 @@ MonoBehaviour:
   _dashSFX: {fileID: 8300000, guid: 10122450b5e1f8942a70a2114cc18dc4, type: 3}
   _hurtSFX: {fileID: 8300000, guid: 597da929ff1c110489941c42c99ad351, type: 3}
   _deathSFX: {fileID: 8300000, guid: 3a530907ed35c0c44bbf68d4400705bb, type: 3}
+  _healthBarPrefab: {fileID: 9068188548730418095, guid: d36d8ef4ecfd6aa4ba2165f0bf068fc6, type: 3}
   _bossDashSFX: {fileID: 8300000, guid: 10122450b5e1f8942a70a2114cc18dc4, type: 3}

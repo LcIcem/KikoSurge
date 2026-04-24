@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4c1b6bf9c005ed04fb7b740a517f3819
+    m_Address: Enemy_Golem
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9d13e353f79d80447b85f6dee40dc05a
     m_Address: Enemy_Boss
     m_ReadOnly: 0
