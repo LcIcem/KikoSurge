@@ -15,9 +15,9 @@ MonoBehaviour:
   m_DefaultGroup: aa105b9335b3bf34ca5babc08864e7c8
   m_currentHash:
     serializedVersion: 2
-    Hash: 612a167f4fbedf66aa74b1d5f06486df
+    Hash: 00000000000000000000000000000000
   m_OptimizeCatalogSize: 0
-  m_BuildRemoteCatalog: 0
+  m_BuildRemoteCatalog: 1
   m_CatalogRequestsTimeout: 0
   m_DisableCatalogUpdateOnStart: 0
   m_InternalIdNamingMode: 0
@@ -52,9 +52,9 @@ MonoBehaviour:
   m_CheckForContentUpdateRestrictionsOption: 0
   m_MonoScriptBundleCustomNaming: 
   m_RemoteCatalogBuildPath:
-    m_Id: 
+    m_Id: 917c72f31e255fb41acbe448a680a569
   m_RemoteCatalogLoadPath:
-    m_Id: 
+    m_Id: 425666d3ebdc82046bcc75ff63cd5d12
   m_ContentStateBuildPathProfileVariableName: <default settings path>
   m_CustomContentStateBuildPath: 
   m_ContentStateBuildPath: 
@@ -67,7 +67,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5befa7f41b0d75742b865d55f4121790, type: 2}
   - {fileID: 11400000, guid: cd9bdfcffe95e2f419c1bfbb4480a798, type: 2}
   - {fileID: 11400000, guid: 14b9d7127435dce49beccf8afdb9a314, type: 2}
-  - {fileID: 11400000, guid: 6cce48cb5fab20645a14f75eb880c8cd, type: 2}
   - {fileID: 11400000, guid: 9ee703f2a6f689c4c9e604d7c3ee59f7, type: 2}
   - {fileID: 11400000, guid: 0d2d5035caf50d446ae38010ba8a661d, type: 2}
   - {fileID: 11400000, guid: a1386bdcb9eb8ac4397edbac3eff79cd, type: 2}
@@ -82,7 +81,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 896f679d28ad1de45be83bdd1336f0af, type: 2}
   - {fileID: 11400000, guid: 001d91eaead2e2e4da24382f6061005e, type: 2}
   - {fileID: 11400000, guid: b4a3b6d4aa92b6145afe66a7e9ec9022, type: 2}
-  - {fileID: 11400000, guid: 1ba9c3db943120445b4b7b91a98638d0, type: 2}
   - {fileID: 11400000, guid: 8ec9e039e582253459c149cbd623be14, type: 2}
   - {fileID: 11400000, guid: 6632cbb90e98dd245b35cc140401511b, type: 2}
   m_BuildSettings:
@@ -95,7 +93,7 @@ MonoBehaviour:
       m_ProfileName: Default
       m_Values:
       - m_Id: 425666d3ebdc82046bcc75ff63cd5d12
-        m_Value: <undefined>
+        m_Value: http://192.168.1.2:80/ServerData/[BuildTarget]/
       - m_Id: 7e11b3bf5a3196f408ebb2be75432ca8
         m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
       - m_Id: 917c72f31e255fb41acbe448a680a569
