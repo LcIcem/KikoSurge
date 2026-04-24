@@ -37,8 +37,6 @@ public class SessionManager : SingletonMono<SessionManager>
     {
         int roleId = SaveLoadManager.Instance.LastSelectedRoleId;
         _currentSession = SessionData.CreateNew(roleId, seed);
-        var roleData = GameDataManager.Instance?.GetRoleStaticData(roleId);
-        Debug.Log($"[SessionManager] Session started: role={roleData?.roleName ?? roleId.ToString()}, seed={seed}, maxWeaponSlots={roleData?.maxWeaponSlots ?? 2}, equipped=[{string.Join(", ", _currentSession.equippedWeaponSlots)}], inventory=[{string.Join(", ", _currentSession.inventoryWeaponSlots)}]");
 
         // 记录当前游戏开始时间戳
         SaveLoadManager.Instance?.RecordSessionStart();
@@ -63,7 +61,6 @@ public class SessionManager : SingletonMono<SessionManager>
     public void LoadSession(SessionData sessionData)
     {
         _currentSession = sessionData;
-        Debug.Log($"[SessionManager] Session loaded: role={sessionData.selectedRoleName}, floor={sessionData.currentFloor}");
 
         // 恢复会话开始时间（用于计算当前游戏时长）
         SaveLoadManager.Instance?.RestoreSessionStart(sessionData.startTimestamp);
@@ -79,7 +76,6 @@ public class SessionManager : SingletonMono<SessionManager>
     {
         if (_currentSession == null)
         {
-            Debug.LogWarning("[SessionManager] No active session to save");
             return;
         }
 
@@ -93,13 +89,11 @@ public class SessionManager : SingletonMono<SessionManager>
     {
         if (_currentSession == null)
         {
-            Debug.LogWarning("[SessionManager] No active session to end");
             return;
         }
 
         SaveLoadManager.Instance.EndGame(isVictory);
         _currentSession = null;
-        Debug.Log($"[SessionManager] Session ended: victory={isVictory}");
     }
 
     #endregion
@@ -113,24 +107,19 @@ public class SessionManager : SingletonMono<SessionManager>
     {
         if (_currentSession == null)
         {
-            Debug.LogWarning("[SessionManager] No active session");
             return null;
         }
-
-        Debug.Log($"[SessionManager] GetPlayerData: selectedRoleId={_currentSession.selectedRoleId}, IsRoleStaticDataLoaded={GameDataManager.Instance?.IsRoleStaticDataLoaded}");
 
         var roleData = GameDataManager.Instance?.GetRoleStaticData(_currentSession.selectedRoleId);
 
         // Fallback: if roleId doesn't match, try using CurSelRoleIndex as list index
         if (roleData == null)
         {
-            Debug.LogWarning($"[SessionManager] RoleId={_currentSession.selectedRoleId} not found, trying fallback with CurSelRoleIndex={GameDataManager.Instance?.CurSelRoleIndex}");
             roleData = GameDataManager.Instance?.GetRoleStaticDataByCurSel();
         }
 
         if (roleData == null)
         {
-            Debug.LogError($"[SessionManager] Cannot compute player data: role static data not found for roleId={_currentSession.selectedRoleId}");
             return null;
         }
 

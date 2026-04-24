@@ -379,7 +379,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // 死亡处理
     protected virtual void Die()
     {
-        Debug.Log($"[EnemyBase] Die() called for {gameObject.name}, EnemyId={EnemyId}");
         PlaySFX(_deathSFX);
 
         _fsm.SetAnimatorBool("dead", true);
@@ -624,7 +623,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
         if (_attackHitTriggered) return;
         _attackHitTriggered = true;
 
-        Debug.Log($"[EnemyAttack] {gameObject.name} 攻击命中! 攻击计时: {_attackTimer:F3}s / {AttackDuration}s, 生效时刻: {AttackHitTime}s");
 
         // 启动冲击波特效
         _shockwaveTimer = DEBUG_SHOCKWAVE_DURATION;
@@ -651,7 +649,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
     {
         if (!CheckAttackHit())
         {
-            Debug.Log($"[EnemyAttack] {gameObject.name} 攻击已生效但检测未命中，攻击落空");
             return;
         }
 
@@ -692,7 +689,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
         if (_player != null)
         {
             _attackDirection = (_player.position - transform.position).normalized;
-            Debug.Log($"[RecordAttackDirection] _attackDirection={_attackDirection}, player={_player.position}, enemy={transform.position}");
         }
     }
 
@@ -719,7 +715,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
     {
         if (col.gameObject.CompareTag("Player"))
         {
-            Debug.Log($"[Enemy] OnCollisionEnter2D with Player! CollisionDamage={CollisionDamage}");
             PublishCollisionDamage(col.transform);
         }
     }
@@ -736,7 +731,6 @@ public class EnemyBase : MonoBehaviour, IPoolable
         if (player != null && other != player.HitCollider)
             return;
 
-        Debug.Log($"[Enemy] OnTriggerEnter2D with Player HitCollider! CollisionDamage={CollisionDamage}");
         PublishCollisionDamage(other.transform);
     }
 

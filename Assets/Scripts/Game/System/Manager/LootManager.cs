@@ -15,7 +15,6 @@ public class LootManager : SingletonMono<LootManager>
 
     protected override void Init()
     {
-        Debug.Log("[LootManager] Init() called - subscribing to events");
         // 订阅敌人死亡事件（放在 Init 中确保在所有 Start 之前完成订阅）
         EventCenter.Instance.Subscribe<EnemyKilledParams>(GameEventID.Combat_EnemyKilled, OnEnemyKilled);
     }
@@ -25,7 +24,6 @@ public class LootManager : SingletonMono<LootManager>
     /// </summary>
     private void OnEnemyKilled(EnemyKilledParams p)
     {
-        Log($"[OnEnemyKilled] 收到敌人死亡事件: enemy={p.enemy?.name ?? "null"}, position={p.position}");
 
         // 防御性检查
         if (p.enemy == null)

@@ -127,14 +127,12 @@ public class InventoryPanel : BasePanel
         // 初始化时隐藏 tooltip
         HideTooltip();
 
-        Debug.Log($"[InventoryPanel.Show] _trashSlot={_trashSlot?.name}({_trashSlot?.GetInstanceID()}), _trashArea={_trashArea?.name}({_trashArea?.GetInstanceID()})");
 
         // 从 SessionData 恢复 pending 物品
         var session = SessionManager.Instance?.CurrentSession;
         if (session?.trashPendingItem != null && !session.trashPendingItem.IsEmpty)
         {
             _pendingDeleteItem = session.trashPendingItem;
-            Debug.Log($"[InventoryPanel.Show] Restored trash pending item: {_pendingDeleteItem.itemId}, qty={_pendingDeleteItem.quantity}");
         }
         else
         {
@@ -325,19 +323,15 @@ public class InventoryPanel : BasePanel
     {
         int targetId = targetSlot != null ? targetSlot.GetInstanceID() : 0;
         int trashId = _trashSlot != null ? _trashSlot.GetInstanceID() : 0;
-        Debug.Log($"[PlaceSlot] targetSlot={targetSlot?.name}({targetId}), IsPlaceholder={targetSlot?.IsPlaceholder}, CurrentIndex={targetSlot?.CurrentIndex}");
-        Debug.Log($"[PlaceSlot] _trashSlot={_trashSlot?.name}({trashId}), _trashArea={_trashArea?.name}, AreSame={(_trashSlot != null && targetSlot != null) && (_trashSlot == targetSlot)}");
 
         if (_pickedUpSlot == null)
         {
-            Debug.Log("[PlaceSlot] FAIL: _pickedUpSlot is null");
             return;
         }
 
         // 点击的是 placeholder（源位置），取消拿起
         if (targetSlot != null && targetSlot.IsPlaceholder && targetSlot.CurrentIndex == _pickedUpSourceIndex)
         {
-            Debug.Log("[PlaceSlot] CancelPickup: clicked placeholder at source index");
             CancelPickup();
             return;
         }
@@ -345,7 +339,6 @@ public class InventoryPanel : BasePanel
         // 不能放在 placeholder 上（其他位置的 placeholder）
         if (targetSlot == null || targetSlot.IsPlaceholder)
         {
-            Debug.Log("[PlaceSlot] CancelPickup: target is null or placeholder");
             CancelPickup();
             return;
         }
@@ -353,14 +346,12 @@ public class InventoryPanel : BasePanel
         // 垃圾桶：删除物品
         if (targetSlot == _trashSlot)
         {
-            Debug.Log("[PlaceSlot] Trash: deleting item");
             TrashItem();
             return;
         }
 
         // 执行交换/移动（TrySwapOrMove 会检查类型兼容性）
         bool success = TrySwapOrMove(targetSlot);
-        Debug.Log($"[PlaceSlot] TrySwapOrMove returned: {success}");
 
         if (success)
         {
@@ -372,7 +363,6 @@ public class InventoryPanel : BasePanel
         else
         {
             // 无效的移动（如跨类型放置），取消拿起回到原位
-            Debug.Log("[PlaceSlot] CancelPickup: TrySwapOrMove failed");
             CancelPickup();
         }
     }
@@ -389,8 +379,7 @@ public class InventoryPanel : BasePanel
 
         if (itemId == 0 || quantity <= 0)
         {
-            Debug.Log("[TrashItem] Cannot trash empty slot");
-            CancelPickup();
+                CancelPickup();
             return;
         }
 
@@ -436,7 +425,6 @@ public class InventoryPanel : BasePanel
         // 清理拿起状态
         ClearPickup();
 
-        Debug.Log($"[TrashItem] Trashed itemId={itemId}, quantity={quantity}, type={itemType}");
     }
 
     /// <summary>
@@ -446,14 +434,12 @@ public class InventoryPanel : BasePanel
     {
         if (_pendingDeleteItem == null || _pendingDeleteItem.IsEmpty)
         {
-            Debug.Log("[RestoreFromTrash] Nothing to restore");
-            return;
+                return;
         }
 
         int itemId = _pendingDeleteItem.itemId;
         int quantity = _pendingDeleteItem.quantity;
 
-        Debug.Log($"[RestoreFromTrash] Restoring itemId={itemId}, quantity={quantity}");
 
         // 获取物品配置以确定正确的类型
         var config = GameDataManager.Instance?.GetItemConfig(itemId);
@@ -478,7 +464,6 @@ public class InventoryPanel : BasePanel
         // 刷新 UI
         RefreshAllViews();
 
-        Debug.Log($"[RestoreFromTrash] Restored itemId={itemId}, quantity={quantity}, type={itemType}");
     }
 
     /// <summary>
@@ -494,12 +479,10 @@ public class InventoryPanel : BasePanel
         bool sourceIsEquip = _pickedUpParent == _equipedWeaponContainer;
         bool targetIsEquip = targetSlot.transform.parent as RectTransform == _equipedWeaponContainer;
 
-        Debug.Log($"[TrySwapOrMove] sourceIsEquip={sourceIsEquip}, targetIsEquip={targetIsEquip}, sourceType={sourceType}, targetType={targetType}, sourceIndex={sourceIndex}, targetIndex={targetIndex}");
 
         // 装备区 < -> 装备区：交换
         if (sourceIsEquip && targetIsEquip)
         {
-            Debug.Log("[TrySwapOrMove] Case: 装备区 < -> 装备区 交换");
             InventoryManager.Instance?.SwapEquippedSlots(sourceIndex, targetIndex);
             return true;
         }
@@ -507,7 +490,6 @@ public class InventoryPanel : BasePanel
         // 背包 -> 装备区（仅武器）
         if (!sourceIsEquip && targetIsEquip && sourceType == ItemType.Weapon)
         {
-            Debug.Log("[TrySwapOrMove] Case: 背包 -> 装备区");
             InventoryManager.Instance?.EquipFromInventory(sourceIndex, targetIndex);
             return true;
         }
@@ -515,7 +497,6 @@ public class InventoryPanel : BasePanel
         // 装备区 -> 背包（仅武器区域）
         if (sourceIsEquip && !targetIsEquip && targetType == ItemType.Weapon)
         {
-            Debug.Log("[TrySwapOrMove] Case: 装备区 -> 背包");
             InventoryManager.Instance?.UnequipWeapon(sourceIndex, targetIndex);
             return true;
         }
@@ -523,12 +504,10 @@ public class InventoryPanel : BasePanel
         // 背包内移动：交换数据（必须是同性之间）
         if (sourceType == targetType)
         {
-            Debug.Log("[TrySwapOrMove] Case: 背包内移动");
             InventoryManager.Instance?.MoveSlot(sourceType, sourceIndex, targetIndex);
             return true;
         }
 
-        Debug.Log("[TrySwapOrMove] Case: 无匹配，返回 false");
         return false;
     }
 
@@ -1726,11 +1705,9 @@ public class InventoryPanel : BasePanel
     {
         if (_trashSlot == null)
         {
-            Debug.LogWarning("[UpdateTrashSlotDisplay] _trashSlot is null! Check Inspector assignment.");
             return;
         }
 
-        Debug.Log($"[UpdateTrashSlotDisplay] trashSlot={_trashSlot.name}, hasComponent={_trashSlot.GetComponent<ItemSlotUI>() != null}");
         _trashSlot.gameObject.SetActive(true);
 
         // 订阅垃圾桶点击事件
@@ -1885,7 +1862,6 @@ public class InventoryPanel : BasePanel
         int slotIndex = _contextMenuSlot.CurrentIndex;
         bool isFromEquipArea = _contextMenuSlot.transform.parent as RectTransform == _equipedWeaponContainer;
 
-        Debug.Log($"[OnContextMenuUse] itemId={itemId}, type={itemType}, slotIndex={slotIndex}, isFromEquipArea={isFromEquipArea}");
 
         bool used = false;
 
@@ -1904,7 +1880,6 @@ public class InventoryPanel : BasePanel
                 break;
 
             default:
-                Debug.Log($"[OnContextMenuUse] Cannot use item type {itemType}");
                 break;
         }
 
@@ -1919,23 +1894,19 @@ public class InventoryPanel : BasePanel
     /// </summary>
     private void OnContextMenuSplit()
     {
-        Debug.Log($"[OnContextMenuSplit] _contextMenuSlot={_contextMenuSlot?.name}, _btnSplit={_btnSplit?.name}, _splitDialogRoot={_splitDialogRoot?.name}");
 
         if (_contextMenuSlot == null)
         {
-            Debug.LogWarning("[OnContextMenuSplit] _contextMenuSlot is null!");
             HideContextMenu();
             return;
         }
 
         if (_contextMenuSlot.Quantity <= 1)
         {
-            Debug.Log("[OnContextMenuSplit] Cannot split single item");
             HideContextMenu();
             return;
         }
 
-        Debug.Log($"[OnContextMenuSplit] Showing split dialog, quantity={_contextMenuSlot.Quantity}");
 
         // 保存 slot 引用，因为 HideContextMenu 会清空它
         var slotForSplit = _contextMenuSlot;
@@ -2010,7 +1981,6 @@ public class InventoryPanel : BasePanel
         var config = GameDataManager.Instance?.GetItemConfig(itemId) as PotionItemConfig;
         if (config == null)
         {
-            Debug.LogWarning($"[UsePotion] Potion config not found for itemId={itemId}");
             return false;
         }
 
@@ -2029,7 +1999,6 @@ public class InventoryPanel : BasePanel
                     SessionManager.Instance?.SetPlayerHealth(newHealth);
                     // 通知 HeartSystem 更新显示（使用 Player._playerData 引用）
                     EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, player.RuntimeData);
-                    Debug.Log($"[UsePotion] Healed for {healAmount}, current health: {newHealth}/{maxHealth}");
                 }
                 break;
         }
@@ -2043,7 +2012,6 @@ public class InventoryPanel : BasePanel
                 config.timedEffectValue,
                 $"potion_{itemId}"
             );
-            Debug.Log($"[UsePotion] Applied Shield buff: duration={config.timedEffectDuration}s, value={config.timedEffectValue}");
         }
         else if (config.timedEffectType == PotionTimedEffectType.SpeedBoost)
         {
@@ -2055,12 +2023,10 @@ public class InventoryPanel : BasePanel
                 speedMultiplier,
                 $"potion_{itemId}"
             );
-            Debug.Log($"[UsePotion] Applied SpeedBoost buff: duration={config.timedEffectDuration}s, value={speedMultiplier} (+{config.timedEffectValue}%)");
         }
 
         // 移除药水
         InventoryManager.Instance?.RemoveItem(ItemType.Potion, itemId, 1);
-        Debug.Log($"[UsePotion] Used potion itemId={itemId}");
         return true;
     }
 
@@ -2096,18 +2062,15 @@ public class InventoryPanel : BasePanel
     /// </summary>
     private void ShowSplitDialog(ItemSlotUI slot)
     {
-        Debug.Log($"[ShowSplitDialog] slot={slot?.name}, IsEmpty={slot?.IsEmpty}, Quantity={slot?.Quantity}");
 
         if (slot == null || slot.IsEmpty)
         {
-            Debug.LogWarning("[ShowSplitDialog] slot is null or empty, cannot show dialog");
             return;
         }
 
         _splitContextSlot = slot;
         _splitQuantity = (slot.Quantity + 1) / 2; // 默认一半
 
-        Debug.Log($"[ShowSplitDialog] _sliderSplitQuantity={_sliderSplitQuantity?.name}, _splitDialogRoot={_splitDialogRoot?.name}");
 
         if (_sliderSplitQuantity != null)
         {
@@ -2121,11 +2084,9 @@ public class InventoryPanel : BasePanel
         if (_splitDialogRoot != null)
         {
             _splitDialogRoot.SetActive(true);
-            Debug.Log("[ShowSplitDialog] Split dialog shown");
         }
         else
         {
-            Debug.LogWarning("[ShowSplitDialog] _splitDialogRoot is null! Check Inspector assignment.");
         }
     }
 
@@ -2162,11 +2123,9 @@ public class InventoryPanel : BasePanel
     /// </summary>
     private void OnSplitConfirm()
     {
-        Debug.Log($"[OnSplitConfirm] Called! _splitContextSlot={_splitContextSlot?.name}, _splitQuantity={_splitQuantity}");
 
         if (_splitContextSlot == null || _splitQuantity <= 0)
         {
-            Debug.LogWarning("[OnSplitConfirm] Early exit: _splitContextSlot is null or _splitQuantity <= 0");
             HideSplitDialog();
             return;
         }
@@ -2178,12 +2137,10 @@ public class InventoryPanel : BasePanel
 
         if (_splitQuantity >= originalQuantity)
         {
-            Debug.Log($"[OnSplitConfirm] Split quantity { _splitQuantity} >= original {originalQuantity}");
             HideSplitDialog();
             return;
         }
 
-        Debug.Log($"[OnSplitConfirm] Splitting itemId={itemId}, type={itemType}, original={originalQuantity}, split={_splitQuantity}, remain={originalQuantity - _splitQuantity}");
 
         // 剩余数量
         int remainQuantity = originalQuantity - _splitQuantity;

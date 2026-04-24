@@ -170,6 +170,5 @@ public class ShopkeeperInteractable : MonoBehaviour, ISpawnable
         }
     }
 
-    private void Log(string msg) => Debug.Log($"[ShopkeeperInteractable] {msg}");
     private void LogWarning(string msg) => Debug.LogWarning($"[ShopkeeperInteractable] {msg}");
 }

@@ -121,6 +121,5 @@ public class ChestInteractable : MonoBehaviour
         }
     }
 
-    private void Log(string msg) => Debug.Log($"[ChestInteractable] {msg}");
     private void LogWarning(string msg) => Debug.LogWarning($"[ChestInteractable] {msg}");
 }

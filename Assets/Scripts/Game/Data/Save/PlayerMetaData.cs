@@ -67,7 +67,6 @@ public class PlayerMetaData
         var set = unlockedRoleIds.ToHashSet();
         set.Add(roleId);
         unlockedRoleIds = IntHashSet.FromHashSet(set);
-        Debug.Log($"[PlayerMetaData] Role {roleId} unlocked");
     }
 
     public void UnlockWeapon(int weaponId)
@@ -75,7 +74,6 @@ public class PlayerMetaData
         var set = unlockedWeaponIds.ToHashSet();
         set.Add(weaponId);
         unlockedWeaponIds = IntHashSet.FromHashSet(set);
-        Debug.Log($"[PlayerMetaData] Weapon {weaponId} unlocked");
     }
 
     public void UnlockRelic(int relicId)
@@ -83,7 +81,6 @@ public class PlayerMetaData
         var set = unlockedRelicIds.ToHashSet();
         set.Add(relicId);
         unlockedRelicIds = IntHashSet.FromHashSet(set);
-        Debug.Log($"[PlayerMetaData] Relic {relicId} unlocked");
     }
 
     public void ApplyGameResult(bool isVictory)
@@ -94,7 +91,5 @@ public class PlayerMetaData
         {
             totalVictories++;
         }
-
-        Debug.Log($"[PlayerMetaData] Game result applied: victory={isVictory}, totalGames={totalGamesPlayed}");
     }
 }

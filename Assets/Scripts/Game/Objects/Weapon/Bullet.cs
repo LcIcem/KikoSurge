@@ -190,7 +190,6 @@ public class Bullet : MonoBehaviour, IPoolable
                 {
                     damageParams.targetDefense = enemy.EnemyConfig?.Defense ?? 0f;
                     result = DamageCalculator.CalculateEnemyDamage(damageParams, enemy.transform.position);
-                    Debug.Log($"[Bullet] 伤害计算完成: finalDamage={result.finalDamage}, isCrit={result.isCrit}, critMultiplier={result.critMultiplier}, rawDamage={result.rawDamage}");
                 }
                 else
                 {
@@ -206,7 +205,6 @@ public class Bullet : MonoBehaviour, IPoolable
                         defenseReduction = 0f,
                         worldPosition = enemy.transform.position
                     };
-                    Debug.Log($"[Bullet] 降级处理: damageParams=null, 使用 Damage={Damage}");
                 }
 
                 enemy.TakeDamage(result.finalDamage);

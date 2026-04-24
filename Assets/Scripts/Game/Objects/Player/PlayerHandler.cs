@@ -108,7 +108,6 @@ public class PlayerHandler
         if (isLobbyPlayer)
         {
             // 大厅玩家：不显示 HubPanel
-            Debug.Log("[PlayerHandler] Lobby player created (no UI setup)");
         }
         else
         {

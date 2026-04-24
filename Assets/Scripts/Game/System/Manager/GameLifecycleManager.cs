@@ -110,8 +110,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
 
     private void OnPanelClosed(LcIcemFramework.BasePanel panel)
     {
-        Debug.Log($"[OnPanelClosed] panel={panel?.GetType().Name}, CurrentState={CurrentState}");
-
         if (CurrentState == GameState.Interacting)
         {
             // Interacting 状态关闭面板时，恢复到之前的状态
@@ -128,7 +126,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             // Paused 状态下，只有关闭的是 PausePanel 时才恢复游戏
             if (panel is PausePanel)
             {
-                Debug.Log("[OnPanelClosed] PausePanel closed, resuming game");
                 ResumeGame();
             }
         }
@@ -268,7 +265,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// <param name="saveSlot">存档槽位</param>
     public void EnterLobby(int saveSlot)
     {
-        Debug.Log($"[EnterLobby] saveSlot={saveSlot}");
         _currentSessionSaveSlot = saveSlot;
 
         // 记录进入大厅的时间（用于计算游玩时长）
@@ -300,7 +296,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     public void UpdateSessionSeed(long seed)
     {
         _currentSessionSeed = seed;
-        Debug.Log($"[UpdateSessionSeed] seed updated to: {seed}");
     }
 
     /// <summary>
@@ -310,8 +305,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// <param name="onProgress">加载进度回调</param>
     public void ContinueGame(int saveSlot, UnityAction<float> onProgress = null)
     {
-        Log($"ContinueGame: slot={saveSlot}");
-
         // 确保选择正确的槽位
         SaveLoadManager.Instance.SelectSlot(saveSlot);
 
@@ -321,14 +314,11 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         {
             _currentSessionSeed = sessionData.seed;
             _currentSessionSaveSlot = saveSlot;
-            Debug.Log($"[ContinueGame] sessionData: roleId={sessionData.selectedRoleId}, roleName={sessionData.selectedRoleName}, seed={sessionData.seed}, floor={sessionData.currentFloor}, currentCheckpoint={sessionData.currentCheckpoint != null}");
             // 加载 session 到 SessionManager
             SessionManager.Instance.LoadSession(sessionData);
-            Log($"继续游戏: seed={_currentSessionSeed}, floor={sessionData.currentFloor}");
         }
         else
         {
-            Debug.LogError("[ContinueGame] sessionData is null - no active session to continue!");
             return;
         }
 
@@ -346,11 +336,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         // 防止重复进入
         if (_isSceneLoading)
         {
-            Log("EnterPlaying skipped: already loading");
             return;
         }
-
-        Log($"EnterPlaying: Starting gameplay. CurrentState={CurrentState}");
 
         // 获取要进入的层索引（继续游戏时从 checkpoint 恢复）
         int targetFloor = 0;
@@ -364,7 +351,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         _isSceneLoading = true;
         ManagerHub.Scene.LoadSceneAsync("Game_Scene", onProgress, () =>
         {
-            Debug.Log("[EnterPlaying] Scene loaded callback executing...");
             // 实例化 LevelController
             if (_levelControllerPrefab != null)
             {
@@ -381,7 +367,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             ChangeState(GameState.Playing);
             EventCenter.Instance.Publish(targetFloor == 0 ? GameEventID.OnSessionStart : GameEventID.OnSessionContinue);
             _isSceneLoading = false;
-            Debug.Log("[EnterPlaying] Scene loaded callback completed");
         });
     }
 
@@ -645,10 +630,8 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
             return;
         _isClosingPanel = true;
 
-        Debug.Log($"[CloseCurrentPanel] called, CurrentState={CurrentState}");
         // 检查最上层面板是否可以通过 ClosePanel 关闭
         var topPanel = ManagerHub.UI.GetTopPanel();
-        Debug.Log($"[CloseCurrentPanel] topPanel={topPanel?.GetType().Name}, CanBeClosed={topPanel?.CanBeClosedByClosePanel}");
         if (topPanel != null && !topPanel.CanBeClosedByClosePanel)
         {
             _isClosingPanel = false;
@@ -695,11 +678,6 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
     /// </summary>
     public void RestartGame()
     {
-        Log("RestartGame");
-
-        Debug.Log($"[RestartGame] LevelController = {LevelController?.name ?? "null"}");
-        Debug.Log($"[RestartGame] CurrentState = {CurrentState}");
-
         // 清理敌人和掉落物
         try { EnemyFactory.Instance?.ReleaseAll(); } catch (System.Exception e) { Debug.LogException(e); }
         try { LootManager.Instance?.ClearAll(); } catch (System.Exception e) { Debug.LogException(e); }
@@ -708,19 +686,13 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
         ManagerHub.UI.HideAllPanels();
 
         // 通过 PlayerHandler 清理玩家
-        Debug.Log($"[RestartGame] Calling DestroyPlayer...");
         LevelController?.DestroyPlayer();
 
         // 销毁关卡
         if (LevelController != null)
         {
-            Debug.Log($"[RestartGame] Destroying LevelController: {LevelController.name}");
             Destroy(LevelController.gameObject);
             LevelController = null;
-        }
-        else
-        {
-            Debug.Log("[RestartGame] LevelController is null, skipping destroy");
         }
 
         // 恢复时间（以防从暂停状态重启）
@@ -731,17 +703,11 @@ public class GameLifecycleManager : SingletonMono<GameLifecycleManager>
 
         // 重新生成 seed 并创建新 session（全新开始）
         long newSeed = SaveLoadManager.Instance.GenerateSeed();
-        int roleId = SaveLoadManager.Instance.CurrentSaveData?.sessionData?.selectedRoleId ?? 0;
-
-        Debug.Log($"[RestartGame] Generating new seed={newSeed} for roleId={roleId}");
         SessionManager.Instance.StartSession(newSeed);
         UpdateSessionSeed(newSeed);
 
-        Debug.Log("[RestartGame] Calling EnterLobby...");
         EnterLobby(_currentSessionSaveSlot);
-        Debug.Log("[RestartGame] EnterLobby done. Calling EnterPlaying...");
         EnterPlaying();
-        Debug.Log("[RestartGame] EnterPlaying done.");
     }
 
     // 调试方法

@@ -153,7 +153,6 @@ public class WeaponHandler
         EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
             new InventoryChangeParams(ItemType.Weapon, 0, 0, InventoryChangeType.Swap));
 
-        Debug.Log($"[WeaponHandler] SwitchToNextWeapon: swapped slot {currentEquipIndex} with {nextIndex}");
     }
 
     /// <summary>
@@ -216,7 +215,6 @@ public class WeaponHandler
             EventCenter.Instance.Publish(GameEventID.OnCurrentWeaponChanged, _weapons[_currentWeaponIndex]);
         }
 
-        Debug.Log($"[WeaponHandler] SyncWeaponListFromSession: {_weapons.Count} weapons synced");
     }
 
     /// <summary>
@@ -260,7 +258,6 @@ public class WeaponHandler
             });
         }
 
-        Debug.Log($"[WeaponHandler] Synced weapons from SessionData: {equippedWeaponIds.Count} weapons");
     }
 
     /// <summary>
@@ -284,6 +281,5 @@ public class WeaponHandler
             });
         }
 
-        Debug.Log($"[WeaponHandler] Synced weapons from SessionData: {equippedSlots.Count} slots");
     }
 }

@@ -189,15 +189,12 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
             _currentSaveData = ManagerHub.Save.Load<PlayerSaveData>(slotId);
             if (_currentSaveData == null)
             {
-                Debug.LogWarning($"[SaveLoadManager] Slot {slotId} save data corrupted, creating new");
                 _currentSaveData = PlayerSaveData.CreateNew(slotId);
             }
-            Debug.Log($"[SaveLoadManager] Slot {slotId} loaded: {(_currentSaveData.HasActiveSession ? "Continue" : "New Game")}");
         }
         else
         {
             _currentSaveData = PlayerSaveData.CreateNew(slotId);
-            Debug.Log($"[SaveLoadManager] Slot {slotId} created (empty)");
         }
 
         return true;
@@ -210,14 +207,12 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     {
         if (slotId < 0 || slotId >= Constants.MAX_SLOT)
         {
-            Debug.LogError($"[SaveLoadManager] Invalid slot: {slotId}");
             return;
         }
 
         _currentSlotId = slotId;
         _currentSaveData = PlayerSaveData.CreateNew(slotId);
         SaveCurrentSlot();
-        Debug.Log($"[SaveLoadManager] CreateNewSave: slot={slotId}");
     }
 
     /// <summary>
@@ -227,7 +222,6 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     {
         if (_currentSaveData?.sessionData == null || SessionManager.Instance?.CurrentSession == null)
         {
-            Debug.LogWarning("[SaveLoadManager] No active session to save");
             return;
         }
 
@@ -279,7 +273,6 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
             : new List<ModifierData>();
 
         SaveCurrentSlot();
-        Debug.Log($"[SaveLoadManager] Session saved: floor={current.currentFloor}, health={current.currentHealth}, checkpoint={current.currentCheckpoint != null}, modifiers={session.modifiers.Count}");
     }
 
     /// <summary>
@@ -305,19 +298,16 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     {
         if (_currentSlotId < 0 || _currentSlotId >= Constants.MAX_SLOT)
         {
-            Debug.LogWarning("[SaveLoadManager] No slot selected, cannot save");
             return;
         }
 
         if (_currentSaveData == null)
         {
-            Debug.LogWarning("[SaveLoadManager] No save data, cannot save");
             return;
         }
 
         _currentSaveData.lastPlayedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         ManagerHub.Save.Save(_currentSlotId, _currentSaveData as LcIcemFramework.SaveData);
-        Debug.Log($"[SaveLoadManager] Slot {_currentSlotId} saved");
     }
 
     /// <summary>
@@ -335,12 +325,10 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     {
         if (_currentSaveData?.sessionData == null)
         {
-            Debug.LogWarning("[SaveLoadManager] No active session to add modifier");
             return;
         }
 
         _currentSaveData.sessionData.AddModifier(modifier);
-        Debug.Log($"[SaveLoadManager] Modifier added: {modifier.modifierName} = {modifier.value}");
     }
 
     /// <summary>
@@ -361,7 +349,6 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     {
         if (_currentSaveData?.sessionData == null)
         {
-            Debug.LogWarning("[SaveLoadManager] No active session to end");
             return;
         }
 
@@ -384,7 +371,6 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
 
         // 保存
         SaveCurrentSlot();
-        Debug.Log($"[SaveLoadManager] Game ended: victory={isVictory}, playTime={currentPlayTime}s");
     }
 
     /// <summary>
@@ -403,7 +389,6 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
             _currentSlotId = -1;
         }
 
-        Debug.Log($"[SaveLoadManager] Slot {slotId} deleted: {deleted}");
         return deleted;
     }
 
@@ -425,7 +410,6 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     public void RecordSessionStart()
     {
         _sessionStartTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        Debug.Log($"[SaveLoadManager] Session start recorded: {_sessionStartTimestamp}");
     }
 
     /// <summary>
@@ -453,14 +437,6 @@ public class SaveLoadManager : SingletonMono<SaveLoadManager>
     {
         return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     }
-
-    #endregion
-
-    #region 日志
-
-    private void Log(string msg) => Debug.Log($"[SaveLoadManager] {msg}");
-    private void LogWarning(string msg) => Debug.LogWarning($"[SaveLoadManager] {msg}");
-    private void LogError(string msg) => Debug.LogError($"[SaveLoadManager] {msg}");
 
     #endregion
 }

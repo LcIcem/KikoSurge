@@ -110,7 +110,6 @@ public class InventoryManager : SingletonMono<InventoryManager>
     /// <returns>是否添加成功</returns>
     public bool AddItemToEmptySlot(ItemType type, int itemId, int quantity = 1)
     {
-        Debug.Log($"[InventoryManager.AddItemToEmptySlot] type={type}, itemId={itemId}, quantity={quantity}");
         return AddItemToSlot(type, itemId, quantity, allowStack: false);
     }
 
@@ -206,8 +205,6 @@ public class InventoryManager : SingletonMono<InventoryManager>
     /// <returns>是否移除成功</returns>
     public bool RemoveItem(ItemType type, int itemId, int quantity = 1)
     {
-        Debug.Log($"[InventoryManager.RemoveItem] type={type}, itemId={itemId}, quantity={quantity}");
-
         if (_sessionData == null || quantity <= 0 || itemId == 0)
             return false;
 
@@ -368,29 +365,21 @@ public class InventoryManager : SingletonMono<InventoryManager>
     /// <returns>是否卸下成功</returns>
     public bool UnequipWeapon(int equippedSlotIndex, int targetInventorySlotIndex = -1)
     {
-        Debug.Log($"[UnequipWeapon] called: equippedSlotIndex={equippedSlotIndex}, targetInventorySlotIndex={targetInventorySlotIndex}");
-
         var equipped = _sessionData?.equippedWeaponSlots;
         var inventory = GetSlotList(ItemType.Weapon);
 
-        Debug.Log($"[UnequipWeapon] equipped.Count={equipped?.Count ?? -1}, inventory.Count={inventory?.Count ?? -1}");
-
         if (equipped == null || inventory == null)
         {
-            Debug.Log("[UnequipWeapon] FAIL: equipped or inventory is null");
             return false;
         }
         if (equippedSlotIndex < 0 || equippedSlotIndex >= equipped.Count)
         {
-            Debug.Log($"[UnequipWeapon] FAIL: equippedSlotIndex out of range");
             return false;
         }
 
         var slot = equipped[equippedSlotIndex];
-        Debug.Log($"[UnequipWeapon] slot.itemId={slot.itemId}, slot.quantity={slot.quantity}, IsEmpty={slot.IsEmpty}");
         if (slot.IsEmpty)
         {
-            Debug.Log("[UnequipWeapon] FAIL: slot is empty");
             return false;
         }
 
@@ -401,7 +390,6 @@ public class InventoryManager : SingletonMono<InventoryManager>
         if (targetInventorySlotIndex >= 0 && targetInventorySlotIndex < inventory.Count)
         {
             var targetSlot = inventory[targetInventorySlotIndex];
-            Debug.Log($"[UnequipWeapon] targetSlot itemId={targetSlot.itemId}, IsEmpty={targetSlot.IsEmpty}");
 
             // 目标格子是空的：直接移动
             if (targetSlot.IsEmpty)
@@ -412,7 +400,6 @@ public class InventoryManager : SingletonMono<InventoryManager>
                 EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
                     new InventoryChangeParams(ItemType.Weapon, 0, 0, InventoryChangeType.Swap));
 
-                Log($"Unequipped weapon at slot {equippedSlotIndex} to empty inventory slot {targetInventorySlotIndex}");
                 return true;
             }
 
@@ -424,16 +411,13 @@ public class InventoryManager : SingletonMono<InventoryManager>
             EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
                 new InventoryChangeParams(ItemType.Weapon, 0, 0, InventoryChangeType.Swap));
 
-            Log($"Unequipped weapon at slot {equippedSlotIndex} swapped with inventory slot {targetInventorySlotIndex}");
             return true;
         }
 
         // 未指定目标格子：自动寻找空格子添加
-        Debug.Log("[UnequipWeapon] No target specified, using AddItem");
         bool added = AddItem(ItemType.Weapon, itemId, quantity);
         if (!added)
         {
-            Debug.Log("[UnequipWeapon] FAIL: AddItem returned false");
             return false;
         }
 
@@ -443,7 +427,6 @@ public class InventoryManager : SingletonMono<InventoryManager>
         EventCenter.Instance.Publish(GameEventID.OnInventoryChanged,
             new InventoryChangeParams(ItemType.Weapon, 0, 0, InventoryChangeType.Swap));
 
-        Log($"Unequipped weapon at slot {equippedSlotIndex}: itemId={itemId}, quantity={quantity}");
         return true;
     }
 
@@ -746,7 +729,6 @@ public class InventoryManager : SingletonMono<InventoryManager>
             {
                 EventCenter.Instance.Publish(GameEventID.UpdateHeartDisplay, player.RuntimeData);
             }
-            Debug.Log($"[RefreshAllRelicModifiers] maxHealth: {oldMaxHealth:F0} -> {newMaxHealth:F0}, health: {oldHealth:F0} -> {newHealth:F0}");
         }
     }
 

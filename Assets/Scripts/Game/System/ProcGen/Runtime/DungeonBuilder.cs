@@ -98,7 +98,6 @@ namespace ProcGen.Runtime
             Clear();
 
             // Step 2: 生成地牢图数据和瓦片预计算数据
-            Log($"开始生成地牢... (Seed: {rng.SeedString})");
             var (graph, tileData) = _generator.Generate(config, rng);
 
             if (graph.allRooms.Count == 0)
@@ -128,12 +127,6 @@ namespace ProcGen.Runtime
 
             // Step 9: 标记构建完毕
             IsBuildCompleted = true;
-
-            Log($"地牢生成完成：{graph.allRooms.Count} 个房间，{graph.corridors.Count} 条走廊，" +
-                $"地面 {tileData.allFloorTiles.Count} 格，墙壁 {tileData.allWallTiles.Count} 格，门 {tileData.allDoorTiles.Count} 格。");
-
-            // 打印房间类型分布
-            LogRoomTypeSummary(graph);
 
             // 生成AStarPath
             var astar = AstarPath.active;
@@ -169,7 +162,6 @@ namespace ProcGen.Runtime
             IsBuildCompleted = false;
             _currentGraph = null;
             _currentTileData = null;
-            Log("Tilemap 已清空。");
         }
 
         // ==================== 私有方法 ====================
@@ -355,34 +347,6 @@ namespace ProcGen.Runtime
             {
                 tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), tile);
             }
-        }
-
-        /// <summary>打印房间类型统计</summary>
-        private void LogRoomTypeSummary(DungeonGraph graph)
-        {
-            var counts = new Dictionary<RoomType, int>();
-
-            foreach (var room in graph.allRooms)
-            {
-                if (!counts.ContainsKey(room.roomType))
-                    counts[room.roomType] = 0;
-                counts[room.roomType]++;
-            }
-
-            var lines = new List<string>();
-            foreach (var kvp in counts)
-            {
-                lines.Add($"  {kvp.Key}: {kvp.Value}");
-            }
-
-            Log($"房间类型分布：\n{string.Join("\n", lines)}");
-        }
-
-        // ==================== 日志工具 ====================
-
-        private void Log(string msg)
-        {
-            Debug.Log($"[DungeonBuilder] {msg}");
         }
 
         private void LogError(string msg)

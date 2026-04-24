@@ -102,7 +102,6 @@ public class Mushroom : EnemyBase
         Vector2 toPlayer = (_player.position - transform.position).normalized;
         float angle = Vector2.Angle(_attackDirection, toPlayer);
 
-        Debug.Log($"[CheckAttackHit] toPlayer={toPlayer}, _attackDirection={_attackDirection}, angle={angle}, halfAngle={_fanAngle * 0.5f}");
 
         return angle < _fanAngle * 0.5f;
     }
@@ -122,37 +121,5 @@ public class Mushroom : EnemyBase
         float halfAngle = _fanAngle * 0.5f;
         Vector3 center = transform.position;
 
-        Debug.Log($"[Mushroom Draw] center={center}, fanDir={_attackDirection}, halfAngle={halfAngle}, fanRange={_fanRange}");
-
-        // 点0：中心点（敌人位置）
-        _fanRenderer.SetPosition(0, center);
-        Debug.Log($"[Mushroom Draw] pos0={center} (center - enemy pos)");
-
-        // 点1：左边界（+halfAngle 旋转得到左边界方向，即 fanDir 偏左）
-        Vector3 leftDir = Quaternion.Euler(0, 0, halfAngle) * (Vector3)_attackDirection;
-        Vector3 leftPoint = center + leftDir * _fanRange;
-        _fanRenderer.SetPosition(1, leftPoint);
-        Debug.Log($"[Mushroom Draw] pos1={leftPoint} (left boundary)");
-
-        // 点2 ~ 点segments+1：弧线（i=1 跳过左边界，i=segments 得到右边界端点）
-        // 从左边界(+halfAngle)扫到右边界(-halfAngle)
-        for (int i = 1; i <= _fanSegments; i++)
-        {
-            float t = (float)i / _fanSegments;
-            float currentAngle = Mathf.Lerp(halfAngle, -halfAngle, t);
-            Vector3 point = center + Quaternion.Euler(0, 0, currentAngle) * (Vector3)_attackDirection * _fanRange;
-            _fanRenderer.SetPosition(i + 1, point);
-            Debug.Log($"[Mushroom Draw] pos{i + 1}={point} ({(i == _fanSegments ? "arc right endpoint" : "arc")})");
-        }
-
-        // 点segments+2：右边界（-halfAngle 旋转得到右边界方向，即 fanDir 偏右）
-        Vector3 rightDir = Quaternion.Euler(0, 0, -halfAngle) * (Vector3)_attackDirection;
-        Vector3 rightPoint = center + rightDir * _fanRange;
-        _fanRenderer.SetPosition(_fanSegments + 2, rightPoint);
-        Debug.Log($"[Mushroom Draw] pos{_fanSegments + 2}={rightPoint} (right boundary)");
-
-        // 点segments+3：闭合回中心点
-        _fanRenderer.SetPosition(_fanSegments + 3, center);
-        Debug.Log($"[Mushroom Draw] pos{_fanSegments + 3}={center} (close to center)");
     }
 }

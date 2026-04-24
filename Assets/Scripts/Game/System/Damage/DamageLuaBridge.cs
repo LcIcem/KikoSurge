@@ -38,7 +38,6 @@ public static class DamageLuaBridge
                 _luaLoaded = _damageModule != null;
             }
             _initializing = false;
-            Debug.Log("[DamageLuaBridge] Lua script loaded via Addressables. Loaded: " + _luaLoaded);
         });
     }
 
@@ -68,14 +67,6 @@ public static class DamageLuaBridge
             paramTable.Set("targetDefense", p.targetDefense);
             paramTable.Set("defBreak", p.playerDefBreak);
 
-            // 打印所有输入参数
-            Debug.Log($"========== Lua伤害计算 ==========");
-            Debug.Log($"[输入] bulletBaseDamage={p.bulletBaseDamage}");
-            Debug.Log($"[输入] playerCritRate={p.playerCritRate}, playerCritMultiplier={p.playerCritMultiplier}");
-            Debug.Log($"[输入] playerDamageBonus={p.playerDamageBonus}, playerDefBreak={p.playerDefBreak}");
-            Debug.Log($"[输入] weaponCritRate={p.weaponCritRate}, weaponCritMultiplier={p.weaponCritMultiplier}");
-            Debug.Log($"[输入] weaponDamageBonus={p.weaponDamageBonus}, weaponFlatDamage={p.weaponDamage}");
-            Debug.Log($"[输入] targetDefense={p.targetDefense}");
 
             LuaTable result = calcFunc.Func<LuaTable, LuaTable>(paramTable);
 
@@ -93,9 +84,6 @@ public static class DamageLuaBridge
             float critRate = result.Get<float>("critRate");
             float critMultiplier = result.Get<float>("critMultiplier");
 
-            Debug.Log($"[Lua结果] isCrit={isCrit}, critRate={critRate}, critMultiplier={critMultiplier}");
-            Debug.Log($"[Lua结果] finalDamage={finalDamage}");
-            Debug.Log($"========== Lua伤害计算结束 ==========");
 
             return new DamageResult
             {
@@ -141,7 +129,6 @@ public static class DamageLuaBridge
                 _damageModule = results[0] as LuaTable;
                 _luaLoaded = _damageModule != null;
             }
-            Debug.Log("[DamageLuaBridge] Lua script reloaded. Loaded: " + _luaLoaded);
         });
     }
 

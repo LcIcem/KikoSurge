@@ -503,7 +503,6 @@ public class Player : MonoBehaviour
         // 如果 maxHealth 发生变化，同步到 Player._playerData
         if (Mathf.Abs(_playerData.maxHealth - newData.maxHealth) > 0.01f)
         {
-            Debug.Log($"[Player] OnUpdateHeartDisplay: maxHealth changed {_playerData.maxHealth:F0} -> {newData.maxHealth:F0}");
             _playerData.maxHealth = newData.maxHealth;
         }
 

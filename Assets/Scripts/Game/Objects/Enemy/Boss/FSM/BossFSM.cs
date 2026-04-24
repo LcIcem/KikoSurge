@@ -28,14 +28,12 @@ public class BossFSM : EnemyFSM
         if (!_isRunning) return;
 
         _bossEnemy.TickBirthStagger();
-        Debug.Log($"[BossFSM] IsInBirthStagger={_bossEnemy.IsInBirthStagger}, Timer={_bossEnemy.BirthStaggerTimerDebug:F2}, State={CurrentStateName}");
 
         if (_bossEnemy.IsInBirthStagger)
         {
             // 出生硬直期间：只允许死亡
             if (CheckTrigger("dead"))
             {
-                Debug.Log("[BossFSM] Death triggered during stagger!");
                 ChangeState(Dead);
             }
             return;

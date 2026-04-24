@@ -107,7 +107,6 @@ public class LevelController : MonoBehaviour
                 door = tm;
         }
 
-        Debug.Log($"[LevelController] Tilemap instantiated, Floor:{floor?.gameObject.name ?? "null"}, Wall:{wall?.gameObject.name ?? "null"}, Door:{door?.gameObject.name ?? "null"}");
 
         if (floor == null || wall == null)
         {
@@ -116,7 +115,6 @@ public class LevelController : MonoBehaviour
         }
 
         _builder.SetTilemapReferences(floor, wall, door);
-        Debug.Log($"[LevelController] TileInfo_SO: {_tileInfo?.name ?? "null"}");
         _builder.SetTileInfo(_tileInfo);
     }
 
@@ -170,7 +168,6 @@ public class LevelController : MonoBehaviour
 
         if (IsLastLayer)
         {
-            Debug.Log("[LevelController] 最后一层，关卡完成");
             EventCenter.Instance.Publish(GameEventID.OnLayerComplete, _currentLayerIndex);
             GameLifecycleManager.Instance.GameClear();
         }
@@ -185,7 +182,6 @@ public class LevelController : MonoBehaviour
     /// </summary>
     public void Initialize(long sessionSeed)
     {
-        Debug.Log($"[LevelController] Initialize called with seed={sessionSeed}");
         _sessionSeed = sessionSeed;
         _currentLayerIndex = -1;
     }
@@ -206,9 +202,7 @@ public class LevelController : MonoBehaviour
         _rng = new GameRandom(DeriveLayerSeed(_sessionSeed, _currentLayerIndex));
 
         // 构建地牢
-        Debug.Log($"[LevelController] Building dungeon for layer {layerIndex}...");
         _builder.Build(GetCurrentLayerModel(), _rng);
-        Debug.Log($"[LevelController] Dungeon built. IsBuildCompleted={_builder.IsBuildCompleted}, Graph={CurrentGraph != null}, FloorTilemap={_builder?.FloorTilemap != null}");
 
         // 初始化 RoomController
         _roomController.Initialize(_builder.GetTileData(), _roomBehaviourTable, _rng,
@@ -223,10 +217,7 @@ public class LevelController : MonoBehaviour
             RestoreFromCheckpoint(checkpoint);
             startWorldPos = checkpoint.GetPlayerWorldPos();
             checkpointHealth = checkpoint.currentHealth;
-            Debug.Log($"[LevelController] Restoring from checkpoint at {startWorldPos}, health={checkpointHealth}");
         }
-
-        Debug.Log($"[LevelController] Creating/reacting player at {startWorldPos}...");
 
         // 如果是第0层（首次创建玩家），创建玩家；否则激活玩家
         if (layerIndex == 0 && !IsPlayerCreated())
@@ -235,7 +226,6 @@ public class LevelController : MonoBehaviour
             if (checkpointHealth > 0)
             {
                 SessionManager.Instance.SetPlayerHealth(checkpointHealth);
-                Debug.Log($"[LevelController] Restored health to SessionManager: {checkpointHealth}");
             }
 
             var playerData = SessionManager.Instance.GetPlayerData();
@@ -285,27 +275,19 @@ public class LevelController : MonoBehaviour
     /// </summary>
     public void EnterNextLayer()
     {
-        Debug.Log($"[LevelController] EnterNextLayer called. CurrentLayer={_currentLayerIndex}, MaxLayer={MaxLayerCount}");
-
         // 检查是否已达到最大层数
         if (_currentLayerIndex >= MaxLayerCount - 1)
         {
-            Debug.Log("[LevelController] 已达最大层数，关卡完成");
             EventCenter.Instance.Publish(GameEventID.OnLayerComplete, _currentLayerIndex);
             return;
         }
 
         int nextLayerIndex = _currentLayerIndex + 1;
-        Debug.Log($"[LevelController] Moving to layer {nextLayerIndex}");
 
         // 失活玩家
         if (_playerHandler != null)
         {
             _playerHandler.DeactivatePlayer();
-        }
-        else
-        {
-            Debug.LogWarning("[LevelController] _playerHandler is null!");
         }
 
         // 清理上一层的敌人和掉落物
@@ -323,13 +305,11 @@ public class LevelController : MonoBehaviour
     {
         if (_dungeonModels == null || _dungeonModels.Count == 0)
         {
-            Debug.LogWarning("[LevelController] DungeonModels 未配置，使用默认配置");
             return null;
         }
 
         if (_currentLayerIndex >= _dungeonModels.Count)
         {
-            Debug.LogWarning($"[LevelController] 层索引 {_currentLayerIndex} 超出配置数量，返回最后一个配置");
             return _dungeonModels[_dungeonModels.Count - 1];
         }
 
@@ -345,7 +325,6 @@ public class LevelController : MonoBehaviour
         var floorTilemap = _builder?.FloorTilemap;
         if (graph == null || floorTilemap == null)
         {
-            Debug.LogWarning("[LevelController] Graph or FloorTilemap is null");
             return Vector3.zero;
         }
 
@@ -474,7 +453,6 @@ public class LevelController : MonoBehaviour
             _restPoints.Add(restPoint);
         }
 
-        Debug.Log($"[LevelController] Spawned {_restPoints.Count} rest points (campfires)");
     }
 
     /// <summary>
@@ -585,7 +563,6 @@ public class LevelController : MonoBehaviour
             _chests.Add(chest);
         }
 
-        Debug.Log($"[LevelController] Spawned {_chests.Count} chests");
     }
 
     /// <summary>
@@ -622,7 +599,6 @@ public class LevelController : MonoBehaviour
             }
         }
 
-        Debug.Log($"[LevelController] Spawned {_shopkeepers.Count} shopkeepers");
     }
 
     /// <summary>
@@ -638,7 +614,6 @@ public class LevelController : MonoBehaviour
     /// </summary>
     public void DestroyPlayer()
     {
-        Debug.Log($"[LevelController] DestroyPlayer called. _playerHandler = {_playerHandler?.GetType().Name ?? "null"}");
         _playerHandler?.DestroyPlayer();
     }
 
@@ -684,7 +659,6 @@ public class LevelController : MonoBehaviour
         // 保存当前激活的buff
         snapshot.activeBuffs = BuffManager.Instance.GetAllActiveBuffs();
 
-        Debug.Log($"[LevelController] Checkpoint snapshot created: floor={_currentLayerIndex}, currentRoom={snapshot.currentRoomId}, health={snapshot.currentHealth}, buffs={snapshot.activeBuffs.Count}");
         return snapshot;
     }
 
@@ -695,13 +669,11 @@ public class LevelController : MonoBehaviour
     {
         if (snapshot == null)
         {
-            Debug.LogWarning("[LevelController] Cannot restore from null checkpoint");
             return;
         }
 
         if (_builder == null || _builder.GetGraph() == null)
         {
-            Debug.LogWarning("[LevelController] Cannot restore: builder or graph is null");
             return;
         }
 
@@ -722,12 +694,10 @@ public class LevelController : MonoBehaviour
         if (savedRoomId >= 0 && savedRoomId <= maxRoomId)
         {
             _roomController.SetCurrentRoomId(savedRoomId);
-            Debug.Log($"[LevelController] Restored currentRoomId={savedRoomId}");
         }
         else
         {
             // 降级处理：使用起始房间
-            Debug.LogWarning($"[LevelController] Invalid currentRoomId={savedRoomId} (max={maxRoomId}), falling back to startRoomId={snapshot.startRoomId}");
             if (snapshot.startRoomId >= 0 && snapshot.startRoomId <= maxRoomId)
             {
                 _roomController.SetCurrentRoomId(snapshot.startRoomId);
@@ -739,13 +709,10 @@ public class LevelController : MonoBehaviour
         {
             var worldPos = snapshot.GetPlayerWorldPos();
             _playerHandler.PlayerInstance.transform.position = worldPos;
-            Debug.Log($"[LevelController] Restored player position to {worldPos}");
         }
 
         // 恢复激活的buff
         BuffManager.Instance.RestoreFromSnapshot(snapshot.activeBuffs);
-
-        Debug.Log($"[LevelController] Restored from checkpoint: floor={snapshot.floorIndex}, currentRoom={snapshot.currentRoomId}, buffs={snapshot.activeBuffs?.Count ?? 0}");
     }
 
     private void OnDestroy()

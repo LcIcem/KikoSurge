@@ -161,12 +161,7 @@ public class Interactable : MonoBehaviour
         // 只有自己是当前激活的交互物时才响应按键
         if (CanInteract && Player.CurrentInteractable == this)
         {
-            Debug.Log($"[Interactable] {gameObject.name} Interact triggered, CanInteract={CanInteract}");
             Interact();
-        }
-        else
-        {
-            Debug.Log($"[Interactable] {gameObject.name} Interact blocked: CanInteract={CanInteract}, CurrentInteractable={Player.CurrentInteractable?.gameObject.name}");
         }
     }
 
@@ -233,7 +228,6 @@ public class Interactable : MonoBehaviour
     {
         if (Player.CurrentInteractable != null)
         {
-            Debug.Log($"[Interactable] {gameObject.name} CheckAndShowUIIfInRange skipped: CurrentInteractable={Player.CurrentInteractable.gameObject.name}");
             return;
         }
 
@@ -242,7 +236,6 @@ public class Interactable : MonoBehaviour
         var player = GameObject.FindGameObjectWithTag("Player");
         if (col == null || player == null)
         {
-            Debug.Log($"[Interactable] {gameObject.name} CheckAndShowUIIfInRange: col or player is null");
             return;
         }
 
@@ -252,8 +245,6 @@ public class Interactable : MonoBehaviour
         Collider2D[] results = new Collider2D[1];
         int count = col.Overlap(filter, results);
 
-        Debug.Log($"[Interactable] {gameObject.name} CheckAndShowUIIfInRange: count={count}, tag={(count > 0 ? results[0].tag : "null")}");
-
         if (count > 0 && results[0].CompareTag("Player"))
         {
             _interactionEnabled = true;
@@ -261,7 +252,6 @@ public class Interactable : MonoBehaviour
             Player.StartInteraction(this);
             ShowInteractionHint(true);
             ShowInfoCard(true);
-            Debug.Log($"[Interactable] {gameObject.name} CheckAndShowUIIfInRange: SUCCESS, _isPlayerInRange={_isPlayerInRange}, _interactionEnabled={_interactionEnabled}");
         }
     }
 
